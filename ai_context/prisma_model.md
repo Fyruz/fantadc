@@ -8,99 +8,113 @@ datasource db {
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  email       String       @unique
-  name        String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             Int             @id @default(autoincrement())
+  email          String          @unique
+  passwordHash   String
+  name           String?
+  role           UserRole        @default(USER)
+  isSuspended    Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
-  fantasyTeam FantasyTeam?
-  votes       Vote[]
+  fantasyTeam    FantasyTeam?
+  votes          Vote[]
+  adminAuditLogs AdminAuditLog[]
 }
 
 model FantasyTeam {
-  id         Int                 @id @default(autoincrement())
-  name       String
-  userId     Int                 @unique
-  coachId    Int
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  id              Int                 @id @default(autoincrement())
+  name            String
+  userId          Int                 @unique
+  captainPlayerId Int
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
 
-  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  coach      FantasyCoach        @relation(fields: [coachId], references: [id])
-  players    FantasyTeamPlayer[]
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  captain         Player              @relation("FantasyTeamCaptain", fields: [captainPlayerId], references: [id], onDelete: Restrict)
+  players         FantasyTeamPlayer[]
 
-  @@index([coachId])
-}
-
-model FantasyCoach {
-  id         Int           @id @default(autoincrement())
-  name       String        @unique
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  teams      FantasyTeam[]
+  @@index([captainPlayerId])
 }
 
 model FootballTeam {
-  id         Int           @id @default(autoincrement())
-  name       String        @unique
-  shortName  String?
-  logoUrl    String?
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  shortName   String?
+  logoUrl     String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  players    Player[]
-  homeMatches Match[]      @relation("HomeTeamMatches")
-  awayMatches Match[]      @relation("AwayTeamMatches")
+  players     Player[]
+  homeMatches Match[]       @relation("HomeTeamMatches")
+  awayMatches Match[]       @relation("AwayTeamMatches")
 }
 
 model Player {
-  id          Int                 @id @default(autoincrement())
-  name        String
-  role        PlayerRole?
-  footballTeamId Int
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id                      Int                 @id @default(autoincrement())
+  name                    String
+  role                    PlayerRole
+  footballTeamId          Int
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
 
-  footballTeam FootballTeam       @relation(fields: [footballTeamId], references: [id], onDelete: Restrict)
-  fantasyTeams FantasyTeamPlayer[]
-  votes       Vote[]
-  matchBonuses PlayerMatchBonus[]
+  footballTeam            FootballTeam        @relation(fields: [footballTeamId], references: [id], onDelete: Restrict)
+  fantasyTeams            FantasyTeamPlayer[]
+  captainedByFantasyTeams FantasyTeam[]       @relation("FantasyTeamCaptain")
+  votes                   Vote[]
+  matchBonuses            PlayerMatchBonus[]
+  matchAppearances        MatchPlayer[]
 
   @@index([footballTeamId])
   @@index([name])
+  @@index([role])
 }
 
 model Match {
-  id          Int                 @id @default(autoincrement())
-  homeTeamId  Int
-  awayTeamId  Int
-  startsAt    DateTime
-  endsAt      DateTime?
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id           Int                 @id @default(autoincrement())
+  homeTeamId   Int
+  awayTeamId   Int
+  status       MatchStatus         @default(DRAFT)
+  startsAt     DateTime
+  concludedAt  DateTime?
+  publishedAt  DateTime?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
 
-  homeTeam    FootballTeam        @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
-  awayTeam    FootballTeam        @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
-  votes       Vote[]
-  bonuses     PlayerMatchBonus[]
+  homeTeam     FootballTeam        @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam     FootballTeam        @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  players      MatchPlayer[]
+  votes        Vote[]
+  bonuses      PlayerMatchBonus[]
 
   @@index([homeTeamId])
   @@index([awayTeamId])
+  @@index([status])
   @@index([startsAt])
 }
 
-model Vote {
-  id         Int        @id @default(autoincrement())
-  userId     Int
-  matchId    Int
-  playerId   Int
-  createdAt  DateTime   @default(now())
+model MatchPlayer {
+  matchId     Int
+  playerId    Int
+  createdAt   DateTime    @default(now())
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  match      Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  player     Player     @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Restrict)
+
+  @@id([matchId, playerId])
+  @@index([playerId])
+}
+
+model Vote {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  matchId     Int
+  playerId    Int
+  createdAt   DateTime    @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player      Player      @relation(fields: [playerId], references: [id], onDelete: Restrict)
 
   @@unique([userId, matchId])
   @@index([matchId])
@@ -109,12 +123,12 @@ model Vote {
 }
 
 model BonusType {
-  id         Int                 @id @default(autoincrement())
-  code       String              @unique
-  name       String              @unique
-  points     Decimal             @db.Decimal(4, 2)
-  createdAt  DateTime            @default(now())
-  updatedAt  DateTime            @updatedAt
+  id          Int                 @id @default(autoincrement())
+  code        String              @unique
+  name        String              @unique
+  points      Decimal             @db.Decimal(5, 2)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   assignments PlayerMatchBonus[]
 }
@@ -124,7 +138,7 @@ model PlayerMatchBonus {
   playerId    Int
   matchId     Int
   bonusTypeId Int
-  points      Decimal     @db.Decimal(4, 2)
+  points      Decimal     @db.Decimal(5, 2)
   quantity    Int         @default(1)
   createdAt   DateTime    @default(now())
 
@@ -150,9 +164,46 @@ model FantasyTeamPlayer {
   @@index([playerId])
 }
 
+model AdminAuditLog {
+  id          Int       @id @default(autoincrement())
+  adminUserId Int
+  action      String
+  entityType  String
+  entityId    String?
+  before      Json?
+  after       Json?
+  createdAt   DateTime  @default(now())
+
+  adminUser   User      @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+
+  @@index([adminUserId])
+  @@index([entityType, entityId])
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
 enum PlayerRole {
   GK
-  DEF
-  MID
-  FWD
+  PLAYER
 }
+
+enum MatchStatus {
+  DRAFT
+  SCHEDULED
+  CONCLUDED
+  PUBLISHED
+}
+
+// Note applicative da rispettare:
+//
+// - una FantasyTeam deve avere esattamente 5 giocatori
+// - la composizione valida e 1 GK + 4 PLAYER
+// - i 5 giocatori devono appartenere a 5 FootballTeam diverse
+// - captainPlayerId deve puntare a un giocatore presente in FantasyTeamPlayer
+// - Vote.playerId deve puntare a un giocatore presente in MatchPlayer per quella partita
+// - la finestra di voto MVP si apre quando Match.status diventa CONCLUDED e dura 1 ora
+// - il bonus MVP esiste, ma il valore esatto e ancora da definire
+// - le azioni admin che modificano dati devono generare un AdminAuditLog

@@ -3,20 +3,21 @@
 ## Progetto
 
 Fantadc e il gestore di un fantacalcio legato a un torneo di paese.
-Gli utenti registrati possono creare la propria squadra fantasy scegliendo i giocatori che partecipano al torneo reale.
+Gli utenti registrati possono creare una sola squadra fantasy scegliendo i giocatori che partecipano al torneo reale.
 
 ## Obiettivo MVP
 
 L'MVP deve permettere di:
 
-1. registrare utenti
-2. creare una squadra fantasy per utente
-3. scegliere un allenatore fantasy da una lista predefinita
-4. comporre la rosa scegliendo giocatori dal torneo reale
-5. consultare squadre, giocatori e partite
-6. votare l'MVP di una partita
-7. permettere agli admin di assegnare bonus ai giocatori per partita
-8. calcolare il punteggio fantasy sulla base dei bonus assegnati
+1. registrare utenti con accesso email-only
+2. creare una sola squadra fantasy per utente
+3. comporre una rosa fissa da 5 giocatori: 1 portiere e 4 giocatori di movimento
+4. imporre che i 5 giocatori provengano da 5 squadre reali diverse
+5. scegliere un capitano che raddoppia il proprio punteggio
+6. consultare squadre, giocatori, partite e classifica
+7. votare l'MVP di una partita in una finestra di 1 ora dopo la chiusura
+8. permettere agli admin di gestire partite, partecipanti al match, bonus e malus
+9. calcolare il punteggio fantasy sulla base di bonus, malus, capitano e premio MVP
 
 ## Perche esiste
 
@@ -26,11 +27,11 @@ Il prodotto serve a gestire in modo semplice e centralizzato un fantacalcio loca
 
 ### Partecipante
 
-Utente registrato che crea una sola squadra fantasy e interagisce con il torneo.
+Utente registrato che crea una sola squadra fantasy, vota gli MVP e segue la classifica.
 
 ### Admin organizzatore
 
-Persona che gestisce dati del torneo, partite e bonus ufficiali.
+Persona che gestisce dati del torneo, partite, bonus, votazioni e supervisione operativa.
 
 ## Perimetro iniziale
 
@@ -38,12 +39,15 @@ Incluso nell'avvio del progetto:
 
 * una sola competizione
 * squadre fantasy create dagli utenti
-* rosa fantasy associata a un utente
+* rosa fantasy statica dopo la creazione utente
+* capitano della squadra fantasy
 * lista giocatori del torneo reale
-* calendario partite
+* calendario partite e dettaglio partita
+* indicazione dei giocatori che hanno preso parte alla partita
 * voto MVP per partita
-* bonus assegnati dagli admin
-* classifiche e viste riepilogative
+* bonus e malus assegnati dagli admin
+* classifica cumulata e storico punteggi per partita
+* area admin con CRUD semplici ma sicuri
 
 ## Non obiettivi per il primo step
 
@@ -51,31 +55,39 @@ Fuori scope per ora:
 
 * multi stagione
 * asta o mercato trasferimenti
-* modifiche storicizzate della rosa
+* modifiche storicizzate automatiche della rosa
 * notifiche push
 * pagamenti
-* ruoli complessi oltre admin e utente
+* ruoli complessi oltre user e admin
+* reset password self service
 * live scoring in tempo reale
 
 ## Assunzioni correnti
 
 * ogni utente ha una sola squadra fantasy
-* la rosa e statica
-* un giocatore reale puo comparire in piu squadre fantasy
-* i bonus ufficiali sono la fonte di verita per il punteggio
-* il voto MVP e separato dal punteggio fantasy
+* la rosa utente e composta da esattamente 5 giocatori
+* la rosa utente ha esattamente 1 portiere e 4 giocatori di movimento
+* i 5 giocatori devono appartenere a 5 squadre reali diverse
+* lo stesso giocatore reale puo comparire in piu squadre fantasy
+* la rosa e bloccata dopo la creazione lato utente
+* il nome squadra non deve essere unico, ma puo essere filtrato per parole non ammesse
+* il coach non fa piu parte del dominio
+* il capitano raddoppia il punteggio del proprio giocatore
+* il voto MVP incide anche sul punteggio fantasy, ma il valore esatto e ancora da definire
+* i contenuti non admin del torneo sono pubblici
 
 ## Macro aree applicative
 
-* area pubblica: presentazione torneo, accesso, regolamento
-* area utente: squadra, giocatori, partite, voti, classifica
-* area admin: anagrafiche, partite, bonus, supervisione
+* area pubblica: presentazione torneo, calendario, partite, classifica, squadre fantasy pubbliche
+* area utente: registrazione, mia squadra, voto MVP, dettagli punteggi
+* area admin: anagrafiche, partite, partecipanti alla partita, bonus, utenti, log, supervisione
 
 ## Glossario minimo
 
 * `FootballTeam`: squadra reale del torneo
 * `FantasyTeam`: squadra fantasy creata da un utente
-* `FantasyCoach`: allenatore selezionabile per la squadra fantasy
+* `Captain`: giocatore della rosa fantasy che raddoppia il proprio punteggio
+* `MatchPlayer`: giocatore segnato come presente in una partita e quindi votabile come MVP
 * `Vote`: voto MVP espresso da un utente su una partita
 * `BonusType`: tipo di bonus o malus configurabile
-* `PlayerMatchBonus`: assegnazione concreta di un bonus a un giocatore in una partita
+* `PlayerMatchBonus`: assegnazione concreta di un bonus o malus a un giocatore in una partita

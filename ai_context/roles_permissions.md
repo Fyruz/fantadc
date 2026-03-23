@@ -8,13 +8,14 @@ Puo:
 
 * vedere presentazione del progetto
 * consultare regolamento pubblico
-* vedere informazioni base del torneo se decidiamo di renderle pubbliche
+* vedere calendario, informazioni sulle partite e classifica fantasy
+* vedere il dettaglio pubblico delle squadre fantasy
 * registrarsi o accedere
 
 Non puo:
 
 * creare squadre fantasy
-* votare
+* votare MVP
 * accedere ad area amministrativa
 
 ## Registered User
@@ -24,18 +25,21 @@ Utente autenticato partecipante al fantacalcio.
 Puo:
 
 * creare la propria squadra fantasy se non esiste ancora
-* scegliere allenatore fantasy
-* selezionare i giocatori della rosa
-* consultare elenco giocatori, squadre reali e calendario partite
-* esprimere un voto MVP per partita
-* vedere classifica e risultati fantasy
+* scegliere il nome squadra
+* selezionare 1 portiere e 4 giocatori di movimento da 5 squadre reali diverse
+* nominare un capitano della rosa
+* consultare elenco giocatori, squadre reali, calendario e dettaglio partite
+* esprimere un voto MVP per partita nella finestra consentita
+* vedere classifica, storico punteggi e dettaglio bonus
 * modificare i dati consentiti del proprio profilo
 
 Non puo:
 
+* modificare la rosa dopo la conferma iniziale
 * gestire anagrafiche ufficiali del torneo
-* assegnare bonus
+* assegnare bonus o malus
 * modificare dati di altri utenti
+* accedere ai log amministrativi
 
 ## Admin
 
@@ -45,17 +49,23 @@ Puo:
 
 * gestire squadre reali
 * gestire giocatori
-* gestire allenatori fantasy
-* creare e aggiornare partite
-* definire tipi bonus
-* assegnare bonus ai giocatori per partita
-* consultare viste di controllo sui dati
+* gestire partite e relativi stati
+* segnare i giocatori che hanno preso parte a una partita
+* definire tipi bonus e malus
+* assegnare e correggere bonus per partita
+* vedere tutte le squadre fantasy
+* modificare manualmente le rose degli utenti
+* sospendere o limitare utenti
+* vedere il dettaglio di tutti i voti MVP
+* correggere o annullare voti MVP
+* chiudere o riaprire finestre di voto
+* vedere il log amministrativo
+* creare altri admin
 
-Da chiarire:
+Nota:
 
-* creazione utenti admin manuale o tramite seed
-* possibilita di correggere voti o bloccare votazioni
-* permessi di modifica della rosa dopo la creazione iniziale
+* esiste un admin di default
+* operativamente esiste un solo livello di admin, anche se l'admin iniziale ha funzione di bootstrap
 
 ## Principio operativo
 

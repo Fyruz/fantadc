@@ -1,12 +1,14 @@
-# Fantacalcio – Domain Model & Prisma Baseline
+# Fantacalcio - Domain Model Baseline
 
 ## Obiettivo
 
-Questo documento definisce il modello dati di base per un sistema di fantacalcio con:
+Questo documento definisce il modello dati di base per il sistema di fantacalcio con:
 
+* squadre fantasy statiche da 5 giocatori
+* capitano che raddoppia il proprio punteggio
 * voto MVP per partita
-* gestione squadre fantasy degli utenti
-* assegnazione bonus da parte degli admin
+* bonus e malus assegnati dagli admin
+* audit delle modifiche amministrative
 
 Stack target:
 
@@ -16,22 +18,26 @@ Stack target:
 
 ---
 
-## Entità principali
+## Entita principali
 
 ### Core
 
 * User
 * FantasyTeam
-* FantasyCoach
 * FootballTeam
 * Player
 * Match
 
 ### Gameplay
 
+* MatchPlayer
 * Vote
 * BonusType
 * PlayerMatchBonus
+
+### Supporto
+
+* AdminAuditLog
 
 ### Tabelle ponte
 
@@ -39,17 +45,28 @@ Stack target:
 
 ---
 
-## Distinzioni fondamentali (IMPORTANTISSIMO)
+## Distinzioni fondamentali
 
 ### Squadre reali vs squadre fantasy
 
-* `FootballTeam` → squadre reali (es. Milan, Inter)
-* `FantasyTeam` → squadre create dagli utenti
+* `FootballTeam` -> squadre reali del torneo
+* `FantasyTeam` -> squadre create dagli utenti
 
-### Giocatori
+### Ruoli giocatore
 
-* un `Player` appartiene a **una sola FootballTeam**
-* un `Player` può appartenere a **più FantasyTeam**
+* i ruoli validi sono solo `GK` e `PLAYER`
+* ogni giocatore ha un ruolo fisso
+
+### Coach
+
+* il coach e stato rimosso dal dominio
+* il posto del coach e stato sostituito dal capitano di squadra
+
+### Capitano
+
+* ogni `FantasyTeam` ha un capitano
+* il capitano e uno dei 5 giocatori della rosa
+* il capitano raddoppia il proprio punteggio
 
 ---
 
@@ -61,46 +78,49 @@ Stack target:
 
 Vincolo:
 
-* un utente può avere **una sola squadra fantasy**
-
----
-
-### Squadra fantasy e allenatore
-
-* `FantasyCoach 1 -- N FantasyTeam`
-
-* la lista allenatori è persistita
-
-* più utenti possono scegliere lo stesso allenatore
-
----
+* un utente puo avere una sola squadra fantasy
 
 ### Squadra fantasy e giocatori
 
-* `FantasyTeam N -- M Player` (via `FantasyTeamPlayer`)
+* `FantasyTeam N -- M Player` via `FantasyTeamPlayer`
 
-* rosa **statica**
+Vincoli funzionali:
 
-* no storico trasferimenti
+* una rosa contiene esattamente 5 giocatori
+* la composizione e 1 `GK` + 4 `PLAYER`
+* i 5 giocatori devono appartenere a 5 `FootballTeam` diverse
+* la rosa e statica per l'utente
 
----
+### Squadra fantasy e capitano
+
+* `FantasyTeam N -- 1 Player (captain)`
+
+Vincolo funzionale:
+
+* il capitano deve appartenere alla rosa della squadra fantasy
 
 ### Squadre reali e giocatori
 
 * `FootballTeam 1 -- N Player`
-
----
 
 ### Partite
 
 * `Match N -- 1 FootballTeam (home)`
 * `Match N -- 1 FootballTeam (away)`
 
-Vincolo:
+Vincoli:
 
-* ogni partita ha esattamente **2 squadre**
+* ogni partita ha esattamente 2 squadre
+* una partita ha uno stato esplicito
 
----
+### Giocatori presenti in partita
+
+* `Match N -- M Player` via `MatchPlayer`
+
+Significato:
+
+* `MatchPlayer` rappresenta i giocatori che hanno preso parte alla partita
+* solo questi giocatori sono candidati al voto MVP
 
 ### Voti MVP
 
@@ -120,9 +140,7 @@ Vincolo critico:
 
 Significato:
 
-* un utente può votare **una sola volta per partita**
-
----
+* un utente puo votare una sola volta per partita
 
 ### Bonus
 
@@ -132,10 +150,9 @@ Significato:
 
 Caratteristiche:
 
-* lista definita (tipo enum persistito)
-* ha punti associati (es. +3, -0.5)
-
----
+* lista gestita dagli admin
+* puo rappresentare sia bonus sia malus
+* ha punti associati
 
 #### Assegnazione bonus
 
@@ -149,116 +166,83 @@ Relazioni:
 
 Significato:
 
-* un bonus è assegnato:
+* un bonus e assegnato a un giocatore in una partita
+* il record salva anche uno snapshot dei punti
 
-  * a un giocatore
-  * in una partita
-  * con un certo valore
+### Audit amministrativo
 
-Nota:
+* `User 1 -- N AdminAuditLog`
 
-* i bonus sono assegnati **solo dagli admin**
-* NON sono voti
+Significato:
 
----
-
-## Modelli logici principali
-
-### Vote
-
-Rappresenta:
-
-* chi vota
-* su quale partita
-* quale giocatore
-
----
-
-### PlayerMatchBonus
-
-Rappresenta:
-
-* evento di bonus in partita
-
-Campi logici:
-
-* playerId
-* matchId
-* bonusTypeId
-* points (snapshot)
-* quantity (opzionale)
+* ogni modifica amministrativa rilevante deve lasciare traccia
 
 ---
 
 ## Regole di dominio
 
 * un utente ha una sola squadra fantasy
-* una squadra fantasy ha un solo allenatore
+* una squadra fantasy ha un capitano
+* una squadra fantasy contiene 5 giocatori
+* la rosa fantasy e 1 portiere + 4 giocatori di movimento
+* i 5 giocatori della rosa appartengono a 5 squadre reali diverse
 * un giocatore appartiene a una sola squadra reale
-* un giocatore può essere in più squadre fantasy
+* un giocatore puo essere in piu squadre fantasy
 * una partita ha due squadre reali
+* solo i giocatori presenti in partita possono essere votati come MVP
 * un utente vota un solo giocatore per partita
-* i bonus sono indipendenti dai voti
-* i bonus sono assegnati dagli admin
-* la rosa fantasy non cambia nel tempo
+* il voto MVP contribuisce al punteggio fantasy
+* bonus e malus sono assegnati dagli admin
+* le modifiche admin sono tracciate
 
 ---
 
 ## Vincoli DB critici
 
-* `FantasyTeam.userId` → UNIQUE
-* `Vote(userId, matchId)` → UNIQUE
+* `FantasyTeam.userId` -> UNIQUE
+* `Vote(userId, matchId)` -> UNIQUE
+* `MatchPlayer(matchId, playerId)` -> chiave primaria composta
 * FK su tutte le relazioni
 * indici su:
-
   * matchId
   * playerId
-  * matchId + playerId
+  * match status
+  * entityType + entityId per audit log
+
+Nota:
+
+Alcune regole restano applicative anche se importanti:
+
+* esattamente 5 giocatori per rosa
+* 1 portiere + 4 giocatori di movimento
+* una sola squadra reale per ciascun giocatore della rosa
+* capitano appartenente alla rosa
+* voto valido solo su giocatore presente in `MatchPlayer`
 
 ---
 
 ## Linee guida Prisma
 
-* modelli in **PascalCase singolare**
-* campi in **camelCase** ([Prisma][1])
-* relazioni esplicite su entrambi i lati ([Prisma][1])
-* usare FK esplicite (`fieldId`) ([Prisma][2])
-* indicizzare campi usati in query (`where`, `orderBy`) ([Prisma][1])
+* modelli in PascalCase singolare
+* campi in camelCase
+* relazioni esplicite su entrambi i lati
+* FK esplicite
+* indicizzare campi usati in query di filtro, ranking e audit
 
 ---
 
 ## Note architetturali
 
 * evitare logica lato frontend per vincoli critici
-* usare sempre vincoli DB per:
-
-  * unicità voto
-* evitare query multiple per voto
-* evitare stato in memoria
+* usare il database come fonte di verita per i dati ufficiali
+* usare validazioni di dominio lato server per le regole non esprimibili bene nel DB
+* ricalcolare i punteggi quando admin corregge bonus o voti
 
 ---
 
-## Estensioni future (non incluse ora)
+## Estensioni future
 
-* MatchStatus (SCHEDULED, LIVE, ENDED)
-* stagioni/campionati
-* storico rosa fantasy
-* ranking globale giocatori
-
----
-
-## TL;DR
-
-Dominio centrale:
-
-User → FantasyTeam → Player
-Match → Vote → Player
-Match → Bonus → Player
-
-Due flussi separati:
-
-* voto utenti (MVP)
-* bonus admin (punteggio)
-
-[1]: https://www.prisma.io/docs/orm/more/best-practices?utm_source=chatgpt.com "Best practices | Prisma Documentation"
-[2]: https://www.prisma.io/docs/orm/prisma-schema/data-model/relations?utm_source=chatgpt.com "Relations | Prisma Documentation"
+* configurazione esplicita delle regole di spareggio
+* configurazione esplicita del bonus MVP
+* rate limit e antifrode piu evoluti
+* multi stagione

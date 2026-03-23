@@ -1,7 +1,7 @@
 # AI Context Index
 
 Questa cartella contiene il contesto condiviso del progetto.
-Non e un planning operativo: serve a descrivere dominio, prodotto, regole e vincoli.
+Non e un planning operativo: serve a descrivere prodotto, dominio, regole, flussi, baseline tecnica e decisioni ancora aperte.
 
 ## Ordine di lettura consigliato
 
@@ -15,44 +15,46 @@ Non e un planning operativo: serve a descrivere dominio, prodotto, regole e vinc
 8. `open_questions.md`
 9. `open_questions/decisioni_core.md`
 
-## Documenti
+## File principali
 
 ### `product.md`
 
-Visione del prodotto, obiettivi MVP, perimetro e glossario minimo.
+Visione del prodotto, obiettivi MVP, perimetro iniziale, assunzioni correnti e glossario del dominio.
 
 ### `domain_rules.md`
 
-Regole funzionali certe derivate dal dominio e dal modello dati.
+Regole di dominio consolidate. Qui vivono i vincoli funzionali principali del fantacalcio: rosa, capitano, voto MVP, classifica, admin e visibilita pubblica.
 
 ### `roles_permissions.md`
 
-Attori del sistema e relative responsabilita.
+Mappa dei ruoli applicativi e dei relativi permessi: `Guest`, `Registered User`, `Admin`.
 
 ### `user_flows.md`
 
-Flussi applicativi principali lato utente e lato admin.
+Flussi applicativi principali lato pubblico, utente e admin. E il riferimento piu utile per progettare pagine, API e casi d'uso.
 
 ### `db.md`
 
-Descrizione del dominio dati ad alto livello.
+Baseline del dominio dati ad alto livello. Descrive entita, relazioni, vincoli chiave e significato funzionale dei modelli.
 
 ### `prisma_model.md`
 
-Schema Prisma baseline da considerare come riferimento tecnico del database.
+Schema Prisma documentale di riferimento. Include il modello atteso con capitano, giocatori presenti in partita, audit log, ruoli utente e stati partita.
 
 ### `technical_baseline.md`
 
-Stack corrente, principi architetturali e confini iniziali dell'applicazione.
+Stack corrente, principi architetturali e aree applicative suggerite.
 
 ### `open_questions.md`
 
-Decisioni ancora aperte che andranno chiuse prima del planning dettagliato.
+Elenco ridotto dei soli punti ancora aperti dopo la chiusura delle decisioni macro. E il file da consultare prima del planning completo se servono ultime conferme.
+
+## Sottocartelle
 
 ### `open_questions/decisioni_core.md`
 
-Questionario esteso da compilare per chiudere le 5 decisioni principali che bloccano il planning.
+Questionario esteso con le risposte raccolte sulle 5 decisioni principali che hanno definito il contesto attuale. Va tenuto come traccia delle decisioni prese.
 
-## Nota
+## Regola di manutenzione
 
-Quando aggiorniamo il dominio o il perimetro funzionale, questi file vanno aggiornati prima del planning e prima di scrivere feature complesse.
+Quando aggiungiamo, rimuoviamo o cambiamo in modo sostanziale un file di contesto sotto `ai_context/`, aggiornare anche questo `README.md`.

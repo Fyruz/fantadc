@@ -15,6 +15,16 @@ Il repository e stato inizializzato con uno starter minimale.
 La parte applicativa vera non e ancora partita.
 Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato a una implementazione completa.
 
+## Decisioni tecniche gia emerse dal contesto
+
+* autenticazione email-only
+* ruoli applicativi iniziali: `user` e `admin`
+* area pubblica disponibile senza login per tutti i contenuti non admin
+* area admin basata su CRUD semplici ma sicuri
+* auditing delle modifiche amministrative
+* rate limit richiesto su operazioni sensibili
+* captcha semplice valutabile in registrazione se il costo di integrazione resta basso
+
 ## Principi architetturali iniziali
 
 * usare il database come fonte di verita per i vincoli critici
@@ -22,6 +32,7 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * evitare dipendenze da stato client per regole importanti
 * costruire prima le basi del dominio e poi le viste UI
 * privilegiare semplicita e leggibilita rispetto a generalizzazioni premature
+* esplicitare bene gli stati di partita e i ricalcoli di punteggio
 
 ## Aree applicative suggerite
 
@@ -30,23 +41,27 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * home
 * accesso e registrazione
 * regolamento
+* calendario e partite
+* classifica fantasy
+* squadre fantasy pubbliche
 
 ### User App
 
 * dashboard utente
+* creazione squadra fantasy
 * mia squadra fantasy
-* elenco giocatori
-* elenco partite
-* dettaglio partita e voto MVP
-* classifica fantasy
+* voto MVP
+* storico punteggi
 
 ### Admin App
 
 * gestione squadre reali
 * gestione giocatori
-* gestione allenatori fantasy
-* gestione partite
-* gestione bonus e assegnazioni
+* gestione partite e stati
+* gestione partecipanti alla partita
+* gestione bonus e malus
+* supervisione utenti e squadre fantasy
+* audit log
 
 ## Convenzioni utili da mantenere
 
@@ -54,6 +69,7 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * centralizzare le decisioni aperte in un file unico
 * separare chiaramente dati ufficiali del torneo da interazioni utente
 * far derivare API, pagine e permessi dai ruoli e dai flussi gia documentati
+* trattare il documento Prisma in `ai_context/prisma_model.md` come baseline da tradurre poi nel vero schema
 
 ## Nota importante su Next.js
 

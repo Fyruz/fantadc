@@ -1,16 +1,17 @@
 # User Flows
 
-## 1. Onboarding utente
+## 1. Accesso pubblico e onboarding
 
-Obiettivo: permettere a un partecipante di entrare nel sistema e iniziare il fantacalcio.
+Obiettivo: permettere a chiunque di seguire il torneo e, se vuole, registrarsi al fantacalcio.
 
 Flusso base:
 
 1. l'utente arriva nell'area pubblica
-2. si registra oppure accede
-3. il sistema verifica se ha gia una squadra fantasy
-4. se non esiste, viene guidato alla creazione della squadra
-5. se esiste, entra nella dashboard personale
+2. puo vedere calendario, partite, classifica fantasy e squadre fantasy pubbliche
+3. si registra oppure accede
+4. il sistema verifica se ha gia una squadra fantasy
+5. se non esiste, viene guidato alla creazione della squadra
+6. se esiste, entra nella dashboard personale
 
 ## 2. Creazione squadra fantasy
 
@@ -19,18 +20,14 @@ Obiettivo: configurare la squadra iniziale dell'utente.
 Flusso base:
 
 1. l'utente inserisce il nome della squadra fantasy
-2. sceglie un allenatore fantasy dalla lista disponibile
-3. consulta la lista dei giocatori del torneo
-4. seleziona i giocatori per comporre la rosa
-5. conferma la squadra
-6. il sistema salva la squadra e impedisce la creazione di una seconda squadra per lo stesso utente
-
-Da definire:
-
-* numero massimo di giocatori
-* eventuali vincoli per ruolo
-* eventuali vincoli per squadra reale
-* possibilita di modifica successiva della rosa
+2. vede una singola schermata con layout a campo e slot liberi
+3. seleziona 1 portiere
+4. seleziona 4 giocatori di movimento
+5. il sistema verifica in tempo reale che i 5 giocatori vengano da 5 squadre reali diverse
+6. l'utente sceglie un capitano tra i 5 giocatori selezionati
+7. conferma la squadra completa
+8. il sistema salva la squadra e impedisce la creazione di una seconda squadra per lo stesso utente
+9. dopo la conferma, la rosa utente resta bloccata
 
 ## 3. Consultazione torneo
 
@@ -43,26 +40,24 @@ Viste principali:
 * dettaglio giocatore
 * calendario partite
 * dettaglio partita
-* classifica fantasy
+* classifica fantasy cumulata
 * dettaglio squadra fantasy
+* dettaglio punteggio per partita
 
 ## 4. Voto MVP
 
-Obiettivo: raccogliere un voto utente per ogni partita.
+Obiettivo: raccogliere un voto utente per ogni partita conclusa.
 
 Flusso base:
 
-1. l'utente apre una partita
-2. visualizza i giocatori coinvolti o il contesto della partita
-3. seleziona un giocatore come MVP
-4. il sistema registra il voto
-5. se l'utente ha gia votato per quella partita, il sistema blocca un secondo voto
-
-Da definire:
-
-* finestra temporale di voto
-* possibilita di modificare il voto prima della chiusura
-* visibilita pubblica o privata dei voti
+1. un admin imposta la partita come conclusa
+2. si apre una finestra di voto di 1 ora
+3. l'utente apre la partita e vede i giocatori segnati come presenti
+4. l'interfaccia mostra un elenco semplice dei 10 giocatori della partita
+5. l'utente seleziona un solo giocatore come MVP
+6. il sistema registra il voto e blocca ulteriori modifiche lato utente
+7. dopo il voto, l'utente vede conferma e favorito provvisorio
+8. alla chiusura della finestra, il sistema mostra l'MVP finale della partita
 
 ## 5. Gestione admin del torneo
 
@@ -73,9 +68,14 @@ Flussi base:
 1. creare e aggiornare squadre reali
 2. creare e aggiornare giocatori
 3. creare e aggiornare partite
-4. creare tipi bonus
-5. assegnare bonus ai giocatori per partita
-6. controllare dati incoerenti o incompleti
+4. gestire gli stati partita: bozza, programmata, conclusa, pubblicata
+5. segnare i giocatori che hanno preso parte alla partita
+6. creare tipi bonus e malus
+7. assegnare o correggere bonus ai giocatori per partita
+8. vedere e correggere voti MVP quando necessario
+9. vedere tutte le squadre fantasy e intervenire manualmente sulle rose
+10. sospendere utenti e gestire altri admin
+11. consultare il log delle modifiche amministrative
 
 ## 6. Calcolo risultati fantasy
 
@@ -83,14 +83,19 @@ Obiettivo: mostrare punteggi e classifiche coerenti con i dati ufficiali.
 
 Flusso logico:
 
-1. gli admin assegnano bonus per partita ai giocatori
-2. il sistema aggrega i bonus dei giocatori presenti nelle squadre fantasy
-3. vengono generati punteggi e classifiche
-4. gli utenti consultano riepiloghi e ranking
+1. gli admin definiscono i giocatori presenti in partita
+2. gli admin assegnano bonus e malus per partita ai giocatori
+3. il sistema determina l'MVP della partita
+4. il sistema calcola il punteggio di ciascun giocatore
+5. se il giocatore e capitano, il suo punteggio viene raddoppiato
+6. il sistema somma i punteggi dei 5 giocatori della squadra fantasy
+7. aggiorna la classifica cumulata totale
+8. conserva il dettaglio storico per partita
 
-Da definire:
+## 7. Punti ancora aperti
 
-* se il punteggio e totale cumulato o per giornata
-* gestione dei pari merito
-* impatto dell'allenatore fantasy
-* eventuali penalita aggiuntive
+Restano da definire nel dettaglio:
+
+* valore esatto dei punti assegnati dall'MVP
+* regole di spareggio in classifica
+* meccanismo tecnico anti spam su registrazione e voto
