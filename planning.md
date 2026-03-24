@@ -32,6 +32,7 @@ Il planning e organizzato in step sequenziali, con sotto-step, dipendenze e outp
 * verificare presenza della documentazione Next.js locale richiesta in `AGENTS.md`
 * definire file `.env` necessari
 * definire convenzioni minime per naming, cartelle e moduli server
+* installare tailwindcss e primereact
 
 ### 0.2 Scelte tecniche operative iniziali
 
