@@ -1,0 +1,10 @@
+// This is the Prisma schema base configuration.
+// The full domain model will be added in Step 1 (see ai_context/prisma_model.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
