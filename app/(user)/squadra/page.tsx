@@ -55,7 +55,7 @@ export default async function SquadraPage() {
             />
           ))}
         </div>
-        {/* GK */}
+        {/* P (Portiere) */}
         {gk && (
           <div className="mt-2">
             <PlayerCard

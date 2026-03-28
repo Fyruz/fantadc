@@ -200,7 +200,7 @@ enum MatchStatus {
 // Note applicative da rispettare:
 //
 // - una FantasyTeam deve avere esattamente 5 giocatori
-// - la composizione valida e 1 GK + 4 PLAYER
+// - la composizione valida e 1 P + 4 A
 // - i 5 giocatori devono appartenere a 5 FootballTeam diverse
 // - captainPlayerId deve puntare a un giocatore presente in FantasyTeamPlayer
 // - Vote.playerId deve puntare a un giocatore presente in MatchPlayer per quella partita

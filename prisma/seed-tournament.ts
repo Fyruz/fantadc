@@ -3,7 +3,7 @@
  *
  * Come usarlo:
  *   1. Modifica l'array TEAMS qui sotto con i dati reali del torneo.
- *   2. Ogni squadra ha un array "players" con 1 GK e qualsiasi numero di PLAYER.
+ *   2. Ogni squadra ha un array "players" con 1 P e qualsiasi numero di A.
  *   3. Esegui: npx tsx prisma/seed-tournament.ts
  *
  * Il seed usa upsert (basato su email player = nome+squadra slug):
