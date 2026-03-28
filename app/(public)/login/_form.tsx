@@ -1,7 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
+import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
+import { Button } from "primereact/button";
 import { login } from "@/app/actions/auth";
 
 export default function LoginForm() {
@@ -9,6 +13,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
   const registered = searchParams.get("registered") === "1";
+  const [password, setPassword] = useState("");
 
   return (
     <>
@@ -23,27 +28,29 @@ export default function LoginForm() {
 
         <div>
           <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-          <input
+          <InputText
             id="email"
             name="email"
             type="email"
             autoComplete="email"
             required
-            className="input w-full"
+            className="w-full"
             placeholder="la-tua@email.com"
           />
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            className="input w-full"
+          <input type="hidden" name="password" value={password} />
+          <Password
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            feedback={false}
+            toggleMask
+            className="w-full"
+            inputClassName="w-full"
             placeholder="••••••••"
+            autoComplete="current-password"
           />
         </div>
 
@@ -51,9 +58,12 @@ export default function LoginForm() {
           <p className="text-red-500 text-sm">{state.message}</p>
         )}
 
-        <button type="submit" disabled={pending} className="btn-primary w-full py-2.5">
-          {pending ? "Accesso in corso..." : "Accedi"}
-        </button>
+        <Button
+          type="submit"
+          label={pending ? "Accesso in corso..." : "Accedi"}
+          disabled={pending}
+          className="w-full py-2.5"
+        />
       </form>
     </>
   );

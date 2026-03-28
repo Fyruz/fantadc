@@ -1,12 +1,25 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import { Button } from "primereact/button";
 import { createPlayer } from "@/app/actions/admin/players";
 
 type Team = { id: number; name: string };
 
+const ROLE_OPTIONS = [
+  { label: "Portiere (GK)", value: "GK" },
+  { label: "Giocatore", value: "PLAYER" },
+];
+
 export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {
   const [state, action, pending] = useActionState(createPlayer, undefined);
+  const [selectedRole, setSelectedRole] = useState<string>("");
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("");
+
+  const teamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
 
   return (
     <div className="max-w-md">
@@ -14,32 +27,35 @@ export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {
       <form action={action} className="flex flex-col gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Nome *</label>
-          <input name="name" className="input w-full" required />
+          <InputText name="name" className="w-full" required />
           {state?.errors?.name && <p className="text-red-500 text-sm mt-1">{state.errors.name[0]}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Ruolo *</label>
-          <select name="role" className="input w-full" required>
-            <option value="">Seleziona ruolo</option>
-            <option value="GK">Portiere (GK)</option>
-            <option value="PLAYER">Giocatore</option>
-          </select>
+          <input type="hidden" name="role" value={selectedRole} />
+          <Dropdown
+            value={selectedRole}
+            onChange={(e) => setSelectedRole(e.value)}
+            options={ROLE_OPTIONS}
+            placeholder="Seleziona ruolo"
+            className="w-full"
+          />
           {state?.errors?.role && <p className="text-red-500 text-sm mt-1">{state.errors.role[0]}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Squadra reale *</label>
-          <select name="footballTeamId" className="input w-full" required>
-            <option value="">Seleziona squadra</option>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>{t.name}</option>
-            ))}
-          </select>
+          <input type="hidden" name="footballTeamId" value={selectedTeamId} />
+          <Dropdown
+            value={selectedTeamId}
+            onChange={(e) => setSelectedTeamId(e.value)}
+            options={teamOptions}
+            placeholder="Seleziona squadra"
+            className="w-full"
+          />
           {state?.errors?.footballTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.footballTeamId[0]}</p>}
         </div>
         {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
-        <button type="submit" disabled={pending} className="btn-primary">
-          {pending ? "Salvo..." : "Crea giocatore"}
-        </button>
+        <Button type="submit" label={pending ? "Salvo..." : "Crea giocatore"} disabled={pending} />
       </form>
     </div>
   );

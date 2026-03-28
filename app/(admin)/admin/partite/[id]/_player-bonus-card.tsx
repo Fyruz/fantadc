@@ -1,7 +1,11 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useState } from "react";
 import { useActionState } from "react";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 import { assignBonus, deleteBonus } from "@/app/actions/admin/bonuses";
 import { removeMatchPlayer } from "@/app/actions/admin/match-players";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
@@ -17,37 +21,40 @@ interface Props {
 }
 
 export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [formKey, setFormKey] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const [selectedBonusType, setSelectedBonusType] = useState<string>("");
+  const [qty, setQty] = useState(1);
   const [state, action, pending] = useActionState(assignBonus, undefined);
 
-  useEffect(() => {
-    if (state !== undefined && !state.message && !state.errors) {
-      setFormKey((k) => k + 1);
+  // Reset form after successful submit
+  const prevStateRef = { current: state };
+  if (state !== undefined && state !== prevStateRef.current) {
+    if (!state.message && !state.errors) {
+      setSelectedBonusType("");
+      setQty(1);
     }
-  }, [state]);
+  }
+
+  const bonusTypeOptions = bonusTypes.map((bt) => ({
+    label: `${bt.code} — ${bt.name} (${bt.points > 0 ? "+" : ""}${bt.points}pt)`,
+    value: String(bt.id),
+  }));
 
   return (
     <>
-      <div
-        className="border rounded p-3 cursor-pointer hover:border-blue-400 transition-colors select-none"
-        onClick={() => dialogRef.current?.showModal()}
-      >
+      <div className="border rounded p-3 hover:border-blue-400 transition-colors select-none">
         <div className="flex items-center justify-between mb-1">
           <span className="font-medium text-sm">
             {player.name}{" "}
             <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
             <span className="text-zinc-400 text-xs">— {player.footballTeam.name}</span>
           </span>
-          <div onClick={(e) => e.stopPropagation()}>
-            <ConfirmDeleteForm
-              action={removeMatchPlayer}
-              hiddenInputs={{ matchId, playerId: player.id }}
-              confirmMessage={`Rimuovere ${player.name} dalla partita?`}
-              buttonLabel="Rimuovi"
-              buttonClassName="text-red-500 text-xs hover:underline"
-            />
-          </div>
+          <ConfirmDeleteForm
+            action={removeMatchPlayer}
+            hiddenInputs={{ matchId, playerId: player.id }}
+            confirmMessage={`Rimuovere ${player.name} dalla partita?`}
+            buttonLabel="Rimuovi"
+          />
         </div>
         {bonuses.length > 0 ? (
           <ul className="flex flex-wrap gap-1.5 mt-2">
@@ -64,49 +71,72 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         ) : (
           <p className="text-xs text-zinc-400 mt-1">Nessun bonus</p>
         )}
+        <div className="mt-2">
+          <Button
+            type="button"
+            label="Aggiungi bonus"
+            icon="pi pi-plus"
+            size="small"
+            text
+            onClick={() => setVisible(true)}
+          />
+        </div>
       </div>
 
-      <dialog
-        ref={dialogRef}
-        className="rounded-lg p-6 shadow-xl w-full max-w-sm backdrop:bg-black/50"
-        onClick={(e) => { if (e.target === dialogRef.current) dialogRef.current?.close(); }}
+      <Dialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        header={player.name}
+        style={{ width: "24rem" }}
+        modal
+        draggable={false}
       >
-        <h3 className="font-bold text-base mb-0.5">{player.name}</h3>
         <p className="text-xs text-zinc-500 mb-4">{player.role} — {player.footballTeam.name}</p>
 
-        <form key={formKey} action={action} className="flex flex-col gap-3">
+        <form action={action} className="flex flex-col gap-3">
           <input type="hidden" name="matchId" value={matchId} />
           <input type="hidden" name="playerId" value={player.id} />
           <div>
             <label className="block text-xs font-medium mb-1 text-zinc-500">Tipo bonus</label>
-            <select name="bonusTypeId" className="input w-full" required>
-              <option value="">Seleziona...</option>
-              {bonusTypes.map((bt) => (
-                <option key={bt.id} value={bt.id}>
-                  {bt.code} — {bt.name} ({bt.points > 0 ? "+" : ""}{bt.points}pt)
-                </option>
-              ))}
-            </select>
+            <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
+            <Dropdown
+              value={selectedBonusType}
+              onChange={(e) => setSelectedBonusType(e.value)}
+              options={bonusTypeOptions}
+              placeholder="Seleziona..."
+              className="w-full"
+            />
             {state?.errors?.bonusTypeId && (
               <p className="text-red-500 text-xs mt-1">{state.errors.bonusTypeId[0]}</p>
             )}
           </div>
           <div>
             <label className="block text-xs font-medium mb-1 text-zinc-500">Quantità</label>
-            <input name="quantity" type="number" min={1} max={10} defaultValue={1} className="input w-20" />
+            <input type="hidden" name="quantity" value={qty} />
+            <InputNumber
+              value={qty}
+              onValueChange={(e) => setQty(e.value ?? 1)}
+              min={1}
+              max={10}
+              showButtons
+              className="w-full"
+            />
           </div>
           {state?.message && <p className="text-red-500 text-xs">{state.message}</p>}
           <div className="flex gap-2 justify-end mt-1">
-            <button
+            <Button
               type="button"
-              className="btn-secondary"
-              onClick={() => dialogRef.current?.close()}
-            >
-              Chiudi
-            </button>
-            <button type="submit" disabled={pending} className="btn-primary">
-              {pending ? "..." : "+ Assegna"}
-            </button>
+              label="Chiudi"
+              severity="secondary"
+              size="small"
+              onClick={() => setVisible(false)}
+            />
+            <Button
+              type="submit"
+              label={pending ? "..." : "+ Assegna"}
+              size="small"
+              disabled={pending}
+            />
           </div>
         </form>
 
@@ -123,14 +153,21 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
                   <form action={deleteBonus as unknown as (fd: FormData) => void} className="inline">
                     <input type="hidden" name="id" value={b.id} />
                     <input type="hidden" name="matchId" value={matchId} />
-                    <button type="submit" className="text-red-500 hover:text-red-700 ml-2 text-base leading-none" title="Rimuovi">×</button>
+                    <Button
+                      type="submit"
+                      icon="pi pi-times"
+                      severity="danger"
+                      text
+                      size="small"
+                      title="Rimuovi"
+                    />
                   </form>
                 </li>
               ))}
             </ul>
           </div>
         )}
-      </dialog>
+      </Dialog>
     </>
   );
 }

@@ -27,3 +27,21 @@ At the end of every planning step:
 1. Run `npx tsc --noEmit` — fix any TypeScript errors before committing.
 2. Run `npm run build` — verify the production build completes without errors.
 3. Commit everything including `.claude/` and `ai_context/.claude/`.
+
+# UI Component Library
+
+This project uses **PrimeReact** (v10) with the `lara-light-blue` theme, combined with **Tailwind CSS** for layout.
+
+**Always use PrimeReact components** when working on existing or new UI:
+- `Button` (from `primereact/button`) — replaces all `<button>` elements
+- `InputText` (from `primereact/inputtext`) — replaces text `<input>` elements
+- `Password` (from `primereact/password`) — replaces password inputs
+- `Dropdown` (from `primereact/dropdown`) — replaces `<select>` elements (use hidden input for form name/value)
+- `InputNumber` (from `primereact/inputnumber`) — replaces number inputs (use hidden input for form value)
+- `Calendar` (from `primereact/calendar`) — replaces date/time inputs (use hidden input for form value)
+- `DataTable` + `Column` (from `primereact/datatable`) — replaces HTML `<table>` elements
+- `Dialog` (from `primereact/dialog`) — replaces `<dialog>` elements
+- `Tag` (from `primereact/tag`) — replaces status badge spans
+- `ConfirmPopup` / `confirmPopup` (from `primereact/confirmpopup`) — replaces `window.confirm`
+
+**Layout** (spacing, flex, grid, width) stays in Tailwind. `PrimeReactProvider` is set up in `components/providers.tsx`.

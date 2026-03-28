@@ -1,4 +1,7 @@
 "use client";
+import { useRef } from "react";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import { Button } from "primereact/button";
 
 interface Props {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,23 +18,39 @@ export default function ConfirmDeleteForm({
   hiddenInputs,
   confirmMessage,
   buttonLabel = "Elimina",
-  buttonClassName = "text-red-500 hover:underline text-xs",
+  buttonClassName,
   formClassName,
 }: Props) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: confirmMessage,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRef.current?.requestSubmit(),
+    });
+  };
+
   return (
-    <form action={action} className={formClassName}>
-      {Object.entries(hiddenInputs).map(([name, value]) => (
-        <input key={name} type="hidden" name={name} value={String(value)} />
-      ))}
-      <button
-        type="submit"
-        className={buttonClassName}
-        onClick={(e) => {
-          if (!confirm(confirmMessage)) e.preventDefault();
-        }}
-      >
-        {buttonLabel}
-      </button>
-    </form>
+    <>
+      <ConfirmPopup />
+      <form ref={formRef} action={action} className={formClassName}>
+        {Object.entries(hiddenInputs).map(([name, value]) => (
+          <input key={name} type="hidden" name={name} value={String(value)} />
+        ))}
+        <Button
+          type="button"
+          label={buttonLabel}
+          severity="danger"
+          text
+          size="small"
+          className={buttonClassName}
+          onClick={handleClick}
+        />
+      </form>
+    </>
   );
 }

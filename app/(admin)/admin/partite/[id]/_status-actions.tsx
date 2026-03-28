@@ -1,6 +1,10 @@
 "use client";
 
+import { useRef } from "react";
 import { useActionState } from "react";
+import { Button } from "primereact/button";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import { Tag } from "primereact/tag";
 import { advanceMatchStatus } from "@/app/actions/admin/matches";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -10,17 +14,17 @@ const STATUS_LABEL: Record<string, string> = {
   PUBLISHED: "Pubblicata",
 };
 
-const STATUS_BADGE: Record<string, string> = {
-  DRAFT: "badge-draft",
-  SCHEDULED: "badge-scheduled",
-  CONCLUDED: "badge-concluded",
-  PUBLISHED: "badge-published",
+const STATUS_SEVERITY: Record<string, "secondary" | "info" | "warning" | "success"> = {
+  DRAFT: "secondary",
+  SCHEDULED: "info",
+  CONCLUDED: "warning",
+  PUBLISHED: "success",
 };
 
 type NextAction = {
   label: string;
   newStatus: string;
-  variant: string;
+  severity: "info" | "warning" | "success" | "secondary";
   confirmMsg: string;
 };
 
@@ -29,7 +33,7 @@ const NEXT_ACTIONS: Record<string, NextAction[]> = {
     {
       label: "Pianifica →",
       newStatus: "SCHEDULED",
-      variant: "btn-secondary",
+      severity: "info",
       confirmMsg: "Segnare la partita come programmata?",
     },
   ],
@@ -37,7 +41,7 @@ const NEXT_ACTIONS: Record<string, NextAction[]> = {
     {
       label: "Concludi partita",
       newStatus: "CONCLUDED",
-      variant: "btn-primary",
+      severity: "warning",
       confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (1 ora).",
     },
   ],
@@ -45,9 +49,8 @@ const NEXT_ACTIONS: Record<string, NextAction[]> = {
     {
       label: "Pubblica risultati",
       newStatus: "PUBLISHED",
-      variant: "btn-primary",
-      confirmMsg:
-        "Pubblicare i risultati? I punteggi diventeranno visibili a tutti.",
+      severity: "success",
+      confirmMsg: "Pubblicare i risultati? I punteggi diventeranno visibili a tutti.",
     },
   ],
   PUBLISHED: [],
@@ -69,53 +72,77 @@ export default function StatusActions({
   playerCount: number;
 }) {
   const [state, action, pending] = useActionState(advanceMatchStatus, undefined);
+  const formRefs = useRef<Map<string, HTMLFormElement>>(new Map());
 
   const nextActions = NEXT_ACTIONS[status] ?? [];
   const backAction = BACK_ACTIONS[status];
 
+  const handleNextAction = (e: React.MouseEvent<HTMLButtonElement>, act: NextAction) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: act.confirmMsg,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRefs.current.get(act.newStatus)?.requestSubmit(),
+    });
+  };
+
+  const handleBackAction = (e: React.MouseEvent<HTMLButtonElement>, newStatus: string) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: `Ripristinare lo stato a "${STATUS_LABEL[newStatus] ?? newStatus}"? Questa operazione è reversibile.`,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRefs.current.get(`back_${newStatus}`)?.requestSubmit(),
+    });
+  };
+
   return (
     <div className="flex flex-col gap-2">
+      <ConfirmPopup />
       <div className="flex items-center gap-3 flex-wrap">
-        <span className={STATUS_BADGE[status] ?? "badge-draft"}>
-          {STATUS_LABEL[status] ?? status}
-        </span>
+        <Tag
+          value={STATUS_LABEL[status] ?? status}
+          severity={STATUS_SEVERITY[status] ?? "secondary"}
+        />
 
         {nextActions.map((act) => (
-          <form key={act.newStatus} action={action}>
+          <form
+            key={act.newStatus}
+            action={action}
+            ref={(el) => { if (el) formRefs.current.set(act.newStatus, el); }}
+          >
             <input type="hidden" name="matchId" value={matchId} />
             <input type="hidden" name="newStatus" value={act.newStatus} />
-            <button
-              type="submit"
+            <Button
+              type="button"
+              label={pending ? "..." : act.label}
+              severity={act.severity}
+              size="small"
               disabled={pending}
-              className={act.variant}
-              onClick={(e) => {
-                if (!confirm(act.confirmMsg)) e.preventDefault();
-              }}
-            >
-              {pending ? "..." : act.label}
-            </button>
+              onClick={(e) => handleNextAction(e, act)}
+            />
           </form>
         ))}
 
         {backAction && (
-          <form action={action}>
+          <form
+            action={action}
+            ref={(el) => { if (el) formRefs.current.set(`back_${backAction.newStatus}`, el); }}
+          >
             <input type="hidden" name="matchId" value={matchId} />
             <input type="hidden" name="newStatus" value={backAction.newStatus} />
-            <button
-              type="submit"
+            <Button
+              type="button"
+              label={backAction.label}
+              severity="secondary"
+              text
+              size="small"
               disabled={pending}
-              className="text-xs text-zinc-400 hover:text-zinc-600 underline"
-              onClick={(e) => {
-                if (
-                  !confirm(
-                    `Ripristinare lo stato a "${STATUS_LABEL[backAction.newStatus] ?? backAction.newStatus}"? Questa operazione è reversibile.`
-                  )
-                )
-                  e.preventDefault();
-              }}
-            >
-              {backAction.label}
-            </button>
+              onClick={(e) => handleBackAction(e, backAction.newStatus)}
+            />
           </form>
         )}
       </div>

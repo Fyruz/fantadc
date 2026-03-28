@@ -1,11 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { useActionState } from "react";
 import Link from "next/link";
+import { InputText } from "primereact/inputtext";
+import { Password } from "primereact/password";
+import { Button } from "primereact/button";
 import { register } from "@/app/actions/auth";
 
 export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, undefined);
+  const [password, setPassword] = useState("");
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -20,12 +25,12 @@ export default function RegisterPage() {
         <form action={action} className="flex flex-col gap-4">
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="name">Nome (opzionale)</label>
-            <input
+            <InputText
               id="name"
               name="name"
               type="text"
               autoComplete="name"
-              className="input w-full"
+              className="w-full"
               placeholder="Mario Rossi"
             />
             {state?.errors?.name && (
@@ -35,13 +40,13 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-            <input
+            <InputText
               id="email"
               name="email"
               type="email"
               autoComplete="email"
               required
-              className="input w-full"
+              className="w-full"
               placeholder="la-tua@email.com"
             />
             {state?.errors?.email && (
@@ -53,14 +58,16 @@ export default function RegisterPage() {
             <label className="block text-sm font-medium mb-1" htmlFor="password">
               Password <span className="text-zinc-400 font-normal">(min. 8 caratteri)</span>
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              className="input w-full"
+            <input type="hidden" name="password" value={password} />
+            <Password
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              feedback={false}
+              toggleMask
+              className="w-full"
+              inputClassName="w-full"
               placeholder="••••••••"
+              autoComplete="new-password"
             />
             {state?.errors?.password && (
               <p className="text-red-500 text-xs mt-1">{state.errors.password[0]}</p>
@@ -71,9 +78,12 @@ export default function RegisterPage() {
             <p className="text-red-500 text-sm">{state.message}</p>
           )}
 
-          <button type="submit" disabled={pending} className="btn-primary w-full py-2.5">
-            {pending ? "Registrazione in corso..." : "Registrati"}
-          </button>
+          <Button
+            type="submit"
+            label={pending ? "Registrazione in corso..." : "Registrati"}
+            disabled={pending}
+            className="w-full py-2.5"
+          />
         </form>
 
         <p className="text-center text-sm text-zinc-500 mt-6">
