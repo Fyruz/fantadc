@@ -6,6 +6,13 @@
   --primary: #0107A3;
   --primary-hover: #0106c4;
   --primary-dark: #000b8a;
+  --primary-light: #E8E9F8;
+  --gold: #F5C518;
+  --bg: #F8F9FC;
+  --surface: #FFFFFF;
+  --border: #E5E7EB;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
 }
 
 @theme inline {
@@ -30,7 +37,6 @@ body {
   .btn-primary:hover:not(:disabled) {
     background-color: var(--primary-hover);
   }
-
   .btn-danger {
     @apply bg-red-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors;
   }
@@ -43,10 +49,93 @@ body {
   .input {
     @apply border border-zinc-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400;
   }
-
-  /* Status badge for match */
   .badge-draft     { @apply text-xs px-2 py-0.5 rounded bg-zinc-100 text-zinc-500; }
   .badge-scheduled { @apply text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700; }
   .badge-concluded { @apply text-xs px-2 py-0.5 rounded bg-orange-100 text-orange-700; }
   .badge-published { @apply text-xs px-2 py-0.5 rounded bg-green-100 text-green-700; }
+
+  /* Admin card base */
+  .admin-card {
+    @apply bg-white rounded-2xl shadow-sm border border-[#E5E7EB];
+  }
+}
+
+/* ─── PrimeReact DataTable overrides ─────────────────────────────────── */
+
+/* Header row */
+.p-datatable .p-datatable-thead > tr > th {
+  background: #F8F9FC !important;
+  color: #6B7280 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid #E5E7EB !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 12px 16px !important;
+}
+
+/* Body rows */
+.p-datatable .p-datatable-tbody > tr > td {
+  padding: 0 16px !important;
+  height: 52px !important;
+  border-bottom: 1px solid #F3F4F6 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+}
+
+/* Striped even rows */
+.p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(even) > td {
+  background: #FAFAFA !important;
+}
+
+/* Hover */
+.p-datatable .p-datatable-tbody > tr:hover > td {
+  background: #F0F1FC !important;
+}
+
+/* Remove outer table border */
+.p-datatable .p-datatable-table {
+  border-collapse: collapse !important;
+}
+
+/* Paginator */
+.p-paginator {
+  background: white !important;
+  border: none !important;
+  padding: 8px 16px !important;
+  border-top: 1px solid #F3F4F6 !important;
+}
+
+.p-paginator .p-paginator-page.p-highlight {
+  background: #0107A3 !important;
+  color: white !important;
+  border-color: #0107A3 !important;
+  border-radius: 50% !important;
+}
+
+.p-paginator .p-paginator-page,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-last {
+  border-radius: 50% !important;
+  min-width: 32px !important;
+  height: 32px !important;
+}
+
+/* Sort icon color */
+.p-datatable .p-sortable-column .p-sortable-column-icon {
+  color: #9CA3AF !important;
+}
+.p-datatable .p-sortable-column:hover .p-sortable-column-icon {
+  color: #0107A3 !important;
+}
+
+/* ─── Bottom nav safe area ────────────────────────────────────────────── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
