@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import UtentiTable from "./_table";
+import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function UtentiPage() {
   const users = await db.user.findMany({
@@ -10,7 +11,7 @@ export default async function UtentiPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Utenti</h1>
+      <AdminPageHeader title="Utenti" />
       <UtentiTable rows={users} />
     </div>
   );

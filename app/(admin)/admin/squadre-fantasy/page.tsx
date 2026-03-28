@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import SquadreFantasyTable from "./_table";
+import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function SquadreFantasyPage() {
   const teams = await db.fantasyTeam.findMany({
@@ -12,7 +13,7 @@ export default async function SquadreFantasyPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Squadre fantasy</h1>
+      <AdminPageHeader title="Squadre fantasy" />
       <SquadreFantasyTable rows={teams} />
     </div>
   );

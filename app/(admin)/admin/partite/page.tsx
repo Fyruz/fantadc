@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { db } from "@/lib/db";
 import PartiteTable from "./_table";
+import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function PartitePage() {
   const matches = await db.match.findMany({
@@ -14,12 +14,7 @@ export default async function PartitePage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold">Partite</h1>
-        <Link href="/admin/partite/new" className="btn-primary">
-          + Nuova partita
-        </Link>
-      </div>
+      <AdminPageHeader title="Partite" cta={{ href: "/admin/partite/new", label: "+ Nuova partita" }} />
       <PartiteTable rows={matches} />
     </div>
   );
