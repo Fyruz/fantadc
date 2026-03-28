@@ -98,6 +98,12 @@ export async function login(
     return { message: "Credenziali non valide." };
   }
 
+  const next = typeof formData.get("next") === "string"
+    ? (formData.get("next") as string)
+    : "";
+  // Validate next: only allow internal relative paths
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+
   try {
     await signIn("credentials", {
       email: parsed.data.email,
@@ -114,7 +120,7 @@ export async function login(
     throw e;
   }
 
-  redirect("/dashboard");
+  redirect(safeNext);
 }
 
 // --- Logout ---
