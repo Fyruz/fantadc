@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
+import { computeTeamHistory } from "@/lib/scoring";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -23,6 +24,9 @@ export default async function SquadraPage() {
 
   if (!fantasyTeam) redirect("/squadra/crea");
 
+  const history = await computeTeamHistory(fantasyTeam.id);
+  const totalPoints = history.reduce((s, m) => s + m.total, 0);
+
   const gk = fantasyTeam.players.find((p) => p.player.role === "GK");
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "PLAYER");
 
@@ -33,6 +37,9 @@ export default async function SquadraPage() {
         <p className="text-zinc-500 text-sm">
           Capitano: <span className="font-medium text-zinc-700">★ {fantasyTeam.captain.name}</span>
         </p>
+        {history.length > 0 && (
+          <p className="text-2xl font-bold mt-2">{totalPoints.toFixed(1)} <span className="text-sm text-zinc-400 font-normal">punti totali</span></p>
+        )}
       </div>
 
       {/* Campo visivo */}
@@ -92,6 +99,52 @@ export default async function SquadraPage() {
       <p className="text-xs text-zinc-400">
         La rosa è bloccata. Solo un admin può modificarla.
       </p>
+
+      {/* Storico punteggi per partita */}
+      {history.length > 0 && (
+        <div>
+          <h2 className="font-semibold mb-3">Storico punteggi</h2>
+          <div className="flex flex-col gap-3">
+            {history.map((ms) => (
+              <details key={ms.matchId} className="border rounded-lg">
+                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-zinc-50 rounded-lg">
+                  <span className="text-sm font-medium">{ms.label}</span>
+                  <span className="font-bold text-sm ml-4">{ms.total.toFixed(1)} pt</span>
+                </summary>
+                <div className="px-4 pb-3">
+                  <table className="w-full text-xs border-collapse mt-1">
+                    <thead>
+                      <tr className="text-left text-zinc-400 border-b">
+                        <th className="py-1 pr-3">Giocatore</th>
+                        <th className="py-1 pr-2 text-right">Bonus</th>
+                        <th className="py-1 pr-2 text-right">MVP</th>
+                        <th className="py-1 text-right">Totale</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {ms.playerScores.map((ps) => (
+                        <tr key={ps.playerId} className="border-b last:border-0">
+                          <td className="py-1 pr-3">
+                            {ps.isCaptain && <span className="text-yellow-500 mr-0.5">★</span>}
+                            {ps.playerName}
+                            {ps.isMvp && <span className="ml-1 text-yellow-600 font-medium">(MVP)</span>}
+                          </td>
+                          <td className="py-1 pr-2 text-right text-zinc-500">{ps.bonusPoints.toFixed(1)}</td>
+                          <td className="py-1 pr-2 text-right text-zinc-500">{ps.mvpPoints > 0 ? `+${ps.mvpPoints.toFixed(1)}` : "—"}</td>
+                          <td className="py-1 text-right font-medium">
+                            {ps.finalPoints.toFixed(1)}
+                            {ps.isCaptain && ps.basePoints !== 0 && <span className="text-yellow-600 text-xs ml-0.5">×2</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div>
         <Link href="/dashboard" className="btn-secondary">← Dashboard</Link>
