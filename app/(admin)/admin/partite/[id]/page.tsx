@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { removeMatchPlayer } from "@/app/actions/admin/match-players";
+import { removeMatchPlayer, addAllMatchPlayers } from "@/app/actions/admin/match-players";
 import { deleteBonus } from "@/app/actions/admin/bonuses";
 import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import AssignBonusForm from "./_assign-bonus-form";
+import StatusActions from "./_status-actions";
 
 export default async function PartitaDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -40,6 +41,7 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
   const availablePlayers = allPlayers.filter(
     (p) => eligibleTeamIds.has(p.footballTeamId) && !participantIds.has(p.id)
   );
+  const allEligibleCount = allPlayers.filter((p) => eligibleTeamIds.has(p.footballTeamId)).length;
 
   const bonusesByPlayer = new Map<number, typeof matchBonuses>();
   for (const b of matchBonuses) {
@@ -50,33 +52,71 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Header + status */}
       <div>
-        <h1 className="text-xl font-bold mb-2">
+        <h1 className="text-xl font-bold mb-1">
           {match.homeTeam.name} vs {match.awayTeam.name}
         </h1>
-        <p className="text-sm text-zinc-500 mb-4">
-          {match.startsAt.toLocaleString("it-IT")} — <span className="font-medium">{match.status}</span>
+        <p className="text-sm text-zinc-500 mb-3">
+          {match.startsAt.toLocaleString("it-IT")}
         </p>
-        <EditMatchForm match={match} teams={teams} />
+        <StatusActions
+          matchId={matchId}
+          status={match.status}
+          playerCount={match.players.length}
+        />
       </div>
 
+      {/* Edit form */}
+      <details>
+        <summary className="cursor-pointer text-sm font-medium text-zinc-500 hover:text-zinc-800 select-none">
+          Modifica dati partita
+        </summary>
+        <div className="mt-3">
+          <EditMatchForm match={match} teams={teams} />
+        </div>
+      </details>
+
+      {/* Participants */}
       <div>
-        <h2 className="text-base font-semibold mb-3">Partecipanti ({match.players.length})</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-base font-semibold">
+            Partecipanti ({match.players.length}{allEligibleCount > 0 ? `/${allEligibleCount}` : ""})
+          </h2>
+          {availablePlayers.length > 0 && (
+            <form action={addAllMatchPlayers as unknown as (fd: FormData) => void}>
+              <input type="hidden" name="matchId" value={matchId} />
+              <button type="submit" className="btn-secondary text-xs py-1">
+                + Aggiungi tutti ({availablePlayers.length})
+              </button>
+            </form>
+          )}
+        </div>
+
         <div className="flex flex-col gap-2 mb-4">
-          {match.players.length === 0 && <p className="text-sm text-zinc-400">Nessun partecipante aggiunto.</p>}
+          {match.players.length === 0 && (
+            <p className="text-sm text-zinc-400">Nessun partecipante aggiunto.</p>
+          )}
           {match.players.map(({ player }) => {
             const bonuses = bonusesByPlayer.get(player.id) ?? [];
             return (
               <div key={player.id} className="border rounded p-3">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-sm">
-                    {player.name} <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
+                    {player.name}{" "}
+                    <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
                     <span className="text-zinc-400 text-xs">— {player.footballTeam.name}</span>
                   </span>
                   <form action={removeMatchPlayer as unknown as (fd: FormData) => void}>
                     <input type="hidden" name="matchId" value={matchId} />
                     <input type="hidden" name="playerId" value={player.id} />
-                    <button type="submit" className="text-red-500 text-xs hover:underline">
+                    <button
+                      type="submit"
+                      className="text-red-500 text-xs hover:underline"
+                      onClick={(e) => {
+                        if (!confirm(`Rimuovere ${player.name} dalla partita?`)) e.preventDefault();
+                      }}
+                    >
                       Rimuovi
                     </button>
                   </form>
@@ -87,11 +127,20 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
                       <li key={b.id} className="flex items-center gap-1 text-xs bg-zinc-100 px-2 py-0.5 rounded">
                         <span>{b.bonusType.code}</span>
                         {b.quantity > 1 && <span>×{b.quantity}</span>}
-                        <span className="text-zinc-500">({Number(b.points) > 0 ? "+" : ""}{Number(b.points)}pt)</span>
+                        <span className="text-zinc-500">
+                          ({Number(b.points) > 0 ? "+" : ""}
+                          {Number(b.points)}pt)
+                        </span>
                         <form action={deleteBonus as unknown as (fd: FormData) => void} className="inline">
                           <input type="hidden" name="id" value={b.id} />
                           <input type="hidden" name="matchId" value={matchId} />
-                          <button type="submit" className="text-red-400 ml-1 hover:text-red-600">×</button>
+                          <button
+                            type="submit"
+                            className="text-red-400 ml-1 hover:text-red-600"
+                            title="Rimuovi bonus"
+                          >
+                            ×
+                          </button>
                         </form>
                       </li>
                     ))}
@@ -101,11 +150,13 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
             );
           })}
         </div>
+
         {availablePlayers.length > 0 && (
           <AddMatchPlayerForm matchId={matchId} availablePlayers={availablePlayers} />
         )}
       </div>
 
+      {/* Bonus assignment */}
       {match.players.length > 0 && (
         <div>
           <h2 className="text-base font-semibold mb-3">Assegna bonus</h2>

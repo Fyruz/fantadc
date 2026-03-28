@@ -35,6 +35,39 @@ export async function addMatchPlayer(formData: FormData): Promise<ActionResult> 
   return {};
 }
 
+export async function addAllMatchPlayers(formData: FormData): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const matchId = Number(formData.get("matchId"));
+
+  const match = await db.match.findUnique({
+    where: { id: matchId },
+    select: { homeTeamId: true, awayTeamId: true },
+  });
+  if (!match) return { message: "Partita non trovata." };
+
+  const players = await db.player.findMany({
+    where: { footballTeamId: { in: [match.homeTeamId, match.awayTeamId] } },
+    select: { id: true },
+  });
+
+  await db.$transaction(
+    players.map((p) =>
+      db.matchPlayer.upsert({
+        where: { matchId_playerId: { matchId, playerId: p.id } },
+        create: { matchId, playerId: p.id },
+        update: {},
+      })
+    )
+  );
+
+  await logAdminAction(Number(admin.id), "ADD_PLAYER", "MatchPlayer", `${matchId}_all`, null, {
+    matchId,
+    count: players.length,
+  });
+  revalidatePath(`/admin/partite/${matchId}`);
+  return {};
+}
+
 export async function removeMatchPlayer(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const matchId = Number(formData.get("matchId"));

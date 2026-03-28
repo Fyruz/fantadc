@@ -85,6 +85,44 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
   redirect(`/admin/partite/${id}`);
 }
 
+export async function advanceMatchStatus(
+  _prev: ActionResult | undefined,
+  formData: FormData
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const id = Number(formData.get("matchId"));
+  const newStatus = formData.get("newStatus") as MatchStatus;
+
+  if (!Object.values(MatchStatus).includes(newStatus)) {
+    return { message: "Stato non valido." };
+  }
+
+  const match = await db.match.findUnique({
+    where: { id },
+    include: { _count: { select: { players: true } } },
+  });
+  if (!match) return { message: "Partita non trovata." };
+
+  if (newStatus === MatchStatus.PUBLISHED && match._count.players === 0) {
+    return { message: "Impossibile pubblicare: nessun giocatore presente nella partita." };
+  }
+
+  const updateData: Parameters<typeof db.match.update>[0]["data"] = { status: newStatus };
+  if (newStatus === MatchStatus.CONCLUDED && !match.concludedAt) {
+    updateData.concludedAt = new Date();
+  }
+  if (newStatus === MatchStatus.PUBLISHED && !match.publishedAt) {
+    updateData.publishedAt = new Date();
+  }
+
+  await db.match.update({ where: { id }, data: updateData });
+  await logAdminAction(Number(admin.id), "UPDATE", "Match", id, { status: match.status }, { status: newStatus });
+
+  revalidatePath(`/admin/partite/${id}`);
+  revalidatePath("/admin/partite");
+  return {};
+}
+
 export async function deleteMatch(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
