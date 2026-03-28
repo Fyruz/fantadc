@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { useActionState } from "react";
 import { Button } from "primereact/button";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
-import { Tag } from "primereact/tag";
+import StatusBadge from "@/components/status-badge";
 import { advanceMatchStatus } from "@/app/actions/admin/matches";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -12,13 +12,6 @@ const STATUS_LABEL: Record<string, string> = {
   SCHEDULED: "Programmata",
   CONCLUDED: "Conclusa",
   PUBLISHED: "Pubblicata",
-};
-
-const STATUS_SEVERITY: Record<string, "secondary" | "info" | "warning" | "success"> = {
-  DRAFT: "secondary",
-  SCHEDULED: "info",
-  CONCLUDED: "warning",
-  PUBLISHED: "success",
 };
 
 type NextAction = {
@@ -30,36 +23,24 @@ type NextAction = {
 
 const NEXT_ACTIONS: Record<string, NextAction[]> = {
   DRAFT: [
-    {
-      label: "Pianifica →",
-      newStatus: "SCHEDULED",
-      severity: "info",
-      confirmMsg: "Segnare la partita come programmata?",
-    },
+    { label: "Pianifica →", newStatus: "SCHEDULED", severity: "info",
+      confirmMsg: "Segnare la partita come programmata?" },
   ],
   SCHEDULED: [
-    {
-      label: "Concludi partita",
-      newStatus: "CONCLUDED",
-      severity: "warning",
-      confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (1 ora).",
-    },
+    { label: "Concludi partita", newStatus: "CONCLUDED", severity: "warning",
+      confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (1 ora)." },
   ],
   CONCLUDED: [
-    {
-      label: "Pubblica risultati",
-      newStatus: "PUBLISHED",
-      severity: "success",
-      confirmMsg: "Pubblicare i risultati? I punteggi diventeranno visibili a tutti.",
-    },
+    { label: "Pubblica risultati", newStatus: "PUBLISHED", severity: "success",
+      confirmMsg: "Pubblicare i risultati? I punteggi diventeranno visibili a tutti." },
   ],
   PUBLISHED: [],
 };
 
 const BACK_ACTIONS: Record<string, { label: string; newStatus: string }> = {
-  SCHEDULED: { label: "← Bozza", newStatus: "DRAFT" },
+  SCHEDULED: { label: "← Bozza",       newStatus: "DRAFT"     },
   CONCLUDED: { label: "← Programmata", newStatus: "SCHEDULED" },
-  PUBLISHED: { label: "← Conclusa", newStatus: "CONCLUDED" },
+  PUBLISHED: { label: "← Conclusa",    newStatus: "CONCLUDED" },
 };
 
 export default function StatusActions({
@@ -91,7 +72,7 @@ export default function StatusActions({
   const handleBackAction = (e: React.MouseEvent<HTMLButtonElement>, newStatus: string) => {
     confirmPopup({
       target: e.currentTarget,
-      message: `Ripristinare lo stato a "${STATUS_LABEL[newStatus] ?? newStatus}"? Questa operazione è reversibile.`,
+      message: `Ripristinare lo stato a "${STATUS_LABEL[newStatus] ?? newStatus}"?`,
       icon: "pi pi-exclamation-triangle",
       acceptLabel: "Sì",
       rejectLabel: "No",
@@ -100,13 +81,10 @@ export default function StatusActions({
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <ConfirmPopup />
-      <div className="flex items-center gap-3 flex-wrap">
-        <Tag
-          value={STATUS_LABEL[status] ?? status}
-          severity={STATUS_SEVERITY[status] ?? "secondary"}
-        />
+      <div className="flex items-center gap-2 flex-wrap overflow-x-auto">
+        <StatusBadge status={status} />
 
         {nextActions.map((act) => (
           <form
@@ -152,14 +130,14 @@ export default function StatusActions({
       )}
 
       {status === "CONCLUDED" && playerCount === 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded px-3 py-2 text-sm text-orange-700">
-          ⚠ Nessun giocatore aggiunto — aggiungi i partecipanti prima di pubblicare i risultati.
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-sm text-amber-700">
+          ⚠ Nessun giocatore aggiunto — aggiungi i partecipanti prima di pubblicare.
         </div>
       )}
 
       {status === "PUBLISHED" && (
-        <div className="bg-blue-50 border border-blue-200 rounded px-3 py-2 text-xs text-blue-700">
-          ℹ I punteggi sono pubblici. Qualsiasi modifica a bonus o giocatori si rifletterà immediatamente sulla classifica.
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs text-blue-700">
+          ℹ I punteggi sono pubblici. Qualsiasi modifica si rifletterà immediatamente sulla classifica.
         </div>
       )}
     </div>

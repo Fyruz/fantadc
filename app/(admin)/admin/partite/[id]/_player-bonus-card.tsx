@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { assignBonus, deleteBonus } from "@/app/actions/admin/bonuses";
 import { removeMatchPlayer } from "@/app/actions/admin/match-players";
-import ConfirmDeleteForm from "@/components/confirm-delete-form";
+import RoleBadge from "@/components/role-badge";
 
 type Bonus = { id: number; bonusType: { code: string }; quantity: number; points: number };
 type BonusType = { id: number; code: string; name: string; points: number };
@@ -25,79 +26,107 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const [selectedBonusType, setSelectedBonusType] = useState<string>("");
   const [qty, setQty] = useState(1);
   const [state, action, pending] = useActionState(assignBonus, undefined);
+  const removeFormRef = useRef<HTMLFormElement>(null);
 
-  // Reset form after successful submit
-  const prevStateRef = { current: state };
-  if (state !== undefined && state !== prevStateRef.current) {
-    if (!state.message && !state.errors) {
-      setSelectedBonusType("");
-      setQty(1);
-    }
-  }
+  const roleColor = player.role === "P" ? "#10B981" : "#3B82F6";
 
   const bonusTypeOptions = bonusTypes.map((bt) => ({
     label: `${bt.code} — ${bt.name} (${bt.points > 0 ? "+" : ""}${bt.points}pt)`,
     value: String(bt.id),
   }));
 
+  const handleRemoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    confirmPopup({
+      target: e.currentTarget,
+      message: `Rimuovere ${player.name} dalla partita?`,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => removeFormRef.current?.requestSubmit(),
+    });
+  };
+
   return (
     <>
-      <div className="border rounded p-3 hover:border-blue-400 transition-colors select-none">
-        <div className="flex items-center justify-between mb-1">
-          <span className="font-medium text-sm">
-            {player.name}{" "}
-            <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
-            <span className="text-zinc-400 text-xs">— {player.footballTeam.name}</span>
-          </span>
-          <ConfirmDeleteForm
-            action={removeMatchPlayer}
-            hiddenInputs={{ matchId, playerId: player.id }}
-            confirmMessage={`Rimuovere ${player.name} dalla partita?`}
-            buttonLabel="Rimuovi"
-          />
+      <ConfirmPopup />
+
+      {/* Hidden remove form */}
+      <form
+        ref={removeFormRef}
+        action={removeMatchPlayer as unknown as (fd: FormData) => void}
+        className="hidden"
+      >
+        <input type="hidden" name="matchId" value={matchId} />
+        <input type="hidden" name="playerId" value={player.id} />
+      </form>
+
+      {/* Card */}
+      <div
+        className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-3 relative cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-150 select-none"
+        style={{ borderLeft: `3px solid ${roleColor}` }}
+        onClick={() => setVisible(true)}
+      >
+        {/* Remove button */}
+        <button
+          type="button"
+          className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
+          onClick={handleRemoveClick}
+          title="Rimuovi dalla partita"
+        >
+          <i className="pi pi-times text-xs" />
+        </button>
+
+        {/* Name + role badge */}
+        <div className="flex items-center gap-1.5 mb-1 pr-5">
+          <RoleBadge role={player.role} />
+          <span className="text-sm font-semibold text-[#111827] truncate">{player.name}</span>
         </div>
+        <p className="text-xs text-[#6B7280]">{player.footballTeam.name}</p>
+
+        {/* Bonus chips */}
         {bonuses.length > 0 ? (
-          <ul className="flex flex-wrap gap-1.5 mt-2">
+          <div className="flex flex-wrap gap-1 mt-2">
             {bonuses.map((b) => (
-              <li key={b.id} className="flex items-center gap-1 text-xs bg-zinc-100 px-2 py-0.5 rounded">
-                <span>{b.bonusType.code}</span>
-                {b.quantity > 1 && <span>×{b.quantity}</span>}
-                <span className="text-zinc-500">
-                  ({b.points > 0 ? "+" : ""}{b.points}pt)
-                </span>
-              </li>
+              <span
+                key={b.id}
+                className="bg-[#F3F4F6] text-[#374151] rounded-full px-2 py-0.5 text-xs"
+              >
+                {b.bonusType.code}
+                {b.quantity > 1 ? ` ×${b.quantity}` : ""}{" "}
+                {b.points > 0 ? "+" : ""}{b.points}pt
+              </span>
             ))}
-          </ul>
+          </div>
         ) : (
-          <p className="text-xs text-zinc-400 mt-1">Nessun bonus</p>
+          <p className="text-xs text-[#9CA3AF] mt-1 flex items-center gap-1">
+            <i className="pi pi-plus-circle text-xs" />
+            Tocca per bonus
+          </p>
         )}
-        <div className="mt-2">
-          <Button
-            type="button"
-            label="Aggiungi bonus"
-            icon="pi pi-plus"
-            size="small"
-            text
-            onClick={() => setVisible(true)}
-          />
-        </div>
       </div>
 
+      {/* Dialog */}
       <Dialog
         visible={visible}
         onHide={() => setVisible(false)}
-        header={player.name}
-        style={{ width: "24rem" }}
+        header={
+          <div className="flex items-center gap-2">
+            <RoleBadge role={player.role} />
+            <span className="text-base font-semibold">{player.name}</span>
+          </div>
+        }
+        style={{ width: "min(24rem, 95vw)" }}
         modal
         draggable={false}
       >
-        <p className="text-xs text-zinc-500 mb-4">{player.role} — {player.footballTeam.name}</p>
+        <p className="text-xs text-[#6B7280] mb-4">{player.footballTeam.name}</p>
 
         <form action={action} className="flex flex-col gap-3">
           <input type="hidden" name="matchId" value={matchId} />
           <input type="hidden" name="playerId" value={player.id} />
           <div>
-            <label className="block text-xs font-medium mb-1 text-zinc-500">Tipo bonus</label>
+            <label className="block text-xs font-medium mb-1 text-[#6B7280]">Tipo bonus</label>
             <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
             <Dropdown
               value={selectedBonusType}
@@ -111,7 +140,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1 text-zinc-500">Quantità</label>
+            <label className="block text-xs font-medium mb-1 text-[#6B7280]">Quantità</label>
             <input type="hidden" name="quantity" value={qty} />
             <InputNumber
               value={qty}
@@ -141,16 +170,25 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         </form>
 
         {bonuses.length > 0 && (
-          <div className="mt-4 border-t pt-3">
-            <p className="text-xs font-medium text-zinc-500 mb-2">Bonus assegnati</p>
+          <div className="mt-4 border-t border-[#E5E7EB] pt-3">
+            <p className="text-xs font-medium text-[#6B7280] mb-2">Bonus assegnati</p>
             <ul className="flex flex-col gap-1">
               {bonuses.map((b) => (
-                <li key={b.id} className="flex items-center justify-between text-xs bg-zinc-50 px-2 py-1 rounded">
-                  <span>
-                    {b.bonusType.code}{b.quantity > 1 ? ` ×${b.quantity}` : ""}{" "}
-                    <span className="text-zinc-500">({b.points > 0 ? "+" : ""}{b.points}pt)</span>
+                <li
+                  key={b.id}
+                  className="flex items-center justify-between text-xs bg-[#F8F9FC] px-2 py-1.5 rounded-lg"
+                >
+                  <span className="text-[#111827]">
+                    {b.bonusType.code}
+                    {b.quantity > 1 ? ` ×${b.quantity}` : ""}{" "}
+                    <span className="text-[#6B7280]">
+                      ({b.points > 0 ? "+" : ""}{b.points}pt)
+                    </span>
                   </span>
-                  <form action={deleteBonus as unknown as (fd: FormData) => void} className="inline">
+                  <form
+                    action={deleteBonus as unknown as (fd: FormData) => void}
+                    className="inline"
+                  >
                     <input type="hidden" name="id" value={b.id} />
                     <input type="hidden" name="matchId" value={matchId} />
                     <Button

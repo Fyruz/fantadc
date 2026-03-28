@@ -1,12 +1,24 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { addAllMatchPlayers } from "@/app/actions/admin/match-players";
+import AdminPageHeader from "@/components/admin-page-header";
 import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 
-export default async function PartitaDetailPage({ params }: { params: Promise<{ id: string }> }) {
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: "Bozza",
+  SCHEDULED: "Programmata",
+  CONCLUDED: "Conclusa",
+  PUBLISHED: "Pubblicata",
+};
+
+export default async function PartitaDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const matchId = Number(id);
 
@@ -50,15 +62,29 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Header + status */}
-      <div>
-        <h1 className="text-xl font-bold mb-1">
-          {match.homeTeam.name} vs {match.awayTeam.name}
-        </h1>
-        <p className="text-sm text-zinc-500 mb-3">
-          {match.startsAt.toLocaleString("it-IT")}
-        </p>
+    <div className="flex flex-col gap-6">
+      <AdminPageHeader title="Dettaglio partita" backHref="/admin/partite" />
+
+      {/* Header card — navy gradient */}
+      <div
+        className="rounded-2xl overflow-hidden p-5 flex items-start justify-between gap-4"
+        style={{ background: "linear-gradient(135deg, #0107A3 0%, #0106c4 100%)" }}
+      >
+        <div>
+          <h2 className="text-xl font-bold text-white">
+            {match.homeTeam.name} vs {match.awayTeam.name}
+          </h2>
+          <p className="text-sm text-white/70 mt-1">
+            {match.startsAt.toLocaleString("it-IT")}
+          </p>
+        </div>
+        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[#F5C518] text-[#111827] flex-shrink-0 mt-0.5">
+          {STATUS_LABEL[match.status] ?? match.status}
+        </span>
+      </div>
+
+      {/* Status actions */}
+      <div className="admin-card p-4">
         <StatusActions
           matchId={matchId}
           status={match.status}
@@ -66,12 +92,14 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
         />
       </div>
 
-      {/* Edit form */}
-      <details>
-        <summary className="cursor-pointer text-sm font-medium text-zinc-500 hover:text-zinc-800 select-none">
+      {/* Edit form — collapsible */}
+      <details className="admin-card overflow-hidden">
+        <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-sm font-medium text-[#6B7280] hover:text-[#111827] select-none list-none border-b border-[#E5E7EB] [&::-webkit-details-marker]:hidden">
+          <i className="pi pi-pencil text-xs" />
           Modifica dati partita
+          <i className="pi pi-chevron-down text-xs ml-auto" />
         </summary>
-        <div className="mt-3">
+        <div className="p-4">
           <EditMatchForm match={match} teams={teams} />
         </div>
       </details>
@@ -79,23 +107,28 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
       {/* Participants */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold">
-            Partecipanti ({match.players.length}{allEligibleCount > 0 ? `/${allEligibleCount}` : ""})
+          <h2 className="text-base font-semibold text-[#111827]">
+            Partecipanti ({match.players.length}
+            {allEligibleCount > 0 ? `/${allEligibleCount}` : ""})
           </h2>
           {availablePlayers.length > 0 && (
             <form action={addAllMatchPlayers as unknown as (fd: FormData) => void}>
               <input type="hidden" name="matchId" value={matchId} />
-              <button type="submit" className="btn-secondary text-xs py-1">
+              <button
+                type="submit"
+                className="text-xs font-medium text-[#0107A3] hover:underline"
+              >
                 + Aggiungi tutti ({availablePlayers.length})
               </button>
             </form>
           )}
         </div>
 
-        <div className="flex flex-col gap-2 mb-4">
-          {match.players.length === 0 && (
-            <p className="text-sm text-zinc-400">Nessun partecipante aggiunto.</p>
-          )}
+        {match.players.length === 0 && (
+          <p className="text-sm text-[#9CA3AF] mb-4">Nessun partecipante aggiunto.</p>
+        )}
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
           {match.players.map(({ player }) => (
             <PlayerBonusCard
               key={player.id}
@@ -114,7 +147,6 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
           <AddMatchPlayerForm matchId={matchId} availablePlayers={availablePlayers} />
         )}
       </div>
-
     </div>
   );
 }
