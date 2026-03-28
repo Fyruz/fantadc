@@ -1,7 +1,15 @@
 import { db } from "@/lib/db";
 import NuovaPartitaForm from "./_form";
+import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function NuovaPartitaPage() {
   const teams = await db.footballTeam.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });
-  return <NuovaPartitaForm teams={teams} />;
+  return (
+    <div>
+      <AdminPageHeader title="Nuova partita" backHref="/admin/partite" />
+      <div className="admin-card p-5">
+        <NuovaPartitaForm teams={teams} />
+      </div>
+    </div>
+  );
 }

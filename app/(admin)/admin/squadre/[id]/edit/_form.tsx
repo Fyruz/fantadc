@@ -11,26 +11,23 @@ export default function EditFootballTeamForm({ team }: Props) {
   const [state, action, pending] = useActionState(updateFootballTeam, undefined);
 
   return (
-    <div className="max-w-md">
-      <h1 className="text-xl font-bold mb-6">Modifica squadra</h1>
-      <form action={action} className="flex flex-col gap-4">
-        <input type="hidden" name="id" value={team.id} />
-        <div>
-          <label className="block text-sm font-medium mb-1">Nome *</label>
-          <InputText name="name" defaultValue={team.name} className="w-full" required />
-          {state?.errors?.name && <p className="text-red-500 text-sm mt-1">{state.errors.name[0]}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Abbreviazione</label>
-          <InputText name="shortName" defaultValue={team.shortName ?? ""} className="w-full" maxLength={5} />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Logo URL</label>
-          <InputText name="logoUrl" type="url" defaultValue={team.logoUrl ?? ""} className="w-full" />
-        </div>
-        {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
-        <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={pending} />
-      </form>
-    </div>
+    <form action={action} className="flex flex-col gap-4">
+      <input type="hidden" name="id" value={team.id} />
+      <div>
+        <label className="block text-sm font-medium mb-1">Nome *</label>
+        <InputText name="name" defaultValue={team.name} className="w-full" required />
+        {state?.errors?.name && <p className="text-red-500 text-sm mt-1">{state.errors.name[0]}</p>}
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Abbreviazione</label>
+        <InputText name="shortName" defaultValue={team.shortName ?? ""} className="w-full" maxLength={5} />
+      </div>
+      <div>
+        <label className="block text-sm font-medium mb-1">Logo URL</label>
+        <InputText name="logoUrl" type="url" defaultValue={team.logoUrl ?? ""} className="w-full" />
+      </div>
+      {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
+      <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={pending} />
+    </form>
   );
 }

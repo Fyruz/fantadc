@@ -22,9 +22,7 @@ export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {
   const teamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
 
   return (
-    <div className="max-w-md">
-      <h1 className="text-xl font-bold mb-6">Nuovo giocatore</h1>
-      <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">Nome *</label>
           <InputText name="name" className="w-full" required />
@@ -56,7 +54,6 @@ export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {
         </div>
         {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
         <Button type="submit" label={pending ? "Salvo..." : "Crea giocatore"} disabled={pending} />
-      </form>
-    </div>
+    </form>
   );
 }
