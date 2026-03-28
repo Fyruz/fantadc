@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { deleteMatch } from "@/app/actions/admin/matches";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Bozza",
@@ -68,19 +69,12 @@ export default async function PartitePage() {
                   <Link href={`/admin/partite/${m.id}`} className="text-blue-600 hover:underline">
                     Gestisci
                   </Link>
-                  <form action={deleteMatch as unknown as (fd: FormData) => void}>
-                    <input type="hidden" name="id" value={m.id} />
-                    <button
-                      type="submit"
-                      className="text-red-500 hover:underline"
-                      onClick={(e) => {
-                        if (!confirm("Eliminare la partita? L'operazione è irreversibile."))
-                          e.preventDefault();
-                      }}
-                    >
-                      Elimina
-                    </button>
-                  </form>
+                  <ConfirmDeleteForm
+                    action={deleteMatch}
+                    hiddenInputs={{ id: m.id }}
+                    confirmMessage="Eliminare la partita? L'operazione è irreversibile."
+                    buttonClassName="text-red-500 hover:underline"
+                  />
                 </td>
               </tr>
             );

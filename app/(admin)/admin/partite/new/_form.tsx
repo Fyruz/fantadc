@@ -28,10 +28,17 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
           </select>
           {state?.errors?.awayTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.awayTeamId[0]}</p>}
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Data e ora *</label>
-          <input name="startsAt" type="datetime-local" className="input w-full" required />
-          {state?.errors?.startsAt && <p className="text-red-500 text-sm mt-1">{state.errors.startsAt[0]}</p>}
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="block text-sm font-medium mb-1">Data *</label>
+            <input name="date" type="date" className="input w-full" required />
+            {state?.errors?.date && <p className="text-red-500 text-sm mt-1">{state.errors.date[0]}</p>}
+          </div>
+          <div className="w-28">
+            <label className="block text-sm font-medium mb-1">Ora *</label>
+            <input name="time" type="time" className="input w-full" required />
+            {state?.errors?.time && <p className="text-red-500 text-sm mt-1">{state.errors.time[0]}</p>}
+          </div>
         </div>
         {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
         <button type="submit" disabled={pending} className="btn-primary">

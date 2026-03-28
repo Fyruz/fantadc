@@ -11,6 +11,8 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
   const startsAtLocal = new Date(match.startsAt.getTime() - match.startsAt.getTimezoneOffset() * 60000)
     .toISOString()
     .slice(0, 16);
+  const defaultDate = startsAtLocal.slice(0, 10);
+  const defaultTime = startsAtLocal.slice(11, 16);
 
   return (
     <form action={action} className="flex flex-col gap-3">
@@ -28,9 +30,13 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
             {teams.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
         </div>
-        <div className="flex-1 min-w-40">
-          <label className="block text-sm font-medium mb-1">Data e ora</label>
-          <input name="startsAt" type="datetime-local" defaultValue={startsAtLocal} className="input w-full" required />
+        <div className="flex-1 min-w-32">
+          <label className="block text-sm font-medium mb-1">Data</label>
+          <input name="date" type="date" defaultValue={defaultDate} className="input w-full" required />
+        </div>
+        <div className="w-28">
+          <label className="block text-sm font-medium mb-1">Ora</label>
+          <input name="time" type="time" defaultValue={defaultTime} className="input w-full" required />
         </div>
         <div className="flex-1 min-w-32">
           <label className="block text-sm font-medium mb-1">Stato</label>

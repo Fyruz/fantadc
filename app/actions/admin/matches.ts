@@ -12,7 +12,8 @@ import type { ActionResult } from "./football-teams";
 const Schema = z.object({
   homeTeamId: z.coerce.number().int().positive("Squadra casa obbligatoria"),
   awayTeamId: z.coerce.number().int().positive("Squadra ospite obbligatoria"),
-  startsAt: z.string().min(1, "Data obbligatoria"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida"),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida"),
   status: z.nativeEnum(MatchStatus).optional(),
 });
 
@@ -21,7 +22,8 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
   const parsed = Schema.safeParse({
     homeTeamId: formData.get("homeTeamId"),
     awayTeamId: formData.get("awayTeamId"),
-    startsAt: formData.get("startsAt"),
+    date: formData.get("date"),
+    time: formData.get("time"),
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   if (parsed.data.homeTeamId === parsed.data.awayTeamId) {
@@ -32,7 +34,7 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
     data: {
       homeTeamId: parsed.data.homeTeamId,
       awayTeamId: parsed.data.awayTeamId,
-      startsAt: new Date(parsed.data.startsAt),
+      startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
     },
   });
   await logAdminAction(Number(admin.id), "CREATE", "Match", match.id, null, { ...match, startsAt: match.startsAt.toISOString() });
@@ -47,7 +49,8 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
   const parsed = Schema.safeParse({
     homeTeamId: formData.get("homeTeamId"),
     awayTeamId: formData.get("awayTeamId"),
-    startsAt: formData.get("startsAt"),
+    date: formData.get("date"),
+    time: formData.get("time"),
     status: formData.get("status") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
@@ -61,7 +64,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
   const updateData: Parameters<typeof db.match.update>[0]["data"] = {
     homeTeamId: parsed.data.homeTeamId,
     awayTeamId: parsed.data.awayTeamId,
-    startsAt: new Date(parsed.data.startsAt),
+    startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
   };
 
   if (parsed.data.status) {
