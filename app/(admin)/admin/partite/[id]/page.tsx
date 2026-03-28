@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { removeMatchPlayer, addAllMatchPlayers } from "@/app/actions/admin/match-players";
 import { deleteBonus } from "@/app/actions/admin/bonuses";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import AssignBonusForm from "./_assign-bonus-form";
@@ -107,19 +108,13 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
                     <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
                     <span className="text-zinc-400 text-xs">— {player.footballTeam.name}</span>
                   </span>
-                  <form action={removeMatchPlayer as unknown as (fd: FormData) => void}>
-                    <input type="hidden" name="matchId" value={matchId} />
-                    <input type="hidden" name="playerId" value={player.id} />
-                    <button
-                      type="submit"
-                      className="text-red-500 text-xs hover:underline"
-                      onClick={(e) => {
-                        if (!confirm(`Rimuovere ${player.name} dalla partita?`)) e.preventDefault();
-                      }}
-                    >
-                      Rimuovi
-                    </button>
-                  </form>
+                  <ConfirmDeleteForm
+                    action={removeMatchPlayer}
+                    hiddenInputs={{ matchId, playerId: player.id }}
+                    confirmMessage={`Rimuovere ${player.name} dalla partita?`}
+                    buttonLabel="Rimuovi"
+                    buttonClassName="text-red-500 text-xs hover:underline"
+                  />
                 </div>
                 {bonuses.length > 0 && (
                   <ul className="flex flex-wrap gap-2">

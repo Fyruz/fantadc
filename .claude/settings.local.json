@@ -16,7 +16,14 @@
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5432/fantadc\" npx prisma migrate resolve --rolled-back 20260327000000_init)",
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5432/fantadc\" npm run db:seed)",
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5432/fantadc\" npm run db:seed-tournament)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)"
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(curl -s http://localhost:3000/admin/bonus-types)",
+      "Bash(curl -s -I http://localhost:3000/admin/bonus-types)",
+      "Bash(node -e \":*)",
+      "Bash(head:*)",
+      "Bash(curl:*)",
+      "Bash(grep -n \"onClick\" E:/Developing/fantadc/app/\\\\\\(admin\\\\\\)/admin/partite/[id]/page.tsx)",
+      "Bash(ls:*)"
     ],
     "defaultMode": "bypassPermissions"
   }

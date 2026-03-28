@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import { deleteBonusType } from "@/app/actions/admin/bonus-types";
 import NewBonusTypeForm from "./_form";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
 export default async function BonusTypesPage() {
   const bonusTypes = await db.bonusType.findMany({ orderBy: { code: "asc" } });
@@ -24,12 +25,11 @@ export default async function BonusTypesPage() {
               <td className="py-2 pr-4">{bt.name}</td>
               <td className="py-2 pr-4">{Number(bt.points) > 0 ? "+" : ""}{Number(bt.points)}</td>
               <td className="py-2">
-                <form action={deleteBonusType as unknown as (fd: FormData) => void}>
-                  <input type="hidden" name="id" value={bt.id} />
-                  <button type="submit" className="text-red-500 hover:underline text-xs" onClick={(e) => { if (!confirm("Eliminare questo tipo bonus?")) e.preventDefault(); }}>
-                    Elimina
-                  </button>
-                </form>
+                <ConfirmDeleteForm
+                  action={deleteBonusType}
+                  hiddenInputs={{ id: bt.id }}
+                  confirmMessage="Eliminare questo tipo bonus?"
+                />
               </td>
             </tr>
           ))}

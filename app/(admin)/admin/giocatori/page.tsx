@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { deletePlayer } from "@/app/actions/admin/players";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
 export default async function GiocatoriPage() {
   const players = await db.player.findMany({
@@ -31,12 +32,12 @@ export default async function GiocatoriPage() {
               <td className="py-2 pr-4 text-zinc-500">{p.footballTeam.name}</td>
               <td className="py-2 flex gap-3">
                 <Link href={`/admin/giocatori/${p.id}/edit`} className="text-blue-600 hover:underline">Modifica</Link>
-                <form action={deletePlayer as unknown as (fd: FormData) => void}>
-                  <input type="hidden" name="id" value={p.id} />
-                  <button type="submit" className="text-red-500 hover:underline" onClick={(e) => { if (!confirm("Eliminare il giocatore?")) e.preventDefault(); }}>
-                    Elimina
-                  </button>
-                </form>
+                <ConfirmDeleteForm
+                  action={deletePlayer}
+                  hiddenInputs={{ id: p.id }}
+                  confirmMessage="Eliminare il giocatore?"
+                  buttonClassName="text-red-500 hover:underline"
+                />
               </td>
             </tr>
           ))}

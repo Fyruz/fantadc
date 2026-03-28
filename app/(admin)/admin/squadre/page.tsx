@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
 export default async function SquadrePage() {
   const teams = await db.footballTeam.findMany({ orderBy: { name: "asc" } });
@@ -26,12 +27,12 @@ export default async function SquadrePage() {
               <td className="py-2 pr-4 text-zinc-500">{t.shortName ?? "—"}</td>
               <td className="py-2 flex gap-3">
                 <Link href={`/admin/squadre/${t.id}/edit`} className="text-blue-600 hover:underline">Modifica</Link>
-                <form action={deleteFootballTeam as unknown as (fd: FormData) => void}>
-                  <input type="hidden" name="id" value={t.id} />
-                  <button type="submit" className="text-red-500 hover:underline" onClick={(e) => { if (!confirm("Eliminare la squadra?")) e.preventDefault(); }}>
-                    Elimina
-                  </button>
-                </form>
+                <ConfirmDeleteForm
+                  action={deleteFootballTeam}
+                  hiddenInputs={{ id: t.id }}
+                  confirmMessage="Eliminare la squadra?"
+                  buttonClassName="text-red-500 hover:underline"
+                />
               </td>
             </tr>
           ))}
