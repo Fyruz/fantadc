@@ -79,11 +79,13 @@ Replace PrimeReact `<Tag>` with custom `StatusBadge` component:
 - `PUBLISHED`: green dot + "Pubblicata", bg `#ECFDF5`, text `#059669`
 
 ### Role Badges (players)
-`PlayerRole` enum has only two values:
-- `GK` (Portiere): green — `bg-green-100 text-green-700`
-- `PLAYER` (Giocatore): blue — `bg-blue-100 text-blue-700`
+`PlayerRole` enum will be migrated from `GK/PLAYER` to `P/A` as part of this work:
+- `P` (Portiere): green — `bg-green-100 text-green-700`
+- `A` (Altro/di movimento): blue — `bg-blue-100 text-blue-700`
 
-The player card left border also uses this two-color scheme (green for GK, blue for PLAYER).
+The player card left border also uses this two-color scheme (green for P, blue for A).
+
+**Schema migration required:** rename enum values `GK → P` and `PLAYER → A` in `schema.prisma`, generate migration, update all seed files and any code referencing the old values.
 
 ---
 
@@ -191,7 +193,7 @@ The player card left border also uses this two-color scheme (green for GK, blue 
 
 ### Player Card
 - Card base, `rounded-xl`, `p-3`
-- Left border 3px colored by role: green for GK, blue for PLAYER
+- Left border 3px colored by role: green for P, blue for A
 - Top-right: remove button (`pi-times`, danger, icon-only, small)
 - Name: 13px/600
 - Role badge (colored pill) + team name 11px text-secondary
