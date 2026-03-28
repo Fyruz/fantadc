@@ -29,7 +29,7 @@ export default async function GiocatoriPublicPage() {
                 <div key={p.id} className="flex items-center gap-2 text-sm border rounded-lg px-3 py-2">
                   <span
                     className="text-xs font-bold rounded px-1 py-0.5 text-white"
-                    style={{ backgroundColor: p.role === "GK" ? "#ca8a04" : "var(--primary)" }}
+                    style={{ backgroundColor: p.role === "P" ? "#ca8a04" : "var(--primary)" }}
                   >
                     {p.role}
                   </span>

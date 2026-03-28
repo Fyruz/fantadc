@@ -27,8 +27,8 @@ export default async function SquadraPage() {
   const history = await computeTeamHistory(fantasyTeam.id);
   const totalPoints = history.reduce((s, m) => s + m.total, 0);
 
-  const gk = fantasyTeam.players.find((p) => p.player.role === "GK");
-  const outfield = fantasyTeam.players.filter((p) => p.player.role === "PLAYER");
+  const gk = fantasyTeam.players.find((p) => p.player.role === "P");
+  const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
   return (
     <div className="flex flex-col gap-8">

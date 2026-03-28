@@ -69,7 +69,7 @@ export default async function SquadraFantasyPublicPage({
                 <span
                   className="text-xs font-bold px-1.5 py-0.5 rounded text-white shrink-0"
                   style={{
-                    backgroundColor: player.role === "GK" ? "#ca8a04" : "var(--primary)",
+                    backgroundColor: player.role === "P" ? "#ca8a04" : "var(--primary)",
                   }}
                 >
                   {player.role}

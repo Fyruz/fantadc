@@ -10,8 +10,8 @@ import { createPlayer } from "@/app/actions/admin/players";
 type Team = { id: number; name: string };
 
 const ROLE_OPTIONS = [
-  { label: "Portiere (GK)", value: "GK" },
-  { label: "Giocatore", value: "PLAYER" },
+  { label: "Portiere", value: "P" },
+  { label: "Giocatore", value: "A" },
 ];
 
 export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {

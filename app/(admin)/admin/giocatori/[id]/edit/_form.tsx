@@ -11,8 +11,8 @@ type Team = { id: number; name: string };
 type Player = { id: number; name: string; role: string; footballTeamId: number };
 
 const ROLE_OPTIONS = [
-  { label: "Portiere (GK)", value: "GK" },
-  { label: "Giocatore", value: "PLAYER" },
+  { label: "Portiere", value: "P" },
+  { label: "Giocatore", value: "A" },
 ];
 
 export default function EditGiocatoreForm({ player, teams }: { player: Player; teams: Team[] }) {

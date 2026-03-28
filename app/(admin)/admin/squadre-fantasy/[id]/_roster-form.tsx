@@ -22,7 +22,7 @@ export default function RosterForm({
     <form action={action} className="flex flex-col gap-4 max-w-lg">
       <input type="hidden" name="fantasyTeamId" value={fantasyTeamId} />
       <div>
-        <label className="block text-sm font-medium mb-2">Seleziona 5 giocatori (1 GK + 4 PLAYER, squadre diverse)</label>
+        <label className="block text-sm font-medium mb-2">Seleziona 5 giocatori (1 P + 4 A, squadre diverse)</label>
         <div className="flex flex-col gap-1 max-h-80 overflow-y-auto border rounded p-2">
           {allPlayers.map((p) => (
             <label key={p.id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-zinc-50 px-2 py-1 rounded">

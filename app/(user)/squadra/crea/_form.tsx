@@ -6,7 +6,7 @@ import { createFantasyTeam } from "@/app/actions/user/fantasy-teams";
 type Player = {
   id: number;
   name: string;
-  role: "GK" | "PLAYER";
+  role: "P" | "A";
   footballTeam: { id: number; name: string };
 };
 
@@ -16,8 +16,8 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [captainId, setCaptainId] = useState<number | null>(null);
   const [teamName, setTeamName] = useState("");
 
-  const gks = players.filter((p) => p.role === "GK");
-  const outfield = players.filter((p) => p.role === "PLAYER");
+  const gks = players.filter((p) => p.role === "P");
+  const outfield = players.filter((p) => p.role === "A");
 
   const selectedPlayers = useMemo(
     () => players.filter((p) => selectedIds.includes(p.id)),
@@ -25,8 +25,8 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   );
 
   const validation = useMemo(() => {
-    const gkCount = selectedPlayers.filter((p) => p.role === "GK").length;
-    const playerCount = selectedPlayers.filter((p) => p.role === "PLAYER").length;
+    const gkCount = selectedPlayers.filter((p) => p.role === "P").length;
+    const playerCount = selectedPlayers.filter((p) => p.role === "A").length;
     const teamIds = selectedPlayers.map((p) => p.footballTeam.id);
     const uniqueTeams = new Set(teamIds).size;
     const captainOk = captainId !== null && selectedIds.includes(captainId);
@@ -48,17 +48,17 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
     };
   }, [selectedIds, selectedPlayers, captainId, teamName]);
 
-  function togglePlayer(id: number, role: "GK" | "PLAYER") {
+  function togglePlayer(id: number, role: "P" | "A") {
     setSelectedIds((prev) => {
       if (prev.includes(id)) {
         if (captainId === id) setCaptainId(null);
         return prev.filter((x) => x !== id);
       }
-      const gkCount = players.filter((p) => prev.includes(p.id) && p.role === "GK").length;
-      const playerCount = players.filter((p) => prev.includes(p.id) && p.role === "PLAYER").length;
+      const gkCount = players.filter((p) => prev.includes(p.id) && p.role === "P").length;
+      const playerCount = players.filter((p) => prev.includes(p.id) && p.role === "A").length;
       if (prev.length >= 5) return prev;
-      if (role === "GK" && gkCount >= 1) return prev;
-      if (role === "PLAYER" && playerCount >= 4) return prev;
+      if (role === "P" && gkCount >= 1) return prev;
+      if (role === "A" && playerCount >= 4) return prev;
       return [...prev, id];
     });
   }
@@ -77,12 +77,12 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
               );
             const gkBlock =
               !selected &&
-              p.role === "GK" &&
-              selectedPlayers.some((sp) => sp.role === "GK");
+              p.role === "P" &&
+              selectedPlayers.some((sp) => sp.role === "P");
             const playerBlock =
               !selected &&
-              p.role === "PLAYER" &&
-              selectedPlayers.filter((sp) => sp.role === "PLAYER").length >= 4;
+              p.role === "A" &&
+              selectedPlayers.filter((sp) => sp.role === "A").length >= 4;
             const countBlock = !selected && selectedIds.length >= 5;
             const disabled = sameTeamBlock || gkBlock || playerBlock || countBlock;
 

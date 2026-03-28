@@ -25,7 +25,8 @@
       "Bash(grep -n \"onClick\" E:/Developing/fantadc/app/\\\\\\(admin\\\\\\)/admin/partite/[id]/page.tsx)",
       "Bash(ls:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5432/fantadc\" npx prisma migrate resolve --applied 20260328000000_rename_player_role_p_a)"
     ],
     "defaultMode": "bypassPermissions"
   }

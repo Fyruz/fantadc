@@ -6,8 +6,8 @@ function makePlayer(id: number, role: PlayerRole, teamId: number): RosterPlayer 
   return { playerId: id, role, footballTeamId: teamId };
 }
 
-const GK = PlayerRole.GK;
-const PL = PlayerRole.PLAYER;
+const GK = PlayerRole.P;
+const PL = PlayerRole.A;
 
 const VALID_ROSTER: RosterPlayer[] = [
   makePlayer(1, GK, 1),

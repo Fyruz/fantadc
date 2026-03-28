@@ -185,8 +185,8 @@ enum UserRole {
 }
 
 enum PlayerRole {
-  GK
-  PLAYER
+  P
+  A
 }
 
 enum MatchStatus {

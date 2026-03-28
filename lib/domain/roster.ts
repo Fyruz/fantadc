@@ -23,10 +23,10 @@ export function validateRoster(
 ): RosterValidationError | null {
   if (players.length !== ROSTER_SIZE) return "WRONG_SIZE";
 
-  const gkCount = players.filter((p) => p.role === PlayerRole.GK).length;
+  const gkCount = players.filter((p) => p.role === PlayerRole.P).length;
   if (gkCount !== REQUIRED_GK) return "WRONG_GK_COUNT";
 
-  const outfieldCount = players.filter((p) => p.role === PlayerRole.PLAYER).length;
+  const outfieldCount = players.filter((p) => p.role === PlayerRole.A).length;
   if (outfieldCount !== REQUIRED_PLAYERS) return "WRONG_PLAYER_COUNT";
 
   const teamIds = players.map((p) => p.footballTeamId);
