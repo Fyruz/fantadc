@@ -23,7 +23,9 @@
       "Bash(head:*)",
       "Bash(curl:*)",
       "Bash(grep -n \"onClick\" E:/Developing/fantadc/app/\\\\\\(admin\\\\\\)/admin/partite/[id]/page.tsx)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "defaultMode": "bypassPermissions"
   }
