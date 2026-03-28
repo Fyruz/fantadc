@@ -1,11 +1,9 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { removeMatchPlayer, addAllMatchPlayers } from "@/app/actions/admin/match-players";
-import { deleteBonus } from "@/app/actions/admin/bonuses";
-import ConfirmDeleteForm from "@/components/confirm-delete-form";
+import { addAllMatchPlayers } from "@/app/actions/admin/match-players";
 import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
-import AssignBonusForm from "./_assign-bonus-form";
+import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 
 export default async function PartitaDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -98,52 +96,18 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
           {match.players.length === 0 && (
             <p className="text-sm text-zinc-400">Nessun partecipante aggiunto.</p>
           )}
-          {match.players.map(({ player }) => {
-            const bonuses = bonusesByPlayer.get(player.id) ?? [];
-            return (
-              <div key={player.id} className="border rounded p-3">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">
-                    {player.name}{" "}
-                    <span className="text-zinc-400 text-xs">({player.role})</span>{" "}
-                    <span className="text-zinc-400 text-xs">— {player.footballTeam.name}</span>
-                  </span>
-                  <ConfirmDeleteForm
-                    action={removeMatchPlayer}
-                    hiddenInputs={{ matchId, playerId: player.id }}
-                    confirmMessage={`Rimuovere ${player.name} dalla partita?`}
-                    buttonLabel="Rimuovi"
-                    buttonClassName="text-red-500 text-xs hover:underline"
-                  />
-                </div>
-                {bonuses.length > 0 && (
-                  <ul className="flex flex-wrap gap-2">
-                    {bonuses.map((b) => (
-                      <li key={b.id} className="flex items-center gap-1 text-xs bg-zinc-100 px-2 py-0.5 rounded">
-                        <span>{b.bonusType.code}</span>
-                        {b.quantity > 1 && <span>×{b.quantity}</span>}
-                        <span className="text-zinc-500">
-                          ({Number(b.points) > 0 ? "+" : ""}
-                          {Number(b.points)}pt)
-                        </span>
-                        <form action={deleteBonus as unknown as (fd: FormData) => void} className="inline">
-                          <input type="hidden" name="id" value={b.id} />
-                          <input type="hidden" name="matchId" value={matchId} />
-                          <button
-                            type="submit"
-                            className="text-red-400 ml-1 hover:text-red-600"
-                            title="Rimuovi bonus"
-                          >
-                            ×
-                          </button>
-                        </form>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            );
-          })}
+          {match.players.map(({ player }) => (
+            <PlayerBonusCard
+              key={player.id}
+              matchId={matchId}
+              player={player}
+              bonuses={(bonusesByPlayer.get(player.id) ?? []).map((b) => ({
+                ...b,
+                points: Number(b.points),
+              }))}
+              bonusTypes={bonusTypes.map((bt) => ({ ...bt, points: Number(bt.points) }))}
+            />
+          ))}
         </div>
 
         {availablePlayers.length > 0 && (
@@ -151,17 +115,6 @@ export default async function PartitaDetailPage({ params }: { params: Promise<{ 
         )}
       </div>
 
-      {/* Bonus assignment */}
-      {match.players.length > 0 && (
-        <div>
-          <h2 className="text-base font-semibold mb-3">Assegna bonus</h2>
-          <AssignBonusForm
-            matchId={matchId}
-            players={match.players.map((mp) => ({ id: mp.player.id, name: mp.player.name }))}
-            bonusTypes={bonusTypes.map((bt) => ({ ...bt, points: Number(bt.points) }))}
-          />
-        </div>
-      )}
     </div>
   );
 }
