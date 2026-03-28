@@ -6,7 +6,8 @@
       "Bash(npx prisma:*)",
       "Bash(npx next:*)",
       "mcp__plugin_telegram_telegram__reply",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)"
     ],
     "defaultMode": "bypassPermissions"
   }
