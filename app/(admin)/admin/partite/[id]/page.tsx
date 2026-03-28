@@ -22,6 +22,7 @@ export default async function PartitaDetailPage({
 }) {
   const { id } = await params;
   const matchId = Number(id);
+  if (isNaN(matchId)) notFound();
 
   const [match, teams, bonusTypes, allPlayers, matchBonuses] = await Promise.all([
     db.match.findUnique({

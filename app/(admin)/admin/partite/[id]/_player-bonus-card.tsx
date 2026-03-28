@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useActionState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
@@ -27,6 +27,22 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const [qty, setQty] = useState(1);
   const [state, action, pending] = useActionState(assignBonus, undefined);
   const removeFormRef = useRef<HTMLFormElement>(null);
+
+  const prevStateRef = useRef<typeof state>(undefined);
+
+  useEffect(() => {
+    if (
+      state !== undefined &&
+      state !== prevStateRef.current &&
+      !state.message &&
+      !state.errors
+    ) {
+      setSelectedBonusType("");
+      setQty(1);
+      setVisible(false);
+    }
+    prevStateRef.current = state;
+  }, [state]);
 
   const roleColor = player.role === "P" ? "#10B981" : "#3B82F6";
 
@@ -129,9 +145,10 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
           <input type="hidden" name="matchId" value={matchId} />
           <input type="hidden" name="playerId" value={player.id} />
           <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7280]">Tipo bonus</label>
+            <label htmlFor="bonus-type-select" className="block text-xs font-medium mb-1 text-[#6B7280]">Tipo bonus</label>
             <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
             <Dropdown
+              inputId="bonus-type-select"
               value={selectedBonusType}
               onChange={(e) => setSelectedBonusType(e.value)}
               options={bonusTypeOptions}
@@ -143,9 +160,10 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             )}
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1 text-[#6B7280]">Quantità</label>
+            <label htmlFor="bonus-qty" className="block text-xs font-medium mb-1 text-[#6B7280]">Quantità</label>
             <input type="hidden" name="quantity" value={qty} />
             <InputNumber
+              inputId="bonus-qty"
               value={qty}
               onValueChange={(e) => setQty(e.value ?? 1)}
               min={1}
