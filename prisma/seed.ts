@@ -8,7 +8,7 @@ const adapter = new PrismaPg({
 const db = new PrismaClient({ adapter });
 
 async function main() {
-  // Admin di default
+  // ─── Admin di default ───────────────────────────────────────────────────────
   const adminEmail = process.env.SEED_ADMIN_EMAIL ?? "admin@fantadc.local";
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "changeme";
 
@@ -23,34 +23,36 @@ async function main() {
         role: UserRole.ADMIN,
       },
     });
-    console.log(`Admin creato: ${adminEmail}`);
+    console.log(`✓ Admin creato: ${adminEmail}`);
   } else {
-    console.log(`Admin già presente: ${adminEmail}`);
+    console.log(`· Admin già presente: ${adminEmail}`);
   }
 
-  // Bonus type iniziali
+  // ─── Tipi di bonus ──────────────────────────────────────────────────────────
   // Il valore MVP (open question #1) è placeholder: 3 punti.
-  // Da aggiornare quando il valore sarà definito (ai_context/open_questions.md).
+  // Aggiornare il valore via pannello admin dopo il go-live se necessario.
   const bonusTypes = [
-    { code: "GOAL", name: "Gol", points: 3 },
-    { code: "ASSIST", name: "Assist", points: 1 },
-    { code: "YELLOW_CARD", name: "Cartellino Giallo", points: -0.5 },
-    { code: "RED_CARD", name: "Cartellino Rosso", points: -2 },
-    { code: "MVP", name: "MVP Partita", points: 3 }, // valore provvisorio
+    { code: "GOAL",             name: "Gol",                   points:  3.0 },
+    { code: "ASSIST",           name: "Assist",                points:  1.0 },
+    { code: "PENALTY_GOAL",     name: "Rigore segnato",        points:  3.0 },
+    { code: "PENALTY_MISSED",   name: "Rigore sbagliato",      points: -3.0 },
+    { code: "OWN_GOAL",         name: "Autorete",              points: -2.0 },
+    { code: "YELLOW_CARD",      name: "Cartellino giallo",     points: -0.5 },
+    { code: "RED_CARD",         name: "Cartellino rosso",      points: -2.0 },
+    { code: "CLEAN_SHEET_GK",   name: "Clean sheet (portiere)",points:  1.0 },
+    { code: "MVP",              name: "MVP Partita",           points:  3.0 },
   ];
 
+  let created = 0;
   for (const bt of bonusTypes) {
-    await db.bonusType.upsert({
+    const result = await db.bonusType.upsert({
       where: { code: bt.code },
       update: {},
-      create: {
-        code: bt.code,
-        name: bt.name,
-        points: bt.points,
-      },
+      create: { code: bt.code, name: bt.name, points: bt.points },
     });
+    if (result.code === bt.code) created++;
   }
-  console.log(`Bonus type iniziali: ${bonusTypes.map((b) => b.code).join(", ")}`);
+  console.log(`✓ Bonus type verificati: ${bonusTypes.map((b) => b.code).join(", ")}`);
 }
 
 main()

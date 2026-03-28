@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "db:seed": "npx tsx prisma/seed.ts",
+    "db:seed-tournament": "npx tsx prisma/seed-tournament.ts",
+    "go-live-check": "npx tsx scripts/go-live-check.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
