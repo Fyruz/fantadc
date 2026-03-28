@@ -37,7 +37,23 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
       startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
     },
   });
-  await logAdminAction(Number(admin.id), "CREATE", "Match", match.id, null, { ...match, startsAt: match.startsAt.toISOString() });
+
+  const players = await db.player.findMany({
+    where: { footballTeamId: { in: [parsed.data.homeTeamId, parsed.data.awayTeamId] } },
+    select: { id: true },
+  });
+  if (players.length > 0) {
+    await db.matchPlayer.createMany({
+      data: players.map((p) => ({ matchId: match.id, playerId: p.id })),
+      skipDuplicates: true,
+    });
+  }
+
+  await logAdminAction(Number(admin.id), "CREATE", "Match", match.id, null, {
+    ...match,
+    startsAt: match.startsAt.toISOString(),
+    autoAddedPlayers: players.length,
+  });
 
   revalidatePath("/admin/partite");
   redirect("/admin/partite");
