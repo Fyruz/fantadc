@@ -6,7 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
 
-export async function addMatchPlayer(formData: FormData): Promise<ActionResult> {
+export async function addMatchPlayer(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const matchId = Number(formData.get("matchId"));
   const playerId = Number(formData.get("playerId"));
