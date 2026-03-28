@@ -6,6 +6,7 @@ import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
+import { Button } from "primereact/button";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Bozza",
@@ -74,7 +75,7 @@ export default async function PartitaDetailPage({
           <h2 className="text-xl font-bold text-white">
             {match.homeTeam.name} vs {match.awayTeam.name}
           </h2>
-          <p className="text-sm text-white/70 mt-1">
+          <p className="text-[13px] text-white/80 mt-1">
             {match.startsAt.toLocaleString("it-IT")}
           </p>
         </div>
@@ -114,12 +115,13 @@ export default async function PartitaDetailPage({
           {availablePlayers.length > 0 && (
             <form action={addAllMatchPlayers as unknown as (fd: FormData) => void}>
               <input type="hidden" name="matchId" value={matchId} />
-              <button
+              <Button
                 type="submit"
-                className="text-xs font-medium text-[#0107A3] hover:underline"
-              >
-                + Aggiungi tutti ({availablePlayers.length})
-              </button>
+                label={`+ Aggiungi tutti (${availablePlayers.length})`}
+                link
+                size="small"
+                className="text-[#0107A3] text-xs font-medium p-0"
+              />
             </form>
           )}
         </div>

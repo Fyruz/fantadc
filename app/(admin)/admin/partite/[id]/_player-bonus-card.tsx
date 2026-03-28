@@ -35,7 +35,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
     value: String(bt.id),
   }));
 
-  const handleRemoveClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleRemoveClick = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     confirmPopup({
       target: e.currentTarget,
@@ -68,14 +68,17 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         onClick={() => setVisible(true)}
       >
         {/* Remove button */}
-        <button
+        <Button
           type="button"
-          className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center text-[#9CA3AF] hover:text-[#EF4444] transition-colors"
+          icon="pi pi-times"
+          severity="danger"
+          size="small"
+          text
+          rounded
+          aria-label="Rimuovi"
+          className="absolute top-1 right-1 w-6 h-6 !p-0"
           onClick={handleRemoveClick}
-          title="Rimuovi dalla partita"
-        >
-          <i className="pi pi-times text-xs" />
-        </button>
+        />
 
         {/* Name + role badge */}
         <div className="flex items-center gap-1.5 mb-1 pr-5">
@@ -162,7 +165,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             />
             <Button
               type="submit"
-              label={pending ? "..." : "+ Assegna"}
+              label={pending ? "..." : "Assegna"}
               size="small"
               disabled={pending}
             />
