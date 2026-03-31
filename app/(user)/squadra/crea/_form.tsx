@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState, useMemo } from "react";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
 import { createFantasyTeam } from "@/app/actions/user/fantasy-teams";
 
 type Player = {
@@ -114,14 +116,13 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-6">
-      {/* Team name */}
       <div>
-        <label className="block text-sm font-medium mb-1">Nome squadra *</label>
-        <input
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Nome squadra *</label>
+        <InputText
           name="name"
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
-          className="input w-full max-w-sm"
+          className="w-full max-w-sm"
           placeholder="es. I Guerrieri"
           maxLength={40}
           required
@@ -153,7 +154,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       {/* Captain selection */}
       {selectedPlayers.length > 0 && (
         <div>
-          <label className="block text-sm font-medium mb-2">Capitano *</label>
+          <label className="block text-xs font-medium text-[#6B7280] mb-2">Capitano *</label>
           <div className="flex flex-wrap gap-2">
             {selectedPlayers.map((p) => (
               <button
@@ -183,13 +184,12 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       )}
 
       <div>
-        <button
+        <Button
           type="submit"
+          label={pending ? "Salvo..." : "Conferma squadra"}
           disabled={!validation.isValid || pending}
-          className="btn-primary"
-        >
-          {pending ? "Salvo..." : "Conferma squadra"}
-        </button>
+          className="w-full md:w-auto"
+        />
         {!validation.isValid && (
           <p className="text-zinc-400 text-xs mt-2">
             Completa la selezione prima di confermare.

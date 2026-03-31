@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
+import { Button } from "primereact/button";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -33,88 +34,87 @@ export default async function SquadraPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-bold mb-1">{fantasyTeam.name}</h1>
-        <p className="text-zinc-500 text-sm">
-          Capitano: <span className="font-medium text-zinc-700">★ {fantasyTeam.captain.name}</span>
+        <h1 className="text-[22px] font-bold text-[#111827] mb-1">{fantasyTeam.name}</h1>
+        <p className="text-[#6B7280] text-sm">
+          Capitano: <span className="font-medium text-[#111827]">★ {fantasyTeam.captain.name}</span>
         </p>
         {history.length > 0 && (
-          <p className="text-2xl font-bold mt-2">{totalPoints.toFixed(1)} <span className="text-sm text-zinc-400 font-normal">punti totali</span></p>
+          <p className="text-2xl font-bold text-[#111827] mt-2">{totalPoints.toFixed(1)} <span className="text-sm text-[#6B7280] font-normal">punti totali</span></p>
         )}
       </div>
 
-      {/* Campo visivo */}
-      <div className="bg-green-50 border border-green-200 rounded-xl p-6 flex flex-col items-center gap-4">
-        {/* 4 outfield */}
-        <div className="flex gap-3 flex-wrap justify-center">
-          {outfield.map(({ player }) => (
-            <PlayerCard
-              key={player.id}
-              name={player.name}
-              team={player.footballTeam.shortName ?? player.footballTeam.name}
-              isCaptain={player.id === fantasyTeam.captainPlayerId}
-            />
-          ))}
-        </div>
-        {/* P (Portiere) */}
-        {gk && (
-          <div className="mt-2">
-            <PlayerCard
-              name={gk.player.name}
-              team={gk.player.footballTeam.shortName ?? gk.player.footballTeam.name}
-              isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
-              isGk
-            />
-          </div>
-        )}
-      </div>
-
-      {/* Dettaglio roster */}
-      <div>
-        <h2 className="font-semibold mb-3">Rosa</h2>
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="border-b text-left text-zinc-500">
-              <th className="py-2 pr-4">Giocatore</th>
-              <th className="py-2 pr-4">Ruolo</th>
-              <th className="py-2">Squadra</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fantasyTeam.players.map(({ player }) => (
-              <tr key={player.id} className="border-b">
-                <td className="py-2 pr-4 font-medium">
-                  {player.id === fantasyTeam.captainPlayerId && (
-                    <span className="text-yellow-500 mr-1">★</span>
-                  )}
-                  {player.name}
-                </td>
-                <td className="py-2 pr-4 text-zinc-500">{player.role}</td>
-                <td className="py-2 text-zinc-500">{player.footballTeam.name}</td>
-              </tr>
+      <div className="admin-card overflow-hidden">
+        <div className="bg-green-50 border-b border-green-100 p-6 flex flex-col items-center gap-4">
+          <div className="flex gap-3 flex-wrap justify-center">
+            {outfield.map(({ player }) => (
+              <PlayerCard
+                key={player.id}
+                name={player.name}
+                team={player.footballTeam.shortName ?? player.footballTeam.name}
+                isCaptain={player.id === fantasyTeam.captainPlayerId}
+              />
             ))}
-          </tbody>
-        </table>
+          </div>
+          {gk && (
+            <div className="mt-2">
+              <PlayerCard
+                name={gk.player.name}
+                team={gk.player.footballTeam.shortName ?? gk.player.footballTeam.name}
+                isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
+                isGk
+              />
+            </div>
+          )}
+        </div>
       </div>
 
-      <p className="text-xs text-zinc-400">
+      <div>
+        <h2 className="text-base font-semibold text-[#111827] mb-3">Rosa</h2>
+        <div className="admin-card overflow-hidden">
+          <table className="w-full text-sm border-collapse">
+            <thead>
+              <tr className="bg-[#F8F9FC] border-b border-[#E5E7EB]">
+                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Giocatore</th>
+                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Ruolo</th>
+                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Squadra</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fantasyTeam.players.map(({ player }, index) => (
+                <tr key={player.id} className={`border-b border-[#F3F4F6] last:border-0 ${index % 2 === 1 ? "bg-[#FAFAFA]" : ""}`}>
+                  <td className="py-2.5 px-4 font-medium text-[#111827]">
+                    {player.id === fantasyTeam.captainPlayerId && (
+                      <span className="text-amber-500 mr-1">★</span>
+                    )}
+                    {player.name}
+                  </td>
+                  <td className="py-2.5 px-4 text-[#6B7280]">{player.role}</td>
+                  <td className="py-2.5 px-4 text-[#6B7280]">{player.footballTeam.name}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <p className="text-xs text-[#9CA3AF]">
         La rosa è bloccata. Solo un admin può modificarla.
       </p>
 
-      {/* Storico punteggi per partita */}
       {history.length > 0 && (
         <div>
-          <h2 className="font-semibold mb-3">Storico punteggi</h2>
+          <h2 className="text-base font-semibold text-[#111827] mb-3">Storico punteggi</h2>
           <div className="flex flex-col gap-3">
             {history.map((ms) => (
-              <details key={ms.matchId} className="border rounded-lg">
-                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-zinc-50 rounded-lg">
-                  <span className="text-sm font-medium">{ms.label}</span>
-                  <span className="font-bold text-sm ml-4">{ms.total.toFixed(1)} pt</span>
+              <details key={ms.matchId} className="admin-card overflow-hidden">
+                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#F8F9FC]">
+                  <span className="text-sm font-medium text-[#111827]">{ms.label}</span>
+                  <span className="font-bold text-sm ml-4 text-[#111827]">{ms.total.toFixed(1)} pt</span>
                 </summary>
                 <div className="px-4 pb-3">
                   <table className="w-full text-xs border-collapse mt-1">
                     <thead>
-                      <tr className="text-left text-zinc-400 border-b">
+                      <tr className="text-left text-[#9CA3AF] border-b border-[#F3F4F6]">
                         <th className="py-1 pr-3">Giocatore</th>
                         <th className="py-1 pr-2 text-right">Bonus</th>
                         <th className="py-1 pr-2 text-right">MVP</th>
@@ -123,17 +123,17 @@ export default async function SquadraPage() {
                     </thead>
                     <tbody>
                       {ms.playerScores.map((ps) => (
-                        <tr key={ps.playerId} className="border-b last:border-0">
+                        <tr key={ps.playerId} className="border-b border-[#F3F4F6] last:border-0">
                           <td className="py-1 pr-3">
-                            {ps.isCaptain && <span className="text-yellow-500 mr-0.5">★</span>}
+                            {ps.isCaptain && <span className="text-amber-500 mr-0.5">★</span>}
                             {ps.playerName}
                             {ps.isMvp && <span className="ml-1 text-yellow-600 font-medium">(MVP)</span>}
                           </td>
-                          <td className="py-1 pr-2 text-right text-zinc-500">{ps.bonusPoints.toFixed(1)}</td>
-                          <td className="py-1 pr-2 text-right text-zinc-500">{ps.mvpPoints > 0 ? `+${ps.mvpPoints.toFixed(1)}` : "—"}</td>
-                          <td className="py-1 text-right font-medium">
+                          <td className="py-1 pr-2 text-right text-[#6B7280]">{ps.bonusPoints.toFixed(1)}</td>
+                          <td className="py-1 pr-2 text-right text-[#6B7280]">{ps.mvpPoints > 0 ? `+${ps.mvpPoints.toFixed(1)}` : "—"}</td>
+                          <td className="py-1 text-right font-medium text-[#111827]">
                             {ps.finalPoints.toFixed(1)}
-                            {ps.isCaptain && ps.basePoints !== 0 && <span className="text-yellow-600 text-xs ml-0.5">×2</span>}
+                            {ps.isCaptain && ps.basePoints !== 0 && <span className="text-amber-600 text-xs ml-0.5">×2</span>}
                           </td>
                         </tr>
                       ))}
@@ -147,7 +147,9 @@ export default async function SquadraPage() {
       )}
 
       <div>
-        <Link href="/dashboard" className="btn-secondary">← Dashboard</Link>
+        <Link href="/dashboard">
+          <Button label="← Dashboard" outlined size="small" />
+        </Link>
       </div>
     </div>
   );
@@ -166,13 +168,14 @@ function PlayerCard({
 }) {
   return (
     <div
-      className={`flex flex-col items-center rounded-lg px-4 py-3 text-center min-w-20 border ${
-        isGk ? "bg-yellow-50 border-yellow-200" : "bg-white border-zinc-200"
+      className={`flex flex-col items-center rounded-xl px-4 py-3 text-center min-w-20 border ${
+        isGk ? "bg-amber-50 border-amber-200" : "bg-white border-[#E5E7EB]"
       }`}
+      style={{ borderLeft: `3px solid ${isGk ? "#F59E0B" : "#3B82F6"}` }}
     >
-      {isCaptain && <span className="text-yellow-500 text-xs mb-0.5">★ C</span>}
-      <span className="font-medium text-sm">{name}</span>
-      <span className="text-xs text-zinc-400">{team}</span>
+      {isCaptain && <span className="text-amber-500 text-xs mb-0.5">★ C</span>}
+      <span className="font-semibold text-sm text-[#111827]">{name}</span>
+      <span className="text-xs text-[#6B7280]">{team}</span>
     </div>
   );
 }

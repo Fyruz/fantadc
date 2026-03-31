@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
+import { Button } from "primereact/button";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -33,30 +34,32 @@ export default async function DashboardPage() {
   const votedMatchIds = new Set(hasVoted.map((v) => v.matchId));
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold mb-1">
+        <h1 className="text-[22px] font-bold text-[#111827]">
           Ciao{user.name ? `, ${user.name}` : ""}!
         </h1>
-        <p className="text-zinc-500 text-sm">{user.email}</p>
+        <p className="text-[#6B7280] text-sm">{user.email}</p>
       </div>
 
       {!fantasyTeam ? (
-        <div className="border-2 border-dashed border-zinc-300 rounded-xl p-8 text-center">
-          <p className="text-zinc-500 mb-4">Non hai ancora creato la tua squadra fantasy.</p>
-          <Link href="/squadra/crea" className="btn-primary">Crea la tua squadra</Link>
+        <div className="admin-card p-6 text-center">
+          <p className="text-[#6B7280] text-sm mb-4">Non hai ancora creato la tua squadra fantasy.</p>
+          <Link href="/squadra/crea">
+            <Button label="Crea la tua squadra" />
+          </Link>
         </div>
       ) : (
-        <div className="border rounded-xl p-5">
+        <div className="admin-card p-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">{fantasyTeam.name}</h2>
-            <Link href="/squadra" className="text-blue-600 text-sm hover:underline">Vedi squadra →</Link>
+            <h2 className="font-semibold text-[#111827]">{fantasyTeam.name}</h2>
+            <Link href="/squadra" className="text-sm text-[#0107A3] hover:underline">Vedi squadra →</Link>
           </div>
           <div className="flex flex-wrap gap-2">
             {fantasyTeam.players.map(({ player }) => (
-              <span key={player.name} className="text-xs bg-zinc-100 px-2 py-1 rounded">
+              <span key={player.name} className="text-xs bg-[#E8E9F8] text-[#0107A3] px-2 py-1 rounded-full font-medium">
                 {player.name}
-                <span className="text-zinc-400 ml-1">({player.role})</span>
+                <span className="text-[#6B7280] ml-1 font-normal">({player.role})</span>
               </span>
             ))}
           </div>
@@ -64,20 +67,25 @@ export default async function DashboardPage() {
       )}
 
       {openMatches.length > 0 && (
-        <div>
-          <h2 className="font-semibold mb-3">Vota MVP</h2>
-          <div className="flex flex-col gap-2">
-            {openMatches.map((m) => {
+        <div className="admin-card p-4">
+          <h2 className="font-semibold text-[#111827] mb-3">Vota MVP</h2>
+          <div className="flex flex-col gap-0">
+            {openMatches.map((m, index) => {
               const voted = votedMatchIds.has(m.id);
               return (
-                <div key={m.id} className="flex items-center justify-between border rounded-lg px-4 py-3">
-                  <span className="text-sm font-medium">
+                <div
+                  key={m.id}
+                  className={`flex items-center justify-between py-2.5 ${
+                    index < openMatches.length - 1 ? "border-b border-[#F3F4F6]" : ""
+                  }`}
+                >
+                  <span className="text-sm font-medium text-[#111827]">
                     {m.homeTeam.name} vs {m.awayTeam.name}
                   </span>
                   {voted ? (
-                    <span className="text-xs text-green-600">Votato ✓</span>
+                    <span className="text-xs text-emerald-600 font-medium">Votato ✓</span>
                   ) : (
-                    <Link href={`/vota/${m.id}`} className="text-sm text-blue-600 hover:underline">
+                    <Link href={`/vota/${m.id}`} className="text-sm text-[#0107A3] hover:underline font-medium">
                       Vota ora →
                     </Link>
                   )}
@@ -89,8 +97,12 @@ export default async function DashboardPage() {
       )}
 
       <div className="flex gap-3 flex-wrap">
-        <Link href="/classifica" className="btn-secondary">Classifica</Link>
-        <Link href="/partite" className="btn-secondary">Calendario partite</Link>
+        <Link href="/classifica">
+          <Button label="Classifica" outlined />
+        </Link>
+        <Link href="/partite">
+          <Button label="Calendario partite" outlined />
+        </Link>
       </div>
     </div>
   );
