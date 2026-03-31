@@ -1,11 +1,17 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
+import StatusBadge from "@/components/status-badge";
+import RoleBadge from "@/components/role-badge";
 
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const matchId = Number(id);
+  if (Number.isNaN(matchId)) notFound();
+
   const match = await db.match.findUnique({
-    where: { id: Number(id), status: { not: "DRAFT" } },
+    where: { id: matchId, status: { not: "DRAFT" } },
     include: {
       homeTeam: { select: { name: true } },
       awayTeam: { select: { name: true } },
@@ -27,7 +33,6 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const windowOpen = isMvpWindowOpen(match.concludedAt);
 
-  // MVP: count votes only after window is closed and match is published
   let mvpPlayer: { name: string; footballTeam: { name: string } } | null = null;
   if (!windowOpen && match.status === "PUBLISHED") {
     const topVote = await db.vote.groupBy({
@@ -43,18 +48,6 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
     }
   }
 
-  const STATUS_LABEL: Record<string, string> = {
-    SCHEDULED: "Programmata",
-    CONCLUDED: "Conclusa",
-    PUBLISHED: "Pubblicata",
-  };
-  const STATUS_CLASS: Record<string, string> = {
-    SCHEDULED: "badge-scheduled",
-    CONCLUDED: "badge-concluded",
-    PUBLISHED: "badge-published",
-  };
-
-  // Group bonuses by player for display
   const bonusByPlayer = new Map<string, typeof match.bonuses>();
   for (const b of match.bonuses) {
     const arr = bonusByPlayer.get(b.player.name) ?? [];
@@ -63,66 +56,84 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="max-w-2xl flex flex-col gap-8">
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-2xl font-bold">
-            {match.homeTeam.name} <span className="text-zinc-400 font-normal">vs</span> {match.awayTeam.name}
+    <div className="flex flex-col gap-4">
+      <Link href="/partite" className="text-sm text-[#6B7280] hover:text-[#111827] flex items-center gap-1 w-fit">
+        <i className="pi pi-arrow-left text-xs" /> Tutte le partite
+      </Link>
+
+      <div
+        className="rounded-2xl overflow-hidden p-5 flex items-start justify-between gap-4"
+        style={{ background: "linear-gradient(135deg, #0107A3 0%, #0106c4 100%)" }}
+      >
+        <div>
+          <h1 className="text-xl font-bold text-white">
+            {match.homeTeam.name} vs {match.awayTeam.name}
           </h1>
-          <span className={STATUS_CLASS[match.status] ?? "badge-draft"}>
-            {STATUS_LABEL[match.status] ?? match.status}
-          </span>
+          <p className="text-[13px] text-white/80 mt-1">
+            {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
+          </p>
         </div>
-        <p className="text-sm text-zinc-500">
-          {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
-        </p>
+        <div className="flex-shrink-0 mt-0.5">
+          <StatusBadge status={match.status} />
+        </div>
       </div>
 
-      {/* MVP */}
       {mvpPlayer && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-center">
-          <p className="text-xs text-zinc-500 uppercase tracking-wide mb-1">MVP della partita</p>
-          <p className="text-xl font-bold">★ {mvpPlayer.name}</p>
-          <p className="text-sm text-zinc-500">{mvpPlayer.footballTeam.name}</p>
+        <div className="admin-card p-5 text-center">
+          <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">MVP della partita</p>
+          <p className="text-xl font-bold text-[#111827]">★ {mvpPlayer.name}</p>
+          <p className="text-sm text-[#6B7280] mt-0.5">{mvpPlayer.footballTeam.name}</p>
         </div>
       )}
 
       {windowOpen && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center text-sm text-blue-700">
-          🗳️ Finestra di voto MVP aperta — <a href="/login" className="font-medium underline">accedi per votare</a>
+          🗳️ Finestra di voto MVP aperta — <Link href="/login" className="font-medium underline">accedi per votare</Link>
         </div>
       )}
 
-      {/* Players */}
       {match.players.length > 0 && (
         <div>
-          <h2 className="font-semibold mb-3">Giocatori in campo ({match.players.length})</h2>
-          <div className="grid grid-cols-2 gap-2">
+          <h2 className="text-base font-semibold text-[#111827] mb-3">Giocatori in campo ({match.players.length})</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {match.players.map(({ player }) => (
-              <div key={player.id} className="border rounded-lg px-3 py-2 text-sm">
-                <span className="font-medium">{player.name}</span>
-                <span className="text-zinc-400 ml-1 text-xs">({player.role})</span>
-                <p className="text-xs text-zinc-400">{player.footballTeam.name}</p>
+              <div
+                key={player.id}
+                className="admin-card p-3 flex items-center gap-2"
+                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}` }}
+              >
+                <RoleBadge role={player.role} />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-[#111827] truncate">{player.name}</p>
+                  <p className="text-xs text-[#6B7280] truncate">{player.footballTeam.name}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Bonuses (only show for published matches) */}
       {match.status === "PUBLISHED" && match.bonuses.length > 0 && (
         <div>
-          <h2 className="font-semibold mb-3">Bonus assegnati</h2>
-          <div className="flex flex-col gap-2">
-            {[...bonusByPlayer.entries()].map(([playerName, bonuses]) => (
-              <div key={playerName} className="border rounded-lg px-3 py-2 text-sm">
-                <span className="font-medium">{playerName}</span>
-                <div className="flex flex-wrap gap-1 mt-1">
+          <h2 className="text-base font-semibold text-[#111827] mb-3">Bonus assegnati</h2>
+          <div className="admin-card overflow-hidden">
+            {[...bonusByPlayer.entries()].map(([playerName, bonuses], index, entries) => (
+              <div
+                key={playerName}
+                className={`px-4 py-3 ${index < entries.length - 1 ? "border-b border-[#F3F4F6]" : ""}`}
+              >
+                <p className="font-medium text-sm text-[#111827] mb-1">{playerName}</p>
+                <div className="flex flex-wrap gap-1">
                   {bonuses.map((b) => (
-                    <span key={b.id} className={`text-xs px-1.5 py-0.5 rounded ${Number(b.points) >= 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                    <span
+                      key={b.id}
+                      className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                        Number(b.points) >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
+                      }`}
+                    >
                       {b.bonusType.code}
-                      {b.quantity > 1 && ` ×${b.quantity}`}
-                      {" "}({Number(b.points) > 0 ? "+" : ""}{Number(b.points)}pt)
+                      {b.quantity > 1 && ` ×${b.quantity}`} {Number(b.points) > 0 ? "+" : ""}
+                      {Number(b.points)}pt
                     </span>
                   ))}
                 </div>

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
+import RoleBadge from "@/components/role-badge";
 
 export const dynamic = "force-dynamic";
 
@@ -40,49 +41,41 @@ export default async function SquadraFantasyPublicPage({
   const totalPoints = history.reduce((s, m) => s + m.total, 0);
 
   return (
-    <div className="max-w-2xl flex flex-col gap-8">
-      {/* Header */}
+    <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold mb-1">{team.name}</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-[22px] font-bold text-[#111827] mb-1">{team.name}</h1>
+        <p className="text-sm text-[#6B7280]">
           Proprietario: {team.user.name ?? team.user.email}
         </p>
         {history.length > 0 && (
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold">{totalPoints.toFixed(1)}</span>
-            <span className="text-zinc-400 text-sm">punti totali</span>
+            <span className="text-3xl font-bold text-[#111827]">{totalPoints.toFixed(1)}</span>
+            <span className="text-[#6B7280] text-sm">punti totali</span>
           </div>
         )}
       </div>
 
-      {/* Rosa */}
       <div>
-        <h2 className="font-semibold mb-3">Rosa</h2>
+        <h2 className="text-base font-semibold text-[#111827] mb-3">Rosa</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {team.players.map(({ player }) => {
             const isCaptain = player.id === team.captainPlayerId;
             return (
               <div
                 key={player.id}
-                className={`border rounded-lg px-3 py-2.5 flex items-center gap-2 text-sm ${isCaptain ? "border-yellow-300 bg-yellow-50" : ""}`}
+                className={`admin-card p-3 flex items-center gap-2 text-sm ${isCaptain ? "!bg-[#FFFBEB] !border-amber-300" : ""}`}
+                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}` }}
               >
-                <span
-                  className="text-xs font-bold px-1.5 py-0.5 rounded text-white shrink-0"
-                  style={{
-                    backgroundColor: player.role === "P" ? "#ca8a04" : "var(--primary)",
-                  }}
-                >
-                  {player.role}
-                </span>
+                <RoleBadge role={player.role} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate">{player.name}</p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="font-medium text-[#111827] truncate">{player.name}</p>
+                  <p className="text-xs text-[#6B7280]">
                     {player.footballTeam.shortName ?? player.footballTeam.name}
                   </p>
                 </div>
                 {isCaptain && (
-                  <span className="text-yellow-500 text-xs font-bold shrink-0" title="Capitano">
-                    ©
+                  <span className="text-amber-500 text-xs font-bold shrink-0" title="Capitano">
+                    ★ C
                   </span>
                 )}
               </div>
@@ -91,17 +84,16 @@ export default async function SquadraFantasyPublicPage({
         </div>
       </div>
 
-      {/* Storico partite */}
       {history.length > 0 && (
         <div>
-          <h2 className="font-semibold mb-3">Storico partite</h2>
+          <h2 className="text-base font-semibold text-[#111827] mb-3">Storico partite</h2>
           <div className="flex flex-col gap-3">
             {history.map((match) => (
-              <details key={match.matchId} className="border rounded-xl overflow-hidden group">
-                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-zinc-50 transition-colors list-none">
+              <details key={match.matchId} className="admin-card overflow-hidden group">
+                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[#F8F9FC] transition-colors list-none">
                   <div>
-                    <p className="font-medium text-sm">{match.label}</p>
-                    <p className="text-xs text-zinc-400">
+                    <p className="font-medium text-sm text-[#111827]">{match.label}</p>
+                    <p className="text-xs text-[#6B7280]">
                       {match.startsAt.toLocaleDateString("it-IT", {
                         day: "2-digit",
                         month: "long",
@@ -110,12 +102,12 @@ export default async function SquadraFantasyPublicPage({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-lg">{match.total.toFixed(1)}</span>
-                    <span className="text-zinc-400 text-sm">pt</span>
-                    <span className="text-zinc-400 text-xs group-open:rotate-180 transition-transform">▼</span>
+                    <span className="font-bold text-lg text-[#111827]">{match.total.toFixed(1)}</span>
+                    <span className="text-[#6B7280] text-sm">pt</span>
+                    <span className="text-[#6B7280] text-xs group-open:rotate-180 transition-transform">▼</span>
                   </div>
                 </summary>
-                <div className="px-4 pb-3 border-t bg-zinc-50">
+                <div className="px-4 pb-3 border-t border-[#F3F4F6] bg-[#F8F9FC]">
                   <div className="flex flex-col gap-1 mt-2">
                     {match.playerScores.map((ps) => (
                       <div
@@ -123,17 +115,17 @@ export default async function SquadraFantasyPublicPage({
                         className="flex items-center justify-between text-xs py-1 border-b last:border-0"
                       >
                         <div className="flex items-center gap-1.5">
-                          {ps.isCaptain && <span className="text-yellow-500 font-bold">©</span>}
+                          {ps.isCaptain && <span className="text-amber-500 font-bold">★ C</span>}
                           {ps.isMvp && <span className="text-yellow-400">★</span>}
-                          <span className="font-medium">{ps.playerName}</span>
-                          <span className="text-zinc-400">({ps.footballTeamName})</span>
+                          <span className="font-medium text-[#111827]">{ps.playerName}</span>
+                          <span className="text-[#6B7280]">({ps.footballTeamName})</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {ps.isCaptain && ps.basePoints > 0 && (
-                            <span className="text-zinc-400 text-xs">×2</span>
+                            <span className="text-[#6B7280] text-xs">×2</span>
                           )}
                           <span
-                            className={`font-mono font-bold ${ps.finalPoints > 0 ? "text-green-700" : ps.finalPoints < 0 ? "text-red-600" : "text-zinc-400"}`}
+                            className={`font-mono font-bold ${ps.finalPoints > 0 ? "text-green-700" : ps.finalPoints < 0 ? "text-red-600" : "text-[#6B7280]"}`}
                           >
                             {ps.finalPoints > 0 ? "+" : ""}
                             {ps.finalPoints.toFixed(1)}
@@ -150,7 +142,9 @@ export default async function SquadraFantasyPublicPage({
       )}
 
       {history.length === 0 && (
-        <p className="text-zinc-400 text-sm">Nessuna partita pubblicata ancora.</p>
+        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+          Nessuna partita pubblicata ancora.
+        </div>
       )}
     </div>
   );
