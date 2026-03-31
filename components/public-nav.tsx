@@ -36,6 +36,11 @@ export default async function PublicNav() {
         <div className="flex items-center gap-2">
           {user ? (
             <>
+              {user.role === "ADMIN" && (
+                <Link href="/admin" className="text-sm text-white/80 hover:text-white transition-colors px-2">
+                  Admin
+                </Link>
+              )}
               <Link href="/dashboard" className="text-sm text-white/80 hover:text-white transition-colors px-2">
                 Dashboard
               </Link>

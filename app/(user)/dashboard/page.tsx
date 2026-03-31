@@ -42,6 +42,20 @@ export default async function DashboardPage() {
         <p className="text-[#6B7280] text-sm">{user.email}</p>
       </div>
 
+      {user.role === "ADMIN" && (
+        <div className="admin-card p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold text-[#111827]">Accesso amministratore attivo</p>
+            <p className="text-sm text-[#6B7280] mt-1">
+              Gestisci partite, bonus, utenti e dati del campionato dal pannello admin.
+            </p>
+          </div>
+          <Link href="/admin">
+            <Button label="Vai all'admin" />
+          </Link>
+        </div>
+      )}
+
       {!fantasyTeam ? (
         <div className="admin-card p-6 text-center">
           <p className="text-[#6B7280] text-sm mb-4">Non hai ancora creato la tua squadra fantasy.</p>

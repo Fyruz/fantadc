@@ -98,11 +98,17 @@ export async function login(
     return { message: "Credenziali non valide." };
   }
 
+  const existingUser = await db.user.findUnique({
+    where: { email: parsed.data.email },
+    select: { role: true },
+  });
+
   const next = typeof formData.get("next") === "string"
     ? (formData.get("next") as string)
     : "";
+  const defaultNext = existingUser?.role === "ADMIN" ? "/admin" : "/dashboard";
   // Validate next: only allow internal relative paths
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : defaultNext;
 
   try {
     await signIn("credentials", {
