@@ -21,7 +21,7 @@ export default async function PublicNav() {
           <span className="text-yellow-400">⚽</span> Fantadc
         </Link>
 
-        <nav className="flex items-center gap-1 flex-wrap">
+        <nav className="hidden md:flex items-center gap-1 flex-wrap">
           {NAV_LINKS.map((n) => (
             <Link
               key={n.href}
