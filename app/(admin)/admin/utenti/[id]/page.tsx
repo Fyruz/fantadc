@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import AdminPageHeader from "@/components/admin-page-header";
 import UserActionsForm from "./_actions-form";
 
 export default async function UtenteDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,28 +21,48 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold mb-1">{user.email}</h1>
-        <p className="text-sm text-zinc-500">
-          {user.name && <span className="mr-3">{user.name}</span>}
-          <span className={`text-xs px-2 py-0.5 rounded ${user.role === "ADMIN" ? "bg-yellow-100 text-yellow-800" : "bg-zinc-100 text-zinc-600"}`}>{user.role}</span>
-          {user.isSuspended && <span className="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded ml-2">Sospeso</span>}
-        </p>
+      <AdminPageHeader title={user.email} backHref="/admin/utenti" />
+
+      <div className="admin-card p-4 flex flex-wrap items-center gap-3">
+        {user.name && (
+          <span className="text-sm font-medium text-[#111827]">{user.name}</span>
+        )}
+        <span
+          className={`text-xs px-2.5 py-0.5 rounded-full font-medium ${
+            user.role === "ADMIN"
+              ? "bg-amber-100 text-amber-700"
+              : "bg-[#E8E9F8] text-[#0107A3]"
+          }`}
+        >
+          {user.role}
+        </span>
+        {user.isSuspended && (
+          <span className="text-xs bg-red-100 text-red-700 px-2.5 py-0.5 rounded-full font-medium">
+            Sospeso
+          </span>
+        )}
       </div>
 
       <UserActionsForm userId={user.id} isSuspended={user.isSuspended} />
 
       <div>
-        <h2 className="text-base font-semibold mb-3">Squadra fantasy</h2>
-        {!user.fantasyTeam && <p className="text-sm text-zinc-400">Nessuna squadra fantasy.</p>}
+        <h2 className="text-base font-semibold text-[#111827] mb-3">Squadra fantasy</h2>
+        {!user.fantasyTeam && (
+          <p className="text-sm text-[#9CA3AF]">Nessuna squadra fantasy.</p>
+        )}
         {user.fantasyTeam && (
-          <div className="border rounded p-3">
-            <div className="flex items-center justify-between">
-              <span className="font-medium text-sm">{user.fantasyTeam.name}</span>
-              <Link href={`/admin/squadre-fantasy/${user.fantasyTeam.id}`} className="text-blue-600 text-xs hover:underline">Gestisci rosa</Link>
+          <div className="admin-card p-4">
+            <div className="flex items-center justify-between gap-4">
+              <span className="font-medium text-sm text-[#111827]">{user.fantasyTeam.name}</span>
+              <Link
+                href={`/admin/squadre-fantasy/${user.fantasyTeam.id}`}
+                className="text-sm font-medium text-[#0107A3] hover:underline flex-shrink-0"
+              >
+                Gestisci rosa →
+              </Link>
             </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              {user.fantasyTeam.players.length} giocatori — Capitano ID: {user.fantasyTeam.captainPlayerId}
+            <p className="text-xs text-[#6B7280] mt-1">
+              {user.fantasyTeam.players.length} giocatori
             </p>
           </div>
         )}
@@ -49,3 +70,4 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
     </div>
   );
 }
+

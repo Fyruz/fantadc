@@ -1,4 +1,6 @@
 import { db } from "@/lib/db";
+import Link from "next/link";
+import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const { page } = await searchParams;
@@ -19,45 +21,64 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
 
   return (
     <div>
-      <h1 className="text-xl font-bold mb-6">Audit log</h1>
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="border-b text-left text-zinc-500">
-            <th className="py-2 pr-4">Data</th>
-            <th className="py-2 pr-4">Admin</th>
-            <th className="py-2 pr-4">Azione</th>
-            <th className="py-2 pr-4">Entità</th>
-            <th className="py-2">ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log) => (
-            <tr key={log.id} className="border-b hover:bg-zinc-50 text-xs">
-              <td className="py-2 pr-4 text-zinc-500 whitespace-nowrap">
-                {log.createdAt.toLocaleString("it-IT")}
-              </td>
-              <td className="py-2 pr-4">{log.adminUser.email}</td>
-              <td className="py-2 pr-4 font-mono">{log.action}</td>
-              <td className="py-2 pr-4 text-zinc-500">{log.entityType}</td>
-              <td className="py-2 text-zinc-400">{String(log.entityId)}</td>
+      <AdminPageHeader title="Audit log" />
+      <div className="admin-card overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-[#F8F9FC]">
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Data</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Admin</th>
+              <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Azione</th>
+              <th className="hidden md:table-cell px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Entità</th>
+              <th className="hidden md:table-cell px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">ID</th>
             </tr>
-          ))}
-          {logs.length === 0 && <tr><td colSpan={5} className="py-8 text-center text-zinc-400">Nessuna voce</td></tr>}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {logs.map((log, i) => (
+              <tr
+                key={log.id}
+                className={`border-b border-[#F3F4F6] last:border-0 hover:bg-[#F0F1FC] transition-colors text-xs ${
+                  i % 2 === 1 ? "bg-[#FAFAFA]" : "bg-white"
+                }`}
+              >
+                <td className="px-4 py-3 text-[#6B7280] whitespace-nowrap">
+                  {log.createdAt.toLocaleString("it-IT")}
+                </td>
+                <td className="px-4 py-3 text-[#111827] font-medium">{log.adminUser.email}</td>
+                <td className="px-4 py-3 font-mono text-[#111827]">{log.action}</td>
+                <td className="hidden md:table-cell px-4 py-3 text-[#6B7280]">{log.entityType}</td>
+                <td className="hidden md:table-cell px-4 py-3 text-[#9CA3AF] font-mono">{String(log.entityId)}</td>
+              </tr>
+            ))}
+            {logs.length === 0 && (
+              <tr>
+                <td colSpan={5} className="px-4 py-8 text-center text-[#9CA3AF] text-sm">
+                  Nessuna voce nel log.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       {totalPages > 1 && (
-        <div className="flex gap-2 mt-4 text-sm">
+        <div className="flex gap-2 mt-4 flex-wrap">
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
-            <a
+            <Link
               key={p}
               href={`?page=${p}`}
-              className={`px-3 py-1 rounded border ${p === currentPage ? "bg-zinc-900 text-white border-zinc-900" : "hover:bg-zinc-50 border-zinc-300"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                p === currentPage
+                  ? "bg-[#0107A3] text-white border-[#0107A3]"
+                  : "bg-white text-[#6B7280] border-[#E5E7EB] hover:bg-[#F8F9FC] hover:text-[#111827]"
+              }`}
             >
               {p}
-            </a>
+            </Link>
           ))}
         </div>
       )}
     </div>
   );
 }
+

@@ -138,10 +138,12 @@ export default async function PartitaDetailPage({
               matchId={matchId}
               player={player}
               bonuses={(bonusesByPlayer.get(player.id) ?? []).map((b) => ({
-                ...b,
+                id: b.id,
+                bonusType: { code: b.bonusType.code },
+                quantity: b.quantity,
                 points: Number(b.points),
               }))}
-              bonusTypes={bonusTypes.map((bt) => ({ ...bt, points: Number(bt.points) }))}
+              bonusTypes={bonusTypes.map((bt) => ({ id: bt.id, code: bt.code, name: bt.name, points: Number(bt.points) }))}
             />
           ))}
         </div>

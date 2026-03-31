@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
+import AdminPageHeader from "@/components/admin-page-header";
 import RosterForm from "./_roster-form";
 
 export default async function SquadraFantasyDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -26,10 +27,8 @@ export default async function SquadraFantasyDetailPage({ params }: { params: Pro
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-bold mb-1">{fantasyTeam.name}</h1>
-        <p className="text-sm text-zinc-500">Proprietario: {fantasyTeam.user.email}</p>
-      </div>
+      <AdminPageHeader title={fantasyTeam.name} backHref="/admin/squadre-fantasy" />
+      <p className="text-sm text-[#6B7280] -mt-4">Proprietario: {fantasyTeam.user.email}</p>
       <RosterForm
         fantasyTeamId={fantasyTeamId}
         currentPlayerIds={currentPlayerIds}

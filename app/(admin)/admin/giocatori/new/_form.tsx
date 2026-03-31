@@ -23,37 +23,37 @@ export default function NuovoGiocatoreForm({ teams }: { teams: Team[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Nome *</label>
-          <InputText name="name" className="w-full" required />
-          {state?.errors?.name && <p className="text-red-500 text-sm mt-1">{state.errors.name[0]}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Ruolo *</label>
-          <input type="hidden" name="role" value={selectedRole} />
-          <Dropdown
-            value={selectedRole}
-            onChange={(e) => setSelectedRole(e.value)}
-            options={ROLE_OPTIONS}
-            placeholder="Seleziona ruolo"
-            className="w-full"
-          />
-          {state?.errors?.role && <p className="text-red-500 text-sm mt-1">{state.errors.role[0]}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Squadra reale *</label>
-          <input type="hidden" name="footballTeamId" value={selectedTeamId} />
-          <Dropdown
-            value={selectedTeamId}
-            onChange={(e) => setSelectedTeamId(e.value)}
-            options={teamOptions}
-            placeholder="Seleziona squadra"
-            className="w-full"
-          />
-          {state?.errors?.footballTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.footballTeamId[0]}</p>}
-        </div>
-        {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
-        <Button type="submit" label={pending ? "Salvo..." : "Crea giocatore"} disabled={pending} />
+      <div>
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Nome *</label>
+        <InputText name="name" className="w-full" required />
+        {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>}
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Ruolo *</label>
+        <input type="hidden" name="role" value={selectedRole} />
+        <Dropdown
+          value={selectedRole}
+          onChange={(e) => setSelectedRole(e.value)}
+          options={ROLE_OPTIONS}
+          placeholder="Seleziona ruolo"
+          className="w-full"
+        />
+        {state?.errors?.role && <p className="text-red-500 text-xs mt-1">{state.errors.role[0]}</p>}
+      </div>
+      <div>
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Squadra reale *</label>
+        <input type="hidden" name="footballTeamId" value={selectedTeamId} />
+        <Dropdown
+          value={selectedTeamId}
+          onChange={(e) => setSelectedTeamId(e.value)}
+          options={teamOptions}
+          placeholder="Seleziona squadra"
+          className="w-full"
+        />
+        {state?.errors?.footballTeamId && <p className="text-red-500 text-xs mt-1">{state.errors.footballTeamId[0]}</p>}
+      </div>
+      {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
+      <Button type="submit" label={pending ? "Salvo..." : "Crea giocatore"} disabled={pending} />
     </form>
   );
 }

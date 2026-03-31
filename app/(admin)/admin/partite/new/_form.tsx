@@ -28,7 +28,7 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div>
-        <label className="block text-sm font-medium mb-1">Squadra casa *</label>
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Squadra casa *</label>
         <input type="hidden" name="homeTeamId" value={homeTeamId} />
         <Dropdown
           value={homeTeamId}
@@ -40,7 +40,7 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
         {state?.errors?.homeTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.homeTeamId[0]}</p>}
       </div>
       <div>
-        <label className="block text-sm font-medium mb-1">Squadra ospite *</label>
+        <label className="block text-xs font-medium text-[#6B7280] mb-1">Squadra ospite *</label>
         <input type="hidden" name="awayTeamId" value={awayTeamId} />
         <Dropdown
           value={awayTeamId}
@@ -53,7 +53,7 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
       </div>
       <div className="flex gap-2">
         <div className="flex-1">
-          <label className="block text-sm font-medium mb-1">Data *</label>
+          <label className="block text-xs font-medium text-[#6B7280] mb-1">Data *</label>
           <input type="hidden" name="date" value={formattedDate} />
           <Calendar
             value={date}
@@ -65,7 +65,7 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
           {state?.errors?.date && <p className="text-red-500 text-sm mt-1">{state.errors.date[0]}</p>}
         </div>
         <div className="w-28">
-          <label className="block text-sm font-medium mb-1">Ora *</label>
+          <label className="block text-xs font-medium text-[#6B7280] mb-1">Ora *</label>
           <input type="hidden" name="time" value={formattedTime} />
           <Calendar
             value={time}
