@@ -4,20 +4,22 @@ import LoginForm from "./_form";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-[70vh] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-extrabold" style={{ color: "var(--primary)" }}>
+          <Link href="/" className="text-2xl font-extrabold text-[#0107A3]">
             ⚽ Fantadc
           </Link>
-          <p className="text-zinc-500 text-sm mt-1">Accedi al tuo account</p>
+          <p className="text-[#6B7280] text-sm mt-1">Accedi al tuo account</p>
         </div>
-        <Suspense>
-          <LoginForm />
-        </Suspense>
-        <p className="text-center text-sm text-zinc-500 mt-6">
+        <div className="admin-card p-6">
+          <Suspense>
+            <LoginForm />
+          </Suspense>
+        </div>
+        <p className="text-center text-sm text-[#6B7280] mt-4">
           Non hai un account?{" "}
-          <Link href="/register" className="font-medium hover:underline" style={{ color: "var(--primary)" }}>
+          <Link href="/register" className="font-medium text-[#0107A3] hover:underline">
             Registrati
           </Link>
         </p>

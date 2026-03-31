@@ -27,7 +27,7 @@ export default function LoginForm() {
         {next && <input type="hidden" name="next" value={next} />}
 
         <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
+          <label className="block text-xs font-medium text-[#6B7280] mb-1" htmlFor="email">Email</label>
           <InputText
             id="email"
             name="email"
@@ -40,7 +40,7 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1" htmlFor="password">Password</label>
+          <label className="block text-xs font-medium text-[#6B7280] mb-1" htmlFor="password">Password</label>
           <input type="hidden" name="password" value={password} />
           <Password
             value={password}
