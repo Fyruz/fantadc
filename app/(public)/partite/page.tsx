@@ -1,57 +1,47 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: "Bozza",
-  SCHEDULED: "Programmata",
-  CONCLUDED: "Conclusa",
-  PUBLISHED: "Pubblicata",
-};
-
-const STATUS_CLASS: Record<string, string> = {
-  DRAFT: "badge-draft",
-  SCHEDULED: "badge-scheduled",
-  CONCLUDED: "badge-concluded",
-  PUBLISHED: "badge-published",
-};
+import StatusBadge from "@/components/status-badge";
 
 export default async function PartitePublicPage() {
   const matches = await db.match.findMany({
     where: { status: { not: "DRAFT" } },
     orderBy: { startsAt: "asc" },
     include: {
-      homeTeam: { select: { name: true, shortName: true } },
-      awayTeam: { select: { name: true, shortName: true } },
+      homeTeam: { select: { name: true } },
+      awayTeam: { select: { name: true } },
     },
   });
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Calendario partite</h1>
-      {matches.length === 0 && (
-        <p className="text-zinc-400">Nessuna partita programmata.</p>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-[22px] font-bold text-[#111827]">Calendario partite</h1>
+      {matches.length === 0 ? (
+        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+          Nessuna partita disponibile.
+        </div>
+      ) : (
+        <div className="admin-card overflow-hidden">
+          {matches.map((m, index) => (
+            <Link
+              key={m.id}
+              href={`/partite/${m.id}`}
+              className={`flex items-center justify-between px-4 py-3 hover:bg-[#F0F1FC] transition-colors ${
+                index < matches.length - 1 ? "border-b border-[#F3F4F6]" : ""
+              }`}
+            >
+              <div>
+                <p className="font-medium text-sm text-[#111827]">
+                  {m.homeTeam.name} <span className="text-[#9CA3AF] font-normal">vs</span> {m.awayTeam.name}
+                </p>
+                <p className="text-xs text-[#6B7280] mt-0.5">
+                  {m.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+              </div>
+              <StatusBadge status={m.status} />
+            </Link>
+          ))}
+        </div>
       )}
-      <div className="flex flex-col gap-2">
-        {matches.map((m) => (
-          <Link
-            key={m.id}
-            href={`/partite/${m.id}`}
-            className="flex items-center justify-between border rounded-xl px-4 py-3 hover:bg-zinc-50 transition-colors"
-          >
-            <div>
-              <span className="font-semibold">
-                {m.homeTeam.name} <span className="text-zinc-400 font-normal mx-1">vs</span> {m.awayTeam.name}
-              </span>
-              <p className="text-xs text-zinc-400 mt-0.5">
-                {m.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
-              </p>
-            </div>
-            <span className={STATUS_CLASS[m.status] ?? "badge-draft"}>
-              {STATUS_LABEL[m.status] ?? m.status}
-            </span>
-          </Link>
-        ))}
-      </div>
     </div>
   );
 }

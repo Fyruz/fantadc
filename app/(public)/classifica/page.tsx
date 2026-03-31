@@ -7,33 +7,39 @@ export default async function ClassificaPublicPage() {
   const rankings = await computeRankings();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Classifica</h1>
-      {rankings.length === 0 && (
-        <p className="text-zinc-400 text-sm">Nessun risultato ancora pubblicato.</p>
-      )}
-      {rankings.length > 0 && (
-        <div className="border rounded-xl overflow-hidden">
-          <table className="w-full text-sm border-collapse">
+    <div className="flex flex-col gap-4">
+      <h1 className="text-[22px] font-bold text-[#111827]">Classifica</h1>
+      {rankings.length === 0 ? (
+        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+          Nessun risultato ancora pubblicato.
+        </div>
+      ) : (
+        <div className="admin-card overflow-hidden">
+          <table className="w-full border-collapse">
             <thead>
-              <tr className="text-white text-left text-xs uppercase tracking-wide" style={{ backgroundColor: "var(--primary)" }}>
-                <th className="py-3 px-4 w-10">#</th>
-                <th className="py-3 px-4">Squadra</th>
-                <th className="py-3 px-4 text-white/60">Proprietario</th>
-                <th className="py-3 px-4 text-right">Punti</th>
+              <tr className="bg-[#F8F9FC]">
+                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB] w-10">#</th>
+                <th className="px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Squadra</th>
+                <th className="hidden sm:table-cell px-4 py-3 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Proprietario</th>
+                <th className="px-4 py-3 text-right text-[11px] font-medium uppercase tracking-wide text-[#6B7280] border-b border-[#E5E7EB]">Punti</th>
               </tr>
             </thead>
             <tbody>
               {rankings.map((r, i) => (
-                <tr key={r.fantasyTeamId} className={`border-b last:border-0 ${i % 2 === 0 ? "bg-white" : "bg-zinc-50"}`}>
-                  <td className="py-3 px-4 font-mono text-zinc-400">{r.rank}</td>
-                  <td className="py-3 px-4">
-                    <Link href={`/squadre-fantasy/${r.fantasyTeamId}`} className="font-semibold hover:underline" style={{ color: "var(--primary)" }}>
+                <tr
+                  key={r.fantasyTeamId}
+                  className={`border-b border-[#F3F4F6] last:border-0 hover:bg-[#F0F1FC] transition-colors ${
+                    i % 2 === 1 ? "bg-[#FAFAFA]" : "bg-white"
+                  }`}
+                >
+                  <td className="px-4 py-3 font-mono text-sm text-[#9CA3AF]">{r.rank}</td>
+                  <td className="px-4 py-3">
+                    <Link href={`/squadre-fantasy/${r.fantasyTeamId}`} className="font-semibold text-sm text-[#0107A3] hover:underline">
                       {r.fantasyTeamName}
                     </Link>
                   </td>
-                  <td className="py-3 px-4 text-zinc-500 text-xs">{r.userName ?? r.userEmail}</td>
-                  <td className="py-3 px-4 text-right font-bold text-lg">{r.totalPoints.toFixed(1)}</td>
+                  <td className="hidden sm:table-cell px-4 py-3 text-sm text-[#6B7280]">{r.userName ?? r.userEmail}</td>
+                  <td className="px-4 py-3 text-right font-bold text-sm text-[#111827]">{r.totalPoints.toFixed(1)}</td>
                 </tr>
               ))}
             </tbody>

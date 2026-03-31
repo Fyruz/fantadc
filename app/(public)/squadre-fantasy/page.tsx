@@ -7,10 +7,12 @@ export default async function SquadreFantasyPublicPage() {
   const rankings = await computeRankings();
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Squadre Fantasy</h1>
+    <div className="flex flex-col gap-4">
+      <h1 className="text-[22px] font-bold text-[#111827]">Squadre Fantasy</h1>
       {rankings.length === 0 && (
-        <p className="text-zinc-400 text-sm">Nessuna squadra fantasy registrata.</p>
+        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+          Nessuna squadra fantasy registrata.
+        </div>
       )}
       {rankings.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -18,31 +20,22 @@ export default async function SquadreFantasyPublicPage() {
             <Link
               key={r.fantasyTeamId}
               href={`/squadre-fantasy/${r.fantasyTeamId}`}
-              className="border rounded-xl p-4 hover:bg-zinc-50 transition-colors flex flex-col gap-2 group"
+              className="admin-card p-4 flex flex-col gap-2 hover:shadow-md hover:-translate-y-px transition-all duration-150 group"
             >
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-2">
                 <div>
-                  <p
-                    className="font-bold text-base group-hover:underline"
-                    style={{ color: "var(--primary)" }}
-                  >
+                  <p className="font-bold text-sm text-[#0107A3] group-hover:underline">
                     {r.fantasyTeamName}
                   </p>
-                  <p className="text-xs text-zinc-400">{r.userName ?? r.userEmail}</p>
+                  <p className="text-xs text-[#6B7280]">{r.userName ?? r.userEmail}</p>
                 </div>
-                <div className="text-right">
-                  <p className="text-2xl font-bold">{r.totalPoints.toFixed(1)}</p>
-                  <p className="text-xs text-zinc-400">punti</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <span
-                  className="text-xs font-mono font-bold px-2 py-0.5 rounded text-white"
-                  style={{ backgroundColor: "var(--primary)" }}
-                >
+                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full text-white bg-[#0107A3] flex-shrink-0">
                   #{r.rank}
                 </span>
-                <span className="text-xs text-zinc-400">in classifica</span>
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-[#111827]">{r.totalPoints.toFixed(1)}</p>
+                <p className="text-xs text-[#6B7280]">punti</p>
               </div>
             </Link>
           ))}
