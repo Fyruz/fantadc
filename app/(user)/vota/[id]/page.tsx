@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
+import { Button } from "primereact/button";
 import VoteForm from "./_vote-form";
 
 export default async function VotaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -47,39 +48,39 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
   // Partita non ancora conclusa
   if (match.status === "DRAFT" || match.status === "SCHEDULED") {
     return (
-      <div className="text-center py-12">
-        <h1 className="text-xl font-bold mb-2">{title}</h1>
-        <p className="text-zinc-500">La partita non è ancora conclusa.</p>
-        <Link href="/dashboard" className="mt-6 inline-block btn-secondary">← Dashboard</Link>
+      <div className="flex flex-col gap-4 items-center py-12">
+        <h1 className="text-[22px] font-bold text-[#111827] mb-2">{title}</h1>
+        <p className="text-[#6B7280]">La partita non è ancora conclusa.</p>
+        <Link href="/dashboard">
+          <Button label="← Dashboard" outlined size="small" />
+        </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-sm mx-auto">
+    <div className="flex flex-col gap-4 max-w-sm mx-auto">
       <div>
-        <h1 className="text-xl font-bold mb-1">{title}</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-[22px] font-bold text-[#111827] mb-1">{title}</h1>
+        <p className="text-sm text-[#6B7280]">
           {windowOpen ? (
-            <span className="text-green-600 font-medium">Finestra di voto aperta</span>
+            <span className="text-emerald-600 font-medium">Finestra di voto aperta</span>
           ) : (
-            <span className="text-zinc-400">Finestra di voto chiusa</span>
+            <span className="text-[#9CA3AF]">Finestra di voto chiusa</span>
           )}
         </p>
       </div>
 
-      {/* Già votato */}
       {userVote && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-4 text-center">
+        <div className="admin-card p-4 text-center border-l-4 border-l-emerald-400">
           <p className="text-green-700 font-semibold text-sm">Hai votato ✓</p>
-          <p className="text-zinc-600 text-sm mt-1">Il tuo voto: <span className="font-medium">{userVote.player.name}</span></p>
+          <p className="text-[#6B7280] text-sm mt-1">Il tuo voto: <span className="font-medium text-[#111827]">{userVote.player.name}</span></p>
         </div>
       )}
 
-      {/* Finestra aperta + non ancora votato */}
       {windowOpen && !userVote && (
         <>
-          <p className="text-sm text-zinc-600">Scegli il giocatore MVP della partita:</p>
+          <p className="text-sm text-[#6B7280]">Scegli il giocatore MVP della partita:</p>
           <VoteForm
             matchId={matchId}
             players={match.players.map((mp) => ({
@@ -91,29 +92,29 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
         </>
       )}
 
-      {/* Favorito provvisorio (finestra aperta) */}
       {windowOpen && topPlayer && (userVote || voteCounts.length > 0) && (
-        <div className="border rounded-xl p-4 text-center">
-          <p className="text-xs text-zinc-500 mb-1">Favorito provvisorio</p>
-          <p className="font-bold text-lg">{topPlayer.name}</p>
-          <p className="text-xs text-zinc-400">{topPlayer.footballTeam.name}</p>
+        <div className="admin-card p-4 text-center">
+          <p className="text-xs text-[#6B7280] mb-1">Favorito provvisorio</p>
+          <p className="font-bold text-lg text-[#111827]">{topPlayer.name}</p>
+          <p className="text-xs text-[#6B7280]">{topPlayer.footballTeam.name}</p>
         </div>
       )}
 
-      {/* MVP finale (finestra chiusa) */}
       {!windowOpen && topPlayer && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-5 text-center">
-          <p className="text-xs text-zinc-500 mb-1 uppercase tracking-wide">MVP della partita</p>
-          <p className="text-2xl font-bold">★ {topPlayer.name}</p>
-          <p className="text-sm text-zinc-500 mt-1">{topPlayer.footballTeam.name}</p>
+        <div className="admin-card p-5 text-center border-l-4 border-l-amber-400">
+          <p className="text-xs text-[#6B7280] mb-1 uppercase tracking-wide">MVP della partita</p>
+          <p className="text-2xl font-bold text-[#111827]">★ {topPlayer.name}</p>
+          <p className="text-sm text-[#6B7280] mt-1">{topPlayer.footballTeam.name}</p>
         </div>
       )}
 
       {!windowOpen && !topPlayer && (
-        <p className="text-sm text-zinc-400 text-center">Nessun voto registrato per questa partita.</p>
+        <p className="text-sm text-[#9CA3AF] text-center">Nessun voto registrato per questa partita.</p>
       )}
 
-      <Link href="/dashboard" className="btn-secondary w-fit">← Dashboard</Link>
+      <Link href="/dashboard">
+        <Button label="← Dashboard" outlined size="small" />
+      </Link>
     </div>
   );
 }

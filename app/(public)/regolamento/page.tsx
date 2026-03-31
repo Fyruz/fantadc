@@ -1,11 +1,11 @@
 export default function RegolamentoPage() {
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Regolamento</h1>
+    <div className="flex flex-col gap-4 max-w-2xl">
+      <h1 className="text-[22px] font-bold text-[#111827]">Regolamento</h1>
 
-      <div className="flex flex-col gap-6 text-sm text-zinc-700">
+      <div className="admin-card p-6 flex flex-col gap-6 text-sm text-[#374151]">
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             Come funziona il Fantadc
           </h2>
           <p>
@@ -16,7 +16,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             La rosa
           </h2>
           <ul className="list-disc list-inside space-y-1">
@@ -35,7 +35,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             Il capitano
           </h2>
           <p>
@@ -46,7 +46,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             I punti
           </h2>
           <ul className="list-disc list-inside space-y-1">
@@ -60,7 +60,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             Il voto MVP
           </h2>
           <ul className="list-disc list-inside space-y-1">
@@ -75,7 +75,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             La classifica
           </h2>
           <p>
@@ -86,7 +86,7 @@ export default function RegolamentoPage() {
         </section>
 
         <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+          <h2 className="font-bold text-base mb-2 text-[#0107A3]">
             Come partecipare
           </h2>
           <ol className="list-decimal list-inside space-y-1">

@@ -36,10 +36,10 @@ export default function VoteForm({
           name="playerId"
           value={p.id}
           disabled={pending}
-          className="flex items-center justify-between border rounded-xl px-4 py-3 text-left hover:bg-zinc-50 active:bg-zinc-100 transition-colors disabled:opacity-50"
+          className="flex items-center justify-between admin-card px-4 py-3 text-left w-full hover:bg-[#F0F1FC] active:bg-[#E8E9F8] transition-colors disabled:opacity-50"
         >
-          <span className="font-medium">{p.name}</span>
-          <span className="text-xs text-zinc-400">{p.footballTeam.name}</span>
+          <span className="font-medium text-sm text-[#111827]">{p.name}</span>
+          <span className="text-xs text-[#6B7280]">{p.footballTeam.name}</span>
         </button>
       ))}
       {state?.success === false && (
