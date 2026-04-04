@@ -8,34 +8,49 @@ export default async function SquadreFantasyPublicPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-[22px] font-bold text-[#111827]">Squadre Fantasy</h1>
+      <div>
+        <div className="over-label mb-1">Stagione 2025</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          SQUADRE FANTASY
+        </h1>
+      </div>
       {rankings.length === 0 && (
-        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Nessuna squadra fantasy registrata.
         </div>
       )}
       {rankings.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-col gap-2">
           {rankings.map((r) => (
             <Link
               key={r.fantasyTeamId}
               href={`/squadre-fantasy/${r.fantasyTeamId}`}
-              className="admin-card p-4 flex flex-col gap-2 hover:shadow-md hover:-translate-y-px transition-all duration-150 group"
+              className="card px-5 py-4 flex items-center justify-between hover:bg-[var(--surface-1)] transition-colors"
             >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <p className="font-bold text-sm text-[#0107A3] group-hover:underline">
-                    {r.fantasyTeamName}
-                  </p>
-                  <p className="text-xs text-[#6B7280]">{r.userName ?? r.userEmail}</p>
-                </div>
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full text-white bg-[#0107A3] flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <span
+                  className="text-xs font-mono font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0"
+                  style={{ background: "var(--primary)" }}
+                >
                   #{r.rank}
                 </span>
+                <div>
+                  <div className="font-display font-black text-[14px] uppercase" style={{ color: "var(--text-primary)" }}>
+                    {r.fantasyTeamName}
+                  </div>
+                  <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {r.userName ?? r.userEmail}
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-2xl font-bold text-[#111827]">{r.totalPoints.toFixed(1)}</p>
-                <p className="text-xs text-[#6B7280]">punti</p>
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="font-display font-black text-lg" style={{ color: "var(--text-primary)" }}>
+                    {r.totalPoints.toFixed(1)}
+                  </div>
+                  <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>punti</div>
+                </div>
+                <i className="pi pi-chevron-right text-xs" style={{ color: "var(--text-disabled)" }} />
               </div>
             </Link>
           ))}

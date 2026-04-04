@@ -43,33 +43,36 @@ export default async function SquadraFantasyPublicPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-[22px] font-bold text-[#111827] mb-1">{team.name}</h1>
-        <p className="text-sm text-[#6B7280]">
+        <div className="over-label mb-1">Stagione 2025</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          {team.name}
+        </h1>
+        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
           Proprietario: {team.user.name ?? team.user.email}
         </p>
         {history.length > 0 && (
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-[#111827]">{totalPoints.toFixed(1)}</span>
-            <span className="text-[#6B7280] text-sm">punti totali</span>
+            <span className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{totalPoints.toFixed(1)}</span>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>punti totali</span>
           </div>
         )}
       </div>
 
       <div>
-        <h2 className="text-base font-semibold text-[#111827] mb-3">Rosa</h2>
+        <h2 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Rosa</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {team.players.map(({ player }) => {
             const isCaptain = player.id === team.captainPlayerId;
             return (
               <div
                 key={player.id}
-                className={`admin-card p-3 flex items-center gap-2 text-sm ${isCaptain ? "!bg-[#FFFBEB] !border-amber-300" : ""}`}
-                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}` }}
+                className={`card p-3 flex items-center gap-2 text-sm ${isCaptain ? "!border-[#F5C518]" : ""}`}
+                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}`, ...(isCaptain ? { background: 'rgba(245,197,24,0.08)' } : {}) }}
               >
                 <RoleBadge role={player.role} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-[#111827] truncate">{player.name}</p>
-                  <p className="text-xs text-[#6B7280]">
+                  <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{player.name}</p>
+                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                     {player.footballTeam.shortName ?? player.footballTeam.name}
                   </p>
                 </div>
@@ -86,14 +89,14 @@ export default async function SquadraFantasyPublicPage({
 
       {history.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-[#111827] mb-3">Storico partite</h2>
+          <h2 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Storico partite</h2>
           <div className="flex flex-col gap-3">
             {history.map((match) => (
-              <details key={match.matchId} className="admin-card overflow-hidden group">
-                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[#F8F9FC] transition-colors list-none">
+              <details key={match.matchId} className="card overflow-hidden group">
+                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-1)] transition-colors list-none">
                   <div>
-                    <p className="font-medium text-sm text-[#111827]">{match.label}</p>
-                    <p className="text-xs text-[#6B7280]">
+                    <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{match.label}</p>
+                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                       {match.startsAt.toLocaleDateString("it-IT", {
                         day: "2-digit",
                         month: "long",
@@ -102,30 +105,32 @@ export default async function SquadraFantasyPublicPage({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-lg text-[#111827]">{match.total.toFixed(1)}</span>
-                    <span className="text-[#6B7280] text-sm">pt</span>
-                    <span className="text-[#6B7280] text-xs group-open:rotate-180 transition-transform">▼</span>
+                    <span className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>{match.total.toFixed(1)}</span>
+                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>pt</span>
+                    <span className="text-xs group-open:rotate-180 transition-transform" style={{ color: "var(--text-muted)" }}>▼</span>
                   </div>
                 </summary>
-                <div className="px-4 pb-3 border-t border-[#F3F4F6] bg-[#F8F9FC]">
+                <div className="px-4 pb-3 border-t" style={{ borderColor: "var(--border-soft)", background: "var(--surface-1)" }}>
                   <div className="flex flex-col gap-1 mt-2">
                     {match.playerScores.map((ps) => (
                       <div
                         key={ps.playerId}
                         className="flex items-center justify-between text-xs py-1 border-b last:border-0"
+                        style={{ borderColor: "var(--border-soft)" }}
                       >
                         <div className="flex items-center gap-1.5">
                           {ps.isCaptain && <span className="text-amber-500 font-bold">★ C</span>}
                           {ps.isMvp && <span className="text-yellow-400">★</span>}
-                          <span className="font-medium text-[#111827]">{ps.playerName}</span>
-                          <span className="text-[#6B7280]">({ps.footballTeamName})</span>
+                          <span className="font-medium" style={{ color: "var(--text-primary)" }}>{ps.playerName}</span>
+                          <span style={{ color: "var(--text-muted)" }}>({ps.footballTeamName})</span>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
                           {ps.isCaptain && ps.basePoints > 0 && (
-                            <span className="text-[#6B7280] text-xs">×2</span>
+                            <span className="text-xs" style={{ color: "var(--text-muted)" }}>×2</span>
                           )}
                           <span
-                            className={`font-mono font-bold ${ps.finalPoints > 0 ? "text-green-700" : ps.finalPoints < 0 ? "text-red-600" : "text-[#6B7280]"}`}
+                            className="font-mono font-bold"
+                            style={{ color: ps.finalPoints > 0 ? '#32D74B' : ps.finalPoints < 0 ? '#FF453A' : 'var(--text-muted)' }}
                           >
                             {ps.finalPoints > 0 ? "+" : ""}
                             {ps.finalPoints.toFixed(1)}
@@ -142,7 +147,7 @@ export default async function SquadraFantasyPublicPage({
       )}
 
       {history.length === 0 && (
-        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
+        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Nessuna partita pubblicata ancora.
         </div>
       )}
