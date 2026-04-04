@@ -46,8 +46,13 @@ export default async function AdminDashboardPage() {
     <div className="flex flex-col gap-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-bold text-[#111827]">Dashboard</h1>
-        <span className="text-sm text-[#6B7280] capitalize hidden sm:block">{today}</span>
+        <div>
+          <div className="over-label mb-1">Area admin</div>
+          <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+            DASHBOARD
+          </h1>
+        </div>
+        <span className="text-sm capitalize hidden sm:block" style={{ color: "var(--text-muted)" }}>{today}</span>
       </div>
 
       {/* Stat cards */}
@@ -60,7 +65,7 @@ export default async function AdminDashboardPage() {
       {/* Anomalie / Tutto ok */}
       {hasAnomalies ? (
         <div>
-          <h2 className="flex items-center gap-2 text-base font-semibold text-[#111827] mb-3">
+          <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--text-primary)] mb-3">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
             Da verificare
           </h2>
@@ -68,13 +73,14 @@ export default async function AdminDashboardPage() {
             {concludedNoPlayers.map((m) => (
               <div
                 key={m.id}
-                className="bg-[#FFFBEB] border border-amber-200 border-l-[3px] border-l-amber-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                className="border border-l-[3px] border-l-amber-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                style={{ background: 'rgba(255,214,10,0.08)', borderColor: 'rgba(255,214,10,0.20)' }}
               >
                 <div>
-                  <p className="text-sm font-medium text-[#111827]">
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
                     {m.homeTeam.name} vs {m.awayTeam.name}
                   </p>
-                  <p className="text-xs text-[#6B7280] mt-0.5">
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                     {m.status === "CONCLUDED"
                       ? "Partita conclusa senza giocatori — aggiungi i partecipanti prima di pubblicare"
                       : "Partita pubblicata senza giocatori — i punteggi non saranno calcolati"}
@@ -82,7 +88,7 @@ export default async function AdminDashboardPage() {
                 </div>
                 <Link
                   href={`/admin/partite/${m.id}`}
-                  className="text-xs font-medium text-[#0107A3] hover:underline flex-shrink-0"
+                  className="text-xs font-medium text-[var(--primary)] hover:underline flex-shrink-0"
                 >
                   Gestisci →
                 </Link>
@@ -90,8 +96,8 @@ export default async function AdminDashboardPage() {
             ))}
 
             {usersNoTeam > 0 && (
-              <div className="bg-[#EFF6FF] border border-blue-200 border-l-[3px] border-l-blue-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4">
-                <p className="text-sm text-[#111827]">
+              <div className="border border-l-[3px] border-l-blue-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4" style={{ background: 'rgba(1,7,163,0.08)', borderColor: 'rgba(1,7,163,0.20)' }}>
+                <p className="text-sm text-[var(--text-primary)]">
                   <span className="font-bold">{usersNoTeam}</span>{" "}
                   {usersNoTeam === 1
                     ? "utente registrato senza squadra fantasy"
@@ -99,7 +105,7 @@ export default async function AdminDashboardPage() {
                 </p>
                 <Link
                   href="/admin/utenti"
-                  className="text-xs font-medium text-[#0107A3] hover:underline flex-shrink-0"
+                  className="text-xs font-medium text-[var(--primary)] hover:underline flex-shrink-0"
                 >
                   Vedi utenti →
                 </Link>
@@ -108,7 +114,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 rounded-full px-3 py-1.5 text-sm font-medium w-fit">
+        <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium w-fit" style={{ background: 'rgba(50,215,75,0.12)', color: '#32D74B' }}>
           <i className="pi pi-check-circle text-sm" />
           Tutto ok
         </div>
