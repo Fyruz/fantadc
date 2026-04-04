@@ -16,20 +16,32 @@ const NAV = [
 
 export default function TopBar({ initials }: { initials: string }) {
   const pathname = usePathname();
-
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-[#E5E7EB] shadow-sm h-14 flex items-center px-4 md:px-6">
+    <header
+      className="sticky top-0 z-30 h-14 flex items-center px-4 md:px-6"
+      style={{ background: "#fff", borderBottom: "1px solid var(--border-soft)", boxShadow: "0 1px 8px rgba(1,7,163,0.06)" }}
+    >
       <div className="flex items-center gap-4 w-full max-w-screen-xl mx-auto">
         {/* Logo */}
-        <Link
-          href="/admin"
-          className="font-bold text-[#0107A3] text-sm tracking-wide flex-shrink-0 flex items-center gap-1.5"
-        >
-          <i className="pi pi-circle-fill text-xs" />
-          fantadc admin
+        <Link href="/admin" className="flex items-center gap-2 flex-shrink-0">
+          <div
+            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
+            style={{ background: "var(--primary)" }}
+          >
+            ⚽
+          </div>
+          <span
+            className="font-display font-black text-[14px] uppercase tracking-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            FANTA<span style={{ color: "var(--primary)" }}>DC</span>
+            <span className="ml-1.5 text-[10px] font-semibold normal-case tracking-normal" style={{ color: "var(--text-muted)" }}>
+              admin
+            </span>
+          </span>
         </Link>
 
         {/* Desktop nav */}
@@ -40,11 +52,12 @@ export default function TopBar({ initials }: { initials: string }) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+                style={
                   active
-                    ? "bg-[#E8E9F8] text-[#0107A3]"
-                    : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F8F9FC]"
-                }`}
+                    ? { background: "var(--primary-light)", color: "var(--primary)" }
+                    : { color: "var(--text-muted)" }
+                }
               >
                 {item.label}
               </Link>
@@ -53,7 +66,10 @@ export default function TopBar({ initials }: { initials: string }) {
         </nav>
 
         {/* Avatar */}
-        <div className="ml-auto w-8 h-8 rounded-full bg-[#0107A3] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+        <div
+          className="ml-auto w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black flex-shrink-0"
+          style={{ background: "var(--primary)" }}
+        >
           {initials}
         </div>
       </div>
