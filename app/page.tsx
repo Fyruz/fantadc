@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
+import StatusBadge from "@/components/status-badge";
 
 export default async function HomePage() {
   const [user, teamCount, playerCount, fantasyCount, recentMatches] = await Promise.all([
@@ -21,137 +22,166 @@ export default async function HomePage() {
     }),
   ]);
 
-  const statusLabel: Record<string, string> = {
-    SCHEDULED: "Programmata",
-    CONCLUDED: "Conclusa",
-    PUBLISHED: "Pubblicata",
-  };
-
-  const statusClass: Record<string, string> = {
-    SCHEDULED: "badge-scheduled",
-    CONCLUDED: "badge-concluded",
-    PUBLISHED: "badge-published",
-  };
-
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F9FC]">
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--bg-base)" }}>
       <PublicNav />
 
       <main className="flex-1 pb-24 md:pb-8">
+        {/* ── Hero ── */}
         <section
-          className="px-4 py-20 text-center text-white"
-          style={{
-            background: "linear-gradient(135deg, #0107A3 0%, #000b8a 50%, #010460 100%)",
-          }}
+          className="px-4 py-16 text-white relative overflow-hidden"
+          style={{ background: "linear-gradient(160deg, #0107A3 0%, #000560 55%, #000338 100%)" }}
         >
-          <div className="mx-auto max-w-2xl">
-            <div className="mb-4 text-6xl">⚽</div>
-            <h1 className="mb-3 text-4xl font-extrabold tracking-tight">Fantadc</h1>
-            <p className="mb-8 text-lg text-white/80">
-              Il fantacalcio ufficiale del torneo di paese.
+          {/* Decorative circles */}
+          <div className="absolute right-[-40px] top-[-40px] w-48 h-48 rounded-full border border-white/5 pointer-events-none" />
+          <div className="absolute right-[-10px] top-[-10px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
+          <div className="absolute left-[-20px] bottom-[-20px] w-36 h-36 rounded-full border border-white/[0.03] pointer-events-none" />
+
+          <div className="relative max-w-2xl mx-auto text-center">
+            <div
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1 mb-6 text-[10px] font-bold uppercase tracking-widest"
+              style={{ background: "rgba(232,160,0,0.15)", border: "1px solid rgba(232,160,0,0.30)", color: "#E8A000" }}
+            >
+              TORNEO DI PAESE · 2025
+            </div>
+
+            <h1 className="font-display font-black text-5xl md:text-6xl uppercase leading-none tracking-tight mb-4">
+              FANTA<span style={{ color: "#E8A000" }}>DC</span>
+            </h1>
+
+            <div className="w-10 h-1 rounded-full mx-auto mb-5" style={{ background: "#E8A000" }} />
+
+            <p className="text-base text-white/70 mb-8 leading-relaxed">
               Scegli i tuoi 5 campioni, vota l&apos;MVP e scala la classifica.
             </p>
+
             {user ? (
               <Link
                 href="/dashboard"
-                className="inline-block rounded-lg bg-yellow-400 px-8 py-3 text-base font-bold text-zinc-900 transition-colors hover:bg-yellow-300"
+                className="inline-flex items-center gap-2 rounded-full font-black text-sm uppercase tracking-wide px-8 py-3.5 transition-opacity hover:opacity-90"
+                style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 4px 16px rgba(232,160,0,0.45)" }}
               >
-                Vai alla tua dashboard →
+                VAI ALLA DASHBOARD →
               </Link>
             ) : (
               <div className="flex flex-wrap justify-center gap-3">
                 <Link
                   href="/register"
-                  className="inline-block rounded-lg bg-yellow-400 px-8 py-3 text-base font-bold text-zinc-900 transition-colors hover:bg-yellow-300"
+                  className="inline-flex items-center rounded-full font-black text-sm uppercase tracking-wide px-8 py-3.5 transition-opacity hover:opacity-90"
+                  style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 4px 16px rgba(232,160,0,0.45)" }}
                 >
-                  Partecipa ora
+                  PARTECIPA ORA →
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-block rounded-lg border border-white/30 bg-white/10 px-8 py-3 text-base font-medium text-white transition-colors hover:bg-white/20"
+                  className="inline-flex items-center rounded-full font-bold text-sm uppercase tracking-wide px-8 py-3.5 transition-colors"
+                  style={{ background: "rgba(255,255,255,0.1)", color: "#fff", border: "1px solid rgba(255,255,255,0.2)" }}
                 >
-                  Accedi
+                  ACCEDI
                 </Link>
               </div>
             )}
           </div>
         </section>
 
+        {/* ── Stats strip ── */}
         {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
-          <section className="border-b bg-zinc-50 px-4 py-6">
-            <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-12 text-center">
+          <section
+            className="px-4 py-4"
+            style={{ background: "#fff", borderBottom: "1px solid var(--border-soft)" }}
+          >
+            <div className="max-w-3xl mx-auto flex justify-around divide-x divide-[var(--border-soft)]">
               {teamCount > 0 && (
-                <div>
-                  <div className="text-3xl font-bold" style={{ color: "var(--primary)" }}>{teamCount}</div>
-                  <div className="mt-0.5 text-xs text-zinc-500">Squadre</div>
+                <div className="flex-1 text-center py-1">
+                  <div className="font-display font-black text-2xl" style={{ color: "var(--primary)" }}>{teamCount}</div>
+                  <div className="over-label mt-0.5">Squadre</div>
                 </div>
               )}
               {playerCount > 0 && (
-                <div>
-                  <div className="text-3xl font-bold" style={{ color: "var(--primary)" }}>{playerCount}</div>
-                  <div className="mt-0.5 text-xs text-zinc-500">Giocatori</div>
+                <div className="flex-1 text-center py-1">
+                  <div className="font-display font-black text-2xl" style={{ color: "var(--primary)" }}>{playerCount}</div>
+                  <div className="over-label mt-0.5">Giocatori</div>
                 </div>
               )}
               {fantasyCount > 0 && (
-                <div>
-                  <div className="text-3xl font-bold" style={{ color: "var(--primary)" }}>{fantasyCount}</div>
-                  <div className="mt-0.5 text-xs text-zinc-500">Squadre fantasy</div>
+                <div className="flex-1 text-center py-1">
+                  <div className="font-display font-black text-2xl" style={{ color: "var(--primary)" }}>{fantasyCount}</div>
+                  <div className="over-label mt-0.5">Fantasy</div>
                 </div>
               )}
             </div>
           </section>
         )}
 
+        {/* ── Ultime partite ── */}
         {recentMatches.length > 0 && (
-          <section className="mx-auto w-full max-w-3xl px-4 py-10">
-            <h2 className="mb-4 text-lg font-bold">Ultime partite</h2>
-            <div className="flex flex-col gap-2">
-              {recentMatches.map((m) => (
+          <section className="max-w-3xl mx-auto w-full px-4 py-8">
+            <div className="flex items-baseline justify-between mb-4">
+              <div>
+                <div className="over-label mb-0.5">Calendario</div>
+                <h2 className="font-display font-black text-xl uppercase" style={{ color: "var(--text-primary)" }}>
+                  ULTIME PARTITE
+                </h2>
+              </div>
+              <Link href="/partite" className="text-xs font-bold uppercase tracking-wide transition-colors hover:opacity-80" style={{ color: "var(--primary)" }}>
+                VEDI TUTTO →
+              </Link>
+            </div>
+
+            <div className="card overflow-hidden">
+              {recentMatches.map((m, index) => (
                 <Link
                   key={m.id}
                   href={`/partite/${m.id}`}
-                  className="flex items-center justify-between rounded-xl border bg-white px-4 py-3 transition-colors hover:bg-zinc-50"
+                  className="flex items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]"
+                  style={index < recentMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
                 >
-                  <span className="text-sm font-medium">
-                    {m.homeTeam.shortName ?? m.homeTeam.name} <span className="mx-1 text-zinc-400">vs</span> {m.awayTeam.shortName ?? m.awayTeam.name}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-zinc-400">{m.startsAt.toLocaleDateString("it-IT")}</span>
-                    <span className={statusClass[m.status] ?? "badge-draft"}>{statusLabel[m.status] ?? m.status}</span>
+                  <div>
+                    <span className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
+                      {m.homeTeam.shortName ?? m.homeTeam.name}
+                      <span className="mx-1.5 font-normal text-[11px]" style={{ color: "var(--text-disabled)" }}>vs</span>
+                      {m.awayTeam.shortName ?? m.awayTeam.name}
+                    </span>
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                      {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                    </div>
                   </div>
+                  <StatusBadge status={m.status} />
                 </Link>
               ))}
-            </div>
-            <div className="mt-4">
-              <Link href="/partite" className="text-sm font-medium hover:underline" style={{ color: "var(--primary)" }}>
-                Vedi tutto il calendario →
-              </Link>
             </div>
           </section>
         )}
 
-        <section className="mx-auto w-full max-w-3xl px-4 pb-12">
+        {/* ── Quick links ── */}
+        <section className="max-w-3xl mx-auto w-full px-4 pb-10">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              { href: "/classifica", label: "Classifica", icon: "🏆" },
-              { href: "/partite", label: "Partite", icon: "📅" },
-              { href: "/squadre", label: "Squadre", icon: "🛡️" },
-              { href: "/regolamento", label: "Regolamento", icon: "📋" },
+              { href: "/classifica",  label: "CLASSIFICA", icon: "🏆" },
+              { href: "/partite",     label: "PARTITE",    icon: "📅" },
+              { href: "/squadre",     label: "SQUADRE",    icon: "🛡️" },
+              { href: "/regolamento", label: "REGOLAMENTO",icon: "📋" },
             ].map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-col items-center gap-2 rounded-xl border bg-white p-4 text-center transition-colors hover:bg-zinc-50"
+                className="flex flex-col items-center gap-2.5 rounded-2xl p-5 text-center transition-colors hover:bg-[var(--surface-2)]"
+                style={{ background: "var(--surface-1)", border: "1px solid var(--border-medium)" }}
               >
                 <span className="text-2xl">{item.icon}</span>
-                <span className="text-sm font-medium">{item.label}</span>
+                <span className="font-display font-black text-[11px] uppercase tracking-wide" style={{ color: "var(--text-secondary)" }}>
+                  {item.label}
+                </span>
               </Link>
             ))}
           </div>
         </section>
       </main>
 
-      <footer className="hidden border-t py-4 text-center text-xs text-zinc-400 md:block">
+      <footer
+        className="hidden md:block py-4 text-center text-[11px]"
+        style={{ borderTop: "1px solid var(--border-soft)", color: "var(--text-disabled)" }}
+      >
         Fantadc — Torneo di paese
       </footer>
       <PublicBottomNav />
