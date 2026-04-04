@@ -21,7 +21,6 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
     <div className="admin-card overflow-hidden">
       <DataTable
         value={rows}
-        stripedRows
         paginator
         rows={10}
         rowsPerPageOptions={[10, 25, 50]}
@@ -33,7 +32,7 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
               (row.status === "CONCLUDED" || row.status === "PUBLISHED") &&
               row._count.players === 0;
             return (
-              <span className="font-medium text-[#111827]">
+              <span className="font-medium text-[var(--text-primary)]">
                 {row.homeTeam.name} vs {row.awayTeam.name}
                 {isAnomaly && (
                   <span className="ml-2 text-xs text-amber-600">⚠ no giocatori</span>
@@ -47,7 +46,7 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
         <Column
           header="Data"
           body={(row: Row) => (
-            <span className="text-[#6B7280]">
+            <span className="text-[var(--text-secondary)]">
               {new Date(row.startsAt).toLocaleDateString("it-IT")}
             </span>
           )}
@@ -65,7 +64,7 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
         <Column
           header="Gioc."
           body={(row: Row) => (
-            <span className="text-[#6B7280] tabular-nums">{row._count.players}</span>
+            <span className="text-[var(--text-secondary)] tabular-nums">{row._count.players}</span>
           )}
           sortable
           sortField="_count.players"
@@ -78,7 +77,7 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/admin/partite/${row.id}`}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[#0107A3] hover:bg-[#E8E9F8] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
                 title="Gestisci"
               >
                 <i className="pi pi-pencil text-sm" />

@@ -130,13 +130,13 @@ export default function StatusActions({
       )}
 
       {status === "CONCLUDED" && playerCount === 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 text-sm text-amber-700">
+        <div className="rounded-xl px-3 py-2 text-sm" style={{ background: 'rgba(255,214,10,0.08)', color: '#FFD60A', border: '1px solid rgba(255,214,10,0.20)' }}>
           ⚠ Nessun giocatore aggiunto — aggiungi i partecipanti prima di pubblicare.
         </div>
       )}
 
       {status === "PUBLISHED" && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl px-3 py-2 text-xs text-blue-700">
+        <div className="rounded-xl px-3 py-2 text-xs" style={{ background: 'rgba(1,7,163,0.10)', color: '#6BA3FF', border: '1px solid rgba(1,7,163,0.20)' }}>
           ℹ I punteggi sono pubblici. Qualsiasi modifica si rifletterà immediatamente sulla classifica.
         </div>
       )}

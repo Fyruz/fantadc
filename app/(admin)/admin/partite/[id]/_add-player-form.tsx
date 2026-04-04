@@ -27,7 +27,7 @@ export default function AddMatchPlayerForm({
     <form action={action} className="flex gap-2 items-end flex-wrap">
       <input type="hidden" name="matchId" value={matchId} />
       <div>
-        <label className="block text-xs font-medium mb-1 text-zinc-500">Aggiungi giocatore</label>
+        <label className="block text-xs font-medium mb-1 text-[var(--text-secondary)]">Aggiungi giocatore</label>
         <input type="hidden" name="playerId" value={selectedPlayerId} />
         <Dropdown
           value={selectedPlayerId}

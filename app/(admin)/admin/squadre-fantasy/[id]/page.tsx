@@ -28,7 +28,7 @@ export default async function SquadraFantasyDetailPage({ params }: { params: Pro
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader title={fantasyTeam.name} backHref="/admin/squadre-fantasy" />
-      <p className="text-sm text-[#6B7280] -mt-4">Proprietario: {fantasyTeam.user.email}</p>
+      <p className="text-sm text-[var(--text-secondary)] -mt-4">Proprietario: {fantasyTeam.user.email}</p>
       <RosterForm
         fantasyTeamId={fantasyTeamId}
         currentPlayerIds={currentPlayerIds}

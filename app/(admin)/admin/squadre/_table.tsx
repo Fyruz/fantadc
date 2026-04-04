@@ -11,12 +11,12 @@ type Row = { id: number; name: string; shortName: string | null };
 export default function SquadreTable({ rows }: { rows: Row[] }) {
   return (
     <div className="admin-card overflow-hidden">
-      <DataTable value={rows} stripedRows paginator rows={10} rowsPerPageOptions={[10, 25, 50]}>
+      <DataTable value={rows} paginator rows={10} rowsPerPageOptions={[10, 25, 50]}>
         <Column field="name" header="Nome" sortable />
         <Column
           field="shortName"
           header="Abbreviazione"
-          body={(row: Row) => <span className="text-zinc-500">{row.shortName ?? "—"}</span>}
+          body={(row: Row) => <span className="text-[var(--text-secondary)]">{row.shortName ?? "—"}</span>}
           sortable
         />
         <Column
@@ -25,7 +25,7 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/admin/squadre/${row.id}/edit`}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[#0107A3] hover:bg-[#E8E9F8] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
                 title="Modifica"
               >
                 <i className="pi pi-pencil text-sm" />

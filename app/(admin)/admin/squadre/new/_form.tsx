@@ -11,16 +11,16 @@ export default function NuovaSquadraForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Nome *</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Nome *</label>
         <InputText name="name" className="w-full" required />
         {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>}
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Abbreviazione</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Abbreviazione</label>
         <InputText name="shortName" className="w-full" maxLength={5} />
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Logo URL</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Logo URL</label>
         <InputText name="logoUrl" type="url" className="w-full" />
         {state?.errors?.logoUrl && <p className="text-red-500 text-sm mt-1">{state.errors.logoUrl[0]}</p>}
       </div>

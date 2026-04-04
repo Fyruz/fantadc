@@ -10,7 +10,7 @@ type Row = { id: number; code: string; name: string; points: unknown };
 export default function BonusTypesTable({ rows }: { rows: Row[] }) {
   return (
     <div className="admin-card overflow-hidden">
-      <DataTable value={rows} stripedRows paginator rows={10} rowsPerPageOptions={[10, 25, 50]}>
+      <DataTable value={rows} paginator rows={10} rowsPerPageOptions={[10, 25, 50]}>
         <Column field="code" header="Codice" sortable />
         <Column field="name" header="Nome" sortable />
         <Column

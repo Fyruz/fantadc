@@ -26,12 +26,12 @@ export default function EditGiocatoreForm({ player, teams }: { player: Player; t
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="id" value={player.id} />
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Nome *</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Nome *</label>
         <InputText name="name" defaultValue={player.name} className="w-full" required />
         {state?.errors?.name && <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>}
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Ruolo *</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Ruolo *</label>
         <input type="hidden" name="role" value={selectedRole} />
         <Dropdown
           value={selectedRole}
@@ -43,7 +43,7 @@ export default function EditGiocatoreForm({ player, teams }: { player: Player; t
         {state?.errors?.role && <p className="text-red-500 text-xs mt-1">{state.errors.role[0]}</p>}
       </div>
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Squadra reale *</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Squadra reale *</label>
         <input type="hidden" name="footballTeamId" value={selectedTeamId} />
         <Dropdown
           value={selectedTeamId}

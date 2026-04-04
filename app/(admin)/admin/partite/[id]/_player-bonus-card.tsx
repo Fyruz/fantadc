@@ -79,7 +79,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
 
       {/* Card */}
       <div
-        className="bg-white rounded-xl shadow-sm border border-[#E5E7EB] p-3 relative cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-150 select-none"
+        className="bg-[var(--surface-1)] rounded-xl shadow-sm border border-[var(--border-soft)] p-3 relative cursor-pointer hover:shadow-md hover:-translate-y-px transition-all duration-150 select-none"
         style={{ borderLeft: `3px solid ${roleColor}` }}
         onClick={() => setVisible(true)}
       >
@@ -99,9 +99,9 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         {/* Name + role badge */}
         <div className="flex items-center gap-1.5 mb-1 pr-5">
           <RoleBadge role={player.role} />
-          <span className="text-sm font-semibold text-[#111827] truncate">{player.name}</span>
+          <span className="text-sm font-semibold text-[var(--text-primary)] truncate">{player.name}</span>
         </div>
-        <p className="text-xs text-[#6B7280]">{player.footballTeam.name}</p>
+        <p className="text-xs text-[var(--text-secondary)]">{player.footballTeam.name}</p>
 
         {/* Bonus chips */}
         {bonuses.length > 0 ? (
@@ -109,7 +109,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             {bonuses.map((b) => (
               <span
                 key={b.id}
-                className="bg-[#F3F4F6] text-[#374151] rounded-full px-2 py-0.5 text-xs"
+                className="bg-[var(--glass)] text-[var(--text-secondary)] rounded-full px-2 py-0.5 text-xs"
               >
                 {b.bonusType.code}
                 {b.quantity > 1 ? ` ×${b.quantity}` : ""}{" "}
@@ -118,7 +118,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             ))}
           </div>
         ) : (
-          <p className="text-xs text-[#9CA3AF] mt-1 flex items-center gap-1">
+          <p className="text-xs text-[var(--text-muted)] mt-1 flex items-center gap-1">
             <i className="pi pi-plus-circle text-xs" />
             Tocca per bonus
           </p>
@@ -139,13 +139,13 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         modal
         draggable={false}
       >
-        <p className="text-xs text-[#6B7280] mb-4">{player.footballTeam.name}</p>
+        <p className="text-xs text-[var(--text-secondary)] mb-4">{player.footballTeam.name}</p>
 
         <form action={action} className="flex flex-col gap-3">
           <input type="hidden" name="matchId" value={matchId} />
           <input type="hidden" name="playerId" value={player.id} />
           <div>
-            <label htmlFor="bonus-type-select" className="block text-xs font-medium mb-1 text-[#6B7280]">Tipo bonus</label>
+            <label htmlFor="bonus-type-select" className="block text-xs font-medium mb-1 text-[var(--text-secondary)]">Tipo bonus</label>
             <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
             <Dropdown
               inputId="bonus-type-select"
@@ -160,7 +160,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             )}
           </div>
           <div>
-            <label htmlFor="bonus-qty" className="block text-xs font-medium mb-1 text-[#6B7280]">Quantità</label>
+            <label htmlFor="bonus-qty" className="block text-xs font-medium mb-1 text-[var(--text-secondary)]">Quantità</label>
             <input type="hidden" name="quantity" value={qty} />
             <InputNumber
               inputId="bonus-qty"
@@ -191,18 +191,18 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         </form>
 
         {bonuses.length > 0 && (
-          <div className="mt-4 border-t border-[#E5E7EB] pt-3">
-            <p className="text-xs font-medium text-[#6B7280] mb-2">Bonus assegnati</p>
+          <div className="mt-4 border-t border-[var(--border-soft)] pt-3">
+            <p className="text-xs font-medium text-[var(--text-secondary)] mb-2">Bonus assegnati</p>
             <ul className="flex flex-col gap-1">
               {bonuses.map((b) => (
                 <li
                   key={b.id}
-                  className="flex items-center justify-between text-xs bg-[#F8F9FC] px-2 py-1.5 rounded-lg"
+                  className="flex items-center justify-between text-xs bg-[var(--bg-base)] px-2 py-1.5 rounded-lg"
                 >
-                  <span className="text-[#111827]">
+                  <span className="text-[var(--text-primary)]">
                     {b.bonusType.code}
                     {b.quantity > 1 ? ` ×${b.quantity}` : ""}{" "}
-                    <span className="text-[#6B7280]">
+                    <span className="text-[var(--text-secondary)]">
                       ({b.points > 0 ? "+" : ""}{b.points}pt)
                     </span>
                   </span>

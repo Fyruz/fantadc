@@ -33,7 +33,7 @@ export default function RosterForm({
       <input type="hidden" name="fantasyTeamId" value={fantasyTeamId} />
 
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-2">
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">
           Seleziona 5 giocatori — 1 Portiere + 4 Giocatori, squadre diverse
         </label>
         <div className="admin-card overflow-hidden max-h-80 overflow-y-auto">
@@ -41,7 +41,7 @@ export default function RosterForm({
             <label
               key={p.id}
               className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-[#F0F1FC] transition-colors text-sm ${
-                i < allPlayers.length - 1 ? "border-b border-[#F3F4F6]" : ""
+                i < allPlayers.length - 1 ? "border-b border-[var(--border-soft)]" : ""
               }`}
             >
               <input
@@ -52,8 +52,8 @@ export default function RosterForm({
                 className="accent-[#0107A3] w-4 h-4 flex-shrink-0"
               />
               <RoleBadge role={p.role} />
-              <span className="font-medium text-[#111827] flex-1">{p.name}</span>
-              <span className="text-xs text-[#6B7280]">{p.footballTeam.name}</span>
+              <span className="font-medium text-[var(--text-primary)] flex-1">{p.name}</span>
+              <span className="text-xs text-[var(--text-secondary)]">{p.footballTeam.name}</span>
             </label>
           ))}
         </div>
@@ -63,7 +63,7 @@ export default function RosterForm({
       </div>
 
       <div>
-        <label className="block text-xs font-medium text-[#6B7280] mb-1">Capitano *</label>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Capitano *</label>
         <input type="hidden" name="captainPlayerId" value={selectedCaptain} />
         <Dropdown
           value={selectedCaptain}

@@ -11,7 +11,7 @@ export default async function AdminAreaLayout({
   const initials = ((user.name ?? user.email) || "A").charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#F8F9FC]">
+    <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
       <TopBar initials={initials} />
       <main className="max-w-screen-xl mx-auto w-full px-4 md:px-6 py-4 md:py-6 pb-24 md:pb-6">
         {children}

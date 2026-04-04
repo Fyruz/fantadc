@@ -80,7 +80,7 @@ export default async function PartitaDetailPage({
             {match.startsAt.toLocaleString("it-IT")}
           </p>
         </div>
-        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[#F5C518] text-[#111827] flex-shrink-0 mt-0.5">
+        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[#F5C518] text-zinc-900 flex-shrink-0 mt-0.5">
           {STATUS_LABEL[match.status] ?? match.status}
         </span>
       </div>
@@ -96,7 +96,7 @@ export default async function PartitaDetailPage({
 
       {/* Edit form — collapsible */}
       <details className="admin-card overflow-hidden">
-        <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-sm font-medium text-[#6B7280] hover:text-[#111827] select-none list-none border-b border-[#E5E7EB] [&::-webkit-details-marker]:hidden">
+        <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] select-none list-none border-b border-[var(--border-soft)] [&::-webkit-details-marker]:hidden">
           <i className="pi pi-pencil text-xs" />
           Modifica dati partita
           <i className="pi pi-chevron-down text-xs ml-auto" />
@@ -109,7 +109,7 @@ export default async function PartitaDetailPage({
       {/* Participants */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-[#111827]">
+          <h2 className="text-base font-semibold text-[var(--text-primary)]">
             Partecipanti ({match.players.length}
             {allEligibleCount > 0 ? `/${allEligibleCount}` : ""})
           </h2>
@@ -121,14 +121,14 @@ export default async function PartitaDetailPage({
                 label={`+ Aggiungi tutti (${availablePlayers.length})`}
                 link
                 size="small"
-                className="text-[#0107A3] text-xs font-medium p-0"
+                className="text-[var(--primary)] text-xs font-medium p-0"
               />
             </form>
           )}
         </div>
 
         {match.players.length === 0 && (
-          <p className="text-sm text-[#9CA3AF] mb-4">Nessun partecipante aggiunto.</p>
+          <p className="text-sm text-[var(--text-muted)] mb-4">Nessun partecipante aggiunto.</p>
         )}
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
