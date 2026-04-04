@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Button } from "primereact/button";
 
 const MAIN_NAV = [
-  { href: "/admin",           label: "Dashboard", icon: "pi-home"     },
-  { href: "/admin/partite",   label: "Partite",   icon: "pi-calendar" },
-  { href: "/admin/giocatori", label: "Giocatori", icon: "pi-users"    },
-  { href: "/admin/squadre",   label: "Squadre",   icon: "pi-shield"   },
+  { href: "/admin",           label: "DASHBOARD", icon: "pi-home"     },
+  { href: "/admin/partite",   label: "PARTITE",   icon: "pi-calendar" },
+  { href: "/admin/giocatori", label: "GIOCATORI", icon: "pi-users"    },
+  { href: "/admin/squadre",   label: "SQUADRE",   icon: "pi-shield"   },
 ];
 
 const MORE_NAV = [
@@ -29,26 +30,31 @@ export default function BottomNav() {
 
   return (
     <>
-      {/* Overlay */}
       {moreOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ background: "rgba(6,7,61,0.3)" }}
           onClick={() => setMoreOpen(false)}
         />
       )}
 
-      {/* More drawer */}
       {moreOpen && (
-        <div className="fixed bottom-[64px] left-0 right-0 bg-white rounded-t-2xl shadow-lg border-t border-[#E5E7EB] z-50 md:hidden pb-safe">
+        <div
+          className="fixed bottom-[64px] left-0 right-0 z-50 rounded-t-2xl md:hidden pb-safe"
+          style={{ background: "#fff", borderTop: "2px solid var(--border-medium)", boxShadow: "0 -4px 24px rgba(1,7,163,0.12)" }}
+        >
           <div className="flex items-center justify-between px-4 pt-3 pb-1">
-            <span className="text-sm font-semibold text-[#111827]">Altro</span>
-            <button
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+              ALTRO
+            </span>
+            <Button
+              icon="pi pi-times"
+              text
               onClick={() => setMoreOpen(false)}
-              className="text-[#6B7280] p-1"
+              className="!p-1"
+              style={{ color: "var(--text-muted)" }}
               aria-label="Chiudi"
-            >
-              <i className="pi pi-times text-sm" />
-            </button>
+            />
           </div>
           <div className="grid grid-cols-2 gap-1 px-3 pb-4">
             {MORE_NAV.map((item) => (
@@ -56,11 +62,12 @@ export default function BottomNav() {
                 key={item.href}
                 href={item.href}
                 onClick={() => setMoreOpen(false)}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-colors ${
+                className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
+                style={
                   isActive(item.href)
-                    ? "bg-[#E8E9F8] text-[#0107A3]"
-                    : "text-[#374151] hover:bg-[#F8F9FC]"
-                }`}
+                    ? { background: "var(--surface-1)", color: "var(--primary)" }
+                    : { color: "var(--text-secondary)" }
+                }
               >
                 <i className={`pi ${item.icon} text-base`} />
                 {item.label}
@@ -70,10 +77,14 @@ export default function BottomNav() {
         </div>
       )}
 
-      {/* Bottom nav bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#E5E7EB] z-40 md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+        style={{
+          background: "#fff",
+          borderTop: "1px solid var(--border-soft)",
+          boxShadow: "0 -2px 12px rgba(1,7,163,0.06)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
         <div className="flex h-16">
           {MAIN_NAV.map((item) => {
@@ -82,22 +93,23 @@ export default function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors"
               >
                 <div className="relative flex flex-col items-center">
                   {active && (
-                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-full bg-[#0107A3]" />
+                    <span
+                      className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-b-full"
+                      style={{ background: "var(--primary)" }}
+                    />
                   )}
                   <i
-                    className={`pi ${item.icon} text-xl ${
-                      active ? "text-[#0107A3]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`pi ${item.icon} text-xl`}
+                    style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
                   />
                 </div>
                 <span
-                  className={`text-[10px] font-medium ${
-                    active ? "text-[#0107A3]" : "text-[#9CA3AF]"
-                  }`}
+                  className="text-[8px] font-black uppercase tracking-wide"
+                  style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
                 >
                   {item.label}
                 </span>
@@ -105,24 +117,22 @@ export default function BottomNav() {
             );
           })}
 
-          {/* Altro button */}
-          <button
-            onClick={() => setMoreOpen(!moreOpen)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+          <Button
+            unstyled
+            onClick={() => setMoreOpen((v) => !v)}
+            className="flex flex-1 flex-col items-center justify-center gap-0.5"
           >
             <i
-              className={`pi pi-ellipsis-h text-xl ${
-                moreIsActive || moreOpen ? "text-[#0107A3]" : "text-[#9CA3AF]"
-              }`}
+              className="pi pi-ellipsis-h text-xl"
+              style={{ color: moreIsActive || moreOpen ? "var(--primary)" : "var(--text-disabled)" }}
             />
             <span
-              className={`text-[10px] font-medium ${
-                moreIsActive || moreOpen ? "text-[#0107A3]" : "text-[#9CA3AF]"
-              }`}
+              className="text-[8px] font-black uppercase tracking-wide"
+              style={{ color: moreIsActive || moreOpen ? "var(--primary)" : "var(--text-disabled)" }}
             >
-              Altro
+              ALTRO
             </span>
-          </button>
+          </Button>
         </div>
       </nav>
     </>
