@@ -5,29 +5,25 @@ import { castVote } from "@/app/actions/user/vote";
 
 type Player = { id: number; name: string; footballTeam: { name: string } };
 
-export default function VoteForm({
-  matchId,
-  players,
-}: {
-  matchId: number;
-  players: Player[];
-}) {
+export default function VoteForm({ matchId, players }: { matchId: number; players: Player[] }) {
   const [state, action, pending] = useActionState(castVote, undefined);
 
   if (state?.success) {
     return (
-      <div className="text-center py-8">
-        <p className="text-2xl mb-2">✓</p>
-        <p className="font-semibold text-green-700">Voto registrato!</p>
-        <p className="text-zinc-500 text-sm mt-1">
-          Il risultato finale sarà visibile alla chiusura della finestra di voto.
-        </p>
+      <div className="card p-8 text-center">
+        <div className="text-3xl mb-2">✓</div>
+        <div className="font-display font-black text-lg uppercase" style={{ color: "#065F46" }}>
+          VOTO REGISTRATO!
+        </div>
+        <div className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
+          Il risultato sarà visibile alla chiusura della finestra di voto.
+        </div>
       </div>
     );
   }
 
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form action={action} className="flex flex-col gap-2">
       <input type="hidden" name="matchId" value={matchId} />
       {players.map((p) => (
         <button
@@ -36,14 +32,16 @@ export default function VoteForm({
           name="playerId"
           value={p.id}
           disabled={pending}
-          className="flex items-center justify-between admin-card px-4 py-3 text-left w-full hover:bg-[#F0F1FC] active:bg-[#E8E9F8] transition-colors disabled:opacity-50"
+          className="card px-4 py-3.5 flex items-center justify-between text-left w-full transition-colors hover:bg-[var(--surface-1)] active:bg-[var(--surface-2)] disabled:opacity-50"
         >
-          <span className="font-medium text-sm text-[#111827]">{p.name}</span>
-          <span className="text-xs text-[#6B7280]">{p.footballTeam.name}</span>
+          <span className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
+            {p.name}
+          </span>
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{p.footballTeam.name}</span>
         </button>
       ))}
       {state?.success === false && (
-        <p className="text-red-500 text-sm text-center">{state.message}</p>
+        <p className="text-sm text-center" style={{ color: "#EF4444" }}>{state.message}</p>
       )}
     </form>
   );
