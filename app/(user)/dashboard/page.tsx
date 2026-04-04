@@ -30,92 +30,135 @@ export default async function DashboardPage() {
         select: { matchId: true },
       })
     : [];
-
   const votedMatchIds = new Set(hasVoted.map((v) => v.matchId));
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
+      {/* Header */}
       <div>
-        <h1 className="text-[22px] font-bold text-[#111827]">
-          Ciao{user.name ? `, ${user.name}` : ""}!
+        <div className="over-label mb-0.5">Bentornato</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          {user.name ? user.name.toUpperCase() : user.email.split("@")[0].toUpperCase()}
         </h1>
-        <p className="text-[#6B7280] text-sm">{user.email}</p>
       </div>
 
+      {/* Admin CTA */}
       {user.role === "ADMIN" && (
-        <div className="admin-card p-4 flex items-center justify-between gap-4">
+        <div className="card p-4 flex items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-[#111827]">Accesso amministratore attivo</p>
-            <p className="text-sm text-[#6B7280] mt-1">
-              Gestisci partite, bonus, utenti e dati del campionato dal pannello admin.
-            </p>
+            <div className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
+              ACCESSO AMMINISTRATORE
+            </div>
+            <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
+              Gestisci partite, bonus e dati del campionato.
+            </div>
           </div>
           <Link href="/admin">
-            <Button label="Vai all'admin" />
+            <Button label="Admin →" size="small" />
           </Link>
         </div>
       )}
 
+      {/* Squadra */}
       {!fantasyTeam ? (
-        <div className="admin-card p-6 text-center">
-          <p className="text-[#6B7280] text-sm mb-4">Non hai ancora creato la tua squadra fantasy.</p>
+        <div
+          className="rounded-[18px] p-6 text-center relative overflow-hidden"
+          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+        >
+          <div className="absolute right-[-20px] top-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
+          <div className="text-white/60 text-sm mb-4">Non hai ancora creato la tua squadra fantasy.</div>
           <Link href="/squadra/crea">
-            <Button label="Crea la tua squadra" />
+            <button
+              className="rounded-full font-black text-sm uppercase tracking-wide px-6 py-2.5"
+              style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 8px rgba(232,160,0,0.4)" }}
+            >
+              CREA LA TUA SQUADRA →
+            </button>
           </Link>
         </div>
       ) : (
-        <div className="admin-card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-[#111827]">{fantasyTeam.name}</h2>
-            <Link href="/squadra" className="text-sm text-[#0107A3] hover:underline">Vedi squadra →</Link>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {fantasyTeam.players.map(({ player }) => (
-              <span key={player.name} className="text-xs bg-[#E8E9F8] text-[#0107A3] px-2 py-1 rounded-full font-medium">
-                {player.name}
-                <span className="text-[#6B7280] ml-1 font-normal">({player.role})</span>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {openMatches.length > 0 && (
-        <div className="admin-card p-4">
-          <h2 className="font-semibold text-[#111827] mb-3">Vota MVP</h2>
-          <div className="flex flex-col gap-0">
-            {openMatches.map((m, index) => {
-              const voted = votedMatchIds.has(m.id);
-              return (
-                <div
-                  key={m.id}
-                  className={`flex items-center justify-between py-2.5 ${
-                    index < openMatches.length - 1 ? "border-b border-[#F3F4F6]" : ""
-                  }`}
+        <div
+          className="rounded-[18px] p-5 relative overflow-hidden"
+          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+        >
+          <div className="absolute right-[-20px] bottom-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-1">La mia squadra</div>
+                <div className="font-display font-black text-xl uppercase text-white">{fantasyTeam.name}</div>
+              </div>
+              <Link href="/squadra" className="text-[10px] font-bold uppercase tracking-wide text-white/60 hover:text-white transition-colors mt-1">
+                VEDI →
+              </Link>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {fantasyTeam.players.map(({ player }) => (
+                <span
+                  key={player.name}
+                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}
                 >
-                  <span className="text-sm font-medium text-[#111827]">
-                    {m.homeTeam.name} vs {m.awayTeam.name}
-                  </span>
-                  {voted ? (
-                    <span className="text-xs text-emerald-600 font-medium">Votato ✓</span>
-                  ) : (
-                    <Link href={`/vota/${m.id}`} className="text-sm text-[#0107A3] hover:underline font-medium">
-                      Vota ora →
-                    </Link>
-                  )}
-                </div>
-              );
-            })}
+                  {player.name}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      <div className="flex gap-3 flex-wrap">
+      {/* Vota MVP */}
+      {openMatches.length > 0 && (
+        <div className="card overflow-hidden">
+          <div className="px-4 pt-3 pb-2 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Vota MVP</div>
+            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "#E8A000" }}>
+              {openMatches.filter((m) => !votedMatchIds.has(m.id)).length} aperti
+            </span>
+          </div>
+          {openMatches.map((m, index) => {
+            const voted = votedMatchIds.has(m.id);
+            return (
+              <div
+                key={m.id}
+                className="flex items-center justify-between px-4 py-3"
+                style={index < openMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+              >
+                <div>
+                  <div className="font-display font-black text-[12px] uppercase" style={{ color: "var(--text-primary)" }}>
+                    {m.homeTeam.name} <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span> {m.awayTeam.name}
+                  </div>
+                </div>
+                {voted ? (
+                  <span
+                    className="text-[10px] font-bold px-2.5 py-1 rounded-full"
+                    style={{ background: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0" }}
+                  >
+                    ✓ Votato
+                  </span>
+                ) : (
+                  <Link href={`/vota/${m.id}`}>
+                    <button
+                      className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5"
+                      style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
+                    >
+                      VOTA
+                    </button>
+                  </Link>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Quick links */}
+      <div className="flex gap-2 flex-wrap">
         <Link href="/classifica">
-          <Button label="Classifica" outlined />
+          <Button label="Classifica" outlined size="small" />
         </Link>
         <Link href="/partite">
-          <Button label="Calendario partite" outlined />
+          <Button label="Partite" outlined size="small" />
         </Link>
       </div>
     </div>
