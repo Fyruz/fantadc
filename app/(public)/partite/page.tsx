@@ -13,31 +13,47 @@ export default async function PartitePublicPage() {
   });
 
   return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-[22px] font-bold text-[#111827]">Calendario partite</h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <div className="over-label mb-1">Stagione 2025</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          PARTITE
+        </h1>
+      </div>
+
       {matches.length === 0 ? (
-        <div className="admin-card p-8 text-center text-[#6B7280] text-sm">
-          Nessuna partita disponibile.
-        </div>
+        <div className="card p-10 text-center over-label">Nessuna partita disponibile.</div>
       ) : (
-        <div className="admin-card overflow-hidden">
-          {matches.map((m, index) => (
+        <div className="flex flex-col gap-3">
+          {matches.map((m) => (
             <Link
               key={m.id}
               href={`/partite/${m.id}`}
-              className={`flex items-center justify-between px-4 py-3 hover:bg-[#F0F1FC] transition-colors ${
-                index < matches.length - 1 ? "border-b border-[#F3F4F6]" : ""
-              }`}
+              className="card px-5 py-4 flex flex-col gap-3 hover:bg-[var(--surface-1)] transition-colors"
             >
-              <div>
-                <p className="font-medium text-sm text-[#111827]">
-                  {m.homeTeam.name} <span className="text-[#9CA3AF] font-normal">vs</span> {m.awayTeam.name}
-                </p>
-                <p className="text-xs text-[#6B7280] mt-0.5">
+              <div className="flex items-center justify-between gap-3">
+                <StatusBadge status={m.status} />
+                <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
                   {m.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
-                </p>
+                </span>
               </div>
-              <StatusBadge status={m.status} />
+              <div className="flex items-center justify-between gap-4 text-center">
+                <span
+                  className="font-display font-black text-[15px] uppercase flex-1 text-right"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {m.homeTeam.name}
+                </span>
+                <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
+                  VS
+                </span>
+                <span
+                  className="font-display font-black text-[15px] uppercase flex-1 text-left"
+                  style={{ color: "var(--text-primary)" }}
+                >
+                  {m.awayTeam.name}
+                </span>
+              </div>
             </Link>
           ))}
         </div>
