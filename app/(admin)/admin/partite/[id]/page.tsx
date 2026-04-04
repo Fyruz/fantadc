@@ -7,13 +7,7 @@ import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 import { Button } from "primereact/button";
-
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: "Bozza",
-  SCHEDULED: "Programmata",
-  CONCLUDED: "Conclusa",
-  PUBLISHED: "Pubblicata",
-};
+import StatusBadge from "@/components/status-badge";
 
 export default async function PartitaDetailPage({
   params,
@@ -80,9 +74,9 @@ export default async function PartitaDetailPage({
             {match.startsAt.toLocaleString("it-IT")}
           </p>
         </div>
-        <span className="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold bg-[#F5C518] text-zinc-900 flex-shrink-0 mt-0.5">
-          {STATUS_LABEL[match.status] ?? match.status}
-        </span>
+        <div className="flex-shrink-0 mt-0.5">
+          <StatusBadge status={match.status} />
+        </div>
       </div>
 
       {/* Status actions */}

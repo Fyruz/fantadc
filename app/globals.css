@@ -323,13 +323,20 @@ body {
   color: var(--text-primary) !important;
 }
 .p-button.p-button-secondary:hover { background: var(--surface-2) !important; }
-.p-button.p-button-danger {
+.p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined) {
   background: #EF4444 !important;
   border-color: #EF4444 !important;
 }
-.p-button.p-button-danger:hover {
+.p-button.p-button-danger:not(.p-button-text):not(.p-button-outlined):hover {
   background: #DC2626 !important;
   border-color: #DC2626 !important;
+}
+.p-button.p-button-text.p-button-danger {
+  color: #EF4444 !important;
+  background: transparent !important;
+}
+.p-button.p-button-text.p-button-danger:hover {
+  background: rgba(239,68,68,0.08) !important;
 }
 
 /* ─── PrimeReact InputNumber (light) ────────────────────── */

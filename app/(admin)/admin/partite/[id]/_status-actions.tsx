@@ -4,7 +4,6 @@ import { useRef } from "react";
 import { useActionState } from "react";
 import { Button } from "primereact/button";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
-import StatusBadge from "@/components/status-badge";
 import { advanceMatchStatus } from "@/app/actions/admin/matches";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -84,8 +83,6 @@ export default function StatusActions({
     <div className="flex flex-col gap-3">
       <ConfirmPopup />
       <div className="flex items-center gap-2 flex-wrap overflow-x-auto">
-        <StatusBadge status={status} />
-
         {nextActions.map((act) => (
           <form
             key={act.newStatus}
