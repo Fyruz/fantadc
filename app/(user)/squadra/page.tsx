@@ -4,6 +4,8 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { Button } from "primereact/button";
+import RosterTable from "./_roster-table";
+import ScoreTable from "./_score-table";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -32,22 +34,37 @@ export default async function SquadraPage() {
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
+      {/* Header */}
       <div>
-        <h1 className="text-[22px] font-bold text-[#111827] mb-1">{fantasyTeam.name}</h1>
-        <p className="text-[#6B7280] text-sm">
-          Capitano: <span className="font-medium text-[#111827]">★ {fantasyTeam.captain.name}</span>
-        </p>
+        <div className="over-label mb-0.5">La mia squadra</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          {fantasyTeam.name.toUpperCase()}
+        </h1>
         {history.length > 0 && (
-          <p className="text-2xl font-bold text-[#111827] mt-2">{totalPoints.toFixed(1)} <span className="text-sm text-[#6B7280] font-normal">punti totali</span></p>
+          <div className="flex items-baseline gap-1.5 mt-1">
+            <span className="font-display font-black text-2xl" style={{ color: "var(--primary)" }}>
+              {totalPoints.toFixed(1)}
+            </span>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>punti totali</span>
+          </div>
         )}
       </div>
 
-      <div className="admin-card overflow-hidden">
-        <div className="bg-green-50 border-b border-green-100 p-6 flex flex-col items-center gap-4">
-          <div className="flex gap-3 flex-wrap justify-center">
+      {/* Card premium squadra */}
+      <div
+        className="rounded-[18px] p-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+      >
+        <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 rounded-full border border-white/5 pointer-events-none" />
+        <div className="relative">
+          <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-3">
+            Capitano: <span style={{ color: "#E8A000" }}>★ {fantasyTeam.captain.name}</span>
+          </div>
+          {/* Attaccanti */}
+          <div className="flex flex-wrap gap-2 mb-2 justify-center">
             {outfield.map(({ player }) => (
-              <PlayerCard
+              <PlayerChip
                 key={player.id}
                 name={player.name}
                 team={player.footballTeam.shortName ?? player.footballTeam.name}
@@ -55,9 +72,10 @@ export default async function SquadraPage() {
               />
             ))}
           </div>
+          {/* Portiere */}
           {gk && (
-            <div className="mt-2">
-              <PlayerCard
+            <div className="flex justify-center">
+              <PlayerChip
                 name={gk.player.name}
                 team={gk.player.footballTeam.shortName ?? gk.player.footballTeam.name}
                 isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
@@ -68,77 +86,41 @@ export default async function SquadraPage() {
         </div>
       </div>
 
+      {/* Rosa */}
       <div>
-        <h2 className="text-base font-semibold text-[#111827] mb-3">Rosa</h2>
-        <div className="admin-card overflow-hidden">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-[#F8F9FC] border-b border-[#E5E7EB]">
-                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Giocatore</th>
-                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Ruolo</th>
-                <th className="py-3 px-4 text-left text-[11px] font-medium uppercase tracking-wide text-[#6B7280]">Squadra</th>
-              </tr>
-            </thead>
-            <tbody>
-              {fantasyTeam.players.map(({ player }, index) => (
-                <tr key={player.id} className={`border-b border-[#F3F4F6] last:border-0 ${index % 2 === 1 ? "bg-[#FAFAFA]" : ""}`}>
-                  <td className="py-2.5 px-4 font-medium text-[#111827]">
-                    {player.id === fantasyTeam.captainPlayerId && (
-                      <span className="text-amber-500 mr-1">★</span>
-                    )}
-                    {player.name}
-                  </td>
-                  <td className="py-2.5 px-4 text-[#6B7280]">{player.role}</td>
-                  <td className="py-2.5 px-4 text-[#6B7280]">{player.footballTeam.name}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <div className="over-label mb-3">Rosa</div>
+        <RosterTable
+          rows={fantasyTeam.players.map(({ player }) => ({
+            id: player.id,
+            name: player.name,
+            role: player.role,
+            footballTeamName: player.footballTeam.name,
+            isCaptain: player.id === fantasyTeam.captainPlayerId,
+          }))}
+        />
       </div>
 
-      <p className="text-xs text-[#9CA3AF]">
+      <p className="text-[11px]" style={{ color: "var(--text-disabled)" }}>
         La rosa è bloccata. Solo un admin può modificarla.
       </p>
 
+      {/* Storico punteggi */}
       {history.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-[#111827] mb-3">Storico punteggi</h2>
-          <div className="flex flex-col gap-3">
+          <div className="over-label mb-3">Storico punteggi</div>
+          <div className="flex flex-col gap-2">
             {history.map((ms) => (
-              <details key={ms.matchId} className="admin-card overflow-hidden">
-                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[#F8F9FC]">
-                  <span className="text-sm font-medium text-[#111827]">{ms.label}</span>
-                  <span className="font-bold text-sm ml-4 text-[#111827]">{ms.total.toFixed(1)} pt</span>
+              <details key={ms.matchId} className="card overflow-hidden">
+                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[var(--surface-1)] transition-colors">
+                  <span className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
+                    {ms.label}
+                  </span>
+                  <span className="font-display font-black text-base" style={{ color: "var(--primary)" }}>
+                    {ms.total.toFixed(1)} pt
+                  </span>
                 </summary>
                 <div className="px-4 pb-3">
-                  <table className="w-full text-xs border-collapse mt-1">
-                    <thead>
-                      <tr className="text-left text-[#9CA3AF] border-b border-[#F3F4F6]">
-                        <th className="py-1 pr-3">Giocatore</th>
-                        <th className="py-1 pr-2 text-right">Bonus</th>
-                        <th className="py-1 pr-2 text-right">MVP</th>
-                        <th className="py-1 text-right">Totale</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {ms.playerScores.map((ps) => (
-                        <tr key={ps.playerId} className="border-b border-[#F3F4F6] last:border-0">
-                          <td className="py-1 pr-3">
-                            {ps.isCaptain && <span className="text-amber-500 mr-0.5">★</span>}
-                            {ps.playerName}
-                            {ps.isMvp && <span className="ml-1 text-yellow-600 font-medium">(MVP)</span>}
-                          </td>
-                          <td className="py-1 pr-2 text-right text-[#6B7280]">{ps.bonusPoints.toFixed(1)}</td>
-                          <td className="py-1 pr-2 text-right text-[#6B7280]">{ps.mvpPoints > 0 ? `+${ps.mvpPoints.toFixed(1)}` : "—"}</td>
-                          <td className="py-1 text-right font-medium text-[#111827]">
-                            {ps.finalPoints.toFixed(1)}
-                            {ps.isCaptain && ps.basePoints !== 0 && <span className="text-amber-600 text-xs ml-0.5">×2</span>}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <ScoreTable rows={ms.playerScores} />
                 </div>
               </details>
             ))}
@@ -155,7 +137,7 @@ export default async function SquadraPage() {
   );
 }
 
-function PlayerCard({
+function PlayerChip({
   name,
   team,
   isCaptain,
@@ -168,14 +150,20 @@ function PlayerCard({
 }) {
   return (
     <div
-      className={`flex flex-col items-center rounded-xl px-4 py-3 text-center min-w-20 border ${
-        isGk ? "bg-amber-50 border-amber-200" : "bg-white border-[#E5E7EB]"
-      }`}
-      style={{ borderLeft: `3px solid ${isGk ? "#F59E0B" : "#3B82F6"}` }}
+      className="flex flex-col items-center rounded-xl px-3 py-2 text-center"
+      style={
+        isGk
+          ? { background: "rgba(232,160,0,0.20)", border: "1px solid rgba(232,160,0,0.35)" }
+          : { background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.16)" }
+      }
     >
-      {isCaptain && <span className="text-amber-500 text-xs mb-0.5">★ C</span>}
-      <span className="font-semibold text-sm text-[#111827]">{name}</span>
-      <span className="text-xs text-[#6B7280]">{team}</span>
+      {isCaptain && (
+        <span className="text-[9px] font-black uppercase tracking-wide mb-0.5" style={{ color: "#E8A000" }}>
+          ★ CAP
+        </span>
+      )}
+      <span className="font-display font-black text-[11px] uppercase text-white leading-tight">{name}</span>
+      <span className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{team}</span>
     </div>
   );
 }
