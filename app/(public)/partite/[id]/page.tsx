@@ -16,11 +16,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       homeTeam: { select: { name: true } },
       awayTeam: { select: { name: true } },
       players: {
-        include: {
-          player: {
-            include: { footballTeam: { select: { name: true } } },
-          },
-        },
+        include: { player: { include: { footballTeam: { select: { name: true } } } } },
         orderBy: { player: { name: "asc" } },
       },
       bonuses: {
@@ -56,56 +52,84 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Link href="/partite" className="text-sm text-[#6B7280] hover:text-[#111827] flex items-center gap-1 w-fit">
-        <i className="pi pi-arrow-left text-xs" /> Tutte le partite
+    <div className="flex flex-col gap-5">
+      <Link
+        href="/partite"
+        className="flex items-center gap-1.5 text-xs font-semibold w-fit transition-colors hover:opacity-70"
+        style={{ color: "var(--text-muted)" }}
+      >
+        <i className="pi pi-arrow-left text-[10px]" /> Tutte le partite
       </Link>
 
+      {/* Header partita */}
       <div
-        className="rounded-2xl overflow-hidden p-5 flex items-start justify-between gap-4"
-        style={{ background: "linear-gradient(135deg, #0107A3 0%, #0106c4 100%)" }}
+        className="rounded-[18px] p-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
       >
-        <div>
-          <h1 className="text-xl font-bold text-white">
-            {match.homeTeam.name} vs {match.awayTeam.name}
-          </h1>
-          <p className="text-[13px] text-white/80 mt-1">
-            {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
-          </p>
-        </div>
-        <div className="flex-shrink-0 mt-0.5">
-          <StatusBadge status={match.status} />
+        <div className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full border border-white/5 pointer-events-none" />
+        <div className="absolute right-[10px] top-[10px] w-16 h-16 rounded-full border border-white/5 pointer-events-none" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          <div>
+            <div className="font-display font-black text-xl uppercase text-white leading-tight">
+              {match.homeTeam.name}
+              <span className="mx-2 text-sm font-normal text-white/40">vs</span>
+              {match.awayTeam.name}
+            </div>
+            <div className="text-[12px] text-white/55 mt-1.5">
+              {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
+            </div>
+          </div>
+          <div className="flex-shrink-0 mt-0.5">
+            <StatusBadge status={match.status} />
+          </div>
         </div>
       </div>
 
+      {/* MVP */}
       {mvpPlayer && (
-        <div className="admin-card p-5 text-center">
-          <p className="text-xs text-[#6B7280] uppercase tracking-wide mb-1">MVP della partita</p>
-          <p className="text-xl font-bold text-[#111827]">★ {mvpPlayer.name}</p>
-          <p className="text-sm text-[#6B7280] mt-0.5">{mvpPlayer.footballTeam.name}</p>
+        <div className="card p-5 text-center" style={{ borderLeft: "3px solid #E8A000" }}>
+          <div className="over-label mb-1">MVP della partita</div>
+          <div className="font-display font-black text-2xl uppercase" style={{ color: "var(--text-primary)" }}>
+            ★ {mvpPlayer.name}
+          </div>
+          <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>{mvpPlayer.footballTeam.name}</div>
         </div>
       )}
 
+      {/* Finestra voto aperta */}
       {windowOpen && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center text-sm text-blue-700">
-          🗳️ Finestra di voto MVP aperta — <Link href="/login" className="font-medium underline">accedi per votare</Link>
+        <div
+          className="rounded-xl p-3.5 text-center text-sm font-semibold"
+          style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--border-medium)" }}
+        >
+          🗳️ Finestra di voto MVP aperta —{" "}
+          <Link href="/login" className="font-black underline">
+            accedi per votare
+          </Link>
         </div>
       )}
 
+      {/* Giocatori in campo */}
       {match.players.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-[#111827] mb-3">Giocatori in campo ({match.players.length})</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="over-label mb-3">
+            Giocatori in campo ({match.players.length})
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {match.players.map(({ player }) => (
               <div
                 key={player.id}
-                className="admin-card p-3 flex items-center gap-2"
-                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}` }}
+                className="card p-3 flex items-center gap-2.5"
               >
                 <RoleBadge role={player.role} />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#111827] truncate">{player.name}</p>
-                  <p className="text-xs text-[#6B7280] truncate">{player.footballTeam.name}</p>
+                  <div className="font-display font-black text-[12px] uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                    {player.name}
+                  </div>
+                  <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
+                    {player.footballTeam.name}
+                  </div>
                 </div>
               </div>
             ))}
@@ -113,23 +137,30 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
         </div>
       )}
 
+      {/* Bonus */}
       {match.status === "PUBLISHED" && match.bonuses.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold text-[#111827] mb-3">Bonus assegnati</h2>
-          <div className="admin-card overflow-hidden">
+          <div className="over-label mb-3">Bonus assegnati</div>
+          <div className="card overflow-hidden">
             {[...bonusByPlayer.entries()].map(([playerName, bonuses], index, entries) => (
               <div
                 key={playerName}
-                className={`px-4 py-3 ${index < entries.length - 1 ? "border-b border-[#F3F4F6]" : ""}`}
+                className="px-4 py-3"
+                style={index < entries.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               >
-                <p className="font-medium text-sm text-[#111827] mb-1">{playerName}</p>
-                <div className="flex flex-wrap gap-1">
+                <div className="font-display font-black text-[13px] uppercase mb-2" style={{ color: "var(--text-primary)" }}>
+                  {playerName}
+                </div>
+                <div className="flex flex-wrap gap-1.5">
                   {bonuses.map((b) => (
                     <span
                       key={b.id}
-                      className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                        Number(b.points) >= 0 ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"
-                      }`}
+                      className="text-[11px] px-2 py-0.5 rounded-full font-bold"
+                      style={
+                        Number(b.points) >= 0
+                          ? { background: "#ECFDF5", color: "#065F46" }
+                          : { background: "#FEF2F2", color: "#991B1B" }
+                      }
                     >
                       {b.bonusType.code}
                       {b.quantity > 1 && ` ×${b.quantity}`} {Number(b.points) > 0 ? "+" : ""}
