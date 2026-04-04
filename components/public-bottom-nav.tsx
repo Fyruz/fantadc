@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Button } from "primereact/button";
 
 type MainNavItem = {
   href: string;
@@ -12,21 +13,21 @@ type MainNavItem = {
 };
 
 const MAIN_NAV: readonly MainNavItem[] = [
-  { href: "/partite", label: "Partite", icon: "pi-calendar" },
-  { href: "/classifica", label: "Classifica", icon: "pi-list" },
-  { href: "/squadre-fantasy", label: "Fantasy", icon: "pi-shield" },
+  { href: "/partite",   label: "PARTITE",   icon: "pi-calendar" },
+  { href: "/classifica",label: "CLASS.",    icon: "pi-list"     },
+  { href: "/squadre-fantasy", label: "FANTASY", icon: "pi-shield" },
   {
     href: "/dashboard",
-    label: "Il mio",
+    label: "IL MIO",
     icon: "pi-user",
     matchers: ["/dashboard", "/squadra", "/vota"],
   },
 ] as const;
 
 const MORE_NAV = [
-  { href: "/giocatori", label: "Giocatori", icon: "pi-users" },
-  { href: "/squadre", label: "Squadre reali", icon: "pi-shield" },
-  { href: "/regolamento", label: "Regolamento", icon: "pi-book" },
+  { href: "/giocatori",  label: "Giocatori",    icon: "pi-users" },
+  { href: "/squadre",    label: "Squadre reali", icon: "pi-shield" },
+  { href: "/regolamento",label: "Regolamento",  icon: "pi-book"  },
 ] as const;
 
 export default function PublicBottomNav() {
@@ -34,10 +35,7 @@ export default function PublicBottomNav() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isActive = (href: string, matchers?: readonly string[]) => {
-    if (matchers) {
-      return matchers.some((matcher) => pathname.startsWith(matcher));
-    }
-
+    if (matchers) return matchers.some((m) => pathname.startsWith(m));
     return href === "/" ? pathname === "/" : pathname.startsWith(href);
   };
 
@@ -45,40 +43,49 @@ export default function PublicBottomNav() {
 
   return (
     <>
+      {/* Overlay */}
       {moreOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ background: "rgba(6,7,61,0.3)" }}
           onClick={() => setMoreOpen(false)}
         />
       )}
 
+      {/* More drawer */}
       {moreOpen && (
-        <div className="fixed bottom-[64px] left-0 right-0 z-50 rounded-t-2xl border-t border-[#E5E7EB] bg-white shadow-lg md:hidden pb-safe">
+        <div
+          className="fixed bottom-[64px] left-0 right-0 z-50 rounded-t-2xl md:hidden pb-safe"
+          style={{ background: "#fff", borderTop: "2px solid var(--border-medium)", boxShadow: "0 -4px 24px rgba(1,7,163,0.12)" }}
+        >
           <div className="flex items-center justify-between px-4 pt-3 pb-1">
-            <span className="text-sm font-semibold text-[#111827]">Altro</span>
-            <button
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+              ALTRO
+            </span>
+            <Button
+              icon="pi pi-times"
+              text
               type="button"
               onClick={() => setMoreOpen(false)}
-              className="p-1 text-[#6B7280]"
+              className="!p-1"
+              style={{ color: "var(--text-muted)" }}
               aria-label="Chiudi"
-            >
-              <i className="pi pi-times text-sm" />
-            </button>
+            />
           </div>
-          <div className="grid grid-cols-1 gap-1 px-3 pb-4">
+          <div className="flex flex-col gap-1 px-3 pb-4">
             {MORE_NAV.map((item) => {
               const active = isActive(item.href);
-
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMoreOpen(false)}
-                  className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors ${
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
+                  style={
                     active
-                      ? "bg-[#E8E9F8] text-[#0107A3]"
-                      : "text-[#374151] hover:bg-[#F8F9FC]"
-                  }`}
+                      ? { background: "var(--surface-1)", color: "var(--primary)" }
+                      : { color: "var(--text-secondary)" }
+                  }
                 >
                   <i className={`pi ${item.icon} text-base`} />
                   {item.label}
@@ -89,14 +96,19 @@ export default function PublicBottomNav() {
         </div>
       )}
 
+      {/* Bottom bar */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB] bg-white md:hidden"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+        style={{
+          background: "#fff",
+          borderTop: "1px solid var(--border-soft)",
+          boxShadow: "0 -2px 12px rgba(1,7,163,0.06)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
       >
         <div className="flex h-16">
           {MAIN_NAV.map((item) => {
             const active = isActive(item.href, item.matchers);
-
             return (
               <Link
                 key={item.href}
@@ -105,18 +117,19 @@ export default function PublicBottomNav() {
               >
                 <div className="relative flex flex-col items-center">
                   {active && (
-                    <span className="absolute -top-1 left-1/2 h-0.5 w-5 -translate-x-1/2 rounded-full bg-[#0107A3]" />
+                    <span
+                      className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-b-full"
+                      style={{ background: "var(--primary)" }}
+                    />
                   )}
                   <i
-                    className={`pi ${item.icon} text-xl ${
-                      active ? "text-[#0107A3]" : "text-[#9CA3AF]"
-                    }`}
+                    className={`pi ${item.icon} text-xl`}
+                    style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
                   />
                 </div>
                 <span
-                  className={`text-[10px] font-medium ${
-                    active ? "text-[#0107A3]" : "text-[#9CA3AF]"
-                  }`}
+                  className="text-[8px] font-black uppercase tracking-wide"
+                  style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
                 >
                   {item.label}
                 </span>
@@ -124,24 +137,24 @@ export default function PublicBottomNav() {
             );
           })}
 
-          <button
+          {/* Altro */}
+          <Button
+            unstyled
             type="button"
-            onClick={() => setMoreOpen((current) => !current)}
+            onClick={() => setMoreOpen((v) => !v)}
             className="flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors"
           >
             <i
-              className={`pi pi-ellipsis-h text-xl ${
-                moreIsActive || moreOpen ? "text-[#0107A3]" : "text-[#9CA3AF]"
-              }`}
+              className="pi pi-ellipsis-h text-xl"
+              style={{ color: moreIsActive || moreOpen ? "var(--primary)" : "var(--text-disabled)" }}
             />
             <span
-              className={`text-[10px] font-medium ${
-                moreIsActive || moreOpen ? "text-[#0107A3]" : "text-[#9CA3AF]"
-              }`}
+              className="text-[8px] font-black uppercase tracking-wide"
+              style={{ color: moreIsActive || moreOpen ? "var(--primary)" : "var(--text-disabled)" }}
             >
-              Altro
+              ALTRO
             </span>
-          </button>
+          </Button>
         </div>
       </nav>
     </>
