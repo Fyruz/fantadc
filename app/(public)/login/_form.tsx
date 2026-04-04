@@ -18,7 +18,7 @@ export default function LoginForm() {
   return (
     <>
       {registered && (
-        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700 mb-4">
+        <div className="rounded-lg px-4 py-3 text-sm mb-4" style={{ background: 'rgba(50,215,75,0.12)', color: '#32D74B', border: '1px solid rgba(50,215,75,0.24)' }}>
           Registrazione completata! Accedi con le tue credenziali.
         </div>
       )}
@@ -27,7 +27,7 @@ export default function LoginForm() {
         {next && <input type="hidden" name="next" value={next} />}
 
         <div>
-          <label className="block text-xs font-medium text-[#6B7280] mb-1" htmlFor="email">Email</label>
+          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="email">Email</label>
           <InputText
             id="email"
             name="email"
@@ -40,7 +40,7 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[#6B7280] mb-1" htmlFor="password">Password</label>
+          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="password">Password</label>
           <input type="hidden" name="password" value={password} />
           <Password
             value={password}
