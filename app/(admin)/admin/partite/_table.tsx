@@ -1,8 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
+import { Button } from "primereact/button";
 import { deleteMatch } from "@/app/actions/admin/matches";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
 import StatusBadge from "@/components/status-badge";
@@ -16,81 +16,87 @@ type Row = {
   _count: { players: number };
 };
 
+const PAGE_SIZE = 15;
+
 export default function PartiteTable({ rows }: { rows: Row[] }) {
+  const [page, setPage] = useState(0);
+  const total = rows.length;
+  const start = page * PAGE_SIZE;
+  const slice = rows.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
   return (
-    <div className="admin-card overflow-hidden">
-      <DataTable
-        value={rows}
-        paginator
-        rows={10}
-        rowsPerPageOptions={[10, 25, 50]}
-      >
-        <Column
-          header="Partita"
-          body={(row: Row) => {
+    <div className="card overflow-hidden">
+      {total === 0 ? (
+        <p className="px-4 py-10 text-center over-label">Nessuna partita.</p>
+      ) : (
+        <>
+          {slice.map((row, idx) => {
             const isAnomaly =
               (row.status === "CONCLUDED" || row.status === "PUBLISHED") &&
               row._count.players === 0;
             return (
-              <span className="font-medium text-[var(--text-primary)]">
-                {row.homeTeam.name} vs {row.awayTeam.name}
-                {isAnomaly && (
-                  <span className="ml-2 text-xs text-amber-600">⚠ no giocatori</span>
-                )}
-              </span>
-            );
-          }}
-          sortable
-          sortField="homeTeam.name"
-        />
-        <Column
-          header="Data"
-          body={(row: Row) => (
-            <span className="text-[var(--text-secondary)]">
-              {new Date(row.startsAt).toLocaleDateString("it-IT")}
-            </span>
-          )}
-          sortable
-          sortField="startsAt"
-          className="hidden md:table-cell"
-          headerClassName="hidden md:table-cell"
-        />
-        <Column
-          header="Stato"
-          body={(row: Row) => <StatusBadge status={row.status} />}
-          sortable
-          sortField="status"
-        />
-        <Column
-          header="Gioc."
-          body={(row: Row) => (
-            <span className="text-[var(--text-secondary)] tabular-nums">{row._count.players}</span>
-          )}
-          sortable
-          sortField="_count.players"
-          className="hidden md:table-cell text-right"
-          headerClassName="hidden md:table-cell"
-        />
-        <Column
-          header=""
-          body={(row: Row) => (
-            <div className="flex items-center gap-2">
-              <Link
-                href={`/admin/partite/${row.id}`}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
-                title="Gestisci"
+              <div
+                key={row.id}
+                className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors"
+                style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               >
-                <i className="pi pi-pencil text-sm" />
-              </Link>
-              <ConfirmDeleteForm
-                action={deleteMatch}
-                hiddenInputs={{ id: row.id }}
-                confirmMessage="Eliminare la partita? L'operazione è irreversibile."
-              />
+                {/* Left */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                    <StatusBadge status={row.status} />
+                    {isAnomaly && (
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(234,179,8,0.12)", color: "#854d0e", border: "1px solid rgba(234,179,8,0.3)" }}
+                      >
+                        ⚠ no giocatori
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                    {row.homeTeam.name} <span className="font-sans font-normal text-xs" style={{ color: "var(--text-disabled)" }}>vs</span> {row.awayTeam.name}
+                  </div>
+                  <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {new Date(row.startsAt).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}
+                    {" · "}{row._count.players} giocatori
+                  </div>
+                </div>
+                {/* Right */}
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <Link
+                    href={`/admin/partite/${row.id}`}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
+                    style={{ color: "var(--primary)" }}
+                    title="Gestisci"
+                  >
+                    <i className="pi pi-pencil text-sm" />
+                  </Link>
+                  <ConfirmDeleteForm
+                    action={deleteMatch}
+                    hiddenInputs={{ id: row.id }}
+                    confirmMessage="Eliminare la partita? L'operazione è irreversibile."
+                  />
+                </div>
+              </div>
+            );
+          })}
+          {totalPages > 1 && (
+            <div
+              className="flex items-center justify-between px-4 py-2.5"
+              style={{ borderTop: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
+            >
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {start + 1}–{Math.min(start + PAGE_SIZE, total)} di {total}
+              </span>
+              <div className="flex gap-1">
+                <Button icon="pi pi-chevron-left" text size="small" disabled={page === 0} onClick={() => setPage((p) => p - 1)} aria-label="Precedente" />
+                <Button icon="pi pi-chevron-right" text size="small" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)} aria-label="Successiva" />
+              </div>
             </div>
           )}
-        />
-      </DataTable>
+        </>
+      )}
     </div>
   );
 }

@@ -65,22 +65,22 @@ export default async function AdminDashboardPage() {
       {/* Anomalie / Tutto ok */}
       {hasAnomalies ? (
         <div>
-          <h2 className="flex items-center gap-2 text-base font-semibold text-[var(--text-primary)] mb-3">
-            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <p className="over-label mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
             Da verificare
-          </h2>
+          </p>
           <div className="flex flex-col gap-3">
             {concludedNoPlayers.map((m) => (
               <div
                 key={m.id}
-                className="border border-l-[3px] border-l-amber-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4"
-                style={{ background: 'rgba(255,214,10,0.08)', borderColor: 'rgba(255,214,10,0.20)' }}
+                className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                style={{ background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.25)", borderLeft: "3px solid #D97706" }}
               >
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                  <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                     {m.homeTeam.name} vs {m.awayTeam.name}
                   </p>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: "#92400E" }}>
                     {m.status === "CONCLUDED"
                       ? "Partita conclusa senza giocatori — aggiungi i partecipanti prima di pubblicare"
                       : "Partita pubblicata senza giocatori — i punteggi non saranno calcolati"}
@@ -88,16 +88,21 @@ export default async function AdminDashboardPage() {
                 </div>
                 <Link
                   href={`/admin/partite/${m.id}`}
-                  className="text-xs font-medium text-[var(--primary)] hover:underline flex-shrink-0"
+                  className="text-xs font-semibold flex-shrink-0 flex items-center gap-1"
+                  style={{ color: "var(--primary)" }}
                 >
-                  Gestisci →
+                  Gestisci
+                  <i className="pi pi-arrow-right text-[10px]" />
                 </Link>
               </div>
             ))}
 
             {usersNoTeam > 0 && (
-              <div className="border border-l-[3px] border-l-blue-500 rounded-xl px-4 py-3 flex items-center justify-between gap-4" style={{ background: 'rgba(1,7,163,0.08)', borderColor: 'rgba(1,7,163,0.20)' }}>
-                <p className="text-sm text-[var(--text-primary)]">
+              <div
+                className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
+                style={{ background: "var(--surface-2)", border: "1px solid var(--border-soft)", borderLeft: "3px solid var(--primary)" }}
+              >
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>
                   <span className="font-bold">{usersNoTeam}</span>{" "}
                   {usersNoTeam === 1
                     ? "utente registrato senza squadra fantasy"
@@ -105,16 +110,21 @@ export default async function AdminDashboardPage() {
                 </p>
                 <Link
                   href="/admin/utenti"
-                  className="text-xs font-medium text-[var(--primary)] hover:underline flex-shrink-0"
+                  className="text-xs font-semibold flex-shrink-0 flex items-center gap-1"
+                  style={{ color: "var(--primary)" }}
                 >
-                  Vedi utenti →
+                  Vedi utenti
+                  <i className="pi pi-arrow-right text-[10px]" />
                 </Link>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium w-fit" style={{ background: 'rgba(50,215,75,0.12)', color: '#32D74B' }}>
+        <div
+          className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium w-fit"
+          style={{ background: "rgba(16,185,129,0.12)", color: "#065F46" }}
+        >
           <i className="pi pi-check-circle text-sm" />
           Tutto ok
         </div>

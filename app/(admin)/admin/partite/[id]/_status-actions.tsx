@@ -127,14 +127,16 @@ export default function StatusActions({
       )}
 
       {status === "CONCLUDED" && playerCount === 0 && (
-        <div className="rounded-xl px-3 py-2 text-sm" style={{ background: 'rgba(255,214,10,0.08)', color: '#FFD60A', border: '1px solid rgba(255,214,10,0.20)' }}>
-          ⚠ Nessun giocatore aggiunto — aggiungi i partecipanti prima di pubblicare.
+        <div className="rounded-xl px-3 py-2.5 text-sm flex items-start gap-2" style={{ background: 'rgba(234,179,8,0.12)', color: '#92400E', border: '1px solid rgba(234,179,8,0.25)' }}>
+          <i className="pi pi-exclamation-triangle text-xs mt-0.5 flex-shrink-0" />
+          <span>Nessun giocatore aggiunto — aggiungi i partecipanti prima di pubblicare.</span>
         </div>
       )}
 
       {status === "PUBLISHED" && (
-        <div className="rounded-xl px-3 py-2 text-xs" style={{ background: 'rgba(1,7,163,0.10)', color: '#6BA3FF', border: '1px solid rgba(1,7,163,0.20)' }}>
-          ℹ I punteggi sono pubblici. Qualsiasi modifica si rifletterà immediatamente sulla classifica.
+        <div className="rounded-xl px-3 py-2.5 text-xs flex items-start gap-2" style={{ background: 'var(--surface-2)', color: 'var(--text-secondary)', border: '1px solid var(--border-soft)' }}>
+          <i className="pi pi-info-circle text-xs mt-0.5 flex-shrink-0" />
+          <span>I punteggi sono pubblici. Qualsiasi modifica si rifletterà immediatamente sulla classifica.</span>
         </div>
       )}
     </div>

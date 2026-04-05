@@ -1,9 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Tag } from "primereact/tag";
+import { Button } from "primereact/button";
 
 type Row = {
   id: number;
@@ -14,55 +13,91 @@ type Row = {
   fantasyTeam: { id: number } | null;
 };
 
+const PAGE_SIZE = 15;
+
 export default function UtentiTable({ rows }: { rows: Row[] }) {
+  const [page, setPage] = useState(0);
+  const total = rows.length;
+  const start = page * PAGE_SIZE;
+  const slice = rows.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
   return (
-    <div className="admin-card overflow-hidden">
-      <DataTable value={rows} paginator rows={10} rowsPerPageOptions={[10, 25, 50]}>
-        <Column field="email" header="Email" sortable />
-        <Column
-          field="name"
-          header="Nome"
-          body={(row: Row) => <span className="text-[var(--text-secondary)]">{row.name ?? "—"}</span>}
-          sortable
-        />
-        <Column
-          header="Ruolo"
-          body={(row: Row) => (
-            <Tag
-              value={row.role}
-              severity={row.role === "ADMIN" ? "warning" : "secondary"}
-            />
-          )}
-          sortable
-          sortField="role"
-        />
-        <Column
-          header="Squadra fantasy"
-          body={(row: Row) => <span className="text-[var(--text-secondary)]">{row.fantasyTeam ? "Sì" : "No"}</span>}
-        />
-        <Column
-          header="Stato"
-          body={(row: Row) =>
-            row.isSuspended ? <Tag value="Sospeso" severity="danger" /> : null
-          }
-          sortable
-          sortField="isSuspended"
-        />
-        <Column
-          header=""
-          body={(row: Row) => (
-            <div className="flex items-center gap-2">
+    <div className="card overflow-hidden">
+      {total === 0 ? (
+        <p className="px-4 py-10 text-center over-label">Nessun utente.</p>
+      ) : (
+        <>
+          {slice.map((row, idx) => (
+            <div
+              key={row.id}
+              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors"
+              style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                  {row.email}
+                </div>
+                <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                  {row.name && (
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      {row.name}
+                    </span>
+                  )}
+                  {row.role === "ADMIN" ? (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(234,179,8,0.12)", color: "#92400E", border: "1px solid rgba(234,179,8,0.3)" }}
+                    >
+                      ADMIN
+                    </span>
+                  ) : (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+                    >
+                      USER
+                    </span>
+                  )}
+                  {row.isSuspended && (
+                    <span
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: "rgba(239,68,68,0.10)", color: "#991B1B", border: "1px solid rgba(239,68,68,0.2)" }}
+                    >
+                      Sospeso
+                    </span>
+                  )}
+                  {row.fantasyTeam && (
+                    <span className="text-[10px]" style={{ color: "var(--text-disabled)" }}>⚽ squadra</span>
+                  )}
+                </div>
+              </div>
               <Link
                 href={`/admin/utenti/${row.id}`}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-[var(--primary)] hover:bg-[var(--primary-light)] transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0"
+                style={{ color: "var(--primary)" }}
                 title="Dettaglio"
               >
-                <i className="pi pi-eye text-sm" />
+                <i className="pi pi-chevron-right text-sm" />
               </Link>
             </div>
+          ))}
+          {totalPages > 1 && (
+            <div
+              className="flex items-center justify-between px-4 py-2.5"
+              style={{ borderTop: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
+            >
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {start + 1}–{Math.min(start + PAGE_SIZE, total)} di {total}
+              </span>
+              <div className="flex gap-1">
+                <Button icon="pi pi-chevron-left" text size="small" disabled={page === 0} onClick={() => setPage((p) => p - 1)} aria-label="Precedente" />
+                <Button icon="pi pi-chevron-right" text size="small" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)} aria-label="Successiva" />
+              </div>
+            </div>
           )}
-        />
-      </DataTable>
+        </>
+      )}
     </div>
   );
 }

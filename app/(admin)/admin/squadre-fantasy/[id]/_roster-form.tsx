@@ -40,7 +40,7 @@ export default function RosterForm({
           {allPlayers.map((p, i) => (
             <label
               key={p.id}
-              className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-[#F0F1FC] transition-colors text-sm ${
+              className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-[var(--surface-1)] transition-colors text-sm ${
                 i < allPlayers.length - 1 ? "border-b border-[var(--border-soft)]" : ""
               }`}
             >
@@ -49,7 +49,7 @@ export default function RosterForm({
                 name="playerIds"
                 value={p.id}
                 defaultChecked={currentPlayerIds.includes(p.id)}
-                className="accent-[#0107A3] w-4 h-4 flex-shrink-0"
+                className="accent-[var(--primary)] w-4 h-4 flex-shrink-0"
               />
               <RoleBadge role={p.role} />
               <span className="font-medium text-[var(--text-primary)] flex-1">{p.name}</span>
@@ -79,9 +79,8 @@ export default function RosterForm({
 
       {state?.message && (
         <p
-          className={`text-sm font-medium ${
-            state.message.startsWith("Rosa") ? "text-emerald-600" : "text-red-500"
-          }`}
+          className="text-sm font-medium"
+          style={{ color: state.message === "Rosa aggiornata." ? "#065F46" : "#991B1B" }}
         >
           {state.message}
         </p>

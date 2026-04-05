@@ -28,7 +28,19 @@ export default async function SquadraFantasyDetailPage({ params }: { params: Pro
   return (
     <div className="flex flex-col gap-6">
       <AdminPageHeader title={fantasyTeam.name} backHref="/admin/squadre-fantasy" />
-      <p className="text-sm text-[var(--text-secondary)] -mt-4">Proprietario: {fantasyTeam.user.email}</p>
+
+      {/* Owner info */}
+      <div className="card px-4 py-3 flex items-center gap-2">
+        <i className="pi pi-user text-xs" style={{ color: "var(--text-disabled)" }} />
+        <span className="text-sm" style={{ color: "var(--text-muted)" }}>{fantasyTeam.user.email}</span>
+        <span
+          className="text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto"
+          style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+        >
+          {currentPlayerIds.length}/5
+        </span>
+      </div>
+
       <RosterForm
         fantasyTeamId={fantasyTeamId}
         currentPlayerIds={currentPlayerIds}
