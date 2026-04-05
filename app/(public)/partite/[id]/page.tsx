@@ -13,8 +13,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const match = await db.match.findUnique({
     where: { id: matchId, status: { not: "DRAFT" } },
     include: {
-      homeTeam: { select: { name: true } },
-      awayTeam: { select: { name: true } },
+      homeTeam: { select: { name: true, shortName: true } },
+      awayTeam: { select: { name: true, shortName: true } },
       players: {
         include: { player: { include: { footballTeam: { select: { name: true } } } } },
         orderBy: { player: { name: "asc" } },
@@ -69,19 +69,36 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
         <div className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full border border-white/5 pointer-events-none" />
         <div className="absolute right-[10px] top-[10px] w-16 h-16 rounded-full border border-white/5 pointer-events-none" />
 
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
-            <div className="font-display font-black text-xl uppercase text-white leading-tight">
-              {match.homeTeam.name}
-              <span className="mx-2 text-sm font-normal text-white/40">vs</span>
-              {match.awayTeam.name}
-            </div>
-            <div className="text-[12px] text-white/55 mt-1.5">
+        <div className="relative">
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div className="text-[12px] text-white/55">
               {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
             </div>
+            <div className="flex-shrink-0">
+              <StatusBadge status={match.status} />
+            </div>
           </div>
-          <div className="flex-shrink-0 mt-0.5">
-            <StatusBadge status={match.status} />
+          {/* Score display */}
+          <div className="flex items-center gap-3">
+            <div className="flex-1 text-right">
+              <div className="font-display font-black text-lg uppercase text-white leading-tight">
+                {match.homeTeam.shortName ?? match.homeTeam.name}
+              </div>
+            </div>
+            <div className="flex-shrink-0 text-center min-w-[5rem]">
+              {match.homeScore !== null && match.awayScore !== null ? (
+                <div className="font-display font-black text-4xl text-white leading-none">
+                  {match.homeScore} — {match.awayScore}
+                </div>
+              ) : (
+                <div className="font-display font-black text-2xl text-white/30">VS</div>
+              )}
+            </div>
+            <div className="flex-1 text-left">
+              <div className="font-display font-black text-lg uppercase text-white leading-tight">
+                {match.awayTeam.shortName ?? match.awayTeam.name}
+              </div>
+            </div>
           </div>
         </div>
       </div>

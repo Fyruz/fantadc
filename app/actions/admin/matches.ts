@@ -9,12 +9,19 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
 
+const scoreField = z.preprocess(
+  (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
+  z.number().int().min(0).max(99).nullable()
+);
+
 const Schema = z.object({
   homeTeamId: z.coerce.number().int().positive("Squadra casa obbligatoria"),
   awayTeamId: z.coerce.number().int().positive("Squadra ospite obbligatoria"),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida"),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida"),
   status: z.nativeEnum(MatchStatus).optional(),
+  homeScore: scoreField.optional(),
+  awayScore: scoreField.optional(),
 });
 
 export async function createMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
@@ -68,6 +75,8 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     date: formData.get("date"),
     time: formData.get("time"),
     status: formData.get("status") || undefined,
+    homeScore: formData.get("homeScore"),
+    awayScore: formData.get("awayScore"),
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   if (parsed.data.homeTeamId === parsed.data.awayTeamId) {
@@ -81,6 +90,8 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     homeTeamId: parsed.data.homeTeamId,
     awayTeamId: parsed.data.awayTeamId,
     startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
+    homeScore: parsed.data.homeScore ?? null,
+    awayScore: parsed.data.awayScore ?? null,
   };
 
   if (parsed.data.status) {

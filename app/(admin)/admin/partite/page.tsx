@@ -6,8 +6,8 @@ export default async function PartitePage() {
   const matches = await db.match.findMany({
     orderBy: { startsAt: "desc" },
     include: {
-      homeTeam: { select: { name: true } },
-      awayTeam: { select: { name: true } },
+      homeTeam: { select: { name: true, shortName: true } },
+      awayTeam: { select: { name: true, shortName: true } },
       _count: { select: { players: true } },
     },
   });

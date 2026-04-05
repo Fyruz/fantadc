@@ -11,8 +11,10 @@ type Row = {
   id: number;
   status: string;
   startsAt: Date;
-  homeTeam: { name: string };
-  awayTeam: { name: string };
+  homeScore: number | null;
+  awayScore: number | null;
+  homeTeam: { name: string; shortName: string | null };
+  awayTeam: { name: string; shortName: string | null };
   _count: { players: number };
 };
 
@@ -54,8 +56,12 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
                       </span>
                     )}
                   </div>
-                  <div className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                    {row.homeTeam.name} <span className="font-sans font-normal text-xs" style={{ color: "var(--text-disabled)" }}>vs</span> {row.awayTeam.name}
+                  <div className="font-display font-black text-sm uppercase flex items-baseline gap-1.5 flex-wrap" style={{ color: "var(--text-primary)" }}>
+                    <span>{row.homeTeam.shortName ?? row.homeTeam.name}</span>
+                    <span className="font-sans font-bold text-xs" style={{ color: row.homeScore !== null && row.awayScore !== null ? "var(--primary)" : "var(--text-disabled)" }}>
+                      {row.homeScore !== null && row.awayScore !== null ? `${row.homeScore}—${row.awayScore}` : "vs"}
+                    </span>
+                    <span>{row.awayTeam.shortName ?? row.awayTeam.name}</span>
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {new Date(row.startsAt).toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" })}

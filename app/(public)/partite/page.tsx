@@ -7,8 +7,8 @@ export default async function PartitePublicPage() {
     where: { status: { not: "DRAFT" } },
     orderBy: { startsAt: "asc" },
     include: {
-      homeTeam: { select: { name: true } },
-      awayTeam: { select: { name: true } },
+      homeTeam: { select: { name: true, shortName: true } },
+      awayTeam: { select: { name: true, shortName: true } },
     },
   });
 
@@ -37,21 +37,17 @@ export default async function PartitePublicPage() {
                   {m.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-4 text-center">
-                <span
-                  className="font-display font-black text-[15px] uppercase flex-1 text-right"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {m.homeTeam.name}
+              <div className="flex items-center gap-3">
+                <span className="font-display font-black text-[14px] uppercase flex-1 text-right leading-tight" style={{ color: "var(--text-primary)" }}>
+                  {m.homeTeam.shortName ?? m.homeTeam.name}
                 </span>
-                <span className="text-[11px] font-bold flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
-                  VS
+                <span className="font-display font-black text-lg flex-shrink-0 min-w-[4rem] text-center" style={{ color: m.homeScore !== null && m.awayScore !== null ? "var(--text-primary)" : "var(--text-disabled)" }}>
+                  {m.homeScore !== null && m.awayScore !== null
+                    ? `${m.homeScore}—${m.awayScore}`
+                    : "VS"}
                 </span>
-                <span
-                  className="font-display font-black text-[15px] uppercase flex-1 text-left"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {m.awayTeam.name}
+                <span className="font-display font-black text-[14px] uppercase flex-1 text-left leading-tight" style={{ color: "var(--text-primary)" }}>
+                  {m.awayTeam.shortName ?? m.awayTeam.name}
                 </span>
               </div>
             </Link>

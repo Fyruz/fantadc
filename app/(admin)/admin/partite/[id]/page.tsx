@@ -24,6 +24,7 @@ export default async function PartitaDetailPage({
       include: {
         homeTeam: { select: { id: true, name: true } },
         awayTeam: { select: { id: true, name: true } },
+
         players: {
           include: {
             player: { include: { footballTeam: { select: { name: true } } } },
@@ -63,19 +64,30 @@ export default async function PartitaDetailPage({
 
       {/* Header card — navy gradient */}
       <div
-        className="rounded-2xl overflow-hidden p-5 flex items-start justify-between gap-4"
+        className="rounded-2xl overflow-hidden p-5"
         style={{ background: "linear-gradient(135deg, #0107A3 0%, #0106c4 100%)" }}
       >
-        <div>
-          <h2 className="text-xl font-bold text-white">
-            {match.homeTeam.name} vs {match.awayTeam.name}
-          </h2>
-          <p className="text-[13px] text-white/80 mt-1">
-            {match.startsAt.toLocaleString("it-IT")}
+        <div className="flex items-start justify-between gap-4 mb-3">
+          <p className="text-[12px] text-white/55">
+            {match.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
           </p>
+          <div className="flex-shrink-0">
+            <StatusBadge status={match.status} />
+          </div>
         </div>
-        <div className="flex-shrink-0 mt-0.5">
-          <StatusBadge status={match.status} />
+        {/* Teams + score */}
+        <div className="flex items-center gap-3">
+          <span className="font-display font-black text-base uppercase text-white flex-1 text-right leading-tight">
+            {match.homeTeam.name}
+          </span>
+          <span className="font-display font-black text-3xl text-white flex-shrink-0 min-w-[4rem] text-center">
+            {match.homeScore !== null && match.awayScore !== null
+              ? `${match.homeScore} — ${match.awayScore}`
+              : <span className="text-white/30 text-xl">— vs —</span>}
+          </span>
+          <span className="font-display font-black text-base uppercase text-white flex-1 text-left leading-tight">
+            {match.awayTeam.name}
+          </span>
         </div>
       </div>
 

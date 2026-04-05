@@ -76,6 +76,8 @@ model Match {
   awayTeamId   Int
   status       MatchStatus         @default(DRAFT)
   startsAt     DateTime
+  homeScore    Int?
+  awayScore    Int?
   concludedAt  DateTime?
   publishedAt  DateTime?
   createdAt    DateTime            @default(now())

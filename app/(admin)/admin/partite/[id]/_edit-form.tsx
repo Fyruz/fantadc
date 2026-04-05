@@ -4,11 +4,20 @@ import { useState } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
+import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { updateMatch } from "@/app/actions/admin/matches";
 
 type Team = { id: number; name: string };
-type Match = { id: number; homeTeamId: number; awayTeamId: number; startsAt: Date; status: string };
+type Match = {
+  id: number;
+  homeTeamId: number;
+  awayTeamId: number;
+  startsAt: Date;
+  status: string;
+  homeScore: number | null;
+  awayScore: number | null;
+};
 
 const STATUS_OPTIONS = [
   { label: "Bozza", value: "DRAFT" },
@@ -27,6 +36,8 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
   const [homeTeamId, setHomeTeamId] = useState<string>(String(match.homeTeamId));
   const [awayTeamId, setAwayTeamId] = useState<string>(String(match.awayTeamId));
   const [status, setStatus] = useState<string>(match.status);
+  const [homeScore, setHomeScore] = useState<number | null>(match.homeScore);
+  const [awayScore, setAwayScore] = useState<number | null>(match.awayScore);
   const [date, setDate] = useState<Date | null>(() => {
     const d = new Date(defaultDate);
     return isNaN(d.getTime()) ? null : d;
@@ -51,73 +62,82 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
     <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="id" value={match.id} />
 
-      {/* Teams — stack on mobile, side by side on sm+ */}
+      {/* Teams */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Squadra casa
           </label>
           <input type="hidden" name="homeTeamId" value={homeTeamId} />
-          <Dropdown
-            value={homeTeamId}
-            onChange={(e) => setHomeTeamId(e.value)}
-            options={teamOptions}
-            className="w-full"
-          />
+          <Dropdown value={homeTeamId} onChange={(e) => setHomeTeamId(e.value)} options={teamOptions} className="w-full" />
         </div>
         <div>
           <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
             Squadra ospite
           </label>
           <input type="hidden" name="awayTeamId" value={awayTeamId} />
-          <Dropdown
-            value={awayTeamId}
-            onChange={(e) => setAwayTeamId(e.value)}
-            options={teamOptions}
-            className="w-full"
-          />
+          <Dropdown value={awayTeamId} onChange={(e) => setAwayTeamId(e.value)} options={teamOptions} className="w-full" />
         </div>
       </div>
 
-      {/* Date + Time + Status — each full width on mobile */}
+      {/* Date + Time + Status */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Data
-          </label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Data</label>
           <input type="hidden" name="date" value={formattedDate} />
-          <Calendar
-            value={date}
-            onChange={(e) => setDate(e.value as Date | null)}
-            dateFormat="dd/mm/yy"
-            showIcon
-            className="w-full"
-          />
+          <Calendar value={date} onChange={(e) => setDate(e.value as Date | null)} dateFormat="dd/mm/yy" showIcon className="w-full" />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Ora
-          </label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Ora</label>
           <input type="hidden" name="time" value={formattedTime} />
-          <Calendar
-            value={time}
-            onChange={(e) => setTime(e.value as Date | null)}
-            timeOnly
-            showIcon
-            className="w-full"
-          />
+          <Calendar value={time} onChange={(e) => setTime(e.value as Date | null)} timeOnly showIcon className="w-full" />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Stato
-          </label>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stato</label>
           <input type="hidden" name="status" value={status} />
-          <Dropdown
-            value={status}
-            onChange={(e) => setStatus(e.value)}
-            options={STATUS_OPTIONS}
-            className="w-full"
-          />
+          <Dropdown value={status} onChange={(e) => setStatus(e.value)} options={STATUS_OPTIONS} className="w-full" />
+        </div>
+      </div>
+
+      {/* Score */}
+      <div>
+        <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
+          Risultato <span style={{ color: "var(--text-disabled)" }}>(opzionale)</span>
+        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex-1">
+            <label className="block text-[10px] font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-disabled)" }}>
+              Casa
+            </label>
+            <input type="hidden" name="homeScore" value={homeScore !== null ? String(homeScore) : ""} />
+            <InputNumber
+              value={homeScore}
+              onValueChange={(e) => setHomeScore(e.value ?? null)}
+              min={0}
+              max={99}
+              placeholder="—"
+              className="w-full"
+              inputStyle={{ textAlign: "center", fontSize: "1.375rem", fontWeight: 900, fontFamily: "var(--font-barlow-condensed)" }}
+            />
+          </div>
+          <span className="text-2xl font-black flex-shrink-0 mt-5" style={{ color: "var(--text-disabled)", fontFamily: "var(--font-barlow-condensed)" }}>
+            —
+          </span>
+          <div className="flex-1">
+            <label className="block text-[10px] font-semibold mb-1.5 uppercase tracking-wide" style={{ color: "var(--text-disabled)" }}>
+              Ospite
+            </label>
+            <input type="hidden" name="awayScore" value={awayScore !== null ? String(awayScore) : ""} />
+            <InputNumber
+              value={awayScore}
+              onValueChange={(e) => setAwayScore(e.value ?? null)}
+              min={0}
+              max={99}
+              placeholder="—"
+              className="w-full"
+              inputStyle={{ textAlign: "center", fontSize: "1.375rem", fontWeight: 900, fontFamily: "var(--font-barlow-condensed)" }}
+            />
+          </div>
         </div>
       </div>
 
