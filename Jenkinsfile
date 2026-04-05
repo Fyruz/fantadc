@@ -33,15 +33,13 @@ pipeline {
                     string(
                         credentialsId: 'fantadc-nextauth-secret-dev',
                         variable: 'NEXTAUTH_SECRET'
-                    ),
-                    file(
-                        credentialsId: 'fantadc-env-docker-dev',
-                        variable: 'ENV_DOCKER_FILE'
                     )
                 ]) {
-                    sh 'cp $ENV_DOCKER_FILE .env.docker'
                     sh 'docker network create fantadc_net || true'
-                    sh 'docker compose --env-file .env.docker up -d --build'
+                    sh """
+                        NEXTAUTH_URL=https://fantadc.gferruzzi.it \
+                        docker compose up -d --build
+                    """
                 }
             }
         }
