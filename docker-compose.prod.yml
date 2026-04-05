@@ -1,0 +1,57 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fantadc-postgres-prod
+    # Nessuna porta esposta all'host in prod: il DB è raggiungibile
+    # solo dall'app tramite la rete Docker interna
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-fantadc}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    networks:
+      - internal_prod
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB:-fantadc}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fantadc:
+    build:
+      context: .
+      target: runner
+    image: fantadc:prod
+    container_name: fantadc-prod
+    ports:
+      - "5679:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-fantadc}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    env_file:
+      - .env.docker
+    networks:
+      - fantadc_prod_net
+      - internal_prod
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  fantadc_prod_net:
+    external: true
+    name: fantadc_prod_net
+  internal_prod:
+    driver: bridge
+
+volumes:
+  pgdata_prod:
