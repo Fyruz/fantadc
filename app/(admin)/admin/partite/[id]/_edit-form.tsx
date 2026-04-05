@@ -11,10 +11,10 @@ type Team = { id: number; name: string };
 type Match = { id: number; homeTeamId: number; awayTeamId: number; startsAt: Date; status: string };
 
 const STATUS_OPTIONS = [
-  { label: "DRAFT", value: "DRAFT" },
-  { label: "SCHEDULED", value: "SCHEDULED" },
-  { label: "CONCLUDED", value: "CONCLUDED" },
-  { label: "PUBLISHED", value: "PUBLISHED" },
+  { label: "Bozza", value: "DRAFT" },
+  { label: "Programmata", value: "SCHEDULED" },
+  { label: "Conclusa", value: "CONCLUDED" },
+  { label: "Pubblicata", value: "PUBLISHED" },
 ];
 
 export default function EditMatchForm({ match, teams }: { match: Match; teams: Team[] }) {
@@ -48,11 +48,15 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
     : "";
 
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form action={action} className="flex flex-col gap-4">
       <input type="hidden" name="id" value={match.id} />
-      <div className="flex gap-3 flex-wrap">
-        <div className="flex-1 min-w-40">
-          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Squadra casa</label>
+
+      {/* Teams — stack on mobile, side by side on sm+ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Squadra casa
+          </label>
           <input type="hidden" name="homeTeamId" value={homeTeamId} />
           <Dropdown
             value={homeTeamId}
@@ -61,8 +65,10 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
             className="w-full"
           />
         </div>
-        <div className="flex-1 min-w-40">
-          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Squadra ospite</label>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Squadra ospite
+          </label>
           <input type="hidden" name="awayTeamId" value={awayTeamId} />
           <Dropdown
             value={awayTeamId}
@@ -71,19 +77,27 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
             className="w-full"
           />
         </div>
-        <div className="flex-1 min-w-32">
-          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Data</label>
+      </div>
+
+      {/* Date + Time + Status — each full width on mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Data
+          </label>
           <input type="hidden" name="date" value={formattedDate} />
           <Calendar
             value={date}
             onChange={(e) => setDate(e.value as Date | null)}
-            dateFormat="yy-mm-dd"
+            dateFormat="dd/mm/yy"
             showIcon
             className="w-full"
           />
         </div>
-        <div className="w-28">
-          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Ora</label>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Ora
+          </label>
           <input type="hidden" name="time" value={formattedTime} />
           <Calendar
             value={time}
@@ -93,8 +107,10 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
             className="w-full"
           />
         </div>
-        <div className="flex-1 min-w-32">
-          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Stato</label>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Stato
+          </label>
           <input type="hidden" name="status" value={status} />
           <Dropdown
             value={status}
@@ -104,8 +120,14 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
           />
         </div>
       </div>
-      {state?.errors?.awayTeamId && <p className="text-red-500 text-sm">{state.errors.awayTeamId[0]}</p>}
-      {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
+
+      {state?.errors?.awayTeamId && (
+        <p className="text-xs" style={{ color: "#991B1B" }}>{state.errors.awayTeamId[0]}</p>
+      )}
+      {state?.message && (
+        <p className="text-xs" style={{ color: "#991B1B" }}>{state.message}</p>
+      )}
+
       <div>
         <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={pending} size="small" />
       </div>

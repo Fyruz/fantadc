@@ -27,45 +27,62 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
 
   return (
     <form action={action} className="flex flex-col gap-4">
-      <div>
-        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Squadra casa *</label>
-        <input type="hidden" name="homeTeamId" value={homeTeamId} />
-        <Dropdown
-          value={homeTeamId}
-          onChange={(e) => setHomeTeamId(e.value)}
-          options={teamOptions}
-          placeholder="Seleziona squadra"
-          className="w-full"
-        />
-        {state?.errors?.homeTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.homeTeamId[0]}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Squadra casa *
+          </label>
+          <input type="hidden" name="homeTeamId" value={homeTeamId} />
+          <Dropdown
+            value={homeTeamId}
+            onChange={(e) => setHomeTeamId(e.value)}
+            options={teamOptions}
+            placeholder="Seleziona squadra"
+            className="w-full"
+          />
+          {state?.errors?.homeTeamId && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.homeTeamId[0]}</p>
+          )}
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Squadra ospite *
+          </label>
+          <input type="hidden" name="awayTeamId" value={awayTeamId} />
+          <Dropdown
+            value={awayTeamId}
+            onChange={(e) => setAwayTeamId(e.value)}
+            options={teamOptions}
+            placeholder="Seleziona squadra"
+            className="w-full"
+          />
+          {state?.errors?.awayTeamId && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.awayTeamId[0]}</p>
+          )}
+        </div>
       </div>
-      <div>
-        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Squadra ospite *</label>
-        <input type="hidden" name="awayTeamId" value={awayTeamId} />
-        <Dropdown
-          value={awayTeamId}
-          onChange={(e) => setAwayTeamId(e.value)}
-          options={teamOptions}
-          placeholder="Seleziona squadra"
-          className="w-full"
-        />
-        {state?.errors?.awayTeamId && <p className="text-red-500 text-sm mt-1">{state.errors.awayTeamId[0]}</p>}
-      </div>
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Data *</label>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Data *
+          </label>
           <input type="hidden" name="date" value={formattedDate} />
           <Calendar
             value={date}
             onChange={(e) => setDate(e.value as Date | null)}
-            dateFormat="yy-mm-dd"
+            dateFormat="dd/mm/yy"
             showIcon
             className="w-full"
           />
-          {state?.errors?.date && <p className="text-red-500 text-sm mt-1">{state.errors.date[0]}</p>}
+          {state?.errors?.date && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.date[0]}</p>
+          )}
         </div>
-        <div className="w-28">
-          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Ora *</label>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Ora *
+          </label>
           <input type="hidden" name="time" value={formattedTime} />
           <Calendar
             value={time}
@@ -74,11 +91,18 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
             showIcon
             className="w-full"
           />
-          {state?.errors?.time && <p className="text-red-500 text-sm mt-1">{state.errors.time[0]}</p>}
+          {state?.errors?.time && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.time[0]}</p>
+          )}
         </div>
       </div>
-      {state?.message && <p className="text-red-500 text-sm">{state.message}</p>}
-      <Button type="submit" label={pending ? "Salvo..." : "Crea partita"} disabled={pending} />
+
+      {state?.message && (
+        <p className="text-xs" style={{ color: "#991B1B" }}>{state.message}</p>
+      )}
+      <div>
+        <Button type="submit" label={pending ? "Salvo..." : "Crea partita"} disabled={pending} />
+      </div>
     </form>
   );
 }
