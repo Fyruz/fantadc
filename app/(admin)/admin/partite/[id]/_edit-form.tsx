@@ -52,7 +52,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
       <input type="hidden" name="id" value={match.id} />
       <div className="flex gap-3 flex-wrap">
         <div className="flex-1 min-w-40">
-          <label className="block text-sm font-medium mb-1">Squadra casa</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Squadra casa</label>
           <input type="hidden" name="homeTeamId" value={homeTeamId} />
           <Dropdown
             value={homeTeamId}
@@ -62,7 +62,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
           />
         </div>
         <div className="flex-1 min-w-40">
-          <label className="block text-sm font-medium mb-1">Squadra ospite</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Squadra ospite</label>
           <input type="hidden" name="awayTeamId" value={awayTeamId} />
           <Dropdown
             value={awayTeamId}
@@ -72,7 +72,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
           />
         </div>
         <div className="flex-1 min-w-32">
-          <label className="block text-sm font-medium mb-1">Data</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Data</label>
           <input type="hidden" name="date" value={formattedDate} />
           <Calendar
             value={date}
@@ -83,7 +83,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
           />
         </div>
         <div className="w-28">
-          <label className="block text-sm font-medium mb-1">Ora</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Ora</label>
           <input type="hidden" name="time" value={formattedTime} />
           <Calendar
             value={time}
@@ -94,7 +94,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
           />
         </div>
         <div className="flex-1 min-w-32">
-          <label className="block text-sm font-medium mb-1">Stato</label>
+          <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>Stato</label>
           <input type="hidden" name="status" value={status} />
           <Dropdown
             value={status}

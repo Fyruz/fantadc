@@ -288,7 +288,6 @@ body {
 .p-dropdown .p-dropdown-label.p-placeholder { color: var(--text-muted) !important; }
 .p-dropdown .p-dropdown-trigger { color: var(--text-muted) !important; }
 
-.p-calendar .p-inputtext { border-radius: 12px !important; }
 .p-password-input {
   background: #fff !important;
   color: var(--text-primary) !important;
@@ -340,11 +339,33 @@ body {
 }
 
 /* ─── PrimeReact InputNumber (light) ────────────────────── */
-.p-inputnumber .p-inputtext { border-radius: 12px !important; }
-.p-inputnumber-button {
-  background: var(--surface-1) !important;
-  color: var(--text-secondary) !important;
+.p-inputnumber .p-inputtext { border-radius: 0 !important; }
+.p-inputnumber.p-inputnumber-buttons-stacked .p-inputnumber-input { border-radius: 12px 0 0 12px !important; }
+.p-inputnumber-button.p-button {
+  background: var(--surface-2) !important;
   border-color: var(--border-medium) !important;
+  color: var(--text-secondary) !important;
+  border-radius: 0 !important;
+}
+.p-inputnumber-button-up.p-button { border-radius: 0 12px 0 0 !important; }
+.p-inputnumber-button-down.p-button { border-radius: 0 0 12px 0 !important; }
+.p-inputnumber-button.p-button:hover {
+  background: var(--surface-1) !important;
+  color: var(--primary) !important;
+}
+
+/* ─── PrimeReact Calendar trigger button ─────────────────── */
+.p-calendar .p-inputtext { border-radius: 12px 0 0 12px !important; border-right: none !important; }
+.p-datepicker-trigger.p-button {
+  background: var(--surface-2) !important;
+  border-color: var(--border-medium) !important;
+  border-left: none !important;
+  color: var(--text-muted) !important;
+  border-radius: 0 12px 12px 0 !important;
+}
+.p-datepicker-trigger.p-button:hover {
+  background: var(--primary-light) !important;
+  color: var(--primary) !important;
 }
 
 /* ─── PrimeReact Tag ─────────────────────────────────────── */
