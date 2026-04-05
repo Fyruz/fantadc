@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { logout } from "@/app/actions/auth";
 
 const NAV = [
   { href: "/admin",                 label: "Dashboard"       },
@@ -10,14 +12,27 @@ const NAV = [
   { href: "/admin/partite",         label: "Partite"         },
   { href: "/admin/bonus-types",     label: "Tipi bonus"      },
   { href: "/admin/utenti",          label: "Utenti"          },
-  { href: "/admin/squadre-fantasy", label: "Squadre Fanta" },
+  { href: "/admin/squadre-fantasy", label: "Squadre Fanta"   },
   { href: "/admin/audit",           label: "Audit"           },
 ];
 
 export default function TopBar({ initials }: { initials: string }) {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
 
   return (
     <header
@@ -65,12 +80,41 @@ export default function TopBar({ initials }: { initials: string }) {
           })}
         </nav>
 
-        {/* Avatar */}
-        <div
-          className="ml-auto w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black flex-shrink-0"
-          style={{ background: "var(--primary)" }}
-        >
-          {initials}
+        {/* Avatar + dropdown */}
+        <div ref={ref} className="ml-auto relative flex-shrink-0">
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
+            style={{ background: "var(--primary)" }}
+            aria-label="Menu utente"
+            aria-expanded={open}
+          >
+            {initials}
+          </button>
+
+          {open && (
+            <div
+              className="absolute right-0 top-10 w-44 rounded-2xl overflow-hidden z-50"
+              style={{
+                background: "#fff",
+                border: "1px solid var(--border-soft)",
+                boxShadow: "0 8px 24px rgba(1,7,163,0.13)",
+              }}
+            >
+              <form action={logout}>
+                <button
+                  type="submit"
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-sm font-semibold text-left transition-colors hover:bg-[var(--surface-1)]"
+                  style={{ color: "#991B1B" }}
+                  onClick={() => setOpen(false)}
+                >
+                  <i className="pi pi-sign-out text-sm" />
+                  Logout
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </header>
