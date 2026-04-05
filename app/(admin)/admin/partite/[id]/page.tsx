@@ -6,6 +6,7 @@ import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
+import ScoreForm from "./_score-form";
 import { Button } from "primereact/button";
 import StatusBadge from "@/components/status-badge";
 
@@ -90,6 +91,15 @@ export default async function PartitaDetailPage({
           </span>
         </div>
       </div>
+
+      {/* Score */}
+      <ScoreForm
+        matchId={matchId}
+        homeTeamName={match.homeTeam.name}
+        awayTeamName={match.awayTeam.name}
+        homeScore={match.homeScore}
+        awayScore={match.awayScore}
+      />
 
       {/* Status actions */}
       <div className="admin-card p-4">

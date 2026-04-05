@@ -153,6 +153,34 @@ export async function advanceMatchStatus(
   return {};
 }
 
+export async function updateMatchScore(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const id = Number(formData.get("matchId"));
+  const rawHome = formData.get("homeScore");
+  const rawAway = formData.get("awayScore");
+
+  const homeScore = rawHome === "" || rawHome === null ? null : Number(rawHome);
+  const awayScore = rawAway === "" || rawAway === null ? null : Number(rawAway);
+
+  if (homeScore !== null && (!Number.isInteger(homeScore) || homeScore < 0 || homeScore > 99))
+    return { message: "Risultato casa non valido." };
+  if (awayScore !== null && (!Number.isInteger(awayScore) || awayScore < 0 || awayScore > 99))
+    return { message: "Risultato ospite non valido." };
+
+  const before = await db.match.findUnique({ where: { id }, select: { homeScore: true, awayScore: true } });
+  if (!before) return { message: "Partita non trovata." };
+
+  await db.match.update({ where: { id }, data: { homeScore, awayScore } });
+  await logAdminAction(Number(admin.id), "UPDATE_SCORE", "Match", id,
+    { homeScore: before.homeScore, awayScore: before.awayScore },
+    { homeScore, awayScore }
+  );
+
+  revalidatePath(`/admin/partite/${id}`);
+  revalidatePath(`/partite/${id}`);
+  return {};
+}
+
 export async function deleteMatch(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
