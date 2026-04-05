@@ -27,11 +27,11 @@ export default async function AdminDashboardPage() {
     ]);
 
   const stats = [
-    { label: "Squadre reali",   value: teams,        href: "/admin/squadre",         icon: "pi-shield"   },
+    { label: "Squadre",          value: teams,        href: "/admin/squadre",         icon: "pi-shield"   },
     { label: "Giocatori",       value: players,      href: "/admin/giocatori",        icon: "pi-users"    },
     { label: "Partite",         value: matches,      href: "/admin/partite",          icon: "pi-calendar" },
     { label: "Utenti",          value: users,        href: "/admin/utenti",           icon: "pi-id-card"  },
-    { label: "Squadre fantasy", value: fantasyTeams, href: "/admin/squadre-fantasy",  icon: "pi-trophy"   },
+    { label: "Squadre Fanta",   value: fantasyTeams, href: "/admin/squadre-fantasy",  icon: "pi-trophy"   },
   ];
 
   const hasAnomalies = concludedNoPlayers.length > 0 || usersNoTeam > 0;

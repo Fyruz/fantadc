@@ -10,7 +10,7 @@ const NAV = [
   { href: "/admin/partite",         label: "Partite"         },
   { href: "/admin/bonus-types",     label: "Tipi bonus"      },
   { href: "/admin/utenti",          label: "Utenti"          },
-  { href: "/admin/squadre-fantasy", label: "Squadre fantasy" },
+  { href: "/admin/squadre-fantasy", label: "Squadre Fanta" },
   { href: "/admin/audit",           label: "Audit"           },
 ];
 

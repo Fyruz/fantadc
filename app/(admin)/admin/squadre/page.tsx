@@ -7,7 +7,7 @@ export default async function SquadrePage() {
 
   return (
     <div>
-      <AdminPageHeader title="Squadre reali" cta={{ href: "/admin/squadre/new", label: "+ Nuova squadra" }} />
+      <AdminPageHeader title="Squadre" cta={{ href: "/admin/squadre/new", label: "Nuova squadra" }} />
       <SquadreTable rows={teams} />
     </div>
   );

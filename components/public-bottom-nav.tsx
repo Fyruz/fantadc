@@ -26,7 +26,7 @@ const MAIN_NAV: readonly MainNavItem[] = [
 
 const MORE_NAV = [
   { href: "/giocatori",  label: "Giocatori",    icon: "pi-users" },
-  { href: "/squadre",    label: "Squadre reali", icon: "pi-shield" },
+  { href: "/squadre",    label: "Squadre",       icon: "pi-shield" },
   { href: "/regolamento",label: "Regolamento",  icon: "pi-book"  },
 ] as const;
 

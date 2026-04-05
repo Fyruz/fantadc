@@ -10,7 +10,7 @@ export default async function GiocatoriPage() {
 
   return (
     <div>
-      <AdminPageHeader title="Giocatori" cta={{ href: "/admin/giocatori/new", label: "+ Nuovo giocatore" }} />
+      <AdminPageHeader title="Giocatori" cta={{ href: "/admin/giocatori/new", label: "Nuovo giocatore" }} />
       <GiocatoriTable rows={players} />
     </div>
   );

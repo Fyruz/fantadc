@@ -13,7 +13,7 @@ export default async function SquadreFantasyPage() {
 
   return (
     <div>
-      <AdminPageHeader title="Squadre fantasy" />
+      <AdminPageHeader title="Squadre Fanta" />
       <SquadreFantasyTable rows={teams} />
     </div>
   );

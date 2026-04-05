@@ -14,7 +14,7 @@ export default async function PartitePage() {
 
   return (
     <div>
-      <AdminPageHeader title="Partite" cta={{ href: "/admin/partite/new", label: "+ Nuova partita" }} />
+      <AdminPageHeader title="Partite" cta={{ href: "/admin/partite/new", label: "Nuova partita" }} />
       <PartiteTable rows={matches} />
     </div>
   );
