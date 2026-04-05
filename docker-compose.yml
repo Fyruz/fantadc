@@ -1,21 +1,55 @@
 services:
-  db:
+  postgres:
     image: postgres:16-alpine
-    container_name: fantadc-db
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: fantadc
-      POSTGRES_PASSWORD: fantadc
-      POSTGRES_DB: fantadc
+    container_name: fantadc-postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+      POSTGRES_DB: ${POSTGRES_DB:-fantadc}
     volumes:
-      - fantadc-db-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fantadc -d fantadc"]
-      interval: 5s
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-dev} -d ${POSTGRES_DB:-fantadc}",
+        ]
+      interval: 10s
       timeout: 5s
-      retries: 10
+      retries: 5
+
+  fantadc:
+    build: .
+    image: fantadc:latest
+    container_name: fantadc
+    ports:
+      - "5680:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/${POSTGRES_DB:-fantadc}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+    env_file:
+      - .env.docker
+    networks:
+      - fantadc_net
+      - internal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  fantadc_net:
+    external: true
+    name: fantadc_net
+  internal:
+    driver: bridge
 
 volumes:
-  fantadc-db-data:
+  pgdata:
