@@ -28,7 +28,7 @@ services:
     image: fantadc:latest
     container_name: fantadc
     ports:
-      - "5680:3000"
+      - "4370:3000"
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgresql://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/${POSTGRES_DB:-fantadc}
