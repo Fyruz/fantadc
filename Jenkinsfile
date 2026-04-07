@@ -51,14 +51,13 @@ pipeline {
                             sleep 2
                         done
                     '''
-                    // 2. Avvia l'app (include prisma+tsx, DATABASE_URL già nel compose env)
+                    // 2. Avvia l'app
                     sh """
                         NEXTAUTH_URL=https://fantadc.gferruzzi.it \
                         docker compose up -d --build fantadc
                     """
-                    // 3. Attendi che il container sia up, poi esegui migrate + seed
+                    // 3. Attendi che il container sia up, poi migra + seed
                     sh '''
-                        echo "Waiting for fantadc container to start..."
                         sleep 10
                         docker exec fantadc npx prisma db push --accept-data-loss
                         docker exec fantadc npx prisma db seed
