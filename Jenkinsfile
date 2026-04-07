@@ -36,12 +36,21 @@ pipeline {
                     )
                 ]) {
                     sh 'docker network create fantadc_net || true'
-                    // 1. Avvia solo il DB e attendi che sia healthy
+                    // 1. Avvia solo il DB e attendi che sia healthy (max 60s)
                     sh """
                         POSTGRES_USER=${POSTGRES_USER} POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
                         docker compose up -d postgres
                     """
-                    sh 'docker compose wait postgres || true'
+                    sh '''
+                        echo "Waiting for postgres to be healthy..."
+                        for i in $(seq 1 30); do
+                            STATUS=$(docker inspect --format="{{.State.Health.Status}}" fantadc-postgres 2>/dev/null || echo "missing")
+                            echo "  attempt $i: $STATUS"
+                            [ "$STATUS" = "healthy" ] && echo "Postgres is healthy." && break
+                            [ $i -eq 30 ] && echo "Timed out waiting for postgres." && exit 1
+                            sleep 2
+                        done
+                    '''
                     // 2. Applica schema e seed tramite il builder stage (ha prisma + tsx)
                     sh """
                         docker build --target builder -t fantadc-migrator:latest .
