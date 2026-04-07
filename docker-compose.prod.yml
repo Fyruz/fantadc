@@ -12,7 +12,7 @@ services:
       - pgdata_prod:/var/lib/postgresql/data
     networks:
       - internal_prod
-    restart: unless-stopped
+    restart: always
     healthcheck:
       test:
         [
@@ -44,7 +44,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    restart: unless-stopped
+    restart: always
 
 networks:
   fantadc_prod_net:
