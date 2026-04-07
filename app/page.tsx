@@ -102,19 +102,6 @@ export default async function HomePage() {
 
           <div className="relative z-10 px-5 py-20 max-w-lg mx-auto flex flex-col items-center gap-6">
 
-            {/* Pill */}
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.2em]"
-              style={{
-                background: "rgba(232,160,0,0.13)",
-                border: "1px solid rgba(232,160,0,0.32)",
-                color: "#E8A000",
-              }}
-            >
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#E8A000", display: "inline-block" }} />
-              Torneo di Paese · 2025
-            </div>
-
             {/* Wordmark */}
             <h1
               className="font-display font-black text-white uppercase leading-[0.88] tracking-tight"
