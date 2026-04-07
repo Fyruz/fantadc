@@ -37,6 +37,17 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Prisma CLI + tsx per eseguire migrazioni e seed via docker exec
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma      ./node_modules/.bin/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma            ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/tsx          ./node_modules/.bin/tsx
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx               ./node_modules/tsx
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tslib             ./node_modules/tslib
+COPY --from=builder --chown=nextjs:nodejs /app/prisma                         ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts               ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json                  ./tsconfig.json
+COPY --from=builder --chown=nextjs:nodejs /app/package.json                   ./package.json
+
 USER nextjs
 EXPOSE 3000
 

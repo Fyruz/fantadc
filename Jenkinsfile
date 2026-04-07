@@ -51,30 +51,18 @@ pipeline {
                             sleep 2
                         done
                     '''
-                    // 2. Applica schema e seed tramite il builder stage (ha prisma + tsx)
-                    // Scriviamo il DATABASE_URL su file per evitare problemi con
-                    // caratteri speciali nella password all'interno della shell.
-                    writeFile file: '.migration.env', text: "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/fantadc\n"
-                    sh '''
-                        docker build --target builder -t fantadc-migrator:latest .
-                        docker run --rm \
-                            --network fantadc_dev_internal \
-                            --env-file .migration.env \
-                            fantadc-migrator:latest \
-                            npx prisma db push --accept-data-loss
-                        docker run --rm \
-                            --network fantadc_dev_internal \
-                            --env-file .migration.env \
-                            fantadc-migrator:latest \
-                            npx prisma db seed
-                        rm -f .migration.env
-                    '''
-                    // 3. Avvia l'app
+                    // 2. Avvia l'app (include prisma+tsx, DATABASE_URL già nel compose env)
                     sh """
                         NEXTAUTH_URL=https://fantadc.gferruzzi.it \
-                        AUTH_TRUST_HOST=true \
                         docker compose up -d --build fantadc
                     """
+                    // 3. Attendi che il container sia up, poi esegui migrate + seed
+                    sh '''
+                        echo "Waiting for fantadc container to start..."
+                        sleep 10
+                        docker exec fantadc npx prisma db push --accept-data-loss
+                        docker exec fantadc npx prisma db seed
+                    '''
                 }
             }
         }
