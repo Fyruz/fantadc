@@ -59,8 +59,8 @@ pipeline {
                     // 3. Attendi che il container sia up, poi migra + seed
                     sh '''
                         sleep 10
-                        echo "=== DATABASE_URL host in container ==="
-                        docker exec fantadc node -e 'try{const u=new URL(process.env.DATABASE_URL||"");console.log("host="+u.hostname+" db="+u.pathname)}catch(e){console.log("DATABASE_URL=",process.env.DATABASE_URL)}'
+                        echo "=== DATABASE_URL raw ==="
+                        docker inspect fantadc --format '{{range .Config.Env}}{{println .}}{{end}}' | grep DATABASE
                         docker exec fantadc npx prisma db push --accept-data-loss
                         docker exec fantadc npx prisma db seed
                     '''
