@@ -52,14 +52,23 @@ pipeline {
                         done
                     '''
                     // 2. Applica schema e seed tramite il builder stage (ha prisma + tsx)
-                    sh """
+                    // Scriviamo il DATABASE_URL su file per evitare problemi con
+                    // caratteri speciali nella password all'interno della shell.
+                    writeFile file: '.migration.env', text: "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/fantadc\n"
+                    sh '''
                         docker build --target builder -t fantadc-migrator:latest .
                         docker run --rm \
                             --network fantadc_dev_internal \
-                            -e DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/fantadc" \
+                            --env-file .migration.env \
                             fantadc-migrator:latest \
-                            sh -c "npx prisma db push --accept-data-loss && npx prisma db seed"
-                    """
+                            npx prisma db push --accept-data-loss
+                        docker run --rm \
+                            --network fantadc_dev_internal \
+                            --env-file .migration.env \
+                            fantadc-migrator:latest \
+                            npx prisma db seed
+                        rm -f .migration.env
+                    '''
                     // 3. Avvia l'app
                     sh """
                         NEXTAUTH_URL=https://fantadc.gferruzzi.it \
