@@ -45,8 +45,8 @@ pipeline {
                             "APP_DATABASE_URL=postgresql://${encodedUser}:${encodedPassword}@postgres:5432/fantadc",
                         ]) {
                             sh 'docker network create fantadc_net || true'
-                            // 1. Avvia solo il DB e attendi che sia healthy (max 60s)
-                            sh 'docker compose up -d postgres'
+                            // 1. Ricrea il DB per riallineare env e network Docker tra i run Jenkins.
+                            sh 'docker compose up -d --force-recreate postgres'
                             sh '''
                                 echo "Waiting for postgres to be healthy..."
                                 for i in $(seq 1 30); do

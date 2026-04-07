@@ -11,7 +11,9 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
-      - internal
+      internal:
+        aliases:
+          - postgres
     restart: always
     healthcheck:
       test:
