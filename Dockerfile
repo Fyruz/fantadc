@@ -40,6 +40,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Prisma CLI + tsx per eseguire migrazioni e seed via docker exec
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma      ./node_modules/.bin/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma            ./node_modules/prisma
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma/engines   ./node_modules/@prisma/engines
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/tsx          ./node_modules/.bin/tsx
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tsx               ./node_modules/tsx
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/tslib             ./node_modules/tslib
