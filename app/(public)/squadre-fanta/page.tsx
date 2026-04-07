@@ -24,7 +24,7 @@ export default async function SquadreFantasyPublicPage() {
           {rankings.map((r) => (
             <Link
               key={r.fantasyTeamId}
-              href={`/squadre-fantasy/${r.fantasyTeamId}`}
+              href={`/squadre-fanta/${r.fantasyTeamId}`}
               className="card px-5 py-4 flex items-center justify-between hover:bg-[var(--surface-1)] transition-colors"
             >
               <div className="flex items-center gap-3">

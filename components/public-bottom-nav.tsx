@@ -15,7 +15,7 @@ type MainNavItem = {
 const MAIN_NAV: readonly MainNavItem[] = [
   { href: "/partite",   label: "PARTITE",   icon: "pi-calendar" },
   { href: "/classifica",label: "CLASS.",    icon: "pi-list"     },
-  { href: "/squadre-fantasy", label: "FANTA",   icon: "pi-shield" },
+  { href: "/squadre-fanta", label: "FANTA",   icon: "pi-shield" },
   {
     href: "/dashboard",
     label: "IL MIO",

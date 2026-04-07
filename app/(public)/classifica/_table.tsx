@@ -83,7 +83,7 @@ export default function ClassificaTable({ rows }: { rows: RankRow[] }) {
                   {row.rank}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <Link href={`/squadre-fantasy/${row.fantasyTeamId}`} className="hover:underline">
+                  <Link href={`/squadre-fanta/${row.fantasyTeamId}`} className="hover:underline">
                     <div
                       className="font-display font-black text-[14px] uppercase truncate"
                       style={{ color: idx === 0 ? "#fff" : "rgba(255,255,255,0.85)" }}
@@ -121,7 +121,7 @@ export default function ClassificaTable({ rows }: { rows: RankRow[] }) {
             >
               <RankBadge rank={row.rank} />
               <div className="flex-1 min-w-0">
-                <Link href={`/squadre-fantasy/${row.fantasyTeamId}`} className="hover:underline">
+                <Link href={`/squadre-fanta/${row.fantasyTeamId}`} className="hover:underline">
                   <div className="font-display font-black text-[13px] uppercase truncate" style={{ color: "var(--text-primary)" }}>
                     {row.fantasyTeamName}
                   </div>
