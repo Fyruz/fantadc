@@ -36,10 +36,26 @@ pipeline {
                     )
                 ]) {
                     sh 'docker network create fantadc_net || true'
+                    // 1. Avvia solo il DB e attendi che sia healthy
+                    sh """
+                        POSTGRES_USER=${POSTGRES_USER} POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
+                        docker compose up -d postgres
+                    """
+                    sh 'docker compose wait postgres || true'
+                    // 2. Applica schema e seed tramite il builder stage (ha prisma + tsx)
+                    sh """
+                        docker build --target builder -t fantadc-migrator:latest .
+                        docker run --rm \
+                            --network fantadc_dev_internal \
+                            -e DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/fantadc" \
+                            fantadc-migrator:latest \
+                            sh -c "npx prisma db push --accept-data-loss && npx prisma db seed"
+                    """
+                    // 3. Avvia l'app
                     sh """
                         NEXTAUTH_URL=https://fantadc.gferruzzi.it \
                         AUTH_TRUST_HOST=true \
-                        docker compose up -d --build
+                        docker compose up -d --build fantadc
                     """
                 }
             }

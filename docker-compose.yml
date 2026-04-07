@@ -48,6 +48,7 @@ networks:
     name: fantadc_net
   internal:
     driver: bridge
+    name: fantadc_dev_internal
 
 volumes:
   pgdata:
