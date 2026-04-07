@@ -379,7 +379,7 @@ export default async function HomePage() {
         className="hidden md:block py-5 text-center text-[11px]"
         style={{ borderTop: "1px solid var(--border-soft)", color: "var(--text-disabled)" }}
       >
-        Fantadc · Torneo di paese
+        Fantadc
       </footer>
 
       <PublicBottomNav />

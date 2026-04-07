@@ -24,7 +24,7 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: "Fantadc",
-  description: "Fantacalcio del torneo di paese",
+  description: "Fantacalcio — scegli i tuoi campioni e scala la classifica.",
 };
 
 export default function RootLayout({

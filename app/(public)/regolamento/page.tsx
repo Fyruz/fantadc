@@ -14,8 +14,8 @@ export default function RegolamentoPage() {
             Come funziona il Fantadc
           </h2>
           <p>
-            Il Fantadc è il gioco fantasy ufficiale del torneo di paese. Ogni partecipante crea la
-            propria squadra fantasy scegliendo 5 giocatori reali del torneo e guadagna punti in base
+            Il Fantadc è un gioco di fantacalcio. Ogni partecipante crea la
+            propria squadra fanta scegliendo 5 giocatori reali e guadagna punti in base
             ai bonus assegnati dagli admin e al risultato del voto MVP.
           </p>
         </section>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useActionState } from "react";
+import Link from "next/link";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
@@ -12,26 +13,39 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-lg mx-auto mb-3"
-            style={{ background: "var(--primary)" }}
-          >
-            ⚽
-          </div>
-          <h1 className="font-display font-black text-2xl uppercase" style={{ color: "var(--text-primary)" }}>
-            FANTA<span style={{ color: "var(--primary)" }}>DC</span>
-          </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>Crea il tuo account</p>
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
+      <div className="w-full max-w-sm flex flex-col gap-8">
+
+        {/* Header */}
+        <div className="text-center">
+          <Link href="/">
+            <span className="font-display font-black text-4xl uppercase" style={{ color: "var(--text-primary)" }}>
+              FANTA<span style={{ color: "var(--primary)" }}>DC</span>
+            </span>
+          </Link>
         </div>
 
-        <div className="card p-6">
-          <form action={action} className="flex flex-col gap-4">
+        {/* Card */}
+        <div
+          className="rounded-3xl px-7 py-8"
+          style={{
+            background: "#fff",
+            border: "1.5px solid var(--border-medium)",
+            boxShadow: "0 4px 32px rgba(1,7,163,0.10)",
+          }}
+        >
+          <h2
+            className="font-display font-black text-2xl uppercase mb-6"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Registrati
+          </h2>
+
+          <form action={action} className="flex flex-col gap-5">
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }} htmlFor="name">Nome (opzionale)</label>
+              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="name">
+                Nome <span className="font-normal normal-case tracking-normal" style={{ color: "var(--text-disabled)" }}>(opzionale)</span>
+              </label>
               <InputText
                 id="name"
                 name="name"
@@ -46,7 +60,9 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }} htmlFor="email">Email</label>
+              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="email">
+                Email
+              </label>
               <InputText
                 id="email"
                 name="email"
@@ -62,8 +78,8 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-xs font-medium mb-1" style={{ color: "var(--text-muted)" }} htmlFor="password">
-                Password <span className="font-normal" style={{ color: "var(--text-muted)" }}>(min. 8 caratteri)</span>
+              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="password">
+                Password <span className="font-normal normal-case tracking-normal" style={{ color: "var(--text-disabled)" }}>(min. 8 caratteri)</span>
               </label>
               <input type="hidden" name="password" value={password} />
               <Password
@@ -82,22 +98,26 @@ export default function RegisterPage() {
             </div>
 
             {state?.message && (
-              <p className="text-red-500 text-sm">{state.message}</p>
+              <p className="text-sm" style={{ color: "#DC2626" }}>{state.message}</p>
             )}
 
             <Button
               type="submit"
               label={pending ? "Registrazione in corso..." : "Registrati"}
               disabled={pending}
-              className="w-full py-2.5"
+              className="w-full"
             />
           </form>
         </div>
 
-        <p className="text-center text-sm mt-4" style={{ color: "var(--text-muted)" }}>
+        {/* Footer link */}
+        <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Hai già un account?{" "}
-          <a href="/login" className="font-bold" style={{ color: "var(--primary)" }}>Accedi</a>
+          <Link href="/login" className="font-black" style={{ color: "var(--primary)" }}>
+            Accedi
+          </Link>
         </p>
+
       </div>
     </div>
   );
