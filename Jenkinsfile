@@ -35,35 +35,38 @@ pipeline {
                         variable: 'NEXTAUTH_SECRET'
                     )
                 ]) {
-                    sh 'docker network create fantadc_net || true'
-                    // 1. Avvia solo il DB e attendi che sia healthy (max 60s)
-                    sh """
-                        POSTGRES_USER=${POSTGRES_USER} POSTGRES_PASSWORD=${POSTGRES_PASSWORD} \
-                        docker compose up -d postgres
-                    """
-                    sh '''
-                        echo "Waiting for postgres to be healthy..."
-                        for i in $(seq 1 30); do
-                            STATUS=$(docker inspect --format="{{.State.Health.Status}}" fantadc-postgres 2>/dev/null || echo "missing")
-                            echo "  attempt $i: $STATUS"
-                            [ "$STATUS" = "healthy" ] && echo "Postgres is healthy." && break
-                            [ $i -eq 30 ] && echo "Timed out waiting for postgres." && exit 1
-                            sleep 2
-                        done
-                    '''
-                    // 2. Avvia l'app
-                    sh """
-                        NEXTAUTH_URL=https://fantadc.gferruzzi.it \
-                        docker compose up -d --build fantadc
-                    """
-                    // 3. Attendi che il container sia up, poi migra + seed
-                    sh '''
-                        sleep 10
-                        echo "=== DATABASE_URL raw ==="
-                        docker inspect fantadc --format '{{range .Config.Env}}{{println .}}{{end}}' | grep DATABASE
-                        docker exec fantadc npx prisma db push --accept-data-loss
-                        docker exec fantadc npx prisma db seed
-                    '''
+                    script {
+                        def encodedUser = java.net.URLEncoder.encode(env.POSTGRES_USER, 'UTF-8').replace('+', '%20')
+                        def encodedPassword = java.net.URLEncoder.encode(env.POSTGRES_PASSWORD, 'UTF-8').replace('+', '%20')
+
+                        withEnv([
+                            'POSTGRES_DB=fantadc',
+                            'NEXTAUTH_URL=https://fantadc.gferruzzi.it',
+                            "APP_DATABASE_URL=postgresql://${encodedUser}:${encodedPassword}@postgres:5432/fantadc",
+                        ]) {
+                            sh 'docker network create fantadc_net || true'
+                            // 1. Avvia solo il DB e attendi che sia healthy (max 60s)
+                            sh 'docker compose up -d postgres'
+                            sh '''
+                                echo "Waiting for postgres to be healthy..."
+                                for i in $(seq 1 30); do
+                                    STATUS=$(docker inspect --format="{{.State.Health.Status}}" fantadc-postgres 2>/dev/null || echo "missing")
+                                    echo "  attempt $i: $STATUS"
+                                    [ "$STATUS" = "healthy" ] && echo "Postgres is healthy." && break
+                                    [ $i -eq 30 ] && echo "Timed out waiting for postgres." && exit 1
+                                    sleep 2
+                                done
+                            '''
+                            // 2. Avvia l'app con un DATABASE_URL gia escapato
+                            sh 'docker compose up -d --build fantadc'
+                            // 3. Attendi che il container sia up, poi migra + seed con la stessa URL
+                            sh '''
+                                sleep 10
+                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'npx prisma db push --accept-data-loss --url "$DATABASE_URL"'
+                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'npx prisma db seed'
+                            '''
+                        }
+                    }
                 }
             }
         }

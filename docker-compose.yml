@@ -30,11 +30,11 @@ services:
     ports:
       - "4370:3000"
     environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-dev}:${POSTGRES_PASSWORD:-dev}@postgres:5432/${POSTGRES_DB:-fantadc}
-      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
-      - NEXTAUTH_URL=${NEXTAUTH_URL}
-      - AUTH_TRUST_HOST=true
+      NODE_ENV: production
+      DATABASE_URL: ${APP_DATABASE_URL:-postgresql://dev:dev@postgres:5432/fantadc}
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET}
+      NEXTAUTH_URL: ${NEXTAUTH_URL}
+      AUTH_TRUST_HOST: "true"
     networks:
       - fantadc_net
       - internal

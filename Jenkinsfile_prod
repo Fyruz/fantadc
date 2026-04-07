@@ -39,9 +39,18 @@ pipeline {
                         variable: 'ENV_DOCKER_FILE'
                     )
                 ]) {
-                    sh 'cp $ENV_DOCKER_FILE .env.docker'
-                    sh 'docker network create fantadc_prod_net || true'
-                    sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d --build'
+                    script {
+                        def encodedUser = java.net.URLEncoder.encode(env.POSTGRES_USER, 'UTF-8').replace('+', '%20')
+                        def encodedPassword = java.net.URLEncoder.encode(env.POSTGRES_PASSWORD, 'UTF-8').replace('+', '%20')
+
+                        withEnv([
+                            "APP_DATABASE_URL=postgresql://${encodedUser}:${encodedPassword}@postgres:5432/fantadc",
+                        ]) {
+                            sh 'cp $ENV_DOCKER_FILE .env.docker'
+                            sh 'docker network create fantadc_prod_net || true'
+                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d --build'
+                        }
+                    }
                 }
             }
         }
