@@ -7,7 +7,7 @@ const NAV_LINKS = [
   { href: "/partite",         label: "Partite"   },
   { href: "/squadre",         label: "Squadre"   },
   { href: "/giocatori",       label: "Giocatori" },
-  { href: "/squadre-fantasy", label: "Fantasy"   },
+  { href: "/squadre-fantasy", label: "Fanta"      },
   { href: "/classifica",      label: "Classifica"},
   { href: "/regolamento",     label: "Regolamento"},
 ];

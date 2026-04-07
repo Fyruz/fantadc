@@ -42,8 +42,9 @@ export default async function SquadraFantasyPublicPage({
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Header */}
       <div>
-        <div className="over-label mb-1">Stagione 2025</div>
+        <div className="over-label mb-1">Squadra Fanta</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
           {team.name}
         </h1>
@@ -52,33 +53,41 @@ export default async function SquadraFantasyPublicPage({
         </p>
         {history.length > 0 && (
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>{totalPoints.toFixed(1)}</span>
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>punti totali</span>
+            <span className="font-display font-black text-3xl" style={{ color: "var(--primary)" }}>
+              {totalPoints.toFixed(1)}
+            </span>
+            <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>punti totali</span>
           </div>
         )}
       </div>
 
+      {/* Rosa */}
       <div>
-        <h2 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Rosa</h2>
+        <div className="over-label mb-3">Rosa</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {team.players.map(({ player }) => {
             const isCaptain = player.id === team.captainPlayerId;
             return (
               <div
                 key={player.id}
-                className={`card p-3 flex items-center gap-2 text-sm ${isCaptain ? "!border-[#F5C518]" : ""}`}
-                style={{ borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}`, ...(isCaptain ? { background: 'rgba(245,197,24,0.08)' } : {}) }}
+                className="card p-3 flex items-center gap-3"
+                style={{
+                  borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}`,
+                  ...(isCaptain ? { background: "rgba(245,197,24,0.07)", borderColor: "#F5C518" } : {}),
+                }}
               >
                 <RoleBadge role={player.role} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium truncate" style={{ color: "var(--text-primary)" }}>{player.name}</p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  <p className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                    {player.name}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {player.footballTeam.shortName ?? player.footballTeam.name}
                   </p>
                 </div>
                 {isCaptain && (
-                  <span className="text-amber-500 text-xs font-bold shrink-0" title="Capitano">
-                    ★ C
+                  <span className="text-[11px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>
+                    ★ CAP
                   </span>
                 )}
               </div>
@@ -87,16 +96,19 @@ export default async function SquadraFantasyPublicPage({
         </div>
       </div>
 
+      {/* Storico partite */}
       {history.length > 0 && (
         <div>
-          <h2 className="text-base font-semibold mb-3" style={{ color: "var(--text-primary)" }}>Storico partite</h2>
+          <div className="over-label mb-3">Storico partite</div>
           <div className="flex flex-col gap-3">
             {history.map((match) => (
               <details key={match.matchId} className="card overflow-hidden group">
                 <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-1)] transition-colors list-none">
                   <div>
-                    <p className="font-medium text-sm" style={{ color: "var(--text-primary)" }}>{match.label}</p>
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                    <p className="font-display font-black text-sm uppercase" style={{ color: "var(--text-primary)" }}>
+                      {match.label}
+                    </p>
+                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                       {match.startsAt.toLocaleDateString("it-IT", {
                         day: "2-digit",
                         month: "long",
@@ -105,9 +117,11 @@ export default async function SquadraFantasyPublicPage({
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>{match.total.toFixed(1)}</span>
-                    <span className="text-sm" style={{ color: "var(--text-muted)" }}>pt</span>
-                    <span className="text-xs group-open:rotate-180 transition-transform" style={{ color: "var(--text-muted)" }}>▼</span>
+                    <span className="font-display font-black text-xl" style={{ color: "var(--text-primary)" }}>
+                      {match.total.toFixed(1)}
+                    </span>
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>pt</span>
+                    <i className="pi pi-chevron-down text-xs transition-transform group-open:rotate-180" style={{ color: "var(--text-muted)" }} />
                   </div>
                 </summary>
                 <div className="px-4 pb-3 border-t" style={{ borderColor: "var(--border-soft)", background: "var(--surface-1)" }}>
@@ -115,25 +129,28 @@ export default async function SquadraFantasyPublicPage({
                     {match.playerScores.map((ps) => (
                       <div
                         key={ps.playerId}
-                        className="flex items-center justify-between text-xs py-1 border-b last:border-0"
+                        className="flex items-center justify-between py-1.5 border-b last:border-0"
                         style={{ borderColor: "var(--border-soft)" }}
                       >
-                        <div className="flex items-center gap-1.5">
-                          {ps.isCaptain && <span className="text-amber-500 font-bold">★ C</span>}
-                          {ps.isMvp && <span className="text-yellow-400">★</span>}
-                          <span className="font-medium" style={{ color: "var(--text-primary)" }}>{ps.playerName}</span>
-                          <span style={{ color: "var(--text-muted)" }}>({ps.footballTeamName})</span>
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {ps.isCaptain && <span className="text-[10px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>★ C</span>}
+                          {ps.isMvp && <span className="text-[10px] flex-shrink-0" style={{ color: "#E8A000" }}>MVP</span>}
+                          <span className="font-display font-black text-xs uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                            {ps.playerName}
+                          </span>
+                          <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                            ({ps.footballTeamName})
+                          </span>
                         </div>
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1.5 shrink-0">
                           {ps.isCaptain && ps.basePoints > 0 && (
-                            <span className="text-xs" style={{ color: "var(--text-muted)" }}>×2</span>
+                            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>×2</span>
                           )}
                           <span
-                            className="font-mono font-bold"
-                            style={{ color: ps.finalPoints > 0 ? '#32D74B' : ps.finalPoints < 0 ? '#FF453A' : 'var(--text-muted)' }}
+                            className="font-display font-black text-sm"
+                            style={{ color: ps.finalPoints > 0 ? "#16A34A" : ps.finalPoints < 0 ? "#DC2626" : "var(--text-muted)" }}
                           >
-                            {ps.finalPoints > 0 ? "+" : ""}
-                            {ps.finalPoints.toFixed(1)}
+                            {ps.finalPoints > 0 ? "+" : ""}{ps.finalPoints.toFixed(1)}
                           </span>
                         </div>
                       </div>

@@ -23,7 +23,7 @@ export default function SquadreFantasyTable({ rows }: { rows: Row[] }) {
   return (
     <div className="card overflow-hidden">
       {total === 0 ? (
-        <p className="px-4 py-10 text-center over-label">Nessuna squadra fantasy.</p>
+        <p className="px-4 py-10 text-center over-label">Nessuna squadra fanta.</p>
       ) : (
         <>
           {slice.map((row, idx) => {

@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
         >
           <div className="absolute right-[-20px] top-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
-          <div className="text-white/60 text-sm mb-4">Non hai ancora creato la tua squadra fantasy.</div>
+          <div className="text-white/60 text-sm mb-4">Non hai ancora creato la tua squadra fanta.</div>
           <Link href="/squadra/crea">
             <button
               className="rounded-full font-black text-sm uppercase tracking-wide px-6 py-2.5"

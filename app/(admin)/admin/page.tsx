@@ -105,8 +105,8 @@ export default async function AdminDashboardPage() {
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
                   <span className="font-bold">{usersNoTeam}</span>{" "}
                   {usersNoTeam === 1
-                    ? "utente registrato senza squadra fantasy"
-                    : "utenti registrati senza squadra fantasy"}
+                    ? "utente registrato senza squadra fanta"
+                    : "utenti registrati senza squadra fanta"}
                 </p>
                 <Link
                   href="/admin/utenti"

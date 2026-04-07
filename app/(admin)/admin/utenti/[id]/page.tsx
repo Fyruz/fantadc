@@ -57,9 +57,9 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
 
       {/* Fantasy team section */}
       <div>
-        <p className="over-label mb-3">Squadra fantasy</p>
+        <p className="over-label mb-3">Squadra fanta</p>
         {!user.fantasyTeam ? (
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Nessuna squadra fantasy.</p>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>Nessuna squadra fanta.</p>
         ) : (
           <div className="card p-4">
             <div className="flex items-center justify-between gap-4">
