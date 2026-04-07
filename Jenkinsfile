@@ -38,6 +38,7 @@ pipeline {
                     sh 'docker network create fantadc_net || true'
                     sh """
                         NEXTAUTH_URL=https://fantadc.gferruzzi.it \
+                        AUTH_TRUST_HOST=true \
                         docker compose up -d --build
                     """
                 }
