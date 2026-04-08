@@ -17,10 +17,10 @@ type Match = {
 };
 
 const STATUS_OPTIONS = [
-  { label: "Bozza", value: "DRAFT" },
+  { label: "Bozza",       value: "DRAFT"     },
   { label: "Programmata", value: "SCHEDULED" },
-  { label: "Conclusa", value: "CONCLUDED" },
-  { label: "Pubblicata", value: "PUBLISHED" },
+  { label: "Conclusa",    value: "CONCLUDED" },
+  { label: "Pubblicata",  value: "PUBLISHED" },
 ];
 
 export default function EditMatchForm({ match, teams }: { match: Match; teams: Team[] }) {
@@ -54,41 +54,45 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
     : "";
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={action} className="flex flex-col gap-4 pt-3">
       <input type="hidden" name="id" value={match.id} />
 
-      {/* Teams */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
             Squadra casa
           </label>
           <input type="hidden" name="homeTeamId" value={homeTeamId} />
-          <Dropdown value={homeTeamId} onChange={(e) => setHomeTeamId(e.value)} options={teamOptions} className="w-full" />
+          <Dropdown value={homeTeamId} onChange={(e) => setHomeTeamId(e.value)} options={teamOptions} className="w-full" filter />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
             Squadra ospite
           </label>
           <input type="hidden" name="awayTeamId" value={awayTeamId} />
-          <Dropdown value={awayTeamId} onChange={(e) => setAwayTeamId(e.value)} options={teamOptions} className="w-full" />
+          <Dropdown value={awayTeamId} onChange={(e) => setAwayTeamId(e.value)} options={teamOptions} className="w-full" filter />
         </div>
       </div>
 
-      {/* Date + Time + Status */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Data</label>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Data
+          </label>
           <input type="hidden" name="date" value={formattedDate} />
-          <Calendar value={date} onChange={(e) => setDate(e.value as Date | null)} dateFormat="dd/mm/yy" showIcon className="w-full" />
+          <Calendar value={date} onChange={(e) => setDate(e.value as Date | null)} dateFormat="dd/mm/yy" showIcon className="w-full" inputClassName="w-full" showButtonBar />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Ora</label>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Ora
+          </label>
           <input type="hidden" name="time" value={formattedTime} />
-          <Calendar value={time} onChange={(e) => setTime(e.value as Date | null)} timeOnly showIcon className="w-full" />
+          <Calendar value={time} onChange={(e) => setTime(e.value as Date | null)} timeOnly showIcon className="w-full" inputClassName="w-full" hourFormat="24" />
         </div>
         <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>Stato</label>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Stato
+          </label>
           <input type="hidden" name="status" value={status} />
           <Dropdown value={status} onChange={(e) => setStatus(e.value)} options={STATUS_OPTIONS} className="w-full" />
         </div>
@@ -101,9 +105,7 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
         <p className="text-xs" style={{ color: "#991B1B" }}>{state.message}</p>
       )}
 
-      <div>
-        <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={pending} size="small" />
-      </div>
+      <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={pending} icon="pi pi-check" className="w-full sm:w-auto" />
     </form>
   );
 }

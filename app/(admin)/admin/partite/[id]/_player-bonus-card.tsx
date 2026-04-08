@@ -5,7 +5,6 @@ import { useActionState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { InputNumber } from "primereact/inputnumber";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { assignBonus, deleteBonus } from "@/app/actions/admin/bonuses";
 import { removeMatchPlayer } from "@/app/actions/admin/match-players";
@@ -21,6 +20,28 @@ interface Props {
   bonusTypes: BonusType[];
 }
 
+function Qty({ value, onChange }: { value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => onChange(Math.max(1, value - 1))}
+        className="w-8 h-8 rounded-full text-base font-bold flex items-center justify-center flex-shrink-0 transition-colors"
+        style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+      >−</button>
+      <span className="font-display font-black text-xl w-6 text-center tabular-nums" style={{ color: "var(--text-primary)" }}>
+        {value}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(Math.min(10, value + 1))}
+        className="w-8 h-8 rounded-full text-base font-bold flex items-center justify-center flex-shrink-0 transition-colors"
+        style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+      >+</button>
+    </div>
+  );
+}
+
 export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }: Props) {
   const [visible, setVisible] = useState(false);
   const [selectedBonusType, setSelectedBonusType] = useState<string>("");
@@ -30,23 +51,22 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const prevStateRef = useRef<typeof state>(undefined);
 
   useEffect(() => {
-    if (state !== undefined && state !== prevStateRef.current && !state.message && !state.errors) {
+    if (state !== undefined && state !== prevStateRef.current && !state?.message && !state?.errors) {
       setSelectedBonusType("");
       setQty(1);
-      setVisible(false);
     }
     prevStateRef.current = state;
   }, [state]);
 
-  const isGk = player.role === "P";
-  const borderColor = isGk ? "#E8A000" : "var(--border-medium)";
-
   const bonusTypeOptions = bonusTypes.map((bt) => ({
-    label: `${bt.code} — ${bt.name} (${bt.points > 0 ? "+" : ""}${bt.points}pt)`,
+    label: `${bt.code} — ${bt.name}`,
     value: String(bt.id),
+    points: bt.points,
   }));
 
-  const handleRemoveClick = (e: React.MouseEvent<HTMLElement>) => {
+  const selectedBt = bonusTypes.find((bt) => String(bt.id) === selectedBonusType);
+
+  const handleRemove = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
     confirmPopup({
       target: e.currentTarget,
@@ -57,6 +77,8 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
       accept: () => removeFormRef.current?.requestSubmit(),
     });
   };
+
+  const totalPoints = bonuses.reduce((s, b) => s + b.points * b.quantity, 0);
 
   return (
     <>
@@ -70,60 +92,63 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
 
       {/* Card */}
       <div
-        className="rounded-xl p-3 relative cursor-pointer transition-all duration-150 select-none hover:shadow-md"
+        className="rounded-xl p-3 relative cursor-pointer transition-all duration-150 select-none hover:shadow-md active:scale-[0.98]"
         style={{
           background: "#fff",
-          border: `1px solid var(--border-soft)`,
-          borderLeft: `3px solid ${borderColor}`,
-          boxShadow: "0 1px 4px rgba(1,7,163,0.06)",
+          border: "1.5px solid var(--border-medium)",
+          borderLeft: `3px solid ${player.role === "GK" ? "#E8A000" : "var(--primary)"}`,
+          boxShadow: "0 1px 4px rgba(1,7,163,0.05)",
         }}
         onClick={() => setVisible(true)}
       >
-        {/* Remove button */}
+        {/* Remove */}
         <button
           type="button"
           aria-label="Rimuovi"
-          className="absolute top-1.5 right-1.5 w-6 h-6 flex items-center justify-center rounded-full transition-colors"
+          className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full transition-colors"
           style={{ color: "var(--text-disabled)" }}
-          onClick={handleRemoveClick}
+          onClick={handleRemove}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
           onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
         >
-          <i className="pi pi-times text-[11px]" />
+          <i className="pi pi-times text-[10px]" />
         </button>
 
-        {/* Name + role */}
-        <div className="flex items-center gap-1.5 mb-1 pr-6">
+        {/* Player */}
+        <div className="flex items-center gap-1.5 pr-6 mb-0.5">
           <RoleBadge role={player.role} />
-          <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+          <span className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
             {player.name}
           </span>
         </div>
-        <p className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+        <p className="text-[11px] truncate mb-2" style={{ color: "var(--text-muted)" }}>
           {player.footballTeam.name}
         </p>
 
-        {/* Bonus chips */}
+        {/* Bonus summary */}
         {bonuses.length > 0 ? (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {bonuses.map((b) => {
-              const pts = b.points;
-              return (
-                <span
-                  key={b.id}
-                  className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                  style={{
-                    background: pts >= 0 ? "#ECFDF5" : "#FEF2F2",
-                    color: pts >= 0 ? "#065F46" : "#991B1B",
-                  }}
-                >
-                  {b.bonusType.code}{b.quantity > 1 ? ` ×${b.quantity}` : ""} {pts > 0 ? "+" : ""}{pts}pt
-                </span>
-              );
-            })}
+          <div className="flex flex-wrap gap-1">
+            {bonuses.map((b) => (
+              <span
+                key={b.id}
+                className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: b.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+                  color: b.points >= 0 ? "#065F46" : "#991B1B",
+                }}
+              >
+                {b.bonusType.code}{b.quantity > 1 ? ` ×${b.quantity}` : ""}
+              </span>
+            ))}
+            <span
+              className="text-[10px] font-black px-1.5 py-0.5 rounded-full ml-auto"
+              style={{ background: "var(--primary-light)", color: "var(--primary)" }}
+            >
+              {totalPoints > 0 ? "+" : ""}{totalPoints}pt
+            </span>
           </div>
         ) : (
-          <p className="text-[11px] mt-1.5 flex items-center gap-1" style={{ color: "var(--text-disabled)" }}>
+          <p className="text-[11px] flex items-center gap-1" style={{ color: "var(--text-disabled)" }}>
             <i className="pi pi-plus-circle text-[10px]" />
             Tocca per bonus
           </p>
@@ -137,98 +162,145 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         header={
           <div className="flex items-center gap-2">
             <RoleBadge role={player.role} />
-            <span className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>
-              {player.name}
-            </span>
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{player.footballTeam.name}</span>
+            <div className="min-w-0">
+              <div className="font-display font-black text-base uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                {player.name}
+              </div>
+              <div className="text-xs" style={{ color: "var(--text-muted)" }}>{player.footballTeam.name}</div>
+            </div>
           </div>
         }
-        style={{ width: "min(24rem, 95vw)" }}
+        style={{ width: "min(26rem, 96vw)" }}
         modal
         draggable={false}
+        resizable={false}
       >
-        <form action={action} className="flex flex-col gap-3">
-          <input type="hidden" name="matchId" value={matchId} />
-          <input type="hidden" name="playerId" value={player.id} />
-          <div>
-            <label htmlFor="bonus-type-select" className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>
-              Tipo bonus
-            </label>
-            <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
-            <Dropdown
-              inputId="bonus-type-select"
-              value={selectedBonusType}
-              onChange={(e) => setSelectedBonusType(e.value)}
-              options={bonusTypeOptions}
-              placeholder="Seleziona..."
-              className="w-full"
-            />
-            {state?.errors?.bonusTypeId && (
-              <p className="text-red-500 text-xs mt-1">{state.errors.bonusTypeId[0]}</p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="bonus-qty" className="block text-xs font-medium mb-1" style={{ color: "var(--text-secondary)" }}>
-              Quantità
-            </label>
-            <input type="hidden" name="quantity" value={qty} />
-            <InputNumber
-              inputId="bonus-qty"
-              value={qty}
-              onValueChange={(e) => setQty(e.value ?? 1)}
-              min={1}
-              max={10}
-              showButtons
-              className="w-full"
-            />
-          </div>
-          {state?.message && <p className="text-red-500 text-xs">{state.message}</p>}
-          <div className="flex gap-2 justify-end mt-1">
-            <Button type="button" label="Chiudi" severity="secondary" size="small" onClick={() => setVisible(false)} />
-            <Button type="submit" label={pending ? "..." : "Assegna"} size="small" disabled={pending} />
-          </div>
-        </form>
+        <div className="flex flex-col gap-4">
 
-        {/* Existing bonuses */}
-        {bonuses.length > 0 && (
-          <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--border-soft)" }}>
-            <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>
-              Bonus assegnati
-            </p>
-            <ul className="flex flex-col gap-1">
-              {bonuses.map((b) => {
-                const pts = b.points;
-                return (
-                  <li
+          {/* Existing bonuses */}
+          {bonuses.length > 0 && (
+            <div>
+              <div className="over-label mb-2">Bonus assegnati</div>
+              <div className="flex flex-col gap-1.5">
+                {bonuses.map((b) => (
+                  <div
                     key={b.id}
-                    className="flex items-center justify-between text-xs px-2.5 py-1.5 rounded-lg"
-                    style={{ background: "var(--surface-1)" }}
+                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                    style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
                   >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="font-bold px-1.5 py-0.5 rounded text-[10px]"
-                        style={{
-                          background: pts >= 0 ? "#ECFDF5" : "#FEF2F2",
-                          color: pts >= 0 ? "#065F46" : "#991B1B",
-                        }}
-                      >
-                        {b.bonusType.code}
-                      </span>
-                      <span style={{ color: "var(--text-primary)" }}>
-                        {b.quantity > 1 ? `×${b.quantity}` : ""} {pts > 0 ? "+" : ""}{pts}pt
+                    <span
+                      className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0"
+                      style={{
+                        background: b.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+                        color: b.points >= 0 ? "#065F46" : "#991B1B",
+                      }}
+                    >
+                      {b.bonusType.code}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                        {b.quantity > 1 ? `×${b.quantity}  ` : ""}
+                        {b.points > 0 ? "+" : ""}{b.points * b.quantity}pt
                       </span>
                     </div>
-                    <form action={deleteBonus as unknown as (fd: FormData) => void} className="inline">
+                    <form action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
                       <input type="hidden" name="id" value={b.id} />
                       <input type="hidden" name="matchId" value={matchId} />
-                      <Button type="submit" icon="pi pi-times" severity="danger" text size="small" title="Rimuovi" />
+                      <button
+                        type="submit"
+                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
+                        style={{ color: "var(--text-disabled)" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
+                        title="Rimuovi"
+                      >
+                        <i className="pi pi-trash text-xs" />
+                      </button>
                     </form>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-        )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Divider */}
+          {bonuses.length > 0 && (
+            <div style={{ borderTop: "1px solid var(--border-soft)" }} />
+          )}
+
+          {/* Assign form */}
+          <form action={action} className="flex flex-col gap-3">
+            <div className="over-label">Assegna bonus</div>
+            <input type="hidden" name="matchId" value={matchId} />
+            <input type="hidden" name="playerId" value={player.id} />
+            <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
+            <input type="hidden" name="quantity" value={qty} />
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+                Tipo bonus
+              </label>
+              <Dropdown
+                value={selectedBonusType}
+                onChange={(e) => setSelectedBonusType(e.value)}
+                options={bonusTypeOptions}
+                placeholder="Seleziona..."
+                className="w-full"
+                itemTemplate={(opt) => (
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <span className="font-bold text-sm">{opt.label}</span>
+                    </div>
+                    <span
+                      className="text-[11px] font-black px-2 py-0.5 rounded-full flex-shrink-0"
+                      style={{
+                        background: opt.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+                        color: opt.points >= 0 ? "#065F46" : "#991B1B",
+                      }}
+                    >
+                      {opt.points > 0 ? "+" : ""}{opt.points}pt
+                    </span>
+                  </div>
+                )}
+              />
+              {state?.errors?.bonusTypeId && (
+                <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.bonusTypeId[0]}</p>
+              )}
+            </div>
+
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+                  Quantità
+                </label>
+                <Qty value={qty} onChange={setQty} />
+              </div>
+              {selectedBt && (
+                <div className="text-right">
+                  <div className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--text-muted)" }}>Totale</div>
+                  <div
+                    className="font-display font-black text-2xl"
+                    style={{ color: selectedBt.points >= 0 ? "#065F46" : "#991B1B" }}
+                  >
+                    {selectedBt.points * qty > 0 ? "+" : ""}{(selectedBt.points * qty).toFixed(1)}pt
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {state?.message && (
+              <p className="text-xs" style={{ color: "#991B1B" }}>{state.message}</p>
+            )}
+
+            <Button
+              type="submit"
+              label={pending ? "Assegno..." : "Assegna bonus"}
+              icon="pi pi-plus"
+              disabled={pending || !selectedBonusType}
+              className="w-full"
+            />
+          </form>
+        </div>
       </Dialog>
     </>
   );

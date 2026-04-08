@@ -7,8 +7,8 @@ import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 import ScoreForm from "./_score-form";
-import { Button } from "primereact/button";
 import StatusBadge from "@/components/status-badge";
+import { Button } from "primereact/button";
 
 export default async function PartitaDetailPage({
   params,
@@ -23,13 +23,10 @@ export default async function PartitaDetailPage({
     db.match.findUnique({
       where: { id: matchId },
       include: {
-        homeTeam: { select: { id: true, name: true } },
-        awayTeam: { select: { id: true, name: true } },
-
+        homeTeam: { select: { id: true, name: true, shortName: true } },
+        awayTeam: { select: { id: true, name: true, shortName: true } },
         players: {
-          include: {
-            player: { include: { footballTeam: { select: { name: true } } } },
-          },
+          include: { player: { include: { footballTeam: { select: { name: true } } } } },
         },
       },
     }),
@@ -59,110 +56,160 @@ export default async function PartitaDetailPage({
     bonusesByPlayer.set(b.playerId, arr);
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <AdminPageHeader title="Dettaglio partita" backHref="/admin/partite" />
+  const hasScore = match.homeScore !== null && match.awayScore !== null;
 
-      {/* Header card — navy gradient */}
+  return (
+    <div className="flex flex-col gap-5">
+      <AdminPageHeader title="Gestione partita" backHref="/admin/partite" />
+
+      {/* ── Hero banner ───────────────────────────────────────────── */}
       <div
-        className="rounded-2xl overflow-hidden p-5"
-        style={{ background: "linear-gradient(135deg, #0107A3 0%, #0106c4 100%)" }}
+        className="rounded-[20px] overflow-hidden"
+        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.28)" }}
       >
-        <div className="flex items-start justify-between gap-4 mb-3">
-          <p className="text-[12px] text-white/55">
-            {match.startsAt.toLocaleString("it-IT", { dateStyle: "medium", timeStyle: "short" })}
-          </p>
-          <div className="flex-shrink-0">
-            <StatusBadge status={match.status} />
+        {/* Top bar */}
+        <div
+          className="flex items-center justify-between px-5 py-3 gap-3"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <StatusBadge status={match.status} />
+          <span className="text-[11px] font-semibold text-white/50 capitalize">
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+          </span>
+        </div>
+        {/* Teams */}
+        <div className="px-5 py-5 flex items-center gap-3">
+          <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
+            <span className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white text-center">
+              {match.homeTeam.shortName ?? match.homeTeam.name}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
+              {match.homeTeam.name}
+            </span>
+          </div>
+          <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
+            {hasScore ? (
+              <div className="font-display font-black text-4xl leading-none text-white">
+                {match.homeScore}<span className="text-white/30"> — </span>{match.awayScore}
+              </div>
+            ) : (
+              <>
+                <div className="font-display font-black text-2xl leading-none text-white/30">VS</div>
+                <div className="text-[11px] font-bold text-white/40 tabular-nums">
+                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                </div>
+              </>
+            )}
+          </div>
+          <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
+            <span className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white text-center">
+              {match.awayTeam.shortName ?? match.awayTeam.name}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
+              {match.awayTeam.name}
+            </span>
           </div>
         </div>
-        {/* Teams + score */}
-        <div className="flex items-center gap-3">
-          <span className="font-display font-black text-base uppercase text-white flex-1 text-right leading-tight">
-            {match.homeTeam.name}
-          </span>
-          <span className="font-display font-black text-3xl text-white flex-shrink-0 min-w-[4rem] text-center">
-            {match.homeScore !== null && match.awayScore !== null
-              ? `${match.homeScore} — ${match.awayScore}`
-              : <span className="text-white/30 text-xl">— vs —</span>}
-          </span>
-          <span className="font-display font-black text-base uppercase text-white flex-1 text-left leading-tight">
-            {match.awayTeam.name}
-          </span>
-        </div>
+        {/* Date strip when has score */}
+        {hasScore && (
+          <div
+            className="px-5 py-2.5 text-center text-[11px] font-semibold text-white/40 capitalize"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+            {" · "}
+            {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
       </div>
 
-      {/* Score */}
+      {/* ── Score editor ──────────────────────────────────────────── */}
       <ScoreForm
         matchId={matchId}
-        homeTeamName={match.homeTeam.name}
-        awayTeamName={match.awayTeam.name}
+        homeTeamName={match.homeTeam.shortName ?? match.homeTeam.name}
+        awayTeamName={match.awayTeam.shortName ?? match.awayTeam.name}
         homeScore={match.homeScore}
         awayScore={match.awayScore}
       />
 
-      {/* Status actions */}
-      <div className="admin-card p-4">
-        <StatusActions
-          matchId={matchId}
-          status={match.status}
-          playerCount={match.players.length}
-        />
+      {/* ── Status actions ────────────────────────────────────────── */}
+      <div className="card p-4">
+        <div className="over-label mb-3">Avanzamento stato</div>
+        <StatusActions matchId={matchId} status={match.status} playerCount={match.players.length} />
       </div>
 
-      {/* Edit form — collapsible */}
-      <details className="admin-card overflow-hidden">
-        <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] select-none list-none border-b border-[var(--border-soft)] [&::-webkit-details-marker]:hidden">
-          <i className="pi pi-pencil text-xs" />
-          Modifica dati partita
-          <i className="pi pi-chevron-down text-xs ml-auto" />
+      {/* ── Edit form (collapsible) ───────────────────────────────── */}
+      <details className="card overflow-hidden group">
+        <summary className="flex items-center gap-2 px-4 py-3.5 cursor-pointer select-none list-none [&::-webkit-details-marker]:hidden hover:bg-[var(--surface-1)] transition-colors">
+          <i className="pi pi-pencil text-xs flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+          <span className="text-sm font-semibold flex-1" style={{ color: "var(--text-secondary)" }}>
+            Modifica dati partita
+          </span>
+          <i className="pi pi-chevron-down text-xs transition-transform group-open:rotate-180" style={{ color: "var(--text-disabled)" }} />
         </summary>
-        <div className="p-4">
+        <div className="px-4 pb-5 pt-1" style={{ borderTop: "1px solid var(--border-soft)" }}>
           <EditMatchForm match={match} teams={teams} />
         </div>
       </details>
 
-      {/* Participants */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-[var(--text-primary)]">
-            Partecipanti ({match.players.length}
-            {allEligibleCount > 0 ? `/${allEligibleCount}` : ""})
-          </h2>
+      {/* ── Participants ──────────────────────────────────────────── */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="over-label">Partecipanti</div>
+            <div className="text-sm font-semibold mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              {match.players.length}
+              {allEligibleCount > 0 && <span style={{ color: "var(--text-disabled)" }}> / {allEligibleCount}</span>}
+              {" "}giocatori
+            </div>
+          </div>
           {availablePlayers.length > 0 && (
             <form action={addAllMatchPlayers as unknown as (fd: FormData) => void}>
               <input type="hidden" name="matchId" value={matchId} />
               <Button
                 type="submit"
-                label={`+ Aggiungi tutti (${availablePlayers.length})`}
-                link
+                label={`Aggiungi tutti (${availablePlayers.length})`}
                 size="small"
-                className="text-[var(--primary)] text-xs font-medium p-0"
+                severity="secondary"
+                icon="pi pi-users"
               />
             </form>
           )}
         </div>
 
         {match.players.length === 0 && (
-          <p className="text-sm text-[var(--text-muted)] mb-4">Nessun partecipante aggiunto.</p>
+          <div
+            className="rounded-xl px-4 py-6 text-center"
+            style={{ background: "var(--surface-1)", border: "1px dashed var(--border-medium)" }}
+          >
+            <i className="pi pi-users text-2xl mb-2 block" style={{ color: "var(--text-disabled)" }} />
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Nessun partecipante aggiunto.</p>
+          </div>
         )}
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-4">
-          {match.players.map(({ player }) => (
-            <PlayerBonusCard
-              key={player.id}
-              matchId={matchId}
-              player={player}
-              bonuses={(bonusesByPlayer.get(player.id) ?? []).map((b) => ({
-                id: b.id,
-                bonusType: { code: b.bonusType.code },
-                quantity: b.quantity,
-                points: Number(b.points),
-              }))}
-              bonusTypes={bonusTypes.map((bt) => ({ id: bt.id, code: bt.code, name: bt.name, points: Number(bt.points) }))}
-            />
-          ))}
-        </div>
+        {match.players.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5">
+            {match.players.map(({ player }) => (
+              <PlayerBonusCard
+                key={player.id}
+                matchId={matchId}
+                player={player}
+                bonuses={(bonusesByPlayer.get(player.id) ?? []).map((b) => ({
+                  id: b.id,
+                  bonusType: { code: b.bonusType.code },
+                  quantity: b.quantity,
+                  points: Number(b.points),
+                }))}
+                bonusTypes={bonusTypes.map((bt) => ({
+                  id: bt.id,
+                  code: bt.code,
+                  name: bt.name,
+                  points: Number(bt.points),
+                }))}
+              />
+            ))}
+          </div>
+        )}
 
         {availablePlayers.length > 0 && (
           <AddMatchPlayerForm matchId={matchId} availablePlayers={availablePlayers} />
