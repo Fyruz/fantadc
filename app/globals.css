@@ -313,6 +313,10 @@ body {
   font-weight: 600 !important;
 }
 
+/* Password wrapper must stretch to fill its container */
+.p-password { width: 100% !important; display: block !important; }
+.p-password > .p-inputtext { width: 100% !important; }
+
 .p-password-input {
   background: #fff !important;
   color: var(--text-primary) !important;
