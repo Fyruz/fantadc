@@ -17,31 +17,50 @@ const scoreField = z.preprocess(
 const Schema = z.object({
   homeTeamId: z.coerce.number().int().positive("Squadra casa obbligatoria"),
   awayTeamId: z.coerce.number().int().positive("Squadra ospite obbligatoria"),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida"),
-  time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida"),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida").or(z.literal("")),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida").or(z.literal("")),
   status: z.nativeEnum(MatchStatus).optional(),
   homeScore: scoreField.optional(),
   awayScore: scoreField.optional(),
 });
 
+const CreateSchema = z.object({
+  homeTeamId: z.coerce.number().int().positive("Squadra casa obbligatoria"),
+  awayTeamId: z.coerce.number().int().positive("Squadra ospite obbligatoria"),
+  status: z.nativeEnum(MatchStatus).default(MatchStatus.DRAFT),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida").or(z.literal("")).optional(),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida").or(z.literal("")).optional(),
+});
+
 export async function createMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
-  const parsed = Schema.safeParse({
+  const parsed = CreateSchema.safeParse({
     homeTeamId: formData.get("homeTeamId"),
     awayTeamId: formData.get("awayTeamId"),
-    date: formData.get("date"),
-    time: formData.get("time"),
+    status: formData.get("status") || MatchStatus.DRAFT,
+    date: formData.get("date") || undefined,
+    time: formData.get("time") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   if (parsed.data.homeTeamId === parsed.data.awayTeamId) {
     return { errors: { awayTeamId: ["La squadra ospite deve essere diversa dalla squadra di casa."] } };
   }
 
+  const needsDateTime = parsed.data.status !== MatchStatus.DRAFT;
+  if (needsDateTime && (!parsed.data.date || !parsed.data.time)) {
+    return { errors: { date: ["Data e ora obbligatorie per questo stato."] } };
+  }
+
+  const startsAt = parsed.data.date && parsed.data.time
+    ? new Date(`${parsed.data.date}T${parsed.data.time}:00`)
+    : new Date(0);
+
   const match = await db.match.create({
     data: {
       homeTeamId: parsed.data.homeTeamId,
       awayTeamId: parsed.data.awayTeamId,
-      startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
+      status: parsed.data.status,
+      startsAt,
     },
   });
 
