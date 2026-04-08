@@ -63,7 +63,7 @@ pipeline {
                             sh '''
                                 sleep 10
                                 docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'npx prisma db push --accept-data-loss --url "$DATABASE_URL"'
-                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'npx prisma db seed'
+                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'DATABASE_URL="$DATABASE_URL" npx tsx prisma/seed.ts'
                             '''
                         }
                     }
