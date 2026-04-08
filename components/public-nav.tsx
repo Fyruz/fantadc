@@ -3,14 +3,31 @@ import { Button } from "primereact/button";
 import { getCurrentUser } from "@/lib/session";
 import { signOut } from "@/lib/auth";
 
-const NAV_LINKS = [
-  { href: "/partite",         label: "Partite"   },
-  { href: "/squadre",         label: "Squadre"   },
-  { href: "/giocatori",       label: "Giocatori" },
-  { href: "/squadre-fanta", label: "Fanta"      },
-  { href: "/classifica",      label: "Classifica"},
-  { href: "/regolamento",     label: "Regolamento"},
+const TORNEO_LINKS = [
+  { href: "/partite",            label: "Partite"    },
+  { href: "/squadre",            label: "Squadre"    },
+  { href: "/giocatori",          label: "Giocatori"  },
+  { href: "/classifica-torneo",  label: "Classifica" },
 ];
+
+const FANTA_LINKS = [
+  { href: "/squadre-fanta",    label: "Squadre Fanta"    },
+  { href: "/classifica-fanta", label: "Classifica Fanta" },
+];
+
+const EXTRA_LINKS = [
+  { href: "/regolamento", label: "Regolamento" },
+];
+
+function NavDivider() {
+  return (
+    <span
+      className="flex-shrink-0 w-px h-4 rounded-full mx-1"
+      style={{ background: "var(--border-medium)" }}
+      aria-hidden
+    />
+  );
+}
 
 export default async function PublicNav() {
   const user = await getCurrentUser();
@@ -39,7 +56,36 @@ export default async function PublicNav() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1 px-4">
-          {NAV_LINKS.map((n) => (
+          {/* Torneo */}
+          {TORNEO_LINKS.map((n) => (
+            <Link
+              key={n.href}
+              href={n.href}
+              className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {n.label}
+            </Link>
+          ))}
+
+          <NavDivider />
+
+          {/* Fanta */}
+          {FANTA_LINKS.map((n) => (
+            <Link
+              key={n.href}
+              href={n.href}
+              className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors hover:bg-[var(--primary-light)]"
+              style={{ color: "var(--primary)" }}
+            >
+              {n.label}
+            </Link>
+          ))}
+
+          <NavDivider />
+
+          {/* Extra */}
+          {EXTRA_LINKS.map((n) => (
             <Link
               key={n.href}
               href={n.href}

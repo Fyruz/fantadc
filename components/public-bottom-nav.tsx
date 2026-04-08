@@ -13,9 +13,9 @@ type MainNavItem = {
 };
 
 const MAIN_NAV: readonly MainNavItem[] = [
-  { href: "/partite",   label: "PARTITE",   icon: "pi-calendar" },
-  { href: "/classifica",label: "CLASS.",    icon: "pi-list"     },
-  { href: "/squadre-fanta", label: "FANTA",   icon: "pi-shield" },
+  { href: "/partite",          label: "PARTITE",   icon: "pi-calendar" },
+  { href: "/classifica-fanta", label: "CL.FANTA",  icon: "pi-trophy"   },
+  { href: "/squadre-fanta",    label: "FANTA",      icon: "pi-shield"   },
   {
     href: "/dashboard",
     label: "IL MIO",
@@ -25,9 +25,10 @@ const MAIN_NAV: readonly MainNavItem[] = [
 ] as const;
 
 const MORE_NAV = [
-  { href: "/giocatori",  label: "Giocatori",    icon: "pi-users" },
-  { href: "/squadre",    label: "Squadre",       icon: "pi-shield" },
-  { href: "/regolamento",label: "Regolamento",  icon: "pi-book"  },
+  { href: "/classifica-torneo", label: "Class. Torneo", icon: "pi-list"   },
+  { href: "/giocatori",         label: "Giocatori",     icon: "pi-users"  },
+  { href: "/squadre",           label: "Squadre",       icon: "pi-shield" },
+  { href: "/regolamento",       label: "Regolamento",   icon: "pi-book"   },
 ] as const;
 
 export default function PublicBottomNav() {
@@ -73,7 +74,13 @@ export default function PublicBottomNav() {
             />
           </div>
           <div className="flex flex-col gap-1 px-3 pb-4">
-            {MORE_NAV.map((item) => {
+            {/* Torneo section label */}
+            <div className="px-3 pt-2 pb-1">
+              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: "var(--text-disabled)" }}>
+                TORNEO REALE
+              </span>
+            </div>
+            {MORE_NAV.filter((_, i) => i === 0).map((item) => {
               const active = isActive(item.href);
               return (
                 <Link
@@ -81,11 +88,27 @@ export default function PublicBottomNav() {
                   href={item.href}
                   onClick={() => setMoreOpen(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
-                  style={
-                    active
-                      ? { background: "var(--surface-1)", color: "var(--primary)" }
-                      : { color: "var(--text-secondary)" }
-                  }
+                  style={active ? { background: "var(--surface-1)", color: "var(--primary)" } : { color: "var(--text-secondary)" }}
+                >
+                  <i className={`pi ${item.icon} text-base`} />
+                  {item.label}
+                </Link>
+              );
+            })}
+            <div className="px-3 pt-2 pb-1">
+              <span className="text-[9px] font-black uppercase tracking-widest" style={{ color: "var(--text-disabled)" }}>
+                ALTRO
+              </span>
+            </div>
+            {MORE_NAV.filter((_, i) => i > 0).map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMoreOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
+                  style={active ? { background: "var(--surface-1)", color: "var(--primary)" } : { color: "var(--text-secondary)" }}
                 >
                   <i className={`pi ${item.icon} text-base`} />
                   {item.label}

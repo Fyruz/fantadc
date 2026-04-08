@@ -5,16 +5,46 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { logout } from "@/app/actions/auth";
 
-const NAV = [
-  { href: "/admin",                 label: "Dashboard"       },
-  { href: "/admin/squadre",         label: "Squadre"         },
-  { href: "/admin/giocatori",       label: "Giocatori"       },
-  { href: "/admin/partite",         label: "Partite"         },
-  { href: "/admin/bonus-types",     label: "Tipi bonus"      },
-  { href: "/admin/utenti",          label: "Utenti"          },
-  { href: "/admin/squadre-fantasy", label: "Squadre Fanta"   },
-  { href: "/admin/audit",           label: "Audit"           },
+const NAV_GROUPS = [
+  {
+    label: null,
+    items: [
+      { href: "/admin", label: "Dashboard" },
+    ],
+  },
+  {
+    label: "Torneo",
+    items: [
+      { href: "/admin/squadre",     label: "Squadre"    },
+      { href: "/admin/giocatori",   label: "Giocatori"  },
+      { href: "/admin/partite",     label: "Partite"    },
+      { href: "/admin/bonus-types", label: "Tipi bonus" },
+    ],
+  },
+  {
+    label: "Fanta",
+    items: [
+      { href: "/admin/squadre-fantasy", label: "Squadre Fanta" },
+    ],
+  },
+  {
+    label: "Sistema",
+    items: [
+      { href: "/admin/utenti", label: "Utenti" },
+      { href: "/admin/audit",  label: "Audit"  },
+    ],
+  },
 ];
+
+function NavDivider() {
+  return (
+    <span
+      className="flex-shrink-0 w-px h-4 rounded-full mx-1"
+      style={{ background: "var(--border-medium)" }}
+      aria-hidden
+    />
+  );
+}
 
 export default function TopBar({ initials }: { initials: string }) {
   const pathname = usePathname();
@@ -24,7 +54,6 @@ export default function TopBar({ initials }: { initials: string }) {
   const isActive = (href: string) =>
     href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -61,23 +90,36 @@ export default function TopBar({ initials }: { initials: string }) {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-x-auto">
-          {NAV.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
-                style={
-                  active
-                    ? { background: "var(--primary-light)", color: "var(--primary)" }
-                    : { color: "var(--text-muted)" }
-                }
-              >
-                {item.label}
-              </Link>
-            );
-          })}
+          {NAV_GROUPS.map((group, gi) => (
+            <div key={gi} className="flex items-center gap-0.5">
+              {gi > 0 && <NavDivider />}
+              {group.label && (
+                <span
+                  className="px-2 text-[9px] font-black uppercase tracking-widest flex-shrink-0"
+                  style={{ color: group.label === "Fanta" ? "var(--primary)" : "var(--text-disabled)" }}
+                >
+                  {group.label}
+                </span>
+              )}
+              {group.items.map((item) => {
+                const active = isActive(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+                    style={
+                      active
+                        ? { background: "var(--primary-light)", color: "var(--primary)" }
+                        : { color: "var(--text-muted)" }
+                    }
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </div>
+          ))}
         </nav>
 
         {/* Avatar + dropdown */}
