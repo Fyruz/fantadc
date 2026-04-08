@@ -118,9 +118,6 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     if (parsed.data.status === MatchStatus.CONCLUDED && !before.concludedAt) {
       updateData.concludedAt = new Date();
     }
-    if (parsed.data.status === MatchStatus.PUBLISHED && !before.publishedAt) {
-      updateData.publishedAt = new Date();
-    }
   }
 
   const match = await db.match.update({ where: { id }, data: updateData });
@@ -152,16 +149,9 @@ export async function advanceMatchStatus(
   });
   if (!match) return { message: "Partita non trovata." };
 
-  if (newStatus === MatchStatus.PUBLISHED && match._count.players === 0) {
-    return { message: "Impossibile pubblicare: nessun giocatore presente nella partita." };
-  }
-
   const updateData: Parameters<typeof db.match.update>[0]["data"] = { status: newStatus };
   if (newStatus === MatchStatus.CONCLUDED && !match.concludedAt) {
     updateData.concludedAt = new Date();
-  }
-  if (newStatus === MatchStatus.PUBLISHED && !match.publishedAt) {
-    updateData.publishedAt = new Date();
   }
 
   await db.match.update({ where: { id }, data: updateData });

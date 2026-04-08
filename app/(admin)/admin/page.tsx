@@ -12,7 +12,7 @@ export default async function AdminDashboardPage() {
       db.fantasyTeam.count(),
       db.match.findMany({
         where: {
-          status: { in: ["CONCLUDED", "PUBLISHED"] },
+          status: "CONCLUDED",
           players: { none: {} },
         },
         select: {
@@ -81,9 +81,7 @@ export default async function AdminDashboardPage() {
                     {m.homeTeam.name} vs {m.awayTeam.name}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "#92400E" }}>
-                    {m.status === "CONCLUDED"
-                      ? "Partita conclusa senza giocatori — aggiungi i partecipanti prima di pubblicare"
-                      : "Partita pubblicata senza giocatori — i punteggi non saranno calcolati"}
+                    Partita conclusa senza giocatori — i punteggi potrebbero non essere calcolati correttamente
                   </p>
                 </div>
                 <Link

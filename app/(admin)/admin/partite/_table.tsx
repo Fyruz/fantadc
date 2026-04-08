@@ -35,9 +35,7 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
       ) : (
         <>
           {slice.map((row, idx) => {
-            const isAnomaly =
-              (row.status === "CONCLUDED" || row.status === "PUBLISHED") &&
-              row._count.players === 0;
+            const isAnomaly = row.status === "CONCLUDED" && row._count.players === 0;
             return (
               <div
                 key={row.id}

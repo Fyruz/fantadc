@@ -30,11 +30,11 @@ export type RankEntry = {
   totalPoints: number;
 };
 
-/** Compute total ranking across all PUBLISHED matches. */
+/** Compute total ranking across all CONCLUDED matches. */
 export async function computeRankings(): Promise<RankEntry[]> {
   const [matches, fantasyTeams, mvpBonusType, playerMap] = await Promise.all([
     db.match.findMany({
-      where: { status: MatchStatus.PUBLISHED },
+      where: { status: MatchStatus.CONCLUDED },
       select: {
         id: true,
         bonuses: { select: { playerId: true, points: true } },
@@ -118,7 +118,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       },
     }),
     db.match.findMany({
-      where: { status: MatchStatus.PUBLISHED },
+      where: { status: MatchStatus.CONCLUDED },
       select: {
         id: true,
         startsAt: true,

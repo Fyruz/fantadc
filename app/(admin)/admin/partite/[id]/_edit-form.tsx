@@ -20,7 +20,6 @@ const STATUS_OPTIONS = [
   { label: "Bozza",       value: "DRAFT"     },
   { label: "Programmata", value: "SCHEDULED" },
   { label: "Conclusa",    value: "CONCLUDED" },
-  { label: "Pubblicata",  value: "PUBLISHED" },
 ];
 
 export default function EditMatchForm({ match, teams }: { match: Match; teams: Team[] }) {

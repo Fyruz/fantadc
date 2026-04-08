@@ -79,7 +79,6 @@ model Match {
   homeScore    Int?
   awayScore    Int?
   concludedAt  DateTime?
-  publishedAt  DateTime?
   createdAt    DateTime            @default(now())
   updatedAt    DateTime            @updatedAt
 
@@ -196,7 +195,6 @@ enum MatchStatus {
   DRAFT
   SCHEDULED
   CONCLUDED
-  PUBLISHED
 }
 
 // Note applicative da rispettare:

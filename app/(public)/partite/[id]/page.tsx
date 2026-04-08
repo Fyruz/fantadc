@@ -30,7 +30,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const windowOpen = isMvpWindowOpen(match.concludedAt);
 
   let mvpPlayer: { name: string; footballTeam: { name: string } } | null = null;
-  if (!windowOpen && match.status === "PUBLISHED") {
+  if (!windowOpen && match.status === "CONCLUDED") {
     const topVote = await db.vote.groupBy({
       by: ["playerId"],
       where: { matchId: match.id },
@@ -183,7 +183,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       )}
 
       {/* Bonus */}
-      {match.status === "PUBLISHED" && match.bonuses.length > 0 && (
+      {match.status === "CONCLUDED" && match.bonuses.length > 0 && (
         <div>
           <div className="over-label mb-3">Bonus assegnati</div>
           <div className="card overflow-hidden">

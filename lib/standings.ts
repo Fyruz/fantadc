@@ -19,7 +19,7 @@ export async function computeStandings(): Promise<StandingEntry[]> {
   const [matches, allTeams] = await Promise.all([
     db.match.findMany({
       where: {
-        status: { in: ["CONCLUDED", "PUBLISHED"] },
+        status: "CONCLUDED",
         homeScore: { not: null },
         awayScore: { not: null },
       },

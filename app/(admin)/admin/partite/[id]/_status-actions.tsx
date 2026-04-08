@@ -10,7 +10,6 @@ const STATUS_LABEL: Record<string, string> = {
   DRAFT:     "Bozza",
   SCHEDULED: "Programmata",
   CONCLUDED: "Conclusa",
-  PUBLISHED: "Pubblicata",
 };
 
 type NextAction = {
@@ -33,19 +32,12 @@ const NEXT_ACTIONS: Record<string, NextAction[]> = {
     icon: "pi pi-flag",
     confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (1 ora).",
   }],
-  CONCLUDED: [{
-    label: "Pubblica risultati",
-    newStatus: "PUBLISHED",
-    icon: "pi pi-eye",
-    confirmMsg: "Pubblicare i risultati? I punteggi diventeranno visibili a tutti.",
-  }],
-  PUBLISHED: [],
+  CONCLUDED: [],
 };
 
 const BACK_ACTIONS: Record<string, { label: string; newStatus: string }> = {
-  SCHEDULED: { label: "Riporta a Bozza",        newStatus: "DRAFT"     },
-  CONCLUDED: { label: "Riporta a Programmata",  newStatus: "SCHEDULED" },
-  PUBLISHED: { label: "Riporta a Conclusa",     newStatus: "CONCLUDED" },
+  SCHEDULED: { label: "Riporta a Bozza",       newStatus: "DRAFT"     },
+  CONCLUDED: { label: "Riporta a Programmata", newStatus: "SCHEDULED" },
 };
 
 export default function StatusActions({
@@ -109,13 +101,13 @@ export default function StatusActions({
         </form>
       ))}
 
-      {status === "PUBLISHED" && (
+      {status === "CONCLUDED" && nextActions.length === 0 && (
         <div
           className="rounded-xl px-4 py-3 text-sm flex items-start gap-2"
           style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--border-medium)" }}
         >
           <i className="pi pi-check-circle text-sm mt-0.5 flex-shrink-0" />
-          <span>Risultati pubblici. Le modifiche al punteggio si riflettono subito sulla classifica.</span>
+          <span>Partita conclusa. I risultati sono visibili a tutti. Le modifiche al punteggio si riflettono subito sulla classifica.</span>
         </div>
       )}
 

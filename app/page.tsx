@@ -11,9 +11,9 @@ export default async function HomePage() {
     db.footballTeam.count(),
     db.player.count(),
     db.fantasyTeam.count(),
-    // Ultima partita pubblicata o conclusa (con risultato)
+    // Ultima partita conclusa (con risultato)
     db.match.findFirst({
-      where: { status: { in: ["PUBLISHED", "CONCLUDED"] } },
+      where: { status: "CONCLUDED" },
       orderBy: { startsAt: "desc" },
       include: {
         homeTeam: { select: { name: true, shortName: true } },
