@@ -11,8 +11,7 @@ const TORNEO_LINKS = [
 ];
 
 const FANTA_LINKS = [
-  { href: "/squadre-fanta",    label: "Squadre Fanta"    },
-  { href: "/classifica-fanta", label: "Classifica Fanta" },
+  { href: "/squadre-fanta", label: "Classifica Fanta" },
 ];
 
 const EXTRA_LINKS = [

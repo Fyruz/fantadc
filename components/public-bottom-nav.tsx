@@ -13,9 +13,8 @@ type MainNavItem = {
 };
 
 const MAIN_NAV: readonly MainNavItem[] = [
-  { href: "/partite",          label: "PARTITE",   icon: "pi-calendar" },
-  { href: "/classifica-fanta", label: "CL.FANTA",  icon: "pi-trophy"   },
-  { href: "/squadre-fanta",    label: "FANTA",      icon: "pi-shield"   },
+  { href: "/partite",       label: "PARTITE",   icon: "pi-calendar" },
+  { href: "/squadre-fanta", label: "CL.FANTA",  icon: "pi-trophy"   },
   {
     href: "/dashboard",
     label: "IL MIO",
