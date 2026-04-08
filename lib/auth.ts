@@ -61,6 +61,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (user.isSuspended) throw new SuspendedUserError();
 
+        await db.user.update({
+          where: { id: user.id },
+          data: { lastLoginAt: new Date() },
+        });
+
         return {
           id: String(user.id),
           email: user.email,

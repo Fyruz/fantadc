@@ -4,15 +4,18 @@ import AdminPageHeader from "@/components/admin-page-header";
 
 export default async function UtentiPage() {
   const users = await db.user.findMany({
-    orderBy: { id: "asc" },
-    include: { fantasyTeam: { select: { id: true } } },
+    orderBy: [{ role: "asc" }, { createdAt: "asc" }],
+    include: { fantasyTeam: { select: { id: true, name: true } } },
     omit: { passwordHash: true },
   });
+
+  const admins = users.filter((u) => u.role === "ADMIN");
+  const regulars = users.filter((u) => u.role === "USER");
 
   return (
     <div>
       <AdminPageHeader title="Utenti" />
-      <UtentiTable rows={users} />
+      <UtentiTable admins={admins} users={regulars} />
     </div>
   );
 }

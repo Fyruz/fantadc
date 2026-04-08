@@ -14,6 +14,7 @@ model User {
   name           String?
   role           UserRole        @default(USER)
   isSuspended    Boolean         @default(false)
+  lastLoginAt    DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
 
