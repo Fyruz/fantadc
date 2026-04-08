@@ -53,7 +53,7 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
         )}
       </div>
 
-      <UserActionsForm userId={user.id} isSuspended={user.isSuspended} />
+      <UserActionsForm userId={user.id} isSuspended={user.isSuspended} isAdmin={user.role === "ADMIN"} />
 
       {/* Fantasy team section */}
       <div>

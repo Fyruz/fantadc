@@ -37,6 +37,39 @@ export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
   return {};
 }
 
+export async function promoteToAdmin(formData: FormData): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const userId = Number(formData.get("userId"));
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return { message: "Utente non trovato." };
+  if (user.role === UserRole.ADMIN) return { message: "Utente già admin." };
+
+  await db.user.update({ where: { id: userId }, data: { role: UserRole.ADMIN } });
+  await logAdminAction(Number(admin.id), "PROMOTE_ADMIN", "User", userId, { role: "USER" }, { role: "ADMIN" });
+
+  revalidatePath("/admin/utenti");
+  revalidatePath(`/admin/utenti/${userId}`);
+  return {};
+}
+
+export async function demoteToUser(formData: FormData): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const userId = Number(formData.get("userId"));
+
+  if (userId === Number(admin.id)) return { message: "Non puoi rimuovere i tuoi privilegi admin." };
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return { message: "Utente non trovato." };
+
+  await db.user.update({ where: { id: userId }, data: { role: UserRole.USER } });
+  await logAdminAction(Number(admin.id), "DEMOTE_USER", "User", userId, { role: "ADMIN" }, { role: "USER" });
+
+  revalidatePath("/admin/utenti");
+  revalidatePath(`/admin/utenti/${userId}`);
+  return {};
+}
+
 const CreateAdminSchema = z.object({
   email: z.string().email("Email non valida").trim().toLowerCase(),
   password: z.string().min(8, "Password min 8 caratteri"),
