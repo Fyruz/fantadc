@@ -63,44 +63,72 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
       {/* Header partita */}
       <div
-        className="rounded-[18px] p-5 relative overflow-hidden"
+        className="rounded-[20px] overflow-hidden"
         style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
       >
-        <div className="absolute right-[-20px] top-[-20px] w-32 h-32 rounded-full border border-white/5 pointer-events-none" />
-        <div className="absolute right-[10px] top-[10px] w-16 h-16 rounded-full border border-white/5 pointer-events-none" />
+        {/* Top bar */}
+        <div
+          className="flex items-center justify-between px-5 py-3 gap-3"
+          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          <StatusBadge status={match.status} />
+          <span className="text-[11px] font-semibold capitalize text-white/50">
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })}
+          </span>
+        </div>
 
-        <div className="relative">
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <div className="text-[12px] text-white/55">
-              {match.startsAt.toLocaleString("it-IT", { dateStyle: "full", timeStyle: "short" })}
-            </div>
-            <div className="flex-shrink-0">
-              <StatusBadge status={match.status} />
-            </div>
+        {/* Body */}
+        <div className="px-5 py-6 flex items-center gap-3">
+          {/* Home */}
+          <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+            <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
+              {match.homeTeam.shortName ?? match.homeTeam.name}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
+              {match.homeTeam.name}
+            </span>
           </div>
-          {/* Score display */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 text-right">
-              <div className="font-display font-black text-lg uppercase text-white leading-tight">
-                {match.homeTeam.shortName ?? match.homeTeam.name}
+
+          {/* Score / VS */}
+          <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
+            {match.homeScore !== null && match.awayScore !== null ? (
+              <div className="font-display font-black text-4xl leading-none text-white">
+                {match.homeScore}
+                <span className="text-white/30"> — </span>
+                {match.awayScore}
               </div>
-            </div>
-            <div className="flex-shrink-0 text-center min-w-[5rem]">
-              {match.homeScore !== null && match.awayScore !== null ? (
-                <div className="font-display font-black text-4xl text-white leading-none">
-                  {match.homeScore} — {match.awayScore}
+            ) : (
+              <>
+                <div className="font-display font-black text-2xl leading-none text-white/30">VS</div>
+                <div className="text-[12px] font-bold text-white/50 tabular-nums">
+                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                 </div>
-              ) : (
-                <div className="font-display font-black text-2xl text-white/30">VS</div>
-              )}
-            </div>
-            <div className="flex-1 text-left">
-              <div className="font-display font-black text-lg uppercase text-white leading-tight">
-                {match.awayTeam.shortName ?? match.awayTeam.name}
-              </div>
-            </div>
+              </>
+            )}
+          </div>
+
+          {/* Away */}
+          <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
+            <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
+              {match.awayTeam.shortName ?? match.awayTeam.name}
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
+              {match.awayTeam.name}
+            </span>
           </div>
         </div>
+
+        {/* Bottom strip — date + time when score is present */}
+        {match.homeScore !== null && match.awayScore !== null && (
+          <div
+            className="px-5 py-2.5 text-center text-[11px] font-semibold text-white/40 capitalize"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+            {" · "}
+            {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
       </div>
 
       {/* MVP */}
