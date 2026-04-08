@@ -10,13 +10,14 @@ import { register } from "@/app/actions/auth";
 
 export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, undefined);
+  const [name, setName]         = useState("");
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm flex flex-col gap-8">
 
-        {/* Header */}
         <div className="text-center">
           <Link href="/">
             <span className="font-display font-black text-4xl uppercase" style={{ color: "var(--text-primary)" }}>
@@ -25,7 +26,6 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        {/* Card */}
         <div
           className="rounded-3xl px-7 py-8"
           style={{
@@ -34,10 +34,7 @@ export default function RegisterPage() {
             boxShadow: "0 4px 32px rgba(1,7,163,0.10)",
           }}
         >
-          <h2
-            className="font-display font-black text-2xl uppercase mb-6"
-            style={{ color: "var(--text-primary)" }}
-          >
+          <h2 className="font-display font-black text-2xl uppercase mb-6" style={{ color: "var(--text-primary)" }}>
             Registrati
           </h2>
 
@@ -53,9 +50,11 @@ export default function RegisterPage() {
                 autoComplete="name"
                 className="w-full"
                 placeholder="Mario Rossi"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
               />
               {state?.errors?.name && (
-                <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>
+                <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{state.errors.name[0]}</p>
               )}
             </div>
 
@@ -71,9 +70,11 @@ export default function RegisterPage() {
                 required
                 className="w-full"
                 placeholder="la-tua@email.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               {state?.errors?.email && (
-                <p className="text-red-500 text-xs mt-1">{state.errors.email[0]}</p>
+                <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{state.errors.email[0]}</p>
               )}
             </div>
 
@@ -93,7 +94,7 @@ export default function RegisterPage() {
                 autoComplete="new-password"
               />
               {state?.errors?.password && (
-                <p className="text-red-500 text-xs mt-1">{state.errors.password[0]}</p>
+                <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{state.errors.password[0]}</p>
               )}
             </div>
 
@@ -110,7 +111,6 @@ export default function RegisterPage() {
           </form>
         </div>
 
-        {/* Footer link */}
         <p className="text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Hai già un account?{" "}
           <Link href="/login" className="font-black" style={{ color: "var(--primary)" }}>

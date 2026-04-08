@@ -13,21 +13,24 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
   const registered = searchParams.get("registered") === "1";
+  const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
 
   return (
     <>
       {registered && (
-        <div className="rounded-lg px-4 py-3 text-sm mb-4" style={{ background: 'rgba(50,215,75,0.12)', color: '#32D74B', border: '1px solid rgba(50,215,75,0.24)' }}>
+        <div className="rounded-lg px-4 py-3 text-sm mb-4" style={{ background: "rgba(50,215,75,0.12)", color: "#32D74B", border: "1px solid rgba(50,215,75,0.24)" }}>
           Registrazione completata! Accedi con le tue credenziali.
         </div>
       )}
 
-      <form action={action} className="flex flex-col gap-4">
+      <form action={action} className="flex flex-col gap-5">
         {next && <input type="hidden" name="next" value={next} />}
 
         <div>
-          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="email">Email</label>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="email">
+            Email
+          </label>
           <InputText
             id="email"
             name="email"
@@ -36,11 +39,15 @@ export default function LoginForm() {
             required
             className="w-full"
             placeholder="la-tua@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1" htmlFor="password">Password</label>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="password">
+            Password
+          </label>
           <input type="hidden" name="password" value={password} />
           <Password
             value={password}
@@ -55,14 +62,14 @@ export default function LoginForm() {
         </div>
 
         {state?.message && (
-          <p className="text-red-500 text-sm">{state.message}</p>
+          <p className="text-sm" style={{ color: "#DC2626" }}>{state.message}</p>
         )}
 
         <Button
           type="submit"
           label={pending ? "Accesso in corso..." : "Accedi"}
           disabled={pending}
-          className="w-full py-2.5"
+          className="w-full"
         />
       </form>
     </>
