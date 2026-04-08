@@ -6,7 +6,13 @@ import { Button } from "primereact/button";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
-type Row = { id: number; name: string; shortName: string | null };
+type Row = {
+  id: number;
+  name: string;
+  shortName: string | null;
+  playerCount: number;
+  matchCount: number;
+};
 
 const PAGE_SIZE = 15;
 
@@ -31,18 +37,38 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
               style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               onClick={() => router.push(`/admin/squadre/${row.id}/edit`)}
             >
-              <div className="flex-1 min-w-0 flex items-center gap-2">
-                <span className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
-                  {row.name}
-                </span>
-                {row.shortName && (
-                  <span
-                    className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                    style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
-                  >
-                    {row.shortName}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                    {row.name}
                   </span>
-                )}
+                  {row.shortName && (
+                    <span
+                      className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                      style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+                    >
+                      {row.shortName}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <span className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                    <i className="pi pi-users text-[10px]" />
+                    {row.playerCount} {row.playerCount === 1 ? "giocatore" : "giocatori"}
+                  </span>
+                  <span className="text-xs flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
+                    <i className="pi pi-calendar text-[10px]" />
+                    {row.matchCount} {row.matchCount === 1 ? "partita" : "partite"}
+                  </span>
+                  {row.playerCount === 0 && (
+                    <span
+                      className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                      style={{ background: "rgba(234,179,8,0.12)", color: "#854d0e", border: "1px solid rgba(234,179,8,0.3)" }}
+                    >
+                      ⚠ nessun giocatore
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                 <ConfirmDeleteForm
