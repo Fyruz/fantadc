@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 
 type Row = {
@@ -16,6 +16,7 @@ type Row = {
 const PAGE_SIZE = 15;
 
 export default function UtentiTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const total = rows.length;
   const start = page * PAGE_SIZE;
@@ -31,8 +32,9 @@ export default function UtentiTable({ rows }: { rows: Row[] }) {
           {slice.map((row, idx) => (
             <div
               key={row.id}
-              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors"
+              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
               style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+              onClick={() => router.push(`/admin/utenti/${row.id}`)}
             >
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
@@ -72,14 +74,7 @@ export default function UtentiTable({ rows }: { rows: Row[] }) {
                   )}
                 </div>
               </div>
-              <Link
-                href={`/admin/utenti/${row.id}`}
-                className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors flex-shrink-0"
-                style={{ color: "var(--primary)" }}
-                title="Dettaglio"
-              >
-                <i className="pi pi-chevron-right text-sm" />
-              </Link>
+              <i className="pi pi-chevron-right text-xs flex-shrink-0" style={{ color: "var(--text-disabled)" }} />
             </div>
           ))}
           {totalPages > 1 && (

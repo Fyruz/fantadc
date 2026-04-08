@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
@@ -11,6 +11,7 @@ type Row = { id: number; name: string; shortName: string | null };
 const PAGE_SIZE = 15;
 
 export default function SquadreTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const total = rows.length;
   const start = page * PAGE_SIZE;
@@ -26,8 +27,9 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
           {slice.map((row, idx) => (
             <div
               key={row.id}
-              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors"
+              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
               style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+              onClick={() => router.push(`/admin/squadre/${row.id}/edit`)}
             >
               <div className="flex-1 min-w-0 flex items-center gap-2">
                 <span className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
@@ -42,21 +44,14 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <Link
-                  href={`/admin/squadre/${row.id}/edit`}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-                  style={{ color: "var(--primary)" }}
-                  title="Modifica"
-                >
-                  <i className="pi pi-pencil text-sm" />
-                </Link>
+              <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                 <ConfirmDeleteForm
                   action={deleteFootballTeam}
                   hiddenInputs={{ id: row.id }}
                   confirmMessage="Eliminare la squadra?"
                 />
               </div>
+              <i className="pi pi-chevron-right text-xs flex-shrink-0" style={{ color: "var(--text-disabled)" }} />
             </div>
           ))}
           {totalPages > 1 && (

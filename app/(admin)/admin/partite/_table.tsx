@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { deleteMatch } from "@/app/actions/admin/matches";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
@@ -21,6 +21,7 @@ type Row = {
 const PAGE_SIZE = 15;
 
 export default function PartiteTable({ rows }: { rows: Row[] }) {
+  const router = useRouter();
   const [page, setPage] = useState(0);
   const total = rows.length;
   const start = page * PAGE_SIZE;
@@ -40,10 +41,10 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
             return (
               <div
                 key={row.id}
-                className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors"
+                className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
                 style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+                onClick={() => router.push(`/admin/partite/${row.id}`)}
               >
-                {/* Left */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <StatusBadge status={row.status} />
@@ -68,22 +69,14 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
                     {" · "}{row._count.players} giocatori
                   </div>
                 </div>
-                {/* Right */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <Link
-                    href={`/admin/partite/${row.id}`}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors"
-                    style={{ color: "var(--primary)" }}
-                    title="Gestisci"
-                  >
-                    <i className="pi pi-pencil text-sm" />
-                  </Link>
+                <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   <ConfirmDeleteForm
                     action={deleteMatch}
                     hiddenInputs={{ id: row.id }}
                     confirmMessage="Eliminare la partita? L'operazione è irreversibile."
                   />
                 </div>
+                <i className="pi pi-chevron-right text-xs flex-shrink-0" style={{ color: "var(--text-disabled)" }} />
               </div>
             );
           })}
