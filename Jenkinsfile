@@ -57,14 +57,14 @@ pipeline {
                                     sleep 2
                                 done
                             '''
-                            // 2. Avvia l'app con un DATABASE_URL gia escapato
-                            sh 'docker compose up -d --build fantadc'
-                            // 3. Attendi che il container sia up, poi migra + seed con la stessa URL
-                            sh '''
-                                sleep 10
-                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'npx prisma db push --accept-data-loss --url "$DATABASE_URL"'
-                                docker exec -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c 'DATABASE_URL="$DATABASE_URL" npx tsx prisma/seed.ts'
-                            '''
+                            // 2. Builda l'immagine senza avviare il container
+                            sh 'docker compose build fantadc'
+                            // 3. Migra lo schema prima di avviare l'app
+                            sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma db push --accept-data-loss --url "$DATABASE_URL"\''
+                            // 4. Seed (idempotente, skippa se i dati esistono gia)
+                            sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'DATABASE_URL="$DATABASE_URL" npx tsx prisma/seed.ts\''
+                            // 5. Avvia (o riavvia) il container app
+                            sh 'docker compose up -d --force-recreate fantadc'
                         }
                     }
                 }
