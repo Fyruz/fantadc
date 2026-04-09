@@ -1,87 +1,349 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import StatCard from "@/components/stat-card";
+import { computeStandings } from "@/lib/standings";
+import { computeRankings } from "@/lib/scoring";
 
 export default async function AdminDashboardPage() {
-  const [teams, players, matches, users, fantasyTeams, concludedNoPlayers, usersNoTeam] =
-    await Promise.all([
-      db.footballTeam.count(),
-      db.player.count(),
-      db.match.count(),
-      db.user.count(),
-      db.fantasyTeam.count(),
-      db.match.findMany({
-        where: {
-          status: "CONCLUDED",
-          players: { none: {} },
-        },
-        select: {
-          id: true,
-          homeTeam: { select: { name: true } },
-          awayTeam: { select: { name: true } },
-          status: true,
-        },
-        orderBy: { startsAt: "desc" },
-      }),
-      db.user.count({ where: { fantasyTeam: null } }),
-    ]);
-
-  const stats = [
-    { label: "Squadre",          value: teams,        href: "/admin/squadre",         icon: "pi-shield"   },
-    { label: "Giocatori",       value: players,      href: "/admin/giocatori",        icon: "pi-users"    },
-    { label: "Partite",         value: matches,      href: "/admin/partite",          icon: "pi-calendar" },
-    { label: "Utenti",          value: users,        href: "/admin/utenti",           icon: "pi-id-card"  },
-    { label: "Squadre Fanta",   value: fantasyTeams, href: "/admin/squadre-fantasy",  icon: "pi-trophy"   },
-  ];
+  const [
+    teamCount, playerCount, matchCount, userCount, fantasyTeamCount,
+    nextMatch,
+    recentMatches,
+    concludedNoPlayers,
+    usersNoTeam,
+    standings,
+    rankings,
+  ] = await Promise.all([
+    db.footballTeam.count(),
+    db.player.count(),
+    db.match.count(),
+    db.user.count(),
+    db.fantasyTeam.count(),
+    db.match.findFirst({
+      where: { status: "SCHEDULED" },
+      orderBy: { startsAt: "asc" },
+      include: {
+        homeTeam: { select: { name: true, shortName: true } },
+        awayTeam: { select: { name: true, shortName: true } },
+      },
+    }),
+    db.match.findMany({
+      where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
+      orderBy: { startsAt: "desc" },
+      take: 4,
+      include: {
+        homeTeam: { select: { shortName: true, name: true } },
+        awayTeam: { select: { shortName: true, name: true } },
+      },
+    }),
+    db.match.findMany({
+      where: { status: "CONCLUDED", players: { none: {} } },
+      select: { id: true, homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } },
+      orderBy: { startsAt: "desc" },
+    }),
+    db.user.count({ where: { fantasyTeam: null } }),
+    computeStandings(),
+    computeRankings(),
+  ]);
 
   const hasAnomalies = concludedNoPlayers.length > 0 || usersNoTeam > 0;
+  const top3standings = standings.slice(0, 3);
+  const top3rankings = rankings.slice(0, 3);
 
   const today = new Date().toLocaleDateString("it-IT", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
+    weekday: "long", day: "numeric", month: "long",
   });
 
+  const concludedCount = await db.match.count({ where: { status: "CONCLUDED" } });
+
   return (
-    <div className="flex flex-col gap-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6">
+
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="flex items-end justify-between gap-3">
         <div>
           <div className="over-label mb-1">Area admin</div>
-          <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-            DASHBOARD
+          <h1 className="font-display font-black text-3xl uppercase leading-none" style={{ color: "var(--text-primary)" }}>
+            Dashboard
           </h1>
         </div>
-        <span className="text-sm capitalize hidden sm:block" style={{ color: "var(--text-muted)" }}>{today}</span>
+        <span className="text-sm capitalize hidden sm:block pb-1" style={{ color: "var(--text-muted)" }}>
+          {today}
+        </span>
       </div>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {stats.map((s) => (
-          <StatCard key={s.href} value={s.value} label={s.label} href={s.href} icon={s.icon} />
+      {/* ── Next match hero ─────────────────────────────────────────── */}
+      {nextMatch ? (
+        <Link
+          href={`/admin/partite/${nextMatch.id}`}
+          className="block rounded-[20px] overflow-hidden transition-transform hover:-translate-y-px"
+          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 32px rgba(1,7,163,0.32)" }}
+        >
+          {/* Top bar */}
+          <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[11px] font-black uppercase tracking-widest text-white/60">
+                Prossima partita
+              </span>
+            </div>
+            <span className="text-[11px] font-semibold text-white/50 capitalize">
+              {nextMatch.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })}
+              {" · "}
+              {nextMatch.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+          {/* Teams */}
+          <div className="px-5 py-5 flex items-center gap-3">
+            <div className="flex-1 text-center">
+              <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
+                {nextMatch.homeTeam.shortName ?? nextMatch.homeTeam.name}
+              </div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
+                {nextMatch.homeTeam.name}
+              </div>
+            </div>
+            <div className="flex-shrink-0 font-display font-black text-2xl text-white/30 px-2">VS</div>
+            <div className="flex-1 text-center">
+              <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
+                {nextMatch.awayTeam.shortName ?? nextMatch.awayTeam.name}
+              </div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
+                {nextMatch.awayTeam.name}
+              </div>
+            </div>
+          </div>
+          {/* Bottom strip */}
+          <div
+            className="px-5 py-2.5 flex items-center justify-end gap-1"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+          >
+            <span className="text-[11px] font-semibold text-white/40">Gestisci</span>
+            <i className="pi pi-arrow-right text-[10px] text-white/40" />
+          </div>
+        </Link>
+      ) : (
+        <div
+          className="rounded-[20px] px-5 py-6 flex items-center gap-4"
+          style={{ background: "var(--surface-1)", border: "1px dashed var(--border-medium)" }}
+        >
+          <i className="pi pi-calendar text-2xl" style={{ color: "var(--text-disabled)" }} />
+          <div>
+            <div className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Nessuna partita programmata</div>
+            <Link href="/admin/partite" className="text-xs font-semibold" style={{ color: "var(--primary)" }}>
+              Crea una partita →
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ── Standings + Fanta rankings ─────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        {/* Torneo standings */}
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Classifica torneo</div>
+            <Link href="/admin/squadre" className="text-[11px] font-semibold flex items-center gap-1" style={{ color: "var(--primary)" }}>
+              Vedi squadre <i className="pi pi-arrow-right text-[9px]" />
+            </Link>
+          </div>
+          {top3standings.length === 0 ? (
+            <p className="px-4 py-5 text-sm text-center" style={{ color: "var(--text-muted)" }}>Nessuna partita conclusa.</p>
+          ) : (
+            top3standings.map((s) => (
+              <div
+                key={s.teamId}
+                className="flex items-center gap-3 px-4 py-3"
+                style={{ borderBottom: "1px solid var(--border-soft)" }}
+              >
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-black text-sm flex-shrink-0"
+                  style={
+                    s.rank === 1
+                      ? { background: "linear-gradient(135deg,#E8A000,#C87800)", color: "#fff" }
+                      : s.rank === 2
+                      ? { background: "var(--surface-2)", color: "var(--text-secondary)" }
+                      : { background: "var(--surface-1)", color: "var(--text-muted)" }
+                  }
+                >
+                  {s.rank}
+                </div>
+                <span className="flex-1 text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  {s.shortName ?? s.teamName}
+                </span>
+                <div className="text-right flex-shrink-0">
+                  <span className="font-display font-black text-base" style={{ color: "var(--text-primary)" }}>{s.points}</span>
+                  <span className="text-[10px] ml-0.5" style={{ color: "var(--text-muted)" }}>pt</span>
+                </div>
+              </div>
+            ))
+          )}
+          {standings.length > 3 && (
+            <Link
+              href="/classifica-torneo"
+              className="flex items-center justify-center gap-1 px-4 py-2.5 text-[11px] font-semibold transition-colors hover:bg-[var(--surface-1)]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              +{standings.length - 3} squadre <i className="pi pi-chevron-down text-[9px]" />
+            </Link>
+          )}
+        </div>
+
+        {/* Fanta rankings */}
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Classifica fanta</div>
+            <Link href="/admin/squadre-fantasy" className="text-[11px] font-semibold flex items-center gap-1" style={{ color: "var(--primary)" }}>
+              Vedi squadre <i className="pi pi-arrow-right text-[9px]" />
+            </Link>
+          </div>
+          {top3rankings.length === 0 ? (
+            <p className="px-4 py-5 text-sm text-center" style={{ color: "var(--text-muted)" }}>Nessun punto assegnato.</p>
+          ) : (
+            top3rankings.map((r) => (
+              <div
+                key={r.fantasyTeamId}
+                className="flex items-center gap-3 px-4 py-3"
+                style={{ borderBottom: "1px solid var(--border-soft)" }}
+              >
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-black text-sm flex-shrink-0"
+                  style={
+                    r.rank === 1
+                      ? { background: "linear-gradient(135deg,#E8A000,#C87800)", color: "#fff" }
+                      : r.rank === 2
+                      ? { background: "var(--surface-2)", color: "var(--text-secondary)" }
+                      : { background: "var(--surface-1)", color: "var(--text-muted)" }
+                  }
+                >
+                  {r.rank}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>{r.fantasyTeamName}</div>
+                  <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{r.userName ?? r.userEmail}</div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <span className="font-display font-black text-base" style={{ color: "var(--primary)" }}>{r.totalPoints}</span>
+                  <span className="text-[10px] ml-0.5" style={{ color: "var(--text-muted)" }}>pt</span>
+                </div>
+              </div>
+            ))
+          )}
+          {rankings.length > 3 && (
+            <Link
+              href="/classifica-fanta"
+              className="flex items-center justify-center gap-1 px-4 py-2.5 text-[11px] font-semibold transition-colors hover:bg-[var(--surface-1)]"
+              style={{ color: "var(--text-muted)" }}
+            >
+              +{rankings.length - 3} squadre <i className="pi pi-chevron-down text-[9px]" />
+            </Link>
+          )}
+        </div>
+      </div>
+
+      {/* ── Recent results ─────────────────────────────────────────── */}
+      {recentMatches.length > 0 && (
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Ultimi risultati</div>
+            <Link href="/admin/partite" className="text-[11px] font-semibold flex items-center gap-1" style={{ color: "var(--primary)" }}>
+              Tutte le partite <i className="pi pi-arrow-right text-[9px]" />
+            </Link>
+          </div>
+          {recentMatches.map((m, idx) => {
+            const home = m.homeTeam.shortName ?? m.homeTeam.name;
+            const away = m.awayTeam.shortName ?? m.awayTeam.name;
+            const homeWon = m.homeScore! > m.awayScore!;
+            const draw = m.homeScore === m.awayScore;
+            return (
+              <Link
+                key={m.id}
+                href={`/admin/partite/${m.id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-1)] transition-colors"
+                style={{ borderBottom: idx < recentMatches.length - 1 ? "1px solid var(--border-soft)" : undefined }}
+              >
+                {/* Home */}
+                <span
+                  className="flex-1 text-sm font-semibold truncate text-right"
+                  style={{ color: homeWon ? "var(--text-primary)" : "var(--text-muted)", fontWeight: homeWon ? 700 : 400 }}
+                >
+                  {home}
+                </span>
+                {/* Score */}
+                <div
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-lg"
+                  style={{ background: draw ? "var(--surface-1)" : "var(--surface-2)", minWidth: "4rem", justifyContent: "center" }}
+                >
+                  <span className="font-display font-black text-base tabular-nums" style={{ color: "var(--text-primary)" }}>
+                    {m.homeScore}
+                  </span>
+                  <span className="text-xs font-black" style={{ color: "var(--text-disabled)" }}>—</span>
+                  <span className="font-display font-black text-base tabular-nums" style={{ color: "var(--text-primary)" }}>
+                    {m.awayScore}
+                  </span>
+                </div>
+                {/* Away */}
+                <span
+                  className="flex-1 text-sm truncate"
+                  style={{ color: !homeWon && !draw ? "var(--text-primary)" : "var(--text-muted)", fontWeight: !homeWon && !draw ? 700 : 400 }}
+                >
+                  {away}
+                </span>
+                <span className="text-[11px] flex-shrink-0 hidden sm:block" style={{ color: "var(--text-disabled)" }}>
+                  {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Stats strip ────────────────────────────────────────────── */}
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-3">
+        {[
+          { label: "Squadre",   value: teamCount,        href: "/admin/squadre",         icon: "pi-shield"   },
+          { label: "Giocatori", value: playerCount,      href: "/admin/giocatori",        icon: "pi-users"    },
+          { label: "Partite",   value: matchCount,       href: "/admin/partite",          icon: "pi-calendar" },
+          { label: "Utenti",    value: userCount,        href: "/admin/utenti",           icon: "pi-id-card"  },
+          { label: "Fanta",     value: fantasyTeamCount, href: "/admin/squadre-fantasy",  icon: "pi-trophy"   },
+        ].map((s) => (
+          <Link
+            key={s.href}
+            href={s.href}
+            className="rounded-xl p-3 flex flex-col gap-1.5 hover:-translate-y-px transition-all duration-150"
+            style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+          >
+            <i className={`pi ${s.icon} text-sm`} style={{ color: "var(--primary)" }} />
+            <div className="font-display font-black text-2xl leading-none" style={{ color: "var(--text-primary)" }}>
+              {s.value}
+            </div>
+            <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+              {s.label}
+            </div>
+          </Link>
         ))}
       </div>
 
-      {/* Anomalie / Tutto ok */}
-      {hasAnomalies ? (
+      {/* ── Anomalie ───────────────────────────────────────────────── */}
+      {hasAnomalies && (
         <div>
           <p className="over-label mb-3 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse inline-block" />
             Da verificare
           </p>
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2.5">
             {concludedNoPlayers.map((m) => (
               <div
                 key={m.id}
                 className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
-                style={{ background: "rgba(234,179,8,0.12)", border: "1px solid rgba(234,179,8,0.25)", borderLeft: "3px solid #D97706" }}
+                style={{ background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.25)", borderLeft: "3px solid #D97706" }}
               >
                 <div>
                   <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                     {m.homeTeam.name} vs {m.awayTeam.name}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "#92400E" }}>
-                    Partita conclusa senza giocatori — i punteggi potrebbero non essere calcolati correttamente
+                    Partita conclusa senza giocatori
                   </p>
                 </div>
                 <Link
@@ -89,39 +351,33 @@ export default async function AdminDashboardPage() {
                   className="text-xs font-semibold flex-shrink-0 flex items-center gap-1"
                   style={{ color: "var(--primary)" }}
                 >
-                  Gestisci
-                  <i className="pi pi-arrow-right text-[10px]" />
+                  Gestisci <i className="pi pi-arrow-right text-[10px]" />
                 </Link>
               </div>
             ))}
-
             {usersNoTeam > 0 && (
               <div
                 className="rounded-xl px-4 py-3 flex items-center justify-between gap-4"
-                style={{ background: "var(--surface-2)", border: "1px solid var(--border-soft)", borderLeft: "3px solid var(--primary)" }}
+                style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)", borderLeft: "3px solid var(--primary)" }}
               >
                 <p className="text-sm" style={{ color: "var(--text-primary)" }}>
                   <span className="font-bold">{usersNoTeam}</span>{" "}
-                  {usersNoTeam === 1
-                    ? "utente registrato senza squadra fanta"
-                    : "utenti registrati senza squadra fanta"}
+                  {usersNoTeam === 1 ? "utente senza squadra fanta" : "utenti senza squadra fanta"}
                 </p>
-                <Link
-                  href="/admin/utenti"
-                  className="text-xs font-semibold flex-shrink-0 flex items-center gap-1"
-                  style={{ color: "var(--primary)" }}
-                >
-                  Vedi utenti
-                  <i className="pi pi-arrow-right text-[10px]" />
+                <Link href="/admin/utenti" className="text-xs font-semibold flex-shrink-0 flex items-center gap-1" style={{ color: "var(--primary)" }}>
+                  Vedi utenti <i className="pi pi-arrow-right text-[10px]" />
                 </Link>
               </div>
             )}
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* ── All ok ─────────────────────────────────────────────────── */}
+      {!hasAnomalies && (concludedCount > 0 || matchCount > 0) && (
         <div
           className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium w-fit"
-          style={{ background: "rgba(16,185,129,0.12)", color: "#065F46" }}
+          style={{ background: "rgba(16,185,129,0.10)", color: "#065F46" }}
         >
           <i className="pi pi-check-circle text-sm" />
           Tutto ok
