@@ -22,20 +22,20 @@ interface Props {
 
 function Qty({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-3">
       <button
         type="button"
         onClick={() => onChange(Math.max(1, value - 1))}
-        className="w-8 h-8 rounded-full text-base font-bold flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-9 h-9 rounded-full text-lg font-bold flex items-center justify-center flex-shrink-0"
         style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
       >−</button>
-      <span className="font-display font-black text-xl w-6 text-center tabular-nums" style={{ color: "var(--text-primary)" }}>
+      <span className="font-display font-black text-2xl w-8 text-center tabular-nums" style={{ color: "var(--text-primary)" }}>
         {value}
       </span>
       <button
         type="button"
         onClick={() => onChange(Math.min(10, value + 1))}
-        className="w-8 h-8 rounded-full text-base font-bold flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-9 h-9 rounded-full text-lg font-bold flex items-center justify-center flex-shrink-0"
         style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
       >+</button>
     </div>
@@ -159,28 +159,57 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
       <Dialog
         visible={visible}
         onHide={() => setVisible(false)}
-        header={
-          <div className="flex items-center gap-2">
-            <RoleBadge role={player.role} />
-            <div className="min-w-0">
-              <div className="font-display font-black text-base uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                {player.name}
-              </div>
-              <div className="text-xs" style={{ color: "var(--text-muted)" }}>{player.footballTeam.name}</div>
-            </div>
-          </div>
-        }
-        style={{ width: "min(26rem, 96vw)" }}
+        header={null}
+        closable={false}
+        style={{ width: "min(26rem, 94vw)", padding: 0 }}
+        contentStyle={{ padding: 0 }}
+        pt={{ root: { style: { borderRadius: "20px", overflow: "hidden" } } }}
         modal
         draggable={false}
         resizable={false}
       >
-        <div className="flex flex-col gap-4">
+        {/* ── Header ── */}
+        <div
+          className="flex items-center gap-3 px-5 py-4"
+          style={{ borderBottom: "1px solid var(--border-soft)" }}
+        >
+          <div
+            className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+            style={{
+              background: player.role === "GK" ? "rgba(232,160,0,0.12)" : "rgba(1,7,163,0.08)",
+              color: player.role === "GK" ? "#C87800" : "var(--primary)",
+            }}
+          >
+            {player.role === "GK" ? "P" : "A"}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="font-display font-black text-base uppercase leading-tight truncate" style={{ color: "var(--text-primary)" }}>
+              {player.name}
+            </div>
+            <div className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              {player.footballTeam.name}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setVisible(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 transition-colors"
+            style={{ background: "var(--surface-1)", color: "var(--text-muted)" }}
+          >
+            <i className="pi pi-times text-xs" />
+          </button>
+        </div>
 
-          {/* Existing bonuses */}
+        <div className="flex flex-col gap-0">
+          {/* ── Existing bonuses ── */}
           {bonuses.length > 0 && (
-            <div>
-              <div className="over-label mb-2">Bonus assegnati</div>
+            <div className="px-5 pt-4 pb-2">
+              <div
+                className="text-[10px] font-black uppercase tracking-widest mb-2"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Bonus assegnati
+              </div>
               <div className="flex flex-col gap-1.5">
                 {bonuses.map((b) => (
                   <div
@@ -189,7 +218,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
                     style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
                   >
                     <span
-                      className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0"
+                      className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0 min-w-[2.5rem] text-center"
                       style={{
                         background: b.points >= 0 ? "#ECFDF5" : "#FEF2F2",
                         color: b.points >= 0 ? "#065F46" : "#991B1B",
@@ -197,12 +226,10 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
                     >
                       {b.bonusType.code}
                     </span>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                        {b.quantity > 1 ? `×${b.quantity}  ` : ""}
-                        {b.points > 0 ? "+" : ""}{b.points * b.quantity}pt
-                      </span>
-                    </div>
+                    <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {b.quantity > 1 ? `×${b.quantity}  ` : ""}
+                      {b.points > 0 ? "+" : ""}{b.points * b.quantity}pt
+                    </span>
                     <form action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
                       <input type="hidden" name="id" value={b.id} />
                       <input type="hidden" name="matchId" value={matchId} />
@@ -223,66 +250,67 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
             </div>
           )}
 
-          {/* Divider */}
-          {bonuses.length > 0 && (
-            <div style={{ borderTop: "1px solid var(--border-soft)" }} />
-          )}
+          {/* ── Assign form ── */}
+          <form action={action} className="flex flex-col gap-4 px-5 pt-4 pb-5">
+            <div
+              className="text-[10px] font-black uppercase tracking-widest"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Assegna bonus
+            </div>
 
-          {/* Assign form */}
-          <form action={action} className="flex flex-col gap-3">
-            <div className="over-label">Assegna bonus</div>
             <input type="hidden" name="matchId" value={matchId} />
             <input type="hidden" name="playerId" value={player.id} />
             <input type="hidden" name="bonusTypeId" value={selectedBonusType} />
             <input type="hidden" name="quantity" value={qty} />
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
-                Tipo bonus
-              </label>
-              <Dropdown
-                value={selectedBonusType}
-                onChange={(e) => setSelectedBonusType(e.value)}
-                options={bonusTypeOptions}
-                placeholder="Seleziona..."
-                className="w-full"
-                itemTemplate={(opt) => (
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <span className="font-bold text-sm">{opt.label}</span>
-                    </div>
-                    <span
-                      className="text-[11px] font-black px-2 py-0.5 rounded-full flex-shrink-0"
-                      style={{
-                        background: opt.points >= 0 ? "#ECFDF5" : "#FEF2F2",
-                        color: opt.points >= 0 ? "#065F46" : "#991B1B",
-                      }}
-                    >
-                      {opt.points > 0 ? "+" : ""}{opt.points}pt
-                    </span>
-                  </div>
-                )}
-              />
-              {state?.errors?.bonusTypeId && (
-                <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.bonusTypeId[0]}</p>
+            {/* Bonus type */}
+            <Dropdown
+              value={selectedBonusType}
+              onChange={(e) => setSelectedBonusType(e.value)}
+              options={bonusTypeOptions}
+              placeholder="Seleziona tipo bonus..."
+              className="w-full"
+              itemTemplate={(opt) => (
+                <div className="flex items-center justify-between gap-3 py-0.5">
+                  <span className="text-sm font-semibold">{opt.label}</span>
+                  <span
+                    className="text-[11px] font-black px-2 py-0.5 rounded-full flex-shrink-0"
+                    style={{
+                      background: opt.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+                      color: opt.points >= 0 ? "#065F46" : "#991B1B",
+                    }}
+                  >
+                    {opt.points > 0 ? "+" : ""}{opt.points}pt
+                  </span>
+                </div>
               )}
-            </div>
+            />
+            {state?.errors?.bonusTypeId && (
+              <p className="text-xs -mt-2" style={{ color: "#991B1B" }}>{state.errors.bonusTypeId[0]}</p>
+            )}
 
+            {/* Quantity + total */}
             <div className="flex items-center justify-between gap-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
                   Quantità
-                </label>
+                </span>
                 <Qty value={qty} onChange={setQty} />
               </div>
               {selectedBt && (
-                <div className="text-right">
-                  <div className="text-[10px] font-bold uppercase tracking-wide mb-1" style={{ color: "var(--text-muted)" }}>Totale</div>
+                <div
+                  className="rounded-xl px-4 py-2.5 text-right"
+                  style={{ background: selectedBt.points >= 0 ? "#ECFDF5" : "#FEF2F2" }}
+                >
+                  <div className="text-[10px] font-black uppercase tracking-widest mb-0.5" style={{ color: selectedBt.points >= 0 ? "#065F46" : "#991B1B", opacity: 0.6 }}>
+                    Totale
+                  </div>
                   <div
-                    className="font-display font-black text-2xl"
+                    className="font-display font-black text-2xl leading-none"
                     style={{ color: selectedBt.points >= 0 ? "#065F46" : "#991B1B" }}
                   >
-                    {selectedBt.points * qty > 0 ? "+" : ""}{(selectedBt.points * qty).toFixed(1)}pt
+                    {selectedBt.points * qty > 0 ? "+" : ""}{(selectedBt.points * qty).toFixed(selectedBt.points % 1 === 0 ? 0 : 1)}pt
                   </div>
                 </div>
               )}
