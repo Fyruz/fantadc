@@ -8,7 +8,7 @@ import { Button } from "primereact/button";
 import { updatePlayer } from "@/app/actions/admin/players";
 
 type Team = { id: number; name: string };
-type Player = { id: number; name: string; role: string; footballTeamId: number };
+type Player = { id: number; name: string; role: string; footballTeamId: number; footballTeam?: { name: string } };
 
 const ROLE_OPTIONS = [
   { label: "Portiere", value: "P" },
