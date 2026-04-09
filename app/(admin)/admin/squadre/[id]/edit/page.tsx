@@ -118,7 +118,6 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
                     href={`/admin/giocatori/${p.id}/edit`}
                     className="text-[11px] font-semibold flex items-center gap-1"
                     style={{ color: "var(--primary)" }}
-                    onClick={(e) => e.stopPropagation()}
                   >
                     Modifica
                     <i className="pi pi-arrow-right text-[9px]" />
