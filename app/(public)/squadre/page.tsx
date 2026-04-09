@@ -17,7 +17,7 @@ export default async function SquadrePublicPage() {
       <div>
         <div className="over-label mb-1">Stagione 2025</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          SQUADRE REALI
+          SQUADRE TORNEO
         </h1>
       </div>
 
