@@ -59,7 +59,9 @@ pipeline {
                             '''
                             // 2. Builda l'immagine senza avviare il container
                             sh 'docker compose build fantadc'
-                            // 3. Migra lo schema prima di avviare l'app
+                            // 3. Pre-migration: converti valori enum deprecati prima del db push
+                            sh "docker exec fantadc-postgres psql -U ${env.POSTGRES_USER} -d fantadc -c \"UPDATE \\\"Match\\\" SET status = 'CONCLUDED' WHERE status = 'PUBLISHED';\" || true"
+                            // 4. Migra lo schema prima di avviare l'app
                             sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma db push --accept-data-loss --url "$DATABASE_URL"\''
                             // 4. Seed (idempotente, skippa se i dati esistono gia)
                             sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'DATABASE_URL="$DATABASE_URL" npx tsx prisma/seed.ts\''
