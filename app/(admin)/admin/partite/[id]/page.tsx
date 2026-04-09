@@ -6,7 +6,6 @@ import EditMatchForm from "./_edit-form";
 import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
-import ScoreForm from "./_score-form";
 import GoalsForm from "./_goals-form";
 import StatusBadge from "@/components/status-badge";
 import { Button } from "primereact/button";
@@ -129,15 +128,6 @@ export default async function PartitaDetailPage({
         )}
       </div>
 
-      {/* ── Score editor ──────────────────────────────────────────── */}
-      <ScoreForm
-        matchId={matchId}
-        homeTeamName={match.homeTeam.shortName ?? match.homeTeam.name}
-        awayTeamName={match.awayTeam.shortName ?? match.awayTeam.name}
-        homeScore={match.homeScore}
-        awayScore={match.awayScore}
-      />
-
       {/* ── Marcatori ─────────────────────────────────────────────── */}
       {match.players.length > 0 && (
         <GoalsForm
@@ -146,8 +136,6 @@ export default async function PartitaDetailPage({
           awayTeamId={match.awayTeamId}
           homeTeamName={match.homeTeam.shortName ?? match.homeTeam.name}
           awayTeamName={match.awayTeam.shortName ?? match.awayTeam.name}
-          homeScore={match.homeScore}
-          awayScore={match.awayScore}
           players={match.players.map(({ player }) => ({
             id: player.id,
             name: player.name,

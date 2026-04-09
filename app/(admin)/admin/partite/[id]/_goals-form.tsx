@@ -29,8 +29,6 @@ interface Props {
   awayTeamId: number;
   homeTeamName: string;
   awayTeamName: string;
-  homeScore: number | null;
-  awayScore: number | null;
   players: Player[];
   goals: Goal[];
 }
@@ -41,8 +39,6 @@ export default function GoalsForm({
   awayTeamId,
   homeTeamName,
   awayTeamName,
-  homeScore,
-  awayScore,
   players,
   goals,
 }: Props) {
@@ -85,31 +81,9 @@ export default function GoalsForm({
       : scorer?.footballTeamId === awayTeamId;
   });
 
-  const totalGoals = goals.length;
-  const expectedGoals = (homeScore ?? 0) + (awayScore ?? 0);
-  const mismatch = homeScore !== null && awayScore !== null && totalGoals !== expectedGoals;
-
   return (
     <div className="card px-4 py-4 flex flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="over-label">Marcatori</div>
-        {mismatch && (
-          <span
-            className="text-[11px] font-bold px-2 py-1 rounded-full"
-            style={{ background: "rgba(234,179,8,0.12)", color: "#92400E", border: "1px solid rgba(234,179,8,0.3)" }}
-          >
-            ⚠ {totalGoals} / {expectedGoals} goal registrati
-          </span>
-        )}
-        {!mismatch && totalGoals > 0 && (
-          <span
-            className="text-[11px] font-bold px-2 py-1 rounded-full"
-            style={{ background: "#ECFDF5", color: "#065F46" }}
-          >
-            ✓ {totalGoals} / {expectedGoals}
-          </span>
-        )}
-      </div>
+      <div className="over-label">Marcatori</div>
 
       {/* Goal list by team */}
       {goals.length > 0 && (
