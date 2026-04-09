@@ -65,6 +65,7 @@ model Player {
   votes                   Vote[]
   matchBonuses            PlayerMatchBonus[]
   matchAppearances        MatchPlayer[]
+  goals                   MatchGoal[]
 
   @@index([footballTeamId])
   @@index([name])
@@ -88,6 +89,7 @@ model Match {
   players      MatchPlayer[]
   votes        Vote[]
   bonuses      PlayerMatchBonus[]
+  goals        MatchGoal[]
 
   @@index([homeTeamId])
   @@index([awayTeamId])
@@ -152,6 +154,21 @@ model PlayerMatchBonus {
   @@index([matchId])
   @@index([bonusTypeId])
   @@index([matchId, playerId])
+}
+
+model MatchGoal {
+  id         Int      @id @default(autoincrement())
+  matchId    Int
+  scorerId   Int
+  isOwnGoal  Boolean  @default(false)
+  minute     Int?
+  createdAt  DateTime @default(now())
+
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  scorer     Player   @relation(fields: [scorerId], references: [id], onDelete: Restrict)
+
+  @@index([matchId])
+  @@index([scorerId])
 }
 
 model FantasyTeamPlayer {

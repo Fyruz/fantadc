@@ -7,6 +7,7 @@ import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 import ScoreForm from "./_score-form";
+import GoalsForm from "./_goals-form";
 import StatusBadge from "@/components/status-badge";
 import { Button } from "primereact/button";
 
@@ -19,7 +20,7 @@ export default async function PartitaDetailPage({
   const matchId = Number(id);
   if (isNaN(matchId)) notFound();
 
-  const [match, teams, bonusTypes, allPlayers, matchBonuses] = await Promise.all([
+  const [match, teams, bonusTypes, allPlayers, matchBonuses, matchGoals] = await Promise.all([
     db.match.findUnique({
       where: { id: matchId },
       include: {
@@ -37,6 +38,11 @@ export default async function PartitaDetailPage({
       where: { matchId },
       include: { bonusType: true },
       orderBy: { id: "asc" },
+    }),
+    db.matchGoal.findMany({
+      where: { matchId },
+      include: { scorer: { select: { name: true, footballTeam: { select: { name: true } } } } },
+      orderBy: { minute: "asc" },
     }),
   ]);
 
@@ -131,6 +137,33 @@ export default async function PartitaDetailPage({
         homeScore={match.homeScore}
         awayScore={match.awayScore}
       />
+
+      {/* ── Marcatori ─────────────────────────────────────────────── */}
+      {match.players.length > 0 && (
+        <GoalsForm
+          matchId={matchId}
+          homeTeamId={match.homeTeamId}
+          awayTeamId={match.awayTeamId}
+          homeTeamName={match.homeTeam.shortName ?? match.homeTeam.name}
+          awayTeamName={match.awayTeam.shortName ?? match.awayTeam.name}
+          homeScore={match.homeScore}
+          awayScore={match.awayScore}
+          players={match.players.map(({ player }) => ({
+            id: player.id,
+            name: player.name,
+            role: player.role,
+            footballTeamId: player.footballTeamId,
+            footballTeam: { name: player.footballTeam.name },
+          }))}
+          goals={matchGoals.map((g) => ({
+            id: g.id,
+            scorerId: g.scorerId,
+            isOwnGoal: g.isOwnGoal,
+            minute: g.minute,
+            scorer: { name: g.scorer.name, footballTeam: { name: g.scorer.footballTeam.name } },
+          }))}
+        />
+      )}
 
       {/* ── Status actions ────────────────────────────────────────── */}
       <div className="card p-4">
