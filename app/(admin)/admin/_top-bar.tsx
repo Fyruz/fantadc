@@ -18,6 +18,8 @@ const NAV_GROUPS = [
       { href: "/admin/squadre",     label: "Squadre"    },
       { href: "/admin/giocatori",   label: "Giocatori"  },
       { href: "/admin/partite",     label: "Partite"    },
+      { href: "/admin/gironi",      label: "Gironi"     },
+      { href: "/admin/eliminazione", label: "Eliminazione" },
       { href: "/admin/bonus-types", label: "Tipi bonus" },
     ],
   },
