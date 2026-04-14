@@ -8,19 +8,46 @@ import { Button } from "primereact/button";
 import { createMatch } from "@/app/actions/admin/matches";
 
 type Team = { id: number; name: string };
+type Group = { id: number; name: string; slug: string };
+type Round = { id: number; name: string };
 
 const STATUS_OPTIONS = [
   { label: "Bozza",       value: "DRAFT"      },
   { label: "Programmata", value: "SCHEDULED"  },
 ];
 
-export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
+const PHASE_OPTIONS = [
+  { label: "Nessuna (amichevole)", value: "" },
+  { label: "Girone", value: "group" },
+  { label: "Eliminazione diretta", value: "knockout" },
+];
+
+export default function NuovaPartitaForm({
+  teams,
+  groups,
+  rounds,
+  defaultGroupId,
+  defaultKnockoutRoundId,
+}: {
+  teams: Team[];
+  groups: Group[];
+  rounds: Round[];
+  defaultGroupId: number | null;
+  defaultKnockoutRoundId: number | null;
+}) {
   const [state, action, pending] = useActionState(createMatch, undefined);
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
   const [status, setStatus]         = useState<string>("DRAFT");
   const [date, setDate]             = useState<Date | null>(null);
   const [time, setTime]             = useState<Date | null>(null);
+  const [phase, setPhase] = useState<string>(
+    defaultGroupId ? "group" : defaultKnockoutRoundId ? "knockout" : ""
+  );
+  const [groupId, setGroupId] = useState<string>(defaultGroupId ? String(defaultGroupId) : "");
+  const [knockoutRoundId, setKnockoutRoundId] = useState<string>(
+    defaultKnockoutRoundId ? String(defaultKnockoutRoundId) : ""
+  );
 
   const allTeamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
   const homeOptions    = allTeamOptions.filter((t) => t.value !== awayTeamId);
@@ -35,8 +62,44 @@ export default function NuovaPartitaForm({ teams }: { teams: Team[] }) {
     ? `${String(time.getHours()).padStart(2, "0")}:${String(time.getMinutes()).padStart(2, "0")}`
     : "";
 
+  const groupOptions = groups.map((g) => ({ label: `Girone ${g.slug} — ${g.name}`, value: String(g.id) }));
+  const roundOptions = rounds.map((r) => ({ label: r.name, value: String(r.id) }));
+
   return (
     <form action={action} className="flex flex-col gap-5">
+      <input type="hidden" name="groupId" value={phase === "group" ? groupId : ""} />
+      <input type="hidden" name="knockoutRoundId" value={phase === "knockout" ? knockoutRoundId : ""} />
+
+      {/* Fase */}
+      <div className="max-w-xs">
+        <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+          Fase del torneo
+        </label>
+        <Dropdown
+          value={phase}
+          onChange={(e) => { setPhase(e.value); setGroupId(""); setKnockoutRoundId(""); }}
+          options={PHASE_OPTIONS}
+          className="w-full"
+        />
+      </div>
+
+      {phase === "group" && (
+        <div className="max-w-xs">
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Girone *
+          </label>
+          <Dropdown value={groupId} onChange={(e) => setGroupId(e.value)} options={groupOptions} className="w-full" placeholder="Seleziona girone" />
+        </div>
+      )}
+
+      {phase === "knockout" && (
+        <div className="max-w-xs">
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Turno eliminazione *
+          </label>
+          <Dropdown value={knockoutRoundId} onChange={(e) => setKnockoutRoundId(e.value)} options={roundOptions} className="w-full" placeholder="Seleziona turno" />
+        </div>
+      )}
 
       {/* Squadre */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

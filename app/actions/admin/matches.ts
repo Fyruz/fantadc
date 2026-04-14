@@ -30,6 +30,8 @@ const CreateSchema = z.object({
   status: z.nativeEnum(MatchStatus).default(MatchStatus.DRAFT),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data non valida").or(z.literal("")).optional(),
   time: z.string().regex(/^\d{2}:\d{2}$/, "Ora non valida").or(z.literal("")).optional(),
+  groupId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
+  knockoutRoundId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
 });
 
 export async function createMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
@@ -40,6 +42,8 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
     status: formData.get("status") || MatchStatus.DRAFT,
     date: formData.get("date") || undefined,
     time: formData.get("time") || undefined,
+    groupId: formData.get("groupId") || null,
+    knockoutRoundId: formData.get("knockoutRoundId") || null,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   if (parsed.data.homeTeamId === parsed.data.awayTeamId) {
@@ -61,6 +65,8 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
       awayTeamId: parsed.data.awayTeamId,
       status: parsed.data.status,
       startsAt,
+      groupId: parsed.data.groupId ?? null,
+      knockoutRoundId: parsed.data.knockoutRoundId ?? null,
     },
   });
 

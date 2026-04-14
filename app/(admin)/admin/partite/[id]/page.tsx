@@ -25,6 +25,8 @@ export default async function PartitaDetailPage({
       include: {
         homeTeam: { select: { id: true, name: true, shortName: true } },
         awayTeam: { select: { id: true, name: true, shortName: true } },
+        group: { select: { id: true, name: true, slug: true } },
+        knockoutRound: { select: { id: true, name: true } },
         players: {
           include: { player: { include: { footballTeam: { select: { name: true } } } } },
         },
@@ -77,7 +79,19 @@ export default async function PartitaDetailPage({
           className="flex items-center justify-between px-5 py-3 gap-3"
           style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
         >
-          <StatusBadge status={match.status} />
+          <div className="flex items-center gap-2">
+            <StatusBadge status={match.status} />
+            {match.group && (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/70" style={{ background: "rgba(255,255,255,0.12)" }}>
+                Girone {match.group.slug}
+              </span>
+            )}
+            {match.knockoutRound && (
+              <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/70" style={{ background: "rgba(255,255,255,0.12)" }}>
+                {match.knockoutRound.name}
+              </span>
+            )}
+          </div>
           <span className="text-[11px] font-semibold text-white/50 capitalize">
             {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
           </span>
