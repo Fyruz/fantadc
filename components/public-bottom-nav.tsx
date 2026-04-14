@@ -25,9 +25,11 @@ const MAIN_NAV: readonly MainNavItem[] = [
 ] as const;
 
 const MORE_NAV = [
-  { href: "/giocatori",   label: "Giocatori",  icon: "pi-users"  },
-  { href: "/squadre",     label: "Squadre",    icon: "pi-shield" },
-  { href: "/regolamento", label: "Regolamento",icon: "pi-book"   },
+  { href: "/gironi",       label: "Gironi",      icon: "pi-th-large"  },
+  { href: "/eliminazione", label: "Eliminazione",icon: "pi-sitemap"   },
+  { href: "/giocatori",    label: "Giocatori",   icon: "pi-users"     },
+  { href: "/squadre",      label: "Squadre",     icon: "pi-shield"    },
+  { href: "/regolamento",  label: "Regolamento", icon: "pi-book"      },
 ] as const;
 
 export default function PublicBottomNav() {

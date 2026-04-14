@@ -4,10 +4,12 @@ import { getCurrentUser } from "@/lib/session";
 import { signOut } from "@/lib/auth";
 
 const TORNEO_LINKS = [
-  { href: "/partite",            label: "Partite"    },
-  { href: "/squadre",            label: "Squadre"    },
-  { href: "/giocatori",          label: "Giocatori"  },
-  { href: "/classifica-torneo",  label: "Classifica" },
+  { href: "/partite",            label: "Partite"      },
+  { href: "/gironi",             label: "Gironi"       },
+  { href: "/eliminazione",       label: "Eliminazione" },
+  { href: "/squadre",            label: "Squadre"      },
+  { href: "/giocatori",          label: "Giocatori"    },
+  { href: "/classifica-torneo",  label: "Classifica"   },
 ];
 
 const FANTA_LINKS = [
