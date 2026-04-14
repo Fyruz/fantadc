@@ -48,7 +48,7 @@ export default async function PartitaDetailPage({
   if (!match) notFound();
 
   const participantIds = new Set(match.players.map((mp) => mp.playerId));
-  const eligibleTeamIds = new Set([match.homeTeamId, match.awayTeamId]);
+  const eligibleTeamIds = new Set([match.homeTeamId, match.awayTeamId].filter((x): x is number => x !== null));
   const availablePlayers = allPlayers.filter(
     (p) => eligibleTeamIds.has(p.footballTeamId) && !participantIds.has(p.id)
   );
@@ -86,10 +86,10 @@ export default async function PartitaDetailPage({
         <div className="px-5 py-5 flex items-center gap-3">
           <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
             <span className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white text-center">
-              {match.homeTeam.shortName ?? match.homeTeam.name}
+              {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.homeTeam.name}
+              {match.homeTeam?.name ?? match.homeSeed ?? "—"}
             </span>
           </div>
           <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
@@ -108,10 +108,10 @@ export default async function PartitaDetailPage({
           </div>
           <div className="flex-1 flex flex-col items-center gap-1 min-w-0">
             <span className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white text-center">
-              {match.awayTeam.shortName ?? match.awayTeam.name}
+              {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.awayTeam.name}
+              {match.awayTeam?.name ?? match.awaySeed ?? "—"}
             </span>
           </div>
         </div>
@@ -132,10 +132,10 @@ export default async function PartitaDetailPage({
       {match.players.length > 0 && (
         <GoalsForm
           matchId={matchId}
-          homeTeamId={match.homeTeamId}
-          awayTeamId={match.awayTeamId}
-          homeTeamName={match.homeTeam.shortName ?? match.homeTeam.name}
-          awayTeamName={match.awayTeam.shortName ?? match.awayTeam.name}
+          homeTeamId={match.homeTeamId ?? 0}
+          awayTeamId={match.awayTeamId ?? 0}
+          homeTeamName={match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "Casa"}
+          awayTeamName={match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "Ospite"}
           players={match.players.map(({ player }) => ({
             id: player.id,
             name: player.name,

@@ -28,7 +28,10 @@
       "Bash(git commit:*)",
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5432/fantadc\" npx prisma migrate resolve --applied 20260328000000_rename_player_role_p_a)",
       "Bash(grep -rn \"GK\\\\|PLAYER\\\\|PlayerRole\\\\.GK\\\\|PlayerRole\\\\.PLAYER\" E:/Developing/fantadc --include=*.ts --include=*.tsx --include=*.sql)",
-      "Bash(bash \"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")"
+      "Bash(bash \"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")",
+      "Bash(docker -H npipe:////./pipe/docker_engine ps --format \"{{.Names}}\\\\t{{.Ports}}\")",
+      "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5433/fantadc\" npx prisma db push)",
+      "Bash(powershell.exe -Command \"netstat -an | Select-String '5432|5433'\")"
     ],
     "defaultMode": "bypassPermissions"
   }

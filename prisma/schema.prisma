@@ -48,6 +48,7 @@ model FootballTeam {
   players     Player[]
   homeMatches Match[]       @relation("HomeTeamMatches")
   awayMatches Match[]       @relation("AwayTeamMatches")
+  groupTeams  GroupTeam[]
 }
 
 model Player {
@@ -71,29 +72,75 @@ model Player {
   @@index([role])
 }
 
-model Match {
-  id           Int                @id @default(autoincrement())
-  homeTeamId   Int
-  awayTeamId   Int
-  status       MatchStatus        @default(DRAFT)
-  startsAt     DateTime
-  homeScore    Int?
-  awayScore    Int?
-  concludedAt  DateTime?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
+model Group {
+  id        Int         @id @default(autoincrement())
+  name      String      // "Girone A", "Girone B", …
+  slug      String      @unique // "A", "B", "C", "D"
+  order     Int         @default(0)
+  createdAt DateTime    @default(now())
 
-  homeTeam     FootballTeam       @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
-  awayTeam     FootballTeam       @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
-  players      MatchPlayer[]
-  votes        Vote[]
-  bonuses      PlayerMatchBonus[]
-  goals        MatchGoal[]
+  teams     GroupTeam[]
+  matches   Match[]
+
+  @@index([order])
+}
+
+model GroupTeam {
+  groupId        Int
+  footballTeamId Int
+  qualified      Boolean      @default(false)
+
+  group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  footballTeam   FootballTeam @relation(fields: [footballTeamId], references: [id], onDelete: Restrict)
+
+  @@id([groupId, footballTeamId])
+  @@index([footballTeamId])
+}
+
+model KnockoutRound {
+  id        Int      @id @default(autoincrement())
+  name      String   // "Quarti di finale", "Semifinale", "Finale 3°/4°", "Finale"
+  order     Int      // 1=QF, 2=SF, 3=3°posto, 4=Finale
+  createdAt DateTime @default(now())
+
+  matches   Match[]
+
+  @@index([order])
+}
+
+model Match {
+  id              Int                @id @default(autoincrement())
+  homeTeamId      Int?               // null = TBD (solo per slot knockout non ancora assegnati)
+  awayTeamId      Int?               // null = TBD
+  status          MatchStatus        @default(DRAFT)
+  startsAt        DateTime
+  homeScore       Int?
+  awayScore       Int?
+  concludedAt     DateTime?
+  // Fase torneo
+  groupId         Int?
+  knockoutRoundId Int?
+  homeSeed        String?            // es. "1A", "V QF1" — visibile quando squadre TBD
+  awaySeed        String?
+  bracketPosition Int?               // ordine nel bracket (1,2,3,4 per QF; 1,2 per SF; ecc.)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  homeTeam        FootballTeam?      @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam        FootballTeam?      @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  group           Group?             @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  knockoutRound   KnockoutRound?     @relation(fields: [knockoutRoundId], references: [id], onDelete: SetNull)
+  players         MatchPlayer[]
+  votes           Vote[]
+  bonuses         PlayerMatchBonus[]
+  goals           MatchGoal[]
 
   @@index([homeTeamId])
   @@index([awayTeamId])
   @@index([status])
   @@index([startsAt])
+  @@index([groupId])
+  @@index([knockoutRoundId])
 }
 
 model MatchPlayer {

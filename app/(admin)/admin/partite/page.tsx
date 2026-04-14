@@ -5,7 +5,9 @@ import AdminPageHeader from "@/components/admin-page-header";
 export default async function PartitePage() {
   const matches = await db.match.findMany({
     orderBy: { startsAt: "desc" },
-    include: {
+    select: {
+      id: true, status: true, startsAt: true, homeScore: true, awayScore: true,
+      homeSeed: true, awaySeed: true,
       homeTeam: { select: { name: true, shortName: true } },
       awayTeam: { select: { name: true, shortName: true } },
       _count: { select: { players: true } },

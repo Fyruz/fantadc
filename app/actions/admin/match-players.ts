@@ -45,8 +45,9 @@ export async function addAllMatchPlayers(formData: FormData): Promise<ActionResu
   });
   if (!match) return { message: "Partita non trovata." };
 
+  const teamIds = [match.homeTeamId, match.awayTeamId].filter((id): id is number => id !== null);
   const players = await db.player.findMany({
-    where: { footballTeamId: { in: [match.homeTeamId, match.awayTeamId] } },
+    where: { footballTeamId: { in: teamIds } },
     select: { id: true },
   });
 

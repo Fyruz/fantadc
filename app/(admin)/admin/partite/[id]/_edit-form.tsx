@@ -10,8 +10,8 @@ import { updateMatch } from "@/app/actions/admin/matches";
 type Team = { id: number; name: string };
 type Match = {
   id: number;
-  homeTeamId: number;
-  awayTeamId: number;
+  homeTeamId: number | null;
+  awayTeamId: number | null;
   startsAt: Date;
   status: string;
 };
@@ -29,8 +29,8 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
   const defaultDate = startsAtLocal.toISOString().slice(0, 10);
   const defaultTime = startsAtLocal.toISOString().slice(11, 16);
 
-  const [homeTeamId, setHomeTeamId] = useState<string>(String(match.homeTeamId));
-  const [awayTeamId, setAwayTeamId] = useState<string>(String(match.awayTeamId));
+  const [homeTeamId, setHomeTeamId] = useState<string>(match.homeTeamId ? String(match.homeTeamId) : "");
+  const [awayTeamId, setAwayTeamId] = useState<string>(match.awayTeamId ? String(match.awayTeamId) : "");
   const [status, setStatus] = useState<string>(match.status);
   const [date, setDate] = useState<Date | null>(() => {
     const d = new Date(defaultDate);

@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
     }),
     db.match.findMany({
       where: { status: "CONCLUDED", players: { none: {} } },
-      select: { id: true, homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } },
+      select: { id: true, homeSeed: true, awaySeed: true, homeTeam: { select: { name: true } }, awayTeam: { select: { name: true } } },
       orderBy: { startsAt: "desc" },
     }),
     db.user.count({ where: { fantasyTeam: null } }),
@@ -96,19 +96,19 @@ export default async function AdminDashboardPage() {
           <div className="px-5 py-5 flex items-center gap-3">
             <div className="flex-1 text-center">
               <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
-                {nextMatch.homeTeam.shortName ?? nextMatch.homeTeam.name}
+                {nextMatch.homeTeam?.shortName ?? nextMatch.homeTeam?.name ?? nextMatch.homeSeed ?? "TBD"}
               </div>
               <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
-                {nextMatch.homeTeam.name}
+                {nextMatch.homeTeam?.name ?? nextMatch.homeSeed ?? ""}
               </div>
             </div>
             <div className="flex-shrink-0 font-display font-black text-2xl text-white/30 px-2">VS</div>
             <div className="flex-1 text-center">
               <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
-                {nextMatch.awayTeam.shortName ?? nextMatch.awayTeam.name}
+                {nextMatch.awayTeam?.shortName ?? nextMatch.awayTeam?.name ?? nextMatch.awaySeed ?? "TBD"}
               </div>
               <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
-                {nextMatch.awayTeam.name}
+                {nextMatch.awayTeam?.name ?? nextMatch.awaySeed ?? ""}
               </div>
             </div>
           </div>
@@ -251,8 +251,8 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
           {recentMatches.map((m, idx) => {
-            const home = m.homeTeam.shortName ?? m.homeTeam.name;
-            const away = m.awayTeam.shortName ?? m.awayTeam.name;
+            const home = m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD";
+            const away = m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD";
             const homeWon = m.homeScore! > m.awayScore!;
             const draw = m.homeScore === m.awayScore;
             return (
@@ -340,7 +340,7 @@ export default async function AdminDashboardPage() {
               >
                 <div>
                   <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                    {m.homeTeam.name} vs {m.awayTeam.name}
+                    {m.homeTeam?.name ?? m.homeSeed ?? "TBD"} vs {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "#92400E" }}>
                     Partita conclusa senza giocatori

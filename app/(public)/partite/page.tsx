@@ -70,13 +70,13 @@ export default async function PartitePublicPage() {
                       className="font-display font-black text-2xl uppercase leading-none tracking-tight"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {m.homeTeam.shortName ?? m.homeTeam.name}
+                      {m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}
                     </span>
                     <span
                       className="text-[10px] font-semibold uppercase tracking-wide truncate max-w-full"
                       style={{ color: "var(--text-disabled)" }}
                     >
-                      {m.homeTeam.name}
+                      {m.homeTeam?.name ?? m.homeSeed ?? "—"}
                     </span>
                   </div>
 
@@ -115,13 +115,13 @@ export default async function PartitePublicPage() {
                       className="font-display font-black text-2xl uppercase leading-none tracking-tight"
                       style={{ color: "var(--text-primary)" }}
                     >
-                      {m.awayTeam.shortName ?? m.awayTeam.name}
+                      {m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                     </span>
                     <span
                       className="text-[10px] font-semibold uppercase tracking-wide truncate max-w-full"
                       style={{ color: "var(--text-disabled)" }}
                     >
-                      {m.awayTeam.name}
+                      {m.awayTeam?.name ?? m.awaySeed ?? "—"}
                     </span>
                   </div>
                 </div>

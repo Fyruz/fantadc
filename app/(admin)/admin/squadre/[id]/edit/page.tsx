@@ -162,7 +162,7 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
                       title={won ? "Vittoria" : lost ? "Sconfitta" : "Pareggio"}
                     />
                     <span className="text-sm font-semibold flex-1 truncate" style={{ color: "var(--text-primary)" }}>
-                      {m.isHome ? "vs" : "@"} {m.opponent.shortName ?? m.opponent.name}
+                      {m.isHome ? "vs" : "@"} {m.opponent?.shortName ?? m.opponent?.name ?? "TBD"}
                     </span>
                     <span className="text-sm font-display font-black flex-shrink-0" style={{ color: hs !== null ? "var(--text-primary)" : "var(--text-disabled)" }}>
                       {hs !== null && as_ !== null ? `${hs} — ${as_}` : "—"}

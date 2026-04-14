@@ -122,6 +122,8 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       select: {
         id: true,
         startsAt: true,
+        homeSeed: true,
+        awaySeed: true,
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
         bonuses: { select: { playerId: true, points: true, bonusType: { select: { code: true, name: true } } } },
@@ -169,7 +171,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
 
     return {
       matchId: match.id,
-      label: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
+      label: `${match.homeTeam?.name ?? match.homeSeed ?? "TBD"} vs ${match.awayTeam?.name ?? match.awaySeed ?? "TBD"}`,
       startsAt: match.startsAt,
       playerScores,
       total: playerScores.reduce((s, p) => s + p.finalPoints, 0),

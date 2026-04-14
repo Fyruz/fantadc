@@ -1,0 +1,3 @@
+- Gestire gironi e brackets.
+- Migliorare ui votazione
+- 

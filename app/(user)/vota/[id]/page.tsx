@@ -41,7 +41,7 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
     ? match.players.find((mp) => mp.playerId === topVotedId)?.player
     : null;
 
-  const title = `${match.homeTeam.name} vs ${match.awayTeam.name}`;
+  const title = `${match.homeTeam?.name ?? match.homeSeed ?? "TBD"} vs ${match.awayTeam?.name ?? match.awaySeed ?? "TBD"}`;
 
   if (match.status === "DRAFT" || match.status === "SCHEDULED") {
     return (

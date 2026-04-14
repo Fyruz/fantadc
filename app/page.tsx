@@ -197,7 +197,7 @@ export default async function HomePage() {
                       className="font-display font-black uppercase leading-tight"
                       style={{ fontSize: "clamp(1rem, 4vw, 1.4rem)", color: "var(--text-primary)" }}
                     >
-                      {featured.homeTeam.shortName ?? featured.homeTeam.name}
+                      {featured.homeTeam?.shortName ?? featured.homeTeam?.name ?? featured.homeSeed ?? "TBD"}
                     </div>
                   </div>
 
@@ -233,7 +233,7 @@ export default async function HomePage() {
                       className="font-display font-black uppercase leading-tight"
                       style={{ fontSize: "clamp(1rem, 4vw, 1.4rem)", color: "var(--text-primary)" }}
                     >
-                      {featured.awayTeam.shortName ?? featured.awayTeam.name}
+                      {featured.awayTeam?.shortName ?? featured.awayTeam?.name ?? featured.awaySeed ?? "TBD"}
                     </div>
                   </div>
                 </div>

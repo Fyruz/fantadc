@@ -126,7 +126,7 @@ export default async function DashboardPage() {
               >
                 <div>
                   <div className="font-display font-black text-[12px] uppercase" style={{ color: "var(--text-primary)" }}>
-                    {m.homeTeam.name} <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span> {m.awayTeam.name}
+                    {m.homeTeam?.name ?? m.homeSeed ?? "TBD"} <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span> {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                   </div>
                 </div>
                 {voted ? (

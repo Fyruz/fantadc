@@ -15,6 +15,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
     include: {
       homeTeam: { select: { name: true, shortName: true } },
       awayTeam: { select: { name: true, shortName: true } },
+      group: { select: { name: true } },
+      knockoutRound: { select: { name: true } },
       players: {
         include: { player: { include: { footballTeam: { select: { name: true } } } } },
         orderBy: { player: { name: "asc" } },
@@ -82,10 +84,10 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           {/* Home */}
           <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
             <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
-              {match.homeTeam.shortName ?? match.homeTeam.name}
+              {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.homeTeam.name}
+              {match.homeTeam?.name ?? match.homeSeed ?? "—"}
             </span>
           </div>
 
@@ -110,10 +112,10 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           {/* Away */}
           <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
             <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
-              {match.awayTeam.shortName ?? match.awayTeam.name}
+              {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
             </span>
             <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.awayTeam.name}
+              {match.awayTeam?.name ?? match.awaySeed ?? "—"}
             </span>
           </div>
         </div>

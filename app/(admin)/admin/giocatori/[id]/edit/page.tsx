@@ -28,6 +28,8 @@ export default async function EditGiocatorePage({
             startsAt: true,
             homeScore: true,
             awayScore: true,
+            homeSeed: true,
+            awaySeed: true,
             homeTeam: { select: { shortName: true, name: true } },
             awayTeam: { select: { shortName: true, name: true } },
           },
@@ -52,6 +54,8 @@ export default async function EditGiocatorePage({
             awayScore: true,
             homeTeamId: true,
             awayTeamId: true,
+            homeSeed: true,
+            awaySeed: true,
             homeTeam: { select: { shortName: true, name: true } },
             awayTeam: { select: { shortName: true, name: true } },
           },
@@ -169,8 +173,8 @@ export default async function EditGiocatorePage({
               </div>
               {goals.map((g, idx) => {
                 const m = g.match;
-                const home = m.homeTeam.shortName ?? m.homeTeam.name;
-                const away = m.awayTeam.shortName ?? m.awayTeam.name;
+                const home = m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD";
+                const away = m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD";
                 return (
                   <Link
                     key={g.id}
@@ -215,8 +219,8 @@ export default async function EditGiocatorePage({
                 const won  = hs !== null && as_ !== null && hs > as_;
                 const lost = hs !== null && as_ !== null && hs < as_;
                 const opponent = isHome
-                  ? (m.awayTeam.shortName ?? m.awayTeam.name)
-                  : (m.homeTeam.shortName ?? m.homeTeam.name);
+                  ? (m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD")
+                  : (m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD");
                 const matchPoints = bonusByMatch.get(m.id)?.points ?? 0;
                 return (
                   <Link

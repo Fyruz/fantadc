@@ -1,6 +1,7 @@
 import { db } from "./db";
 
 export type StandingEntry = {
+  groupSlug?: string; // present when computing per-group standings
   rank: number;
   teamId: number;
   teamName: string;
@@ -54,6 +55,7 @@ export async function computeStandings(): Promise<StandingEntry[]> {
   for (const t of allTeams) ensure(t);
 
   for (const m of matches) {
+    if (!m.homeTeam || !m.awayTeam) continue; // skip TBD knockout matches
     const hs = m.homeScore!;
     const as_ = m.awayScore!;
     const home = ensure(m.homeTeam);
@@ -84,4 +86,93 @@ export async function computeStandings(): Promise<StandingEntry[]> {
   );
 
   return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+}
+
+/** Classifica di un singolo girone — solo partite CONCLUDED con groupId = groupId */
+export async function computeGroupStandings(groupId: number): Promise<StandingEntry[]> {
+  const [matches, groupTeams] = await Promise.all([
+    db.match.findMany({
+      where: {
+        groupId,
+        status: "CONCLUDED",
+        homeScore: { not: null },
+        awayScore: { not: null },
+      },
+      select: {
+        homeTeamId: true,
+        awayTeamId: true,
+        homeScore: true,
+        awayScore: true,
+        homeTeam: { select: { id: true, name: true, shortName: true } },
+        awayTeam: { select: { id: true, name: true, shortName: true } },
+      },
+    }),
+    db.groupTeam.findMany({
+      where: { groupId },
+      include: { footballTeam: { select: { id: true, name: true, shortName: true } } },
+    }),
+  ]);
+
+  const map = new Map<number, Omit<StandingEntry, "rank">>();
+
+  const ensure = (team: { id: number; name: string; shortName: string | null }) => {
+    if (!map.has(team.id)) {
+      map.set(team.id, {
+        teamId: team.id,
+        teamName: team.name,
+        shortName: team.shortName,
+        played: 0, won: 0, drawn: 0, lost: 0,
+        goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
+      });
+    }
+    return map.get(team.id)!;
+  };
+
+  // Seed solo le squadre assegnate al girone
+  for (const gt of groupTeams) ensure(gt.footballTeam);
+
+  for (const m of matches) {
+    if (!m.homeTeam || !m.awayTeam) continue; // skip TBD knockout matches
+    const hs = m.homeScore!;
+    const as_ = m.awayScore!;
+    const home = ensure(m.homeTeam);
+    const away = ensure(m.awayTeam);
+
+    home.played++; away.played++;
+    home.goalsFor += hs; home.goalsAgainst += as_;
+    away.goalsFor += as_; away.goalsAgainst += hs;
+
+    if (hs > as_) {
+      home.won++; home.points += 3; away.lost++;
+    } else if (hs < as_) {
+      away.won++; away.points += 3; home.lost++;
+    } else {
+      home.drawn++; home.points += 1;
+      away.drawn++; away.points += 1;
+    }
+  }
+
+  const entries = [...map.values()];
+  for (const e of entries) e.goalDiff = e.goalsFor - e.goalsAgainst;
+
+  entries.sort((a, b) =>
+    b.points - a.points ||
+    b.goalDiff - a.goalDiff ||
+    b.goalsFor - a.goalsFor ||
+    a.teamName.localeCompare(b.teamName, "it")
+  );
+
+  return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+}
+
+/** Classifica per tutti i gironi — restituisce Map<groupId, StandingEntry[]> */
+export async function computeAllGroupsStandings(): Promise<Map<number, StandingEntry[]>> {
+  const groups = await db.group.findMany({ select: { id: true } });
+  const result = new Map<number, StandingEntry[]>();
+  await Promise.all(
+    groups.map(async (g) => {
+      result.set(g.id, await computeGroupStandings(g.id));
+    })
+  );
+  return result;
 }

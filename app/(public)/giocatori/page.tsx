@@ -18,6 +18,8 @@ export default async function GiocatoriPublicPage() {
             awayScore: true,
             homeTeamId: true,
             awayTeamId: true,
+            homeSeed: true,
+            awaySeed: true,
             homeTeam: { select: { shortName: true, name: true } },
             awayTeam: { select: { shortName: true, name: true } },
           },
@@ -81,8 +83,8 @@ export default async function GiocatoriPublicPage() {
       const hs = isHome ? m.homeScore : m.awayScore;
       const as_ = isHome ? m.awayScore : m.homeScore;
       const opponent = isHome
-        ? (m.awayTeam.shortName ?? m.awayTeam.name)
-        : (m.homeTeam.shortName ?? m.homeTeam.name);
+        ? (m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD")
+        : (m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD");
       const matchGoals = pGoals.filter(
         (g) => g.matchId === m.id && !g.isOwnGoal
       ).length;
