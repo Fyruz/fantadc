@@ -12,16 +12,24 @@ Il punteggio fantasy rimane cumulativo su tutte le fasi — non si resetta tra f
 
 ---
 
-## Decisioni da prendere prima dell'implementazione
+## Decisioni — CHIUSE ✓
 
-Prima di iniziare il lavoro, risolvere questi punti con l'organizzatore:
+Tutte le decisioni sono state confermate dall'organizzatore:
 
-1. **Quanti gironi?** Probabilmente 2–4. Il numero influisce solo sulla configurazione, non sul modello.
-2. **Quante squadre passano per girone?** (es. le prime 2 di 4, oppure la prima di 3 + 2 migliori seconde)
-3. **Regola per le migliori seconde?** Se passano più seconde, serve un criterio per ordinarle tra gironi diversi.
-4. **Esiste il terzo posto?** Partita tra i perdenti delle semifinali.
-5. **Il bracket knockout è visibile prima dei match?** (es. mostrare già "Semifinale 1 — da definire" o aspettare che l'admin assegni le squadre)
-6. **Le partite d'eliminazione mostrano il bracket o solo la lista turni?** (bracket grafico o lista semplice)
+1. **4 gironi** da **4 squadre** ciascuno (16 squadre totali), determinati tramite sorteggio
+2. **Le prime 2 classificate** di ogni girone passano → 8 squadre al knockout
+3. **Bracket fisso** — gli accoppiamenti dei quarti sono predeterminati dalla posizione nel girone:
+   - QF 1: **1°A vs 2°B**
+   - QF 2: **1°C vs 2°D**
+   - QF 3: **2°A vs 1°B**
+   - QF 4: **2°C vs 1°D**
+   - SF 1: Vincente QF1 vs Vincente QF2
+   - SF 2: Vincente QF3 vs Vincente QF4
+   - Finale 3°/4°: Perdente SF1 vs Perdente SF2
+   - Finale 1°/2°: Vincente SF1 vs Vincente SF2
+4. **Sì, c'è il terzo posto** (partita tra perdenti delle semifinali)
+5. **Il bracket è visibile prima** — mostra "TBD" finché l'admin non assegna le squadre
+6. **Bracket grafico** — non solo lista turni
 
 ---
 
@@ -32,7 +40,8 @@ Prima di iniziare il lavoro, risolvere questi punti con l'organizzatore:
 ```prisma
 model Group {
   id          Int          @id @default(autoincrement())
-  name        String       // "Girone A", "Girone B", …
+  name        String       // "Girone A", "Girone B", "Girone C", "Girone D"
+  slug        String       @unique // "A", "B", "C", "D" — usato nel bracket (es. "1A", "2B")
   order       Int          @default(0)
   createdAt   DateTime     @default(now())
 
@@ -45,7 +54,7 @@ model Group {
 model GroupTeam {
   groupId        Int
   footballTeamId Int
-  qualified      Boolean     @default(false) // admin lo segna a mano quando il girone finisce
+  qualified      Boolean     @default(false) // admin lo segna manualmente a fine girone
 
   group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   footballTeam   FootballTeam @relation(fields: [footballTeamId], references: [id], onDelete: Restrict)
@@ -56,8 +65,8 @@ model GroupTeam {
 
 model KnockoutRound {
   id        Int      @id @default(autoincrement())
-  name      String   // "Quarti di finale", "Semifinale", "Finale", "Terzo posto"
-  order     Int      // 1 = prima fase, 2 = seconda, … usato per ordinamento bracket
+  name      String   // "Quarti di finale", "Semifinale", "Finale 3°/4° posto", "Finale"
+  order     Int      // 1=QF, 2=SF, 3=Finale 3°posto, 4=Finale — ordine bracket
   createdAt DateTime @default(now())
 
   matches   Match[]
@@ -73,6 +82,14 @@ model KnockoutRound {
 groupId         Int?
 knockoutRoundId Int?
 
+// Bracket seed — mostra l'accoppiamento prima che le squadre siano assegnate
+// Es. "1A" = primo classificato Girone A, "2B" = secondo classificato Girone B
+homeSeed        String?   // es. "1A", "2B" — nullo una volta assegnata la squadra reale
+awaySeed        String?   // es. "1C", "2D"
+
+// Bracket position — per ordinare le partite di uno stesso turno nel bracket
+bracketPosition Int?      // 1,2,3,4 per i QF; 1,2 per le SF; 1 per 3°/4°; 1 per Finale
+
 group           Group?         @relation(fields: [groupId], references: [id], onDelete: SetNull)
 knockoutRound   KnockoutRound? @relation(fields: [knockoutRoundId], references: [id], onDelete: SetNull)
 
@@ -87,14 +104,37 @@ knockoutRound   KnockoutRound? @relation(fields: [knockoutRoundId], references: 
 groupTeams   GroupTeam[]
 ```
 
+### Seed del bracket (fatto dall'admin una volta sola)
+
+Quando la fase a gironi è configurata, l'admin crea i turni knockout e i match placeholder:
+
+```
+KnockoutRound: Quarti di finale (order=1)
+  Match QF1: homeSeed="1A" awaySeed="2B" bracketPosition=1
+  Match QF2: homeSeed="1C" awaySeed="2D" bracketPosition=2
+  Match QF3: homeSeed="2A" awaySeed="1B" bracketPosition=3
+  Match QF4: homeSeed="2C" awaySeed="1D" bracketPosition=4
+
+KnockoutRound: Semifinale (order=2)
+  Match SF1: homeSeed="V QF1" awaySeed="V QF2" bracketPosition=1
+  Match SF2: homeSeed="V QF3" awaySeed="V QF4" bracketPosition=2
+
+KnockoutRound: Finale 3°/4° posto (order=3)
+  Match: homeSeed="P SF1" awaySeed="P SF2" bracketPosition=1
+
+KnockoutRound: Finale (order=4)
+  Match: homeSeed="V SF1" awaySeed="V SF2" bracketPosition=1
+```
+
+Quando l'admin assegna le squadre reali ai match (dopo la fine del girone), imposta `homeTeamId` e `awayTeamId` e cancella i seed (o li mantiene per riferimento storico).
+
 ### Migration
 
-Poiché viene aggiunto `groupId` e `knockoutRoundId` nullable su Match, non serve pre-migration SQL — tutte le partite esistenti avranno `null` e rimangono valide come "partite senza fase".
+Nessun breaking change — tutti i nuovi campi su `Match` sono nullable. Partite esistenti restano valide con tutti i nuovi campi a `null`.
 
-Sequenza deploy:
-```
-npx prisma db push   # aggiunge le nuove tabelle e i campi nullable
-# nessun seed obbligatorio — i gironi vengono creati dall'admin
+```bash
+npx prisma db push   # aggiunge tabelle e campi nullable
+# nessun seed obbligatorio — l'admin crea gironi e turni dall'interfaccia
 ```
 
 ---
@@ -161,26 +201,35 @@ setTeamQualified(formData)    // groupId, footballTeamId, qualified: boolean
 ### 2. Gestione eliminazione diretta
 
 #### `app/(admin)/admin/eliminazione/page.tsx`
-- Lista turni (KnockoutRound) ordinati per `order`
-- Bottone "Nuovo turno"
-- Per ogni turno: nome, numero partite, stato
-- Click → apre dettaglio turno (o espande inline)
+- **Bracket grafico** identico alla vista utente ma con controlli admin
+- Per ogni slot partita: pulsante "Assegna squadre" quando le squadre sono TBD
+- Per ogni slot: link "Gestisci partita" → `/admin/partite/[id]`
+- Bottone "Inizializza bracket" (crea i turni e match placeholder se non esistono ancora — azione una-tantum)
+- Stato visivo: TBD (grigio) / Programmata / In corso / Conclusa
 
-#### `app/(admin)/admin/eliminazione/new/page.tsx` + `_form.tsx`
-- Form: nome turno (es. "Semifinale"), ordine
-- Server action `createKnockoutRound`
-
-#### `app/(admin)/admin/eliminazione/[id]/page.tsx`
-- Lista partite di questo turno con link a gestione partita
-- Bottone "Aggiungi partita" (crea nuova partita con `knockoutRoundId` pre-impostato)
-- Per ogni partita: squadre, data, stato, risultato
+#### `app/(admin)/admin/eliminazione/[id]/page.tsx` (dettaglio turno)
+- Lista partite del turno con link a gestione
+- Form per assegnare le squadre reali a un match TBD:
+  - Dropdown home team (filtra su squadre qualificate o tutte)
+  - Dropdown away team
+  - Salva → imposta `homeTeamId`, `awayTeamId`, azzera i seed
 
 #### `app/actions/admin/knockout.ts`
 ```typescript
-createKnockoutRound(formData) // nome, ordine
-updateKnockoutRound(formData) // rename, riordino
-deleteKnockoutRound(formData) // solo se senza partite
+initBracket(formData)         // crea i 4 turni e gli 8 match placeholder con seed predefiniti
+updateKnockoutRound(formData) // rename se necessario
+assignKnockoutTeams(formData) // matchId, homeTeamId, awayTeamId — assegna squadre al match TBD
+deleteKnockoutRound(formData) // solo se senza partite con dati reali
 ```
+
+#### Flusso operativo admin
+
+1. Fase a gironi completa → admin segna le squadre qualificate in `/admin/gironi/[id]`
+2. Admin va in `/admin/eliminazione` → clicca "Inizializza bracket"
+3. Sistema crea automaticamente i turni e i match placeholder (QF1: 1A vs 2B, ecc.)
+4. Admin assegna le squadre reali ai QF usando la classifica dei gironi come riferimento
+5. Dopo ogni partita QF/SF, admin assegna le squadre ai match successivi (avanzamento manuale)
+6. Admin gestisce ogni partita normalmente da `/admin/partite/[id]`
 
 ---
 
@@ -227,11 +276,32 @@ deleteKnockoutRound(formData) // solo se senza partite
 
 #### `app/(public)/eliminazione/page.tsx`
 - Titolo "FASE AD ELIMINAZIONE DIRETTA"
-- Per ogni turno (ordinati per `order`): sezione con
-  - Nome turno (es. "Quarti di finale")
-  - Lista partite del turno: squadre, data, stato, risultato
-  - Badge risultato quando CONCLUDED
-- Eventuale bracket grafico (fase 2 — da valutare complessità)
+- **Bracket grafico** a colonne (una colonna per turno: QF → SF → Finale):
+  - Ogni "slot" mostra: seed (es. "1A") o nome squadra se assegnata, risultato se CONCLUDED
+  - Le linee di connessione tra i match (SVG o CSS border trick)
+  - Colori: slot TBD in grigio, squadra assegnata in colore normale, vincente evidenziata
+  - Mobile: layout verticale per turno (una colonna scorrevole)
+- Finale 3°/4° posto mostrata separatamente sotto il bracket principale
+- Click su un match del bracket → apre dettaglio partita `/partite/[id]`
+
+**Struttura visiva bracket (desktop):**
+```
+QF                 SF              Finale
+┌─────────┐
+│ 1A vs 2B│─┐
+└─────────┘ │  ┌─────────┐
+             ├─▶│ V1 vs V2│─┐
+┌─────────┐ │  └─────────┘ │   ┌──────────┐
+│ 1C vs 2D│─┘               ├──▶│ FINALE   │
+└─────────┘                 │   └──────────┘
+                             │
+┌─────────┐                 │
+│ 2A vs 1B│─┐  ┌─────────┐ │
+└─────────┘ ├─▶│ V3 vs V4│─┘
+┌─────────┐ │  └─────────┘
+│ 2C vs 1D│─┘
+└─────────┘
+```
 
 ### 3. Aggiornamenti navigazione
 
@@ -322,9 +392,14 @@ deleteKnockoutRound(formData) // solo se senza partite
 
 ## Note architetturali
 
-- Una partita ha al massimo UN `groupId` o UN `knockoutRoundId` (mai entrambi) — da validare nelle server actions
-- Le partite senza `groupId` e senza `knockoutRoundId` continuano a funzionare normalmente (retrocompatibilità)
-- `computeStandings()` globale rimane invariata — utile per classifica generale del torneo
-- La qualificazione (`GroupTeam.qualified`) è gestita manualmente dall'admin, non calcolata automaticamente — questo evita edge cases su parità punti, scontri diretti, ecc.
-- Il punteggio fantasy non cambia per fase — rimane cumulativo su tutte le partite
-- L'eliminazione diretta non ha bisogno di un modello "risultato vincitore" esplicito — si deduce dal risultato della partita
+- Una partita ha al massimo UN `groupId` o UN `knockoutRoundId` (mai entrambi) — validato nelle server actions
+- Le partite senza `groupId` e senza `knockoutRoundId` continuano a funzionare normalmente (retrocompatibilità totale)
+- `computeStandings()` globale rimane invariata — usata per classifica generale del torneo
+- La qualificazione (`GroupTeam.qualified`) è **gestita manualmente dall'admin** — evita edge case su parità punti e scontri diretti tra gironi diversi
+- Il **bracket è fisso** (1A vs 2B, ecc.) — non serve logica automatica di accoppiamento, l'admin assegna le squadre a mano dopo la fine dei gironi
+- L'avanzamento nel bracket è **manuale** — l'admin assegna le squadre a SF/Finale dopo i risultati QF/SF, non c'è logica automatica di "vincente passa"
+- Il punteggio fantasy non cambia per fase — rimane cumulativo su tutte le partite di tutte le fasi
+- Il vincitore di una partita knockout si deduce dal risultato (`homeScore` vs `awayScore`) — non serve campo dedicato
+- I campi `homeSeed`/`awaySeed` (es. "1A", "V QF1") servono solo per display nei placeholder TBD — azzerati o ignorati quando le squadre reali sono assegnate
+- Il bracket grafico lato utente/admin è **CSS-based** (grid + border trick) — non serve libreria dedicata; i dati sono abbastanza semplici (4+2+1+1 match)
+- **Struttura gironi confermata**: 4 gironi (A, B, C, D) × 4 squadre = 16 squadre totali, partite di sola andata, prime 2 per girone qualificate = 8 team al knockout
