@@ -37,8 +37,9 @@ export default function PublicBottomNav() {
   const [moreOpen, setMoreOpen] = useState(false);
 
   const isActive = (href: string, matchers?: readonly string[]) => {
-    if (matchers) return matchers.some((m) => pathname.startsWith(m));
-    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+    if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));
+    if (href === "/") return pathname === "/";
+    return pathname === href || pathname.startsWith(href + "/");
   };
 
   const moreIsActive = MORE_NAV.some((item) => isActive(item.href));
