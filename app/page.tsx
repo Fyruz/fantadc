@@ -6,7 +6,7 @@ import PublicNav from "@/components/public-nav";
 import StatusBadge from "@/components/status-badge";
 
 export default async function HomePage() {
-  const [user, teamCount, playerCount, fantasyCount, spotlight, upcoming] = await Promise.all([
+  const [user, teamCount, playerCount, fantasyCount, spotlight, upcoming, groups] = await Promise.all([
     getCurrentUser(),
     db.footballTeam.count(),
     db.player.count(),
@@ -29,9 +29,47 @@ export default async function HomePage() {
         awayTeam: { select: { name: true, shortName: true } },
       },
     }),
+    // Gironi — solo se esistono
+    db.group.findMany({
+      orderBy: { order: "asc" },
+      include: {
+        teams: {
+          include: { footballTeam: { select: { id: true, name: true, shortName: true } } },
+        },
+        matches: {
+          where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
+          select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
+        },
+      },
+    }),
   ]);
 
   const featured = upcoming ?? spotlight;
+
+  // Compute inline standings per group (no DB round-trip needed — data already fetched)
+  type GroupRow = { teamId: number; name: string; shortName: string | null; played: number; points: number; qualified: boolean };
+  const groupStandings = groups.map((g) => {
+    const map = new Map<number, GroupRow>();
+    for (const gt of g.teams) {
+      map.set(gt.footballTeamId, {
+        teamId: gt.footballTeamId,
+        name: gt.footballTeam.name,
+        shortName: gt.footballTeam.shortName,
+        played: 0,
+        points: 0,
+        qualified: gt.qualified,
+      });
+    }
+    for (const m of g.matches) {
+      if (!m.homeTeamId || !m.awayTeamId) continue;
+      const hs = m.homeScore!; const as_ = m.awayScore!;
+      const home = map.get(m.homeTeamId); const away = map.get(m.awayTeamId);
+      if (home) { home.played++; if (hs > as_) home.points += 3; else if (hs === as_) home.points += 1; }
+      if (away) { away.played++; if (as_ > hs) away.points += 3; else if (hs === as_) away.points += 1; }
+    }
+    const rows = [...map.values()].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "it"));
+    return { id: g.id, slug: g.slug, name: g.name, rows };
+  });
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#F5F6FF" }}>
@@ -288,6 +326,61 @@ export default async function HomePage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {/* ══ GIRONI ════════════════════════════════════════════════ */}
+        {groupStandings.length > 0 && (
+          <section className="max-w-lg mx-auto w-full px-4 py-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="over-label">Fase a gironi</span>
+              <Link href="/gironi" className="text-[11px] font-black uppercase tracking-wide" style={{ color: "var(--primary)" }}>
+                Vedi tutto →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {groupStandings.map((g) => (
+                <Link
+                  key={g.id}
+                  href="/gironi"
+                  className="block rounded-2xl overflow-hidden transition-colors hover:opacity-90"
+                  style={{ background: "#fff", border: "1.5px solid var(--border-medium)", boxShadow: "0 2px 8px rgba(1,7,163,0.06)" }}
+                >
+                  {/* Group header */}
+                  <div
+                    className="px-3 py-2 flex items-center gap-2"
+                    style={{ background: "linear-gradient(135deg, #0107A3, #000669)" }}
+                  >
+                    <span className="font-display font-black text-sm uppercase text-white">Girone {g.slug}</span>
+                  </div>
+                  {/* Rows */}
+                  {g.rows.length === 0 ? (
+                    <div className="px-3 py-3 text-[11px]" style={{ color: "var(--text-muted)" }}>Nessuna squadra</div>
+                  ) : (
+                    g.rows.map((row, idx) => (
+                      <div
+                        key={row.teamId}
+                        className="flex items-center gap-2 px-3 py-1.5"
+                        style={idx < g.rows.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
+                      >
+                        <span className="text-[10px] font-black w-4 text-center flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
+                          {idx + 1}
+                        </span>
+                        <span className="flex-1 text-[11px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                          {row.shortName ?? row.name}
+                        </span>
+                        {row.qualified && (
+                          <span className="text-[9px] font-black flex-shrink-0" style={{ color: "#10B981" }}>Q</span>
+                        )}
+                        <span className="text-[11px] font-display font-black flex-shrink-0 tabular-nums" style={{ color: "var(--primary)" }}>
+                          {row.points}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </Link>
+              ))}
             </div>
           </section>
         )}
