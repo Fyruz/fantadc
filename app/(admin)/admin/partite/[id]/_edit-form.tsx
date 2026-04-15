@@ -8,10 +8,14 @@ import { Button } from "primereact/button";
 import { updateMatch } from "@/app/actions/admin/matches";
 
 type Team = { id: number; name: string };
+type Group = { id: number; name: string; slug: string };
+type Round = { id: number; name: string };
 type Match = {
   id: number;
   homeTeamId: number | null;
   awayTeamId: number | null;
+  groupId: number | null;
+  knockoutRoundId: number | null;
   startsAt: Date;
   status: string;
 };
@@ -22,7 +26,23 @@ const STATUS_OPTIONS = [
   { label: "Conclusa",    value: "CONCLUDED" },
 ];
 
-export default function EditMatchForm({ match, teams }: { match: Match; teams: Team[] }) {
+const PHASE_OPTIONS = [
+  { label: "Nessuna (amichevole)", value: "" },
+  { label: "Girone",               value: "group" },
+  { label: "Eliminazione diretta", value: "knockout" },
+];
+
+export default function EditMatchForm({
+  match,
+  teams,
+  groups,
+  rounds,
+}: {
+  match: Match;
+  teams: Team[];
+  groups: Group[];
+  rounds: Round[];
+}) {
   const [state, action, pending] = useActionState(updateMatch, undefined);
 
   const startsAtLocal = new Date(match.startsAt.getTime() - match.startsAt.getTimezoneOffset() * 60000);
@@ -42,8 +62,17 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
     t.setHours(h, m, 0, 0);
     return t;
   });
+  const [phase, setPhase] = useState<string>(
+    match.groupId ? "group" : match.knockoutRoundId ? "knockout" : ""
+  );
+  const [groupId, setGroupId] = useState<string>(match.groupId ? String(match.groupId) : "");
+  const [knockoutRoundId, setKnockoutRoundId] = useState<string>(
+    match.knockoutRoundId ? String(match.knockoutRoundId) : ""
+  );
 
   const teamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
+  const groupOptions = groups.map((g) => ({ label: `Girone ${g.slug} — ${g.name}`, value: String(g.id) }));
+  const roundOptions = rounds.map((r) => ({ label: r.name, value: String(r.id) }));
 
   const formattedDate = date
     ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
@@ -55,6 +84,39 @@ export default function EditMatchForm({ match, teams }: { match: Match; teams: T
   return (
     <form action={action} className="flex flex-col gap-4 pt-3">
       <input type="hidden" name="id" value={match.id} />
+      <input type="hidden" name="groupId" value={phase === "group" ? groupId : ""} />
+      <input type="hidden" name="knockoutRoundId" value={phase === "knockout" ? knockoutRoundId : ""} />
+
+      {/* Fase */}
+      <div>
+        <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+          Fase del torneo
+        </label>
+        <Dropdown
+          value={phase}
+          onChange={(e) => { setPhase(e.value); setGroupId(""); setKnockoutRoundId(""); }}
+          options={PHASE_OPTIONS}
+          className="w-full"
+        />
+      </div>
+
+      {phase === "group" && (
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Girone
+          </label>
+          <Dropdown value={groupId} onChange={(e) => setGroupId(e.value)} options={groupOptions} className="w-full" placeholder="Seleziona girone" />
+        </div>
+      )}
+
+      {phase === "knockout" && (
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Turno eliminazione
+          </label>
+          <Dropdown value={knockoutRoundId} onChange={(e) => setKnockoutRoundId(e.value)} options={roundOptions} className="w-full" placeholder="Seleziona turno" />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>

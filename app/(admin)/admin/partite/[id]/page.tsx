@@ -19,7 +19,7 @@ export default async function PartitaDetailPage({
   const matchId = Number(id);
   if (isNaN(matchId)) notFound();
 
-  const [match, teams, bonusTypes, allPlayers, matchBonuses, matchGoals] = await Promise.all([
+  const [match, teams, groups, rounds, bonusTypes, allPlayers, matchBonuses, matchGoals] = await Promise.all([
     db.match.findUnique({
       where: { id: matchId },
       include: {
@@ -33,6 +33,8 @@ export default async function PartitaDetailPage({
       },
     }),
     db.footballTeam.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    db.group.findMany({ orderBy: { order: "asc" }, select: { id: true, name: true, slug: true } }),
+    db.knockoutRound.findMany({ orderBy: { order: "asc" }, select: { id: true, name: true } }),
     db.bonusType.findMany({ orderBy: { code: "asc" } }),
     db.player.findMany({ orderBy: { name: "asc" }, include: { footballTeam: { select: { name: true } } } }),
     db.playerMatchBonus.findMany({
@@ -183,7 +185,7 @@ export default async function PartitaDetailPage({
           <i className="pi pi-chevron-down text-xs transition-transform group-open:rotate-180" style={{ color: "var(--text-disabled)" }} />
         </summary>
         <div className="px-4 pb-5 pt-1" style={{ borderTop: "1px solid var(--border-soft)" }}>
-          <EditMatchForm match={match} teams={teams} />
+          <EditMatchForm match={match} teams={teams} groups={groups} rounds={rounds} />
         </div>
       </details>
 

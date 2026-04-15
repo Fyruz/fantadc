@@ -4,7 +4,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -49,6 +48,7 @@ model FootballTeam {
   players     Player[]
   homeMatches Match[]       @relation("HomeTeamMatches")
   awayMatches Match[]       @relation("AwayTeamMatches")
+  groupTeams  GroupTeam[]
 }
 
 model Player {
@@ -72,53 +72,99 @@ model Player {
   @@index([role])
 }
 
-model Match {
-  id           Int                 @id @default(autoincrement())
-  homeTeamId   Int
-  awayTeamId   Int
-  status       MatchStatus         @default(DRAFT)
-  startsAt     DateTime
-  homeScore    Int?
-  awayScore    Int?
-  concludedAt  DateTime?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @updatedAt
+model Group {
+  id        Int         @id @default(autoincrement())
+  name      String      // "Girone A", "Girone B", …
+  slug      String      @unique // "A", "B", "C", "D"
+  order     Int         @default(0)
+  createdAt DateTime    @default(now())
 
-  homeTeam     FootballTeam        @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
-  awayTeam     FootballTeam        @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
-  players      MatchPlayer[]
-  votes        Vote[]
-  bonuses      PlayerMatchBonus[]
-  goals        MatchGoal[]
+  teams     GroupTeam[]
+  matches   Match[]
+
+  @@index([order])
+}
+
+model GroupTeam {
+  groupId        Int
+  footballTeamId Int
+  qualified      Boolean      @default(false)
+
+  group          Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  footballTeam   FootballTeam @relation(fields: [footballTeamId], references: [id], onDelete: Restrict)
+
+  @@id([groupId, footballTeamId])
+  @@index([footballTeamId])
+}
+
+model KnockoutRound {
+  id        Int      @id @default(autoincrement())
+  name      String   // "Quarti di finale", "Semifinale", "Finale 3°/4°", "Finale"
+  order     Int      // 1=QF, 2=SF, 3=3°posto, 4=Finale
+  createdAt DateTime @default(now())
+
+  matches   Match[]
+
+  @@index([order])
+}
+
+model Match {
+  id              Int                @id @default(autoincrement())
+  homeTeamId      Int?               // null = TBD (solo per slot knockout non ancora assegnati)
+  awayTeamId      Int?               // null = TBD
+  status          MatchStatus        @default(DRAFT)
+  startsAt        DateTime
+  homeScore       Int?
+  awayScore       Int?
+  concludedAt     DateTime?
+  // Fase torneo
+  groupId         Int?
+  knockoutRoundId Int?
+  homeSeed        String?            // es. "1A", "V QF1" — visibile quando squadre TBD
+  awaySeed        String?
+  bracketPosition Int?               // ordine nel bracket (1,2,3,4 per QF; 1,2 per SF; ecc.)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  homeTeam        FootballTeam?      @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam        FootballTeam?      @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  group           Group?             @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  knockoutRound   KnockoutRound?     @relation(fields: [knockoutRoundId], references: [id], onDelete: SetNull)
+  players         MatchPlayer[]
+  votes           Vote[]
+  bonuses         PlayerMatchBonus[]
+  goals           MatchGoal[]
 
   @@index([homeTeamId])
   @@index([awayTeamId])
   @@index([status])
   @@index([startsAt])
+  @@index([groupId])
+  @@index([knockoutRoundId])
 }
 
 model MatchPlayer {
-  matchId     Int
-  playerId    Int
-  createdAt   DateTime    @default(now())
+  matchId   Int
+  playerId  Int
+  createdAt DateTime @default(now())
 
-  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  player      Player      @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Restrict)
 
   @@id([matchId, playerId])
   @@index([playerId])
 }
 
 model Vote {
-  id          Int         @id @default(autoincrement())
-  userId      Int
-  matchId     Int
-  playerId    Int
-  createdAt   DateTime    @default(now())
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  matchId   Int
+  playerId  Int
+  createdAt DateTime @default(now())
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  player      Player      @relation(fields: [playerId], references: [id], onDelete: Restrict)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Restrict)
 
   @@unique([userId, matchId])
   @@index([matchId])
@@ -127,28 +173,28 @@ model Vote {
 }
 
 model BonusType {
-  id          Int                 @id @default(autoincrement())
-  code        String              @unique
-  name        String              @unique
-  points      Decimal             @db.Decimal(5, 2)
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
+  id          Int                @id @default(autoincrement())
+  code        String             @unique
+  name        String             @unique
+  points      Decimal            @db.Decimal(5, 2)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   assignments PlayerMatchBonus[]
 }
 
 model PlayerMatchBonus {
-  id          Int         @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   playerId    Int
   matchId     Int
   bonusTypeId Int
-  points      Decimal     @db.Decimal(5, 2)
-  quantity    Int         @default(1)
-  createdAt   DateTime    @default(now())
+  points      Decimal   @db.Decimal(5, 2)
+  quantity    Int       @default(1)
+  createdAt   DateTime  @default(now())
 
-  player      Player      @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  match       Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  bonusType   BonusType   @relation(fields: [bonusTypeId], references: [id], onDelete: Restrict)
+  player      Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  match       Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  bonusType   BonusType @relation(fields: [bonusTypeId], references: [id], onDelete: Restrict)
 
   @@index([playerId])
   @@index([matchId])
@@ -184,16 +230,16 @@ model FantasyTeamPlayer {
 }
 
 model AdminAuditLog {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   adminUserId Int
   action      String
   entityType  String
   entityId    String?
   before      Json?
   after       Json?
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
 
-  adminUser   User      @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
+  adminUser   User     @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@index([adminUserId])
   @@index([entityType, entityId])
@@ -205,8 +251,8 @@ enum UserRole {
 }
 
 enum PlayerRole {
-  GK
-  PLAYER
+  P
+  A
 }
 
 enum MatchStatus {
@@ -214,14 +260,3 @@ enum MatchStatus {
   SCHEDULED
   CONCLUDED
 }
-
-// Note applicative da rispettare:
-//
-// - una FantasyTeam deve avere esattamente 5 giocatori
-// - la composizione valida e 1 P + 4 A
-// - i 5 giocatori devono appartenere a 5 FootballTeam diverse
-// - captainPlayerId deve puntare a un giocatore presente in FantasyTeamPlayer
-// - Vote.playerId deve puntare a un giocatore presente in MatchPlayer per quella partita
-// - la finestra di voto MVP si apre quando Match.status diventa CONCLUDED e dura 1 ora
-// - il bonus MVP esiste, ma il valore esatto e ancora da definire
-// - le azioni admin che modificano dati devono generare un AdminAuditLog

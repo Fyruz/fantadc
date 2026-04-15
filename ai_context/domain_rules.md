@@ -67,6 +67,35 @@
 * deve esistere uno storico punteggi per partita
 * il dettaglio dei bonus assegnati deve essere consultabile
 
+### Fasi del torneo
+
+* il torneo si articola in due fasi: **fase a gironi** e **fase ad eliminazione diretta**
+* le due fasi coesistono — le partite senza `groupId` e `knockoutRoundId` sono amichevoli o fuori fase
+* una partita ha al massimo un `groupId` **oppure** un `knockoutRoundId`, mai entrambi
+
+#### Fase a gironi
+
+* ci sono 4 gironi (A, B, C, D), ciascuno con 4 squadre (16 totali)
+* ogni girone ha la propria classifica calcolata con `computeGroupStandings(groupId)`
+* le prime 2 classificate di ogni girone passano alla fase ad eliminazione diretta
+* la qualificazione (`GroupTeam.qualified`) è gestita manualmente dall'admin
+* una squadra appartiene a un solo girone alla volta
+
+#### Fase ad eliminazione diretta
+
+* bracket fisso a 8 squadre: 4 quarti di finale → 2 semifinali → finale + finale 3°/4° posto
+* accoppiamenti QF predeterminati dalla posizione nel girone:
+  * QF1: 1°A vs 2°B, QF2: 1°C vs 2°D, QF3: 2°A vs 1°B, QF4: 2°C vs 1°D
+* i match placeholder vengono creati con `homeSeed`/`awaySeed` (es. "1A", "V QF1") e `homeTeamId = null`
+* l'admin assegna le squadre reali ai match TBD usando `assignKnockoutTeams`
+* l'avanzamento nel bracket è manuale — l'admin assegna le squadre alle fasi successive
+* il vincitore si deduce dal risultato (`homeScore` vs `awayScore`), non da un campo dedicato
+
+#### Punteggio fantasy e fasi
+
+* il punteggio fantasy è cumulativo su tutte le fasi — non si resetta tra gironi e knockout
+* `computeStandings()` globale rimane invariata per la classifica generale
+
 ### Admin e audit
 
 * gli admin possono creare, modificare ed eliminare squadre reali, giocatori e partite

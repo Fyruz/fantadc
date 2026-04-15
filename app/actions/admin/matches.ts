@@ -22,6 +22,8 @@ const Schema = z.object({
   status: z.nativeEnum(MatchStatus).optional(),
   homeScore: scoreField.optional(),
   awayScore: scoreField.optional(),
+  groupId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
+  knockoutRoundId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
 });
 
 const CreateSchema = z.object({
@@ -102,6 +104,8 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     status: formData.get("status") || undefined,
     homeScore: formData.get("homeScore"),
     awayScore: formData.get("awayScore"),
+    groupId: formData.get("groupId") || null,
+    knockoutRoundId: formData.get("knockoutRoundId") || null,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   if (parsed.data.homeTeamId === parsed.data.awayTeamId) {
@@ -117,6 +121,8 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
     homeScore: parsed.data.homeScore ?? null,
     awayScore: parsed.data.awayScore ?? null,
+    groupId: parsed.data.groupId ?? null,
+    knockoutRoundId: parsed.data.knockoutRoundId ?? null,
   };
 
   if (parsed.data.status) {

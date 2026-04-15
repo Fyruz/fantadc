@@ -17,21 +17,75 @@ type Row = {
   awayTeam: { name: string; shortName: string | null } | null;
   homeSeed: string | null;
   awaySeed: string | null;
+  groupId: number | null;
+  knockoutRoundId: number | null;
+  group: { slug: string } | null;
+  knockoutRound: { name: string } | null;
   _count: { players: number };
 };
+
+type Tab = "all" | "group" | "knockout" | "none";
 
 const PAGE_SIZE = 15;
 
 export default function PartiteTable({ rows }: { rows: Row[] }) {
   const router = useRouter();
+  const [tab, setTab] = useState<Tab>("all");
   const [page, setPage] = useState(0);
-  const total = rows.length;
+
+  const filtered = rows.filter((r) => {
+    if (tab === "all") return true;
+    if (tab === "group") return r.groupId !== null;
+    if (tab === "knockout") return r.knockoutRoundId !== null;
+    if (tab === "none") return r.groupId === null && r.knockoutRoundId === null;
+    return true;
+  });
+
+  const total = filtered.length;
   const start = page * PAGE_SIZE;
-  const slice = rows.slice(start, start + PAGE_SIZE);
+  const slice = filtered.slice(start, start + PAGE_SIZE);
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const counts = {
+    all: rows.length,
+    group: rows.filter((r) => r.groupId !== null).length,
+    knockout: rows.filter((r) => r.knockoutRoundId !== null).length,
+    none: rows.filter((r) => r.groupId === null && r.knockoutRoundId === null).length,
+  };
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "all",      label: `Tutte (${counts.all})` },
+    { key: "group",    label: `Gironi (${counts.group})` },
+    { key: "knockout", label: `Eliminazione (${counts.knockout})` },
+    { key: "none",     label: `Senza fase (${counts.none})` },
+  ];
+
+  const changeTab = (t: Tab) => { setTab(t); setPage(0); };
 
   return (
     <div className="card overflow-hidden">
+      {/* Tabs */}
+      <div
+        className="flex items-center gap-0.5 px-3 py-2 overflow-x-auto"
+        style={{ borderBottom: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
+      >
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => changeTab(t.key)}
+            className="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-colors"
+            style={
+              tab === t.key
+                ? { background: "var(--primary)", color: "#fff" }
+                : { color: "var(--text-muted)" }
+            }
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {total === 0 ? (
         <p className="px-4 py-10 text-center over-label">Nessuna partita.</p>
       ) : (
@@ -48,6 +102,22 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">
                     <StatusBadge status={row.status} />
+                    {row.group && (
+                      <span
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                        style={{ background: "var(--primary-light)", color: "var(--primary)" }}
+                      >
+                        Girone {row.group.slug}
+                      </span>
+                    )}
+                    {row.knockoutRound && (
+                      <span
+                        className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                        style={{ background: "rgba(232,160,0,0.10)", color: "#C48A00" }}
+                      >
+                        {row.knockoutRound.name}
+                      </span>
+                    )}
                     {isAnomaly && (
                       <span
                         className="text-[10px] font-bold px-2 py-0.5 rounded-full"

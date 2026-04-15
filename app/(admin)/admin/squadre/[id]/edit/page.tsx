@@ -10,7 +10,7 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
   const { id } = await params;
   const teamId = Number(id);
 
-  const [team, standings] = await Promise.all([
+  const [team, standings, groupTeam] = await Promise.all([
     db.footballTeam.findUnique({
       where: { id: teamId },
       include: {
@@ -28,6 +28,10 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
       },
     }),
     computeStandings(),
+    db.groupTeam.findFirst({
+      where: { footballTeamId: teamId },
+      include: { group: { select: { id: true, name: true, slug: true } } },
+    }),
   ]);
 
   if (!team) notFound();
@@ -59,6 +63,35 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
             <div className="over-label mb-4">Modifica</div>
             <EditFootballTeamForm team={team} />
           </div>
+
+          {/* Girone */}
+          {groupTeam && (
+            <div className="card p-4">
+              <div className="over-label mb-2">Girone</div>
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="font-display font-black text-base uppercase" style={{ color: "var(--text-primary)" }}>
+                    Girone {groupTeam.group.slug}
+                  </div>
+                  <div className="text-xs" style={{ color: "var(--text-muted)" }}>{groupTeam.group.name}</div>
+                </div>
+                <div className="flex items-center gap-2">
+                  {groupTeam.qualified && (
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full" style={{ background: "#ECFDF5", color: "#065F46" }}>
+                      ✓ Qualificata
+                    </span>
+                  )}
+                  <Link
+                    href={`/admin/gironi/${groupTeam.group.id}`}
+                    className="text-[11px] font-semibold flex items-center gap-1"
+                    style={{ color: "var(--primary)" }}
+                  >
+                    Gestisci <i className="pi pi-arrow-right text-[9px]" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Classifica */}
           {standing && (

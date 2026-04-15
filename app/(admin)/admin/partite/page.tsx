@@ -8,6 +8,9 @@ export default async function PartitePage() {
     select: {
       id: true, status: true, startsAt: true, homeScore: true, awayScore: true,
       homeSeed: true, awaySeed: true,
+      groupId: true, knockoutRoundId: true,
+      group: { select: { slug: true } },
+      knockoutRound: { select: { name: true } },
       homeTeam: { select: { name: true, shortName: true } },
       awayTeam: { select: { name: true, shortName: true } },
       _count: { select: { players: true } },
