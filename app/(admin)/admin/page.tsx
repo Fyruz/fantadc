@@ -12,6 +12,7 @@ export default async function AdminDashboardPage() {
     usersNoTeam,
     standings,
     rankings,
+    groups,
   ] = await Promise.all([
     db.footballTeam.count(),
     db.player.count(),
@@ -43,6 +44,10 @@ export default async function AdminDashboardPage() {
     db.user.count({ where: { fantasyTeam: null } }),
     computeStandings(),
     computeRankings(),
+    db.group.findMany({
+      orderBy: { order: "asc" },
+      include: { teams: { select: { qualified: true } } },
+    }),
   ]);
 
   const hasAnomalies = concludedNoPlayers.length > 0 || usersNoTeam > 0;
@@ -54,6 +59,9 @@ export default async function AdminDashboardPage() {
   });
 
   const concludedCount = await db.match.count({ where: { status: "CONCLUDED" } });
+
+  const totalTeamsInGroups = groups.reduce((acc, g) => acc + g.teams.length, 0);
+  const totalQualified = groups.reduce((acc, g) => acc + g.teams.filter((t) => t.qualified).length, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -295,6 +303,61 @@ export default async function AdminDashboardPage() {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* ── Stato gironi ───────────────────────────────────────────── */}
+      {groups.length > 0 && (
+        <div className="card overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Stato gironi</div>
+            <Link href="/admin/gironi" className="text-[11px] font-semibold flex items-center gap-1" style={{ color: "var(--primary)" }}>
+              Gestisci <i className="pi pi-arrow-right text-[9px]" />
+            </Link>
+          </div>
+          <div className="px-4 py-3 flex items-center gap-6 flex-wrap">
+            {/* Group pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {groups.map((g) => {
+                const qualified = g.teams.filter((t) => t.qualified).length;
+                const total = g.teams.length;
+                return (
+                  <Link
+                    key={g.id}
+                    href={`/admin/gironi/${g.id}`}
+                    className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors hover:bg-[var(--surface-2)]"
+                    style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+                  >
+                    <span className="font-display font-black text-sm" style={{ color: "var(--primary)" }}>
+                      {g.slug}
+                    </span>
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      {total}/4 squadre
+                    </span>
+                    {qualified > 0 && (
+                      <span
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                        style={{ background: "#ECFDF5", color: "#065F46" }}
+                      >
+                        {qualified} Q
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+            {/* Summary */}
+            <div className="flex items-center gap-4 ml-auto">
+              <div className="text-center">
+                <div className="font-display font-black text-xl" style={{ color: "var(--text-primary)" }}>{totalTeamsInGroups}</div>
+                <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>squadre</div>
+              </div>
+              <div className="text-center">
+                <div className="font-display font-black text-xl" style={{ color: "#065F46" }}>{totalQualified}</div>
+                <div className="text-[10px] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>qualificate</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
