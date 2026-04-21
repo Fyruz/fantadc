@@ -3,7 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import EditGiocatoreForm from "./_form";
 import AdminPageHeader from "@/components/admin-page-header";
-import RoleBadge from "@/components/role-badge";
 
 export default async function EditGiocatorePage({
   params,

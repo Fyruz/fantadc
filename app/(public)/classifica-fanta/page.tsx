@@ -1,7 +1,7 @@
-import { computeRankings } from "@/lib/scoring";
 import ClassificaTable from "@/app/(public)/classifica/_table";
+import { computeRankings } from "@/lib/scoring";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function ClassificaFantaPage() {
   const rankings = await computeRankings();

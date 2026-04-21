@@ -5,7 +5,6 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { useState } from "react";
 import { initBracket, assignKnockoutTeams, deleteBracket } from "@/app/actions/admin/knockout";
-import type { ActionResult } from "@/app/actions/admin/football-teams";
 
 /* ── Init bracket ───────────────────────────────────────────────── */
 export function InitBracketForm() {

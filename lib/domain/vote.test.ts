@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import { isMvpWindowOpen, validateVote } from "./vote";
 
 const ONE_HOUR_MS = 60 * 60 * 1000;
