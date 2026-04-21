@@ -39,7 +39,7 @@ export function computeMvpWinnerId(votes: Array<{ playerId: number }>): number |
   }
 
   const topEntry = [...counts.entries()].sort(
-    (a, b) => b[1] - a[1] || a[0] - b[0]
+    (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)
   )[0];
 
   return topEntry ? topEntry[0] : null;
