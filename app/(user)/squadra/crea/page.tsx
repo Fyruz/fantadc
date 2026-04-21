@@ -17,7 +17,7 @@ export default async function CreaSquadraPage() {
       id: true,
       name: true,
       role: true,
-      footballTeam: { select: { id: true, name: true } },
+      footballTeam: { select: { id: true, name: true, shortName: true } },
     },
   });
 
@@ -31,12 +31,24 @@ export default async function CreaSquadraPage() {
       </Link>
 
       <div className="admin-card p-5 sm:p-6">
-        <div className="mb-6">
-          <h1 className="mb-2 text-[22px] font-bold text-[var(--text-primary)]">Crea la tua squadra</h1>
-          <p className="max-w-2xl text-sm text-[var(--text-secondary)]">
-            Seleziona 1 portiere e 4 giocatori da 5 squadre diverse. Scegli il tuo capitano.
-            La rosa sarà bloccata dopo la conferma.
-          </p>
+        <div className="mb-6 flex flex-col gap-3">
+          <div>
+            <h1 className="mb-2 text-[22px] font-bold text-[var(--text-primary)]">Crea la tua squadra</h1>
+            <p className="max-w-2xl text-sm text-[var(--text-secondary)]">
+              Costruisci la rosa direttamente sul campo: scegli 1 portiere, 4 giocatori di
+              movimento da 5 squadre diverse e poi nomina il capitano.
+            </p>
+          </div>
+
+          <div
+            className="surface-card flex flex-col gap-1.5 p-3 text-xs sm:flex-row sm:items-center sm:justify-between"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            <span>Tocca uno slot libero per aprire la lista dei giocatori disponibili.</span>
+            <span className="font-semibold text-[var(--text-primary)]">
+              Dopo la conferma la rosa sarà bloccata.
+            </span>
+          </div>
         </div>
 
         <CreaSquadraForm players={players} />
