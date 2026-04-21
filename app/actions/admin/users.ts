@@ -5,6 +5,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { UserRole } from "@prisma/client";
 import { db } from "@/lib/db";
+import { isWithinBcryptByteLimit } from "@/lib/password";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
@@ -23,7 +24,7 @@ export async function suspendUser(formData: FormData): Promise<ActionResult> {
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { message: "Utente non trovato." };
-  if (user.id === adminId) return { message: "Non puoi modificare il tuo stato." };
+  if (user.id === adminId) return { message: "Non puoi sospendere te stesso." };
 
   await db.user.update({ where: { id: userId }, data: { isSuspended: true } });
   await logAdminAction(adminId, "SUSPEND_USER", "User", userId, { isSuspended: false }, { isSuspended: true });
@@ -43,7 +44,7 @@ export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { message: "Utente non trovato." };
-  if (user.id === adminId) return { message: "Non puoi modificare il tuo stato." };
+  if (!user.isSuspended) return {};
 
   await db.user.update({ where: { id: userId }, data: { isSuspended: false } });
   await logAdminAction(
@@ -51,7 +52,7 @@ export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
     "UNSUSPEND_USER",
     "User",
     userId,
-    { isSuspended: user.isSuspended },
+    { isSuspended: true },
     { isSuspended: false }
   );
 
@@ -65,7 +66,7 @@ const CreateAdminSchema = z.object({
   password: z
     .string()
     .min(8, "Password min 8 caratteri")
-    .max(72, "Password troppo lunga"),
+    .refine(isWithinBcryptByteLimit, "Password troppo lunga"),
   name: z.string().trim().optional(),
 });
 

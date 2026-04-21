@@ -11,6 +11,11 @@ const MAX_AUDIT_DEPTH = 5;
 const MAX_AUDIT_KEYS = 50;
 const MAX_AUDIT_STRING_LENGTH = 500;
 
+/**
+ * JSON-safe shape accepted by the audit logger after sanitization/redaction.
+ * We use this instead of `unknown` so recursive payload transforms stay typed
+ * before handing values to Prisma's JSON columns.
+ */
 export type AuditLogValue =
   | null
   | boolean

@@ -7,6 +7,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { signIn, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isWithinBcryptByteLimit } from "@/lib/password";
 import {
   registerLimiter,
   loginLimiter,
@@ -33,7 +34,7 @@ const RegisterSchema = z.object({
   password: z
     .string()
     .min(8, { message: "La password deve essere di almeno 8 caratteri." })
-    .max(72, { message: "Password troppo lunga." }),
+    .refine(isWithinBcryptByteLimit, { message: "Password troppo lunga." }),
   name: z.string().min(2, { message: "Il nome deve avere almeno 2 caratteri." }).trim().optional(),
 });
 
@@ -42,7 +43,7 @@ const LoginSchema = z.object({
   password: z
     .string()
     .min(1, { message: "Password obbligatoria." })
-    .max(72, { message: "Password troppo lunga." }),
+    .refine(isWithinBcryptByteLimit, { message: "Password troppo lunga." }),
 });
 
 export type AuthActionResult = {

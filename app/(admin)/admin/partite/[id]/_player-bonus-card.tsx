@@ -8,6 +8,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { assignBonus, deleteBonus } from "@/app/actions/admin/bonuses";
 import { removeMatchPlayer } from "@/app/actions/admin/match-players";
+import { isSuccessfulActionResult } from "@/lib/action-result";
 import RoleBadge from "@/components/role-badge";
 
 type Bonus = { id: number; bonusType: { code: string }; quantity: number; points: number };
@@ -31,7 +32,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
       formData: FormData
     ) => {
       const result = await assignBonus(previousState, formData);
-      if (!result.message && !result.errors) {
+      if (isSuccessfulActionResult(result)) {
         setSelectedBonusType("");
         setQty(1);
         setVisible(false);
