@@ -9,9 +9,16 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
 
+const UserIdSchema = z.object({
+  userId: z.coerce.number().int().positive(),
+});
+
 export async function suspendUser(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
-  const userId = Number(formData.get("userId"));
+  const parsed = UserIdSchema.safeParse({ userId: formData.get("userId") });
+  if (!parsed.success) return { message: "Utente non valido." };
+
+  const { userId } = parsed.data;
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { message: "Utente non trovato." };
@@ -27,10 +34,24 @@ export async function suspendUser(formData: FormData): Promise<ActionResult> {
 
 export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
-  const userId = Number(formData.get("userId"));
+  const parsed = UserIdSchema.safeParse({ userId: formData.get("userId") });
+  if (!parsed.success) return { message: "Utente non valido." };
+
+  const { userId } = parsed.data;
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return { message: "Utente non trovato." };
+  if (user.id === Number(admin.id)) return { message: "Non puoi modificare il tuo stato." };
 
   await db.user.update({ where: { id: userId }, data: { isSuspended: false } });
-  await logAdminAction(Number(admin.id), "UNSUSPEND_USER", "User", userId, { isSuspended: true }, { isSuspended: false });
+  await logAdminAction(
+    Number(admin.id),
+    "UNSUSPEND_USER",
+    "User",
+    userId,
+    { isSuspended: user.isSuspended },
+    { isSuspended: false }
+  );
 
   revalidatePath("/admin/utenti");
   revalidatePath(`/admin/utenti/${userId}`);
@@ -39,7 +60,10 @@ export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
 
 const CreateAdminSchema = z.object({
   email: z.string().email("Email non valida").trim().toLowerCase(),
-  password: z.string().min(8, "Password min 8 caratteri"),
+  password: z
+    .string()
+    .min(8, "Password min 8 caratteri")
+    .max(72, "Password troppo lunga"),
   name: z.string().trim().optional(),
 });
 

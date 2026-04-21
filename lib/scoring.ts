@@ -1,5 +1,10 @@
-import { db } from "./db";
 import { MatchStatus } from "@prisma/client";
+import { db } from "./db";
+import {
+  buildMatchPlayerPointIndex,
+  buildPlayerTotalPoints,
+  getMvpPlayerId,
+} from "./scoring-utils";
 
 export type PlayerMatchScore = {
   playerId: number;
@@ -10,12 +15,12 @@ export type PlayerMatchScore = {
   mvpPoints: number;
   basePoints: number;
   isCaptain: boolean;
-  finalPoints: number; // basePoints * (isCaptain ? 2 : 1)
+  finalPoints: number;
 };
 
 export type MatchScore = {
   matchId: number;
-  label: string; // "HomeTeam vs AwayTeam"
+  label: string;
   startsAt: Date;
   playerScores: PlayerMatchScore[];
   total: number;
@@ -32,7 +37,7 @@ export type RankEntry = {
 
 /** Compute total ranking across all PUBLISHED matches. */
 export async function computeRankings(): Promise<RankEntry[]> {
-  const [matches, fantasyTeams, mvpBonusType, playerMap] = await Promise.all([
+  const [matches, fantasyTeams, mvpBonusType] = await Promise.all([
     db.match.findMany({
       where: { status: MatchStatus.PUBLISHED },
       select: {
@@ -51,55 +56,43 @@ export async function computeRankings(): Promise<RankEntry[]> {
       },
     }),
     db.bonusType.findFirst({ where: { code: "MVP" }, select: { points: true } }),
-    db.player.findMany({ select: { id: true, name: true } }),
   ]);
 
   const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
-  const playerNames = new Map(playerMap.map((p) => [p.id, p.name]));
+  const totalPointsByPlayer = buildPlayerTotalPoints(
+    buildMatchPlayerPointIndex(matches, mvpBonus)
+  );
 
-  function getMvpId(votes: { playerId: number }[]): number | null {
-    if (!votes.length) return null;
-    const counts = new Map<number, number>();
-    for (const v of votes) counts.set(v.playerId, (counts.get(v.playerId) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
-  }
+  const entries = fantasyTeams.map((fantasyTeam) => {
+    const totalPoints = fantasyTeam.players.reduce((total, { playerId }) => {
+      const playerPoints = totalPointsByPlayer.get(playerId) ?? 0;
+      const multiplier = fantasyTeam.captainPlayerId === playerId ? 2 : 1;
+      return total + playerPoints * multiplier;
+    }, 0);
 
-  const entries: Omit<RankEntry, "rank">[] = fantasyTeams.map((ft) => {
-    let total = 0;
-    for (const match of matches) {
-      const mvpId = getMvpId(match.votes);
-      for (const { playerId } of ft.players) {
-        const bonusPoints = match.bonuses
-          .filter((b) => b.playerId === playerId)
-          .reduce((s, b) => s + Number(b.points), 0);
-        const mvpPoints = playerId === mvpId ? mvpBonus : 0;
-        const base = bonusPoints + mvpPoints;
-        const multiplier = ft.captainPlayerId === playerId ? 2 : 1;
-        total += base * multiplier;
-      }
-    }
     return {
-      fantasyTeamId: ft.id,
-      fantasyTeamName: ft.name,
-      userEmail: ft.user.email,
-      userName: ft.user.name,
-      totalPoints: total,
-      _playerNames: playerNames,
+      fantasyTeamId: fantasyTeam.id,
+      fantasyTeamName: fantasyTeam.name,
+      userEmail: fantasyTeam.user.email,
+      userName: fantasyTeam.user.name,
+      totalPoints,
     };
   });
 
   entries.sort(
-    (a, b) =>
-      b.totalPoints - a.totalPoints ||
-      a.fantasyTeamName.localeCompare(b.fantasyTeamName, "it")
+    (left, right) =>
+      right.totalPoints - left.totalPoints ||
+      left.fantasyTeamName.localeCompare(right.fantasyTeamName, "it")
   );
 
-  return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+  return entries.map((entry, index) => ({ ...entry, rank: index + 1 }));
 }
 
 /** Compute per-match score history for a single fantasy team. */
-export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchScore[]> {
-  const [ft, matches, mvpBonusType] = await Promise.all([
+export async function computeTeamHistory(
+  fantasyTeamId: number
+): Promise<MatchScore[]> {
+  const [fantasyTeam, matches, mvpBonusType] = await Promise.all([
     db.fantasyTeam.findUnique({
       where: { id: fantasyTeamId },
       select: {
@@ -124,7 +117,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         startsAt: true,
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
-        bonuses: { select: { playerId: true, points: true, bonusType: { select: { code: true, name: true } } } },
+        bonuses: { select: { playerId: true, points: true } },
         votes: { select: { playerId: true } },
       },
       orderBy: { startsAt: "asc" },
@@ -132,47 +125,49 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
     db.bonusType.findFirst({ where: { code: "MVP" }, select: { points: true } }),
   ]);
 
-  if (!ft) return [];
+  if (!fantasyTeam) return [];
 
   const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
-
-  function getMvpId(votes: { playerId: number }[]): number | null {
-    if (!votes.length) return null;
-    const counts = new Map<number, number>();
-    for (const v of votes) counts.set(v.playerId, (counts.get(v.playerId) ?? 0) + 1);
-    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
-  }
+  const pointsByMatch = buildMatchPlayerPointIndex(matches, mvpBonus);
 
   return matches.map((match) => {
-    const mvpId = getMvpId(match.votes);
-    const playerScores: PlayerMatchScore[] = ft.players.map(({ player }) => {
-      const bonusPoints = match.bonuses
-        .filter((b) => b.playerId === player.id)
-        .reduce((s, b) => s + Number(b.points), 0);
-      const isMvp = player.id === mvpId;
-      const mvpPoints = isMvp ? mvpBonus : 0;
-      const basePoints = bonusPoints + mvpPoints;
-      const isCaptain = ft.captainPlayerId === player.id;
-      const finalPoints = basePoints * (isCaptain ? 2 : 1);
-      return {
-        playerId: player.id,
-        playerName: player.name,
-        footballTeamName: player.footballTeam.name,
-        bonusPoints,
-        isMvp,
-        mvpPoints,
-        basePoints,
-        isCaptain,
-        finalPoints,
-      };
-    });
+    const matchPoints = pointsByMatch.get(match.id) ?? new Map<number, number>();
+    const mvpId = getMvpPlayerId(match.votes);
+    const playerScores: PlayerMatchScore[] = fantasyTeam.players.map(
+      ({ player }) => {
+        let bonusPoints = 0;
+        for (const bonus of match.bonuses) {
+          if (bonus.playerId === player.id) {
+            bonusPoints += Number(bonus.points);
+          }
+        }
+
+        const isMvp = player.id === mvpId;
+        const mvpPoints = isMvp ? mvpBonus : 0;
+        const basePoints = matchPoints.get(player.id) ?? 0;
+        const isCaptain = fantasyTeam.captainPlayerId === player.id;
+        const finalPoints = basePoints * (isCaptain ? 2 : 1);
+
+        return {
+          playerId: player.id,
+          playerName: player.name,
+          footballTeamName: player.footballTeam.name,
+          bonusPoints,
+          isMvp,
+          mvpPoints,
+          basePoints,
+          isCaptain,
+          finalPoints,
+        };
+      }
+    );
 
     return {
       matchId: match.id,
       label: `${match.homeTeam.name} vs ${match.awayTeam.name}`,
       startsAt: match.startsAt,
       playerScores,
-      total: playerScores.reduce((s, p) => s + p.finalPoints, 0),
+      total: playerScores.reduce((total, playerScore) => total + playerScore.finalPoints, 0),
     };
   });
 }

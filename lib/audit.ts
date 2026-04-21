@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { sanitizeAuditPayload } from "@/lib/audit-utils";
 
 export async function logAdminAction(
   adminUserId: number,
@@ -16,8 +17,8 @@ export async function logAdminAction(
       action,
       entityType,
       entityId: entityId != null ? String(entityId) : null,
-      before: before ?? undefined,
-      after: after ?? undefined,
+      before: sanitizeAuditPayload(before),
+      after: sanitizeAuditPayload(after),
     },
   });
 }

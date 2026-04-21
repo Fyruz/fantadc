@@ -13,6 +13,19 @@ import {
   checkRateLimit,
 } from "@/lib/rate-limit";
 
+function getClientIp(hdrs: Headers): string {
+  const forwardedFor = hdrs.get("x-forwarded-for");
+  if (forwardedFor) {
+    const firstHop = forwardedFor
+      .split(",")
+      .map((part) => part.trim())
+      .find(Boolean);
+    if (firstHop) return firstHop;
+  }
+
+  return hdrs.get("x-real-ip")?.trim() || "unknown";
+}
+
 // --- Schemas ---
 
 const RegisterSchema = z.object({
@@ -26,7 +39,10 @@ const RegisterSchema = z.object({
 
 const LoginSchema = z.object({
   email: z.string().email().trim().toLowerCase(),
-  password: z.string().min(1),
+  password: z
+    .string()
+    .min(1, { message: "Password obbligatoria." })
+    .max(72, { message: "Password troppo lunga." }),
 });
 
 export type AuthActionResult = {
@@ -41,7 +57,7 @@ export async function register(
   formData: FormData
 ): Promise<AuthActionResult> {
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip") ?? "unknown";
+  const ip = getClientIp(hdrs);
 
   const { limited, retryAfter } = await checkRateLimit(registerLimiter, ip);
   if (limited) {
@@ -80,7 +96,7 @@ export async function login(
   formData: FormData
 ): Promise<AuthActionResult> {
   const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip") ?? "unknown";
+  const ip = getClientIp(hdrs);
 
   const { limited, retryAfter } = await checkRateLimit(loginLimiter, ip);
   if (limited) {

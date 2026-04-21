@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+  --font-geist-sans: Inter, "Segoe UI", Arial, Helvetica, sans-serif;
+  --font-geist-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-barlow-condensed: "Barlow Condensed", "Arial Narrow Bold", "Arial Narrow", Impact, sans-serif;
+
   /* ── Brand ─────────────────────────────── */
   --primary: #0107A3;
   --primary-hover: #0A14B8;

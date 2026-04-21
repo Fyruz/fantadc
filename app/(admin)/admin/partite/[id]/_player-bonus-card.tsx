@@ -30,11 +30,22 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const prevStateRef = useRef<typeof state>(undefined);
 
   useEffect(() => {
-    if (state !== undefined && state !== prevStateRef.current && !state.message && !state.errors) {
-      setSelectedBonusType("");
-      setQty(1);
-      setVisible(false);
+    if (
+      state !== undefined &&
+      state !== prevStateRef.current &&
+      !state.message &&
+      !state.errors
+    ) {
+      const timer = window.setTimeout(() => {
+        setSelectedBonusType("");
+        setQty(1);
+        setVisible(false);
+      }, 0);
+
+      prevStateRef.current = state;
+      return () => window.clearTimeout(timer);
     }
+
     prevStateRef.current = state;
   }, [state]);
 
