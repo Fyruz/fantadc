@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { useActionState } from "react";
+import { useActionState, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -25,29 +24,22 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const [visible, setVisible] = useState(false);
   const [selectedBonusType, setSelectedBonusType] = useState<string>("");
   const [qty, setQty] = useState(1);
-  const [state, action, pending] = useActionState(assignBonus, undefined);
   const removeFormRef = useRef<HTMLFormElement>(null);
-  const prevStateRef = useRef<typeof state>(undefined);
-
-  useEffect(() => {
-    if (
-      state !== undefined &&
-      state !== prevStateRef.current &&
-      !state.message &&
-      !state.errors
-    ) {
-      const timer = window.setTimeout(() => {
+  const [state, action, pending] = useActionState(
+    async (
+      previousState: Awaited<ReturnType<typeof assignBonus>> | undefined,
+      formData: FormData
+    ) => {
+      const result = await assignBonus(previousState, formData);
+      if (!result.message && !result.errors) {
         setSelectedBonusType("");
         setQty(1);
         setVisible(false);
-      }, 0);
-
-      prevStateRef.current = state;
-      return () => window.clearTimeout(timer);
-    }
-
-    prevStateRef.current = state;
-  }, [state]);
+      }
+      return result;
+    },
+    undefined
+  );
 
   const isGk = player.role === "P";
   const borderColor = isGk ? "#E8A000" : "var(--border-medium)";

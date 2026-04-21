@@ -128,10 +128,8 @@ export async function computeTeamHistory(
   if (!fantasyTeam) return [];
 
   const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
-  const pointsByMatch = buildMatchPlayerPointIndex(matches, mvpBonus);
 
   return matches.map((match) => {
-    const matchPoints = pointsByMatch.get(match.id) ?? new Map<number, number>();
     const mvpId = getMvpPlayerId(match.votes);
     const playerScores: PlayerMatchScore[] = fantasyTeam.players.map(
       ({ player }) => {
@@ -144,7 +142,7 @@ export async function computeTeamHistory(
 
         const isMvp = player.id === mvpId;
         const mvpPoints = isMvp ? mvpBonus : 0;
-        const basePoints = matchPoints.get(player.id) ?? 0;
+        const basePoints = bonusPoints + mvpPoints;
         const isCaptain = fantasyTeam.captainPlayerId === player.id;
         const finalPoints = basePoints * (isCaptain ? 2 : 1);
 

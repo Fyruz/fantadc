@@ -15,6 +15,7 @@ const UserIdSchema = z.object({
 
 export async function suspendUser(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
+  const adminId = Number(admin.id);
   const parsed = UserIdSchema.safeParse({ userId: formData.get("userId") });
   if (!parsed.success) return { message: "Utente non valido." };
 
@@ -22,10 +23,10 @@ export async function suspendUser(formData: FormData): Promise<ActionResult> {
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { message: "Utente non trovato." };
-  if (user.id === Number(admin.id)) return { message: "Non puoi sospendere te stesso." };
+  if (user.id === adminId) return { message: "Non puoi modificare il tuo stato." };
 
   await db.user.update({ where: { id: userId }, data: { isSuspended: true } });
-  await logAdminAction(Number(admin.id), "SUSPEND_USER", "User", userId, { isSuspended: false }, { isSuspended: true });
+  await logAdminAction(adminId, "SUSPEND_USER", "User", userId, { isSuspended: false }, { isSuspended: true });
 
   revalidatePath("/admin/utenti");
   revalidatePath(`/admin/utenti/${userId}`);
@@ -34,6 +35,7 @@ export async function suspendUser(formData: FormData): Promise<ActionResult> {
 
 export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
+  const adminId = Number(admin.id);
   const parsed = UserIdSchema.safeParse({ userId: formData.get("userId") });
   if (!parsed.success) return { message: "Utente non valido." };
 
@@ -41,11 +43,11 @@ export async function unsuspendUser(formData: FormData): Promise<ActionResult> {
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { message: "Utente non trovato." };
-  if (user.id === Number(admin.id)) return { message: "Non puoi modificare il tuo stato." };
+  if (user.id === adminId) return { message: "Non puoi modificare il tuo stato." };
 
   await db.user.update({ where: { id: userId }, data: { isSuspended: false } });
   await logAdminAction(
-    Number(admin.id),
+    adminId,
     "UNSUSPEND_USER",
     "User",
     userId,
@@ -63,6 +65,7 @@ const CreateAdminSchema = z.object({
   password: z
     .string()
     .min(8, "Password min 8 caratteri")
+    // bcrypt considera solo i primi 72 byte: limitiamo l&apos;input per evitare ambiguità e sprechi.
     .max(72, "Password troppo lunga"),
   name: z.string().trim().optional(),
 });

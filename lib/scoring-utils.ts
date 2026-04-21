@@ -25,16 +25,34 @@ export function getMvpPlayerId(
   if (!votes.length) return null;
 
   const counts = new Map<number, number>();
-  let winnerId: number | null = null;
-  let winnerVotes = 0;
+  const firstSeenAt = new Map<number, number>();
 
-  for (const vote of votes) {
+  for (const [index, vote] of votes.entries()) {
+    if (!firstSeenAt.has(vote.playerId)) {
+      firstSeenAt.set(vote.playerId, index);
+    }
+
     const nextCount = (counts.get(vote.playerId) ?? 0) + 1;
     counts.set(vote.playerId, nextCount);
+  }
 
-    if (nextCount > winnerVotes) {
-      winnerId = vote.playerId;
-      winnerVotes = nextCount;
+  let winnerId: number | null = null;
+  let winnerVotes = -1;
+  let winnerFirstSeenAt = Number.POSITIVE_INFINITY;
+
+  for (const [playerId, voteCount] of counts.entries()) {
+    const playerFirstSeenAt = firstSeenAt.get(playerId);
+    if (playerFirstSeenAt === undefined) {
+      continue;
+    }
+
+    if (
+      voteCount > winnerVotes ||
+      (voteCount === winnerVotes && playerFirstSeenAt < winnerFirstSeenAt)
+    ) {
+      winnerId = playerId;
+      winnerVotes = voteCount;
+      winnerFirstSeenAt = playerFirstSeenAt;
     }
   }
 

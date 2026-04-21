@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
-import { isMvpWindowOpen, validateVote } from "@/lib/domain/vote";
+import { validateVote } from "@/lib/domain/vote";
 import { voteLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export type VoteResult =

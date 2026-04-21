@@ -43,14 +43,12 @@ async function main() {
     { code: "MVP",              name: "MVP Partita",           points:  3.0 },
   ];
 
-  let created = 0;
   for (const bt of bonusTypes) {
-    const result = await db.bonusType.upsert({
+    await db.bonusType.upsert({
       where: { code: bt.code },
       update: {},
       create: { code: bt.code, name: bt.name, points: bt.points },
     });
-    if (result.code === bt.code) created++;
   }
   console.log(`✓ Bonus type verificati: ${bonusTypes.map((b) => b.code).join(", ")}`);
 }
