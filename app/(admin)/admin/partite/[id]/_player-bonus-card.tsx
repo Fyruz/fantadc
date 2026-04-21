@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
@@ -46,17 +46,20 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const [visible, setVisible] = useState(false);
   const [selectedBonusType, setSelectedBonusType] = useState<string>("");
   const [qty, setQty] = useState(1);
-  const [state, action, pending] = useActionState(assignBonus, undefined);
-  const removeFormRef = useRef<HTMLFormElement>(null);
-  const prevStateRef = useRef<typeof state>(undefined);
+  const [state, action, pending] = useActionState(
+    async (prevState: Awaited<ReturnType<typeof assignBonus>> | undefined, formData: FormData) => {
+      const nextState = await assignBonus(prevState, formData);
 
-  useEffect(() => {
-    if (state !== undefined && state !== prevStateRef.current && !state?.message && !state?.errors) {
-      setSelectedBonusType("");
-      setQty(1);
-    }
-    prevStateRef.current = state;
-  }, [state]);
+      if (!nextState?.message && !nextState?.errors) {
+        setSelectedBonusType("");
+        setQty(1);
+      }
+
+      return nextState;
+    },
+    undefined
+  );
+  const removeFormRef = useRef<HTMLFormElement>(null);
 
   const bonusTypeOptions = bonusTypes.map((bt) => ({
     label: `${bt.code} — ${bt.name}`,

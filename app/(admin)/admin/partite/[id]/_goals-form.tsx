@@ -50,7 +50,6 @@ export default function GoalsForm({
   // Determine which team scored based on selected player
   // For the dropdown: show attacker's team players first (opposite team), then own team
   const selectedPlayer = players.find((p) => String(p.id) === scorerId);
-  const selectedTeamId = selectedPlayer?.footballTeamId;
 
   // Group players: home and away
   const homePlayers = players.filter((p) => p.footballTeamId === homeTeamId);
@@ -97,9 +96,9 @@ export default function GoalsForm({
               {goalsHome.length === 0 ? (
                 <span className="text-xs" style={{ color: "var(--text-disabled)" }}>—</span>
               ) : (
-                goalsHome.map((g) => (
-                  <GoalRow key={g.id} goal={g} matchId={matchId} players={players} />
-                ))
+                  goalsHome.map((g) => (
+                    <GoalRow key={g.id} goal={g} matchId={matchId} />
+                  ))
               )}
             </div>
           </div>
@@ -112,9 +111,9 @@ export default function GoalsForm({
               {goalsAway.length === 0 ? (
                 <span className="text-xs" style={{ color: "var(--text-disabled)" }}>—</span>
               ) : (
-                goalsAway.map((g) => (
-                  <GoalRow key={g.id} goal={g} matchId={matchId} players={players} />
-                ))
+                  goalsAway.map((g) => (
+                    <GoalRow key={g.id} goal={g} matchId={matchId} />
+                  ))
               )}
             </div>
           </div>
@@ -208,7 +207,7 @@ export default function GoalsForm({
   );
 }
 
-function GoalRow({ goal, matchId, players }: { goal: Goal; matchId: number; players: Player[] }) {
+function GoalRow({ goal, matchId }: { goal: Goal; matchId: number }) {
   const formRef = useRef<HTMLFormElement>(null);
 
   return (

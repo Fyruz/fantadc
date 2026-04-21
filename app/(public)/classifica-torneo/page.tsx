@@ -1,6 +1,6 @@
 import { computeStandings } from "@/lib/standings";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function ClassificaTorneoPage() {
   const standings = await computeStandings();

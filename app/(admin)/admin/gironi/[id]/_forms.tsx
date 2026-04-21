@@ -10,7 +10,6 @@ import type { ActionResult } from "@/app/actions/admin/football-teams";
 
 type Group = { id: number; name: string; slug: string; order: number };
 type FootballTeam = { id: number; name: string; shortName: string | null };
-type GroupTeam = { footballTeamId: number; qualified: boolean; footballTeam: FootballTeam };
 
 /* ── Edit group ─────────────────────────────────────────────────── */
 export function EditGroupForm({ group }: { group: Group }) {

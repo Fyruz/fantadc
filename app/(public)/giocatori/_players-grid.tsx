@@ -240,8 +240,6 @@ export default function PlayersGrid({ groups }: { groups: Group[] }) {
             {/* Player grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3">
               {players.map((p, idx) => {
-                const isLastRow =
-                  idx >= players.length - (players.length % (3) || 3);
                 const col = players.length <= 2 ? 2 : 3;
                 const lastRowStart = players.length - (players.length % col || col);
                 const isInLastRow = idx >= lastRowStart;

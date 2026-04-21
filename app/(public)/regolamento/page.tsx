@@ -32,7 +32,7 @@ export default function RegolamentoPage() {
             <li>
               I 5 giocatori devono appartenere a <strong>5 squadre reali diverse</strong>
             </li>
-            <li>La rosa è <strong>bloccata</strong> dopo la creazione e non è modificabile dall'utente</li>
+            <li>La rosa è <strong>bloccata</strong> dopo la creazione e non è modificabile dall&apos;utente</li>
             <li>
               Ogni squadra deve avere un <strong>capitano</strong>, che deve far parte della rosa
             </li>
@@ -75,7 +75,7 @@ export default function RegolamentoPage() {
             <li>Ogni utente registrato può votare <strong>una sola volta</strong> per partita</li>
             <li>Il giocatore più votato diventa il <strong>MVP della partita</strong> e guadagna punti bonus</li>
             <li>Durante la finestra di voto è visibile il favorito provvisorio</li>
-            <li>Il voto non è modificabile dopo l'invio</li>
+            <li>Il voto non è modificabile dopo l&apos;invio</li>
           </ul>
         </section>
 
@@ -97,7 +97,7 @@ export default function RegolamentoPage() {
           <ol className="list-decimal list-inside space-y-1">
             <li>Registrati con la tua email</li>
             <li>Crea la tua squadra fantasy scegliendo 5 giocatori e il capitano</li>
-            <li>Segui le partite del torneo e vota l'MVP dopo ogni incontro</li>
+            <li>Segui le partite del torneo e vota l&apos;MVP dopo ogni incontro</li>
             <li>Scala la classifica e batti i tuoi avversari!</li>
           </ol>
         </section>

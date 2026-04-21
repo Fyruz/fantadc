@@ -13,11 +13,6 @@ type Row = {
   fantasyTeam: { id: number; name: string } | null;
 };
 
-function formatDate(d: Date | null) {
-  if (!d) return null;
-  return d.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric" });
-}
-
 function formatDateTime(d: Date | null) {
   if (!d) return null;
   return d.toLocaleString("it-IT", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });

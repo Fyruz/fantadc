@@ -1,10 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
-import { isMvpWindowOpen, validateVote } from "@/lib/domain/vote";
+import { validateVote } from "@/lib/domain/vote";
 import { voteLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export type VoteResult =
@@ -63,8 +64,15 @@ export async function castVote(
 
   try {
     await db.vote.create({ data: { userId, matchId, playerId } });
-  } catch {
-    // unique constraint: doppio submit
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return { success: false, message: "Hai già votato per questa partita." };
+    }
+
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
+      return { success: false, message: "Il giocatore non è presente in questa partita." };
+    }
+
     return { success: false, message: "Hai già votato per questa partita." };
   }
 
