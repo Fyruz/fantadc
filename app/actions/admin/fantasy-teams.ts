@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import { validateRoster } from "@/lib/domain/roster";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 import type { ActionResult } from "./football-teams";
 import { PlayerRole } from "@prisma/client";
 
@@ -56,5 +57,6 @@ export async function adminUpdateFantasyRoster(_prev: ActionResult | undefined, 
   await logAdminAction(Number(admin.id), "UPDATE_ROSTER", "FantasyTeam", fantasyTeamId, before, { captainPlayerId, playerIds });
 
   revalidatePath(`/admin/squadre-fantasy/${fantasyTeamId}`);
+  revalidateFantasyPages();
   return { message: "Rosa aggiornata." };
 }

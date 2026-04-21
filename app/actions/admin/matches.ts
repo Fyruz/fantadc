@@ -7,6 +7,7 @@ import { MatchStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 import type { ActionResult } from "./football-teams";
 
 const scoreField = z.preprocess(
@@ -112,6 +113,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
 
   revalidatePath("/admin/partite");
   revalidatePath(`/admin/partite/${id}`);
+  revalidateFantasyPages();
   redirect(`/admin/partite/${id}`);
 }
 
@@ -150,6 +152,7 @@ export async function advanceMatchStatus(
 
   revalidatePath(`/admin/partite/${id}`);
   revalidatePath("/admin/partite");
+  revalidateFantasyPages();
   return {};
 }
 
@@ -192,5 +195,6 @@ export async function deleteMatch(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE", "Match", id, { ...before, startsAt: before.startsAt.toISOString() }, null);
 
   revalidatePath("/admin/partite");
+  revalidateFantasyPages();
   redirect("/admin/partite");
 }

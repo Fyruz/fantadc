@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import RoleBadge from "@/components/role-badge";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function SquadraFantasyPublicPage({
   params,

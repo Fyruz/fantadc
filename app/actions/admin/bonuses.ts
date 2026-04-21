@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 import type { ActionResult } from "./football-teams";
 
 const Schema = z.object({
@@ -45,6 +46,7 @@ export async function assignBonus(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "ASSIGN_BONUS", "PlayerMatchBonus", bonus.id, null, bonus);
 
   revalidatePath(`/admin/partite/${parsed.data.matchId}`);
+  revalidateFantasyPages();
   return {};
 }
 
@@ -60,5 +62,6 @@ export async function deleteBonus(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE_BONUS", "PlayerMatchBonus", id, before, null);
 
   revalidatePath(`/admin/partite/${matchId}`);
+  revalidateFantasyPages();
   return {};
 }

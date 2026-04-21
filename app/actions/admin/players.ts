@@ -7,6 +7,7 @@ import { PlayerRole } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 import type { ActionResult } from "./football-teams";
 
 const Schema = z.object({
@@ -28,6 +29,7 @@ export async function createPlayer(_prev: ActionResult | undefined, formData: Fo
   await logAdminAction(Number(admin.id), "CREATE", "Player", player.id, null, player);
 
   revalidatePath("/admin/giocatori");
+  revalidateFantasyPages();
   redirect("/admin/giocatori");
 }
 
@@ -48,6 +50,7 @@ export async function updatePlayer(_prev: ActionResult | undefined, formData: Fo
   await logAdminAction(Number(admin.id), "UPDATE", "Player", id, before, player);
 
   revalidatePath("/admin/giocatori");
+  revalidateFantasyPages();
   redirect("/admin/giocatori");
 }
 
@@ -66,5 +69,6 @@ export async function deletePlayer(formData: FormData): Promise<ActionResult> {
   }
 
   revalidatePath("/admin/giocatori");
+  revalidateFantasyPages();
   redirect("/admin/giocatori");
 }

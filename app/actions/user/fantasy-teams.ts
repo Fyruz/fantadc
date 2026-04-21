@@ -7,6 +7,7 @@ import { PlayerRole } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { validateRoster } from "@/lib/domain/roster";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 
 export type CreateTeamResult =
   | { success: true }
@@ -93,5 +94,6 @@ export async function createFantasyTeam(
 
   revalidatePath("/dashboard");
   revalidatePath("/squadra");
+  revalidateFantasyPages();
   redirect("/squadra");
 }

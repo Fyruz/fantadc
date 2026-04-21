@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 import type { ActionResult } from "./football-teams";
 
 const Schema = z.object({
@@ -26,6 +27,7 @@ export async function createBonusType(_prev: ActionResult | undefined, formData:
   await logAdminAction(Number(admin.id), "CREATE", "BonusType", bt.id, null, bt);
 
   revalidatePath("/admin/bonus-types");
+  revalidateFantasyPages();
   return {};
 }
 
@@ -46,6 +48,7 @@ export async function updateBonusType(_prev: ActionResult | undefined, formData:
   await logAdminAction(Number(admin.id), "UPDATE", "BonusType", id, before, bt);
 
   revalidatePath("/admin/bonus-types");
+  revalidateFantasyPages();
   return {};
 }
 
@@ -64,5 +67,6 @@ export async function deleteBonusType(formData: FormData): Promise<ActionResult>
   }
 
   revalidatePath("/admin/bonus-types");
+  revalidateFantasyPages();
   return {};
 }

@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { revalidateFantasyPages } from "@/lib/revalidate-public-pages";
 
 const Schema = z.object({
   name: z.string().min(1, "Nome obbligatorio").trim(),
@@ -31,6 +32,7 @@ export async function createFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "CREATE", "FootballTeam", team.id, null, team);
 
   revalidatePath("/admin/squadre");
+  revalidateFantasyPages();
   redirect("/admin/squadre");
 }
 
@@ -51,6 +53,7 @@ export async function updateFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "UPDATE", "FootballTeam", id, before, team);
 
   revalidatePath("/admin/squadre");
+  revalidateFantasyPages();
   redirect("/admin/squadre");
 }
 
@@ -69,5 +72,6 @@ export async function deleteFootballTeam(formData: FormData): Promise<ActionResu
   }
 
   revalidatePath("/admin/squadre");
+  revalidateFantasyPages();
   redirect("/admin/squadre");
 }

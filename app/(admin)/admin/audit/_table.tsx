@@ -1,7 +1,6 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "primereact/button";
+import Link from "next/link";
+import type { PaginationState } from "@/lib/pagination";
+import { buildPageHref } from "@/lib/pagination";
 
 type LogRow = {
   id: number;
@@ -12,26 +11,33 @@ type LogRow = {
   entityId: string | null;
 };
 
-const PAGE_SIZE = 25;
-
-export default function AuditTable({ rows }: { rows: LogRow[] }) {
-  const [page, setPage] = useState(0);
-  const total = rows.length;
-  const start = page * PAGE_SIZE;
-  const slice = rows.slice(start, start + PAGE_SIZE);
-  const totalPages = Math.ceil(total / PAGE_SIZE);
+export default function AuditTable({
+  rows,
+  pagination,
+}: {
+  rows: LogRow[];
+  pagination: PaginationState;
+}) {
+  const previousHref =
+    pagination.currentPage > 1
+      ? buildPageHref("/admin/audit", pagination.currentPage - 1)
+      : null;
+  const nextHref =
+    pagination.currentPage < pagination.totalPages
+      ? buildPageHref("/admin/audit", pagination.currentPage + 1)
+      : null;
 
   return (
     <div className="card overflow-hidden">
-      {total === 0 ? (
+      {pagination.totalItems === 0 ? (
         <p className="px-4 py-10 text-center over-label">Nessuna attività registrata.</p>
       ) : (
         <>
-          {slice.map((row, idx) => (
+          {rows.map((row, idx) => (
             <div
               key={row.id}
               className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--surface-1)] transition-colors"
-              style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+              style={idx < rows.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
             >
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
@@ -53,17 +59,58 @@ export default function AuditTable({ rows }: { rows: LogRow[] }) {
               </div>
             </div>
           ))}
-          {totalPages > 1 && (
+          {pagination.totalPages > 1 && (
             <div
-              className="flex items-center justify-between px-4 py-2.5"
+              className="flex items-center justify-between gap-3 px-4 py-3 flex-wrap"
               style={{ borderTop: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
             >
-              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                {start + 1}–{Math.min(start + PAGE_SIZE, total)} di {total}
-              </span>
-              <div className="flex gap-1">
-                <Button icon="pi pi-chevron-left" text size="small" disabled={page === 0} onClick={() => setPage((p) => p - 1)} aria-label="Precedente" />
-                <Button icon="pi pi-chevron-right" text size="small" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)} aria-label="Successiva" />
+              <div className="flex flex-col">
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {pagination.from}–{pagination.to} di {pagination.totalItems}
+                </span>
+                <span className="text-[11px]" style={{ color: "var(--text-disabled)" }}>
+                  Pagina {pagination.currentPage} di {pagination.totalPages}
+                </span>
+              </div>
+              <div className="flex gap-2">
+                {previousHref ? (
+                  <Link
+                    href={previousHref}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-xs font-black uppercase tracking-wide transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)", background: "#fff" }}
+                  >
+                    <i className="pi pi-chevron-left text-[10px]" />
+                    Prec.
+                  </Link>
+                ) : (
+                  <span
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-xs font-black uppercase tracking-wide opacity-50 cursor-not-allowed"
+                    style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)", background: "#fff" }}
+                    aria-disabled="true"
+                  >
+                    <i className="pi pi-chevron-left text-[10px]" />
+                    Prec.
+                  </span>
+                )}
+                {nextHref ? (
+                  <Link
+                    href={nextHref}
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-xs font-black uppercase tracking-wide transition-colors cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    style={{ borderColor: "var(--primary)", color: "var(--primary)", background: "rgba(1,7,163,0.06)" }}
+                  >
+                    Succ.
+                    <i className="pi pi-chevron-right text-[10px]" />
+                  </Link>
+                ) : (
+                  <span
+                    className="inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-xs font-black uppercase tracking-wide opacity-50 cursor-not-allowed"
+                    style={{ borderColor: "var(--primary)", color: "var(--primary)", background: "rgba(1,7,163,0.06)" }}
+                    aria-disabled="true"
+                  >
+                    Succ.
+                    <i className="pi pi-chevron-right text-[10px]" />
+                  </span>
+                )}
               </div>
             </div>
           )}

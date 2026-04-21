@@ -1,7 +1,7 @@
 import { computeRankings } from "@/lib/scoring";
 import ClassificaTable from "./_table";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function ClassificaPublicPage() {
   const rankings = await computeRankings();
