@@ -24,9 +24,8 @@ const BRACKET_TEMPLATE = [
 ];
 
 /** Crea i 4 turni e gli 8 match placeholder in una sola operazione. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function initBracket(_prev: ActionResult | undefined, _formData: FormData): Promise<ActionResult> {
-  void _prev;
-  void _formData;
   const admin = await requireAdmin();
 
   const existing = await db.knockoutRound.count();
@@ -108,9 +107,8 @@ export async function updateKnockoutRound(_prev: ActionResult | undefined, formD
   return {};
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteBracket(_prev: ActionResult | undefined, _formData: FormData): Promise<ActionResult> {
-  void _prev;
-  void _formData;
   const admin = await requireAdmin();
 
   // Elimina solo i match TBD (homeTeamId = null) prima di eliminare i turni

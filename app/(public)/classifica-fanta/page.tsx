@@ -1,5 +1,5 @@
-import ClassificaTable from "@/app/(public)/classifica/_table";
 import { computeRankings } from "@/lib/scoring";
+import ClassificaTable from "@/app/(public)/classifica/_table";
 
 export const revalidate = 60;
 
