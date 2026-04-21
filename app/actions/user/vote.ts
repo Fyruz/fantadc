@@ -73,7 +73,7 @@ export async function castVote(
       return { success: false, message: "Il giocatore non è presente in questa partita." };
     }
 
-    return { success: false, message: "Hai già votato per questa partita." };
+    return { success: false, message: "Si è verificato un errore durante il voto." };
   }
 
   revalidatePath(`/vota/${matchId}`);
