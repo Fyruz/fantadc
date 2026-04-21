@@ -38,7 +38,11 @@ export function computeMvpWinnerId(votes: Array<{ playerId: number }>): number |
     counts.set(vote.playerId, (counts.get(vote.playerId) ?? 0) + 1);
   }
 
-  return [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0][0];
+  const topEntry = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0] - b[0]
+  )[0];
+
+  return topEntry ? topEntry[0] : null;
 }
 
 export function accumulatePlayerTotals(
