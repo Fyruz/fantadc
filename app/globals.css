@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* Offline-safe fallbacks that replace the removed Google font fetches. */
   --font-geist-sans:
     "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-geist-mono:
