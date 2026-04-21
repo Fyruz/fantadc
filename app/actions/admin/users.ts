@@ -65,7 +65,6 @@ const CreateAdminSchema = z.object({
   password: z
     .string()
     .min(8, "Password min 8 caratteri")
-    // bcrypt considera solo i primi 72 byte: limitiamo l&apos;input per evitare ambiguità e sprechi.
     .max(72, "Password troppo lunga"),
   name: z.string().trim().optional(),
 });

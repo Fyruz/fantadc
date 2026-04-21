@@ -42,7 +42,6 @@ const LoginSchema = z.object({
   password: z
     .string()
     .min(1, { message: "Password obbligatoria." })
-    // bcrypt considera solo i primi 72 byte: limitiamo l&apos;input per evitare ambiguità e sprechi.
     .max(72, { message: "Password troppo lunga." }),
 });
 
