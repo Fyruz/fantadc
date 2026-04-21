@@ -65,12 +65,13 @@ export async function castVote(
   try {
     await db.vote.create({ data: { userId, matchId, playerId } });
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { success: false, message: "Hai già votato per questa partita." };
-    }
-
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
-      return { success: false, message: "Il giocatore non è presente in questa partita." };
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      switch (error.code) {
+        case "P2002":
+          return { success: false, message: "Hai già votato per questa partita." };
+        case "P2003":
+          return { success: false, message: "Il giocatore non è presente in questa partita." };
+      }
     }
 
     return { success: false, message: "Si è verificato un errore durante il voto." };
