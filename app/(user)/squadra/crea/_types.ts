@@ -28,3 +28,19 @@ export const OUTFIELD_SLOTS: SlotKey[] = ["topLeft", "topRight", "bottomLeft", "
 export function getTeamCode(player: Player): string {
   return (player.footballTeam.shortName ?? player.footballTeam.name.slice(0, 3)).toUpperCase();
 }
+
+export function filterGroups(groups: PlayerGroup[], query: string): PlayerGroup[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return groups;
+  return groups
+    .map((g) => ({
+      ...g,
+      players: g.players.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          g.teamName.toLowerCase().includes(q) ||
+          g.teamCode.toLowerCase().includes(q)
+      ),
+    }))
+    .filter((g) => g.players.length > 0);
+}
