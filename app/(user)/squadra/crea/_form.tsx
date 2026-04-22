@@ -206,15 +206,9 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
           placeholder="es. I Guerrieri"
           maxLength={40}
         />
-        {state?.success === false && state.errors?.name ? (
-          <p className="text-center text-[11px] font-medium text-red-400">
-            {state.errors.name[0]}
-          </p>
-        ) : (
-          <p className="text-center text-[10px] text-white/45">
-            1 portiere · 4 giocatori · 5 squadre diverse
-          </p>
-        )}
+        <p className="text-center text-[10px] text-[var(--text-muted)]">
+          1 portiere · 4 giocatori · 5 squadre diverse
+        </p>
       </div>
 
       {/* Campo + sidebar desktop */}
@@ -350,9 +344,24 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
 
       {/* Hint validazione mobile — progressivo */}
       {getMobileHint(validation, teamName) && (
-        <p className="text-center text-[11px] text-white/65 lg:hidden">
+        <p className="text-center text-[11px] text-[var(--text-muted)] lg:hidden">
           {getMobileHint(validation, teamName)}
         </p>
+      )}
+
+      {/* Errori server mobile */}
+      {state?.success === false && (
+        <div aria-live="polite" className="flex flex-col items-center gap-0.5 lg:hidden">
+          {state.message && (
+            <p className="text-[11px] font-medium text-red-500">{state.message}</p>
+          )}
+          {state.errors?.name && (
+            <p className="text-[11px] font-medium text-red-500">{state.errors.name[0]}</p>
+          )}
+          {state.errors?.captainPlayerId && (
+            <p className="text-[11px] font-medium text-red-500">{state.errors.captainPlayerId[0]}</p>
+          )}
+        </div>
       )}
 
       {/* Conferma mobile */}
@@ -371,13 +380,6 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       {selectedIds.map((id) => (
         <input key={id} type="hidden" name="playerIds" value={id} />
       ))}
-
-      {/* Errore server */}
-      {state?.success === false && state.message && (
-        <p aria-live="polite" className="text-center text-sm text-red-500">
-          {state.message}
-        </p>
-      )}
 
       {/* Menu contestuale slot pieno */}
       <Dialog
