@@ -183,7 +183,7 @@ export default function PwaController() {
   };
 
   const handleInstallClick = () => {
-    // Intentionally fire-and-forget: the browser owns the native install dialog lifecycle.
+    // Intentionally fire-and-forget: the browser owns the native install dialog lifecycle and surfaces the UX itself.
     void handleInstall();
   };
 

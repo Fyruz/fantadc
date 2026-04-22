@@ -106,7 +106,11 @@ async function handleAssetRequest(request) {
       });
 
   if (cachedResponse) {
-    void fetchAndCache();
+    void fetchAndCache().catch((error) => {
+      if (IS_DEV) {
+        console.warn("[Fantadc PWA] Background asset refresh failed.", error);
+      }
+    });
     return cachedResponse;
   }
 

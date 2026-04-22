@@ -33,7 +33,7 @@ export const siteConfig = {
   ],
 } as const;
 
-function normalizeUrl(value: string | undefined) {
+function resolveAppUrl(value: string | undefined) {
   if (!value) {
     if (process.env.NODE_ENV === "production") {
       console.warn("[Fantadc PWA] NEXTAUTH_URL/NEXT_PUBLIC_APP_URL not set, falling back to localhost metadata URLs.");
@@ -50,5 +50,5 @@ function normalizeUrl(value: string | undefined) {
 }
 
 export function getSiteUrl() {
-  return normalizeUrl(process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL);
+  return resolveAppUrl(process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL);
 }
