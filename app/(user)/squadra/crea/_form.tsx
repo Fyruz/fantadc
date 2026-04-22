@@ -353,49 +353,76 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       <Dialog
         visible={menuSlot !== null}
         onHide={() => setMenuSlot(null)}
-        header={menuPlayer?.name ?? ""}
-        style={{ width: "220px" }}
+        closable={false}
+        dismissableMask
+        style={{ width: "240px" }}
+        pt={{
+          root: { style: { borderRadius: "16px", overflow: "hidden" } },
+          header: { className: "!hidden" },
+          content: { className: "!p-0" },
+        }}
         modal
         draggable={false}
         resizable={false}
       >
         {menuSlot && menuPlayer && (
-          <div className="flex flex-col gap-1">
-            <Button
-              type="button"
-              unstyled
-              onClick={() => {
-                setCaptainId(menuIsCaptain ? null : menuPlayer.id);
-                setMenuSlot(null);
-              }}
-              className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left text-amber-800 transition-colors hover:bg-yellow-50"
-            >
-              <span>★</span>
-              <span className="font-semibold">
-                {menuIsCaptain ? "Togli capitano" : "Nomina capitano"}
-              </span>
-            </Button>
-            <Button
-              type="button"
-              unstyled
-              onClick={() => openSlot(menuSlot)}
-              className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-1)]"
-            >
-              <span>↔</span>
-              <span className="font-semibold">Cambia giocatore</span>
-            </Button>
-            <Button
-              type="button"
-              unstyled
-              onClick={() => {
-                clearSlot(menuSlot);
-                setMenuSlot(null);
-              }}
-              className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left text-red-500 transition-colors hover:bg-red-50"
-            >
-              <span>✕</span>
-              <span className="font-semibold">Rimuovi</span>
-            </Button>
+          <div>
+            {/* Player identity */}
+            <div className="border-b border-[var(--border-soft)] px-4 pb-3 pt-4">
+              <div className="mb-0.5 text-[9px] font-bold uppercase tracking-[1.5px]" style={{ color: "#6466A3" }}>
+                {getTeamCode(menuPlayer)}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[15px] font-extrabold text-[var(--text-primary)]">
+                  {menuPlayer.name}
+                </span>
+                {menuIsCaptain && (
+                  <span className="rounded-full bg-yellow-50 px-2 py-0.5 text-[10px] font-bold text-yellow-700">
+                    ★ C
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Azioni */}
+            <div className="py-1.5">
+              <Button
+                type="button"
+                unstyled
+                onClick={() => {
+                  setCaptainId(menuIsCaptain ? null : menuPlayer.id);
+                  setMenuSlot(null);
+                }}
+                className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-yellow-50"
+              >
+                <i className={`pi ${menuIsCaptain ? "pi-star" : "pi-star-fill"} text-sm text-yellow-600`} />
+                <span className="text-sm font-semibold text-yellow-800">
+                  {menuIsCaptain ? "Togli capitano" : "Nomina capitano"}
+                </span>
+              </Button>
+              <Button
+                type="button"
+                unstyled
+                onClick={() => openSlot(menuSlot)}
+                className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-[var(--surface-1)]"
+              >
+                <i className="pi pi-refresh text-sm text-[var(--text-secondary)]" />
+                <span className="text-sm font-semibold text-[var(--text-primary)]">Cambia giocatore</span>
+              </Button>
+              <div className="mx-4 border-t border-[var(--border-soft)] my-1" />
+              <Button
+                type="button"
+                unstyled
+                onClick={() => {
+                  clearSlot(menuSlot);
+                  setMenuSlot(null);
+                }}
+                className="flex w-full cursor-pointer items-center gap-3 px-4 py-2.5 text-left transition-colors hover:bg-red-50"
+              >
+                <i className="pi pi-trash text-sm text-red-400" />
+                <span className="text-sm font-semibold text-red-500">Rimuovi</span>
+              </Button>
+            </div>
           </div>
         )}
       </Dialog>
