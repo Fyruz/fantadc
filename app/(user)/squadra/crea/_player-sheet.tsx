@@ -10,7 +10,6 @@ import type { Player, PlayerGroup } from "./_types";
 const mobilePt = {
   root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
   header: { className: "!px-4 !py-0" },
-  headerActions: { className: "!hidden" },
   content: { className: "!px-4 !pt-2 !pb-4" },
 };
 
@@ -68,6 +67,7 @@ export default function PlayerSheet({
       visible={visible}
       onHide={handleHide}
       header={isMobile ? mobileHeader : slotLabel}
+      closable={!isMobile}
       position={isMobile ? "bottom" : "center"}
       style={dialogStyle}
       pt={isMobile ? mobilePt : undefined}

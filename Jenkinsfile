@@ -64,7 +64,7 @@ pipeline {
                             // 4. Migra lo schema prima di avviare l'app
                             sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma db push --accept-data-loss --url "$DATABASE_URL"\''
                             // 4. Seed (idempotente, skippa se i dati esistono gia)
-                            sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'DATABASE_URL="$DATABASE_URL" npx tsx prisma/seed.ts\''
+                            sh 'docker compose run --rm -e DATABASE_URL="$APP_DATABASE_URL" -e NODE_ENV=development fantadc sh -c \'DATABASE_URL="$DATABASE_URL" NODE_ENV=development npx tsx prisma/seed.ts\''
                             // 5. Avvia (o riavvia) il container app
                             sh 'docker compose up -d --force-recreate fantadc'
                         }
