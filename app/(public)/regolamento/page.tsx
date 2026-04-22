@@ -2,7 +2,7 @@ export default function RegolamentoPage() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
-        <div className="over-label mb-1">Stagione 2025</div>
+        <div className="over-label mb-1">Stagione 2026</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
           REGOLAMENTO
         </h1>

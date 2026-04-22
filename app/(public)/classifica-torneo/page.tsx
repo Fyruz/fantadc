@@ -9,7 +9,7 @@ export default async function ClassificaTorneoPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <div className="over-label mb-1">Stagione 2025</div>
+        <div className="over-label mb-1">Stagione 2026</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
           CLASSIFICA TORNEO
         </h1>

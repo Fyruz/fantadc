@@ -25,7 +25,7 @@ export default async function GironiPublicPage() {
     return (
       <div className="flex flex-col gap-6">
         <div>
-          <div className="over-label mb-1">Stagione 2025</div>
+          <div className="over-label mb-1">Stagione 2026</div>
           <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>GIRONI</h1>
         </div>
         <div className="card p-10 text-center over-label">Fase a gironi non ancora iniziata.</div>
@@ -39,7 +39,7 @@ export default async function GironiPublicPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <div className="over-label mb-1">Stagione 2025</div>
+        <div className="over-label mb-1">Stagione 2026</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>GIRONI</h1>
       </div>
 
