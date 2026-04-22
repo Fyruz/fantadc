@@ -23,8 +23,6 @@ export const SLOT_ORDER: SlotKey[] = [
   "bottomRight",
 ];
 
-export const OUTFIELD_SLOTS: SlotKey[] = ["topLeft", "topRight", "bottomLeft", "bottomRight"];
-
 export function getTeamCode(player: Player): string {
   return (player.footballTeam.shortName ?? player.footballTeam.name.slice(0, 3)).toUpperCase();
 }

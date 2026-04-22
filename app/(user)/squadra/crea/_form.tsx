@@ -89,7 +89,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       count: selectedIds.length,
       gkOk: gkCount === 1,
       playerOk: playerCount === 4,
-      teamsOk: uniqueTeams === selectedIds.length,
+      teamsOk: uniqueTeams === 5 && selectedIds.length === 5,
       captainOk,
       isValid:
         selectedIds.length === 5 &&
