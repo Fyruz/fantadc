@@ -91,7 +91,6 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       playerOk: playerCount === 4,
       teamsOk: uniqueTeams === selectedIds.length,
       captainOk,
-      nameOk: teamName.trim().length >= 1,
       isValid:
         selectedIds.length === 5 &&
         gkCount === 1 &&
@@ -319,6 +318,13 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         </div>
       </div>
 
+      {/* Hint capitano mobile — visibile quando tutti gli slot sono pieni ma nessun capitano */}
+      {validation.count === 5 && !validation.captainOk && (
+        <p className="text-center text-xs text-white/70 lg:hidden">
+          Tocca uno slot per scegliere il capitano
+        </p>
+      )}
+
       {/* Conferma mobile */}
       <div className="flex justify-center lg:hidden">
         <Button
@@ -362,8 +368,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
                 setCaptainId(menuIsCaptain ? null : menuPlayer.id);
                 setMenuSlot(null);
               }}
-              className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left transition-colors hover:bg-yellow-50"
-              style={{ color: "#92400E" }}
+              className="flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 text-left text-amber-800 transition-colors hover:bg-yellow-50"
             >
               <span>★</span>
               <span className="font-semibold">
