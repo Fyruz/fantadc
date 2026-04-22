@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "primereact/button";
 
@@ -55,6 +55,7 @@ export default function PwaController() {
   const [updateDismissed, setUpdateDismissed] = useState(() => isPromptDismissed(UPDATE_DISMISS_KEY));
   const [installed, setInstalled] = useState(() => isStandaloneMode());
   const [iosHintEnabled, setIosHintEnabled] = useState(() => isIosDevice() && !isStandaloneMode());
+  const isReloadingRef = useRef(false);
 
   const shouldHide = useMemo(
     () => pathname.startsWith("/admin") || pathname.startsWith("/api") || installed,
@@ -67,8 +68,6 @@ export default function PwaController() {
     }
 
     let ignore = false;
-    let reloading = false;
-
     const registerServiceWorker = async () => {
       try {
         const swRegistration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
@@ -106,11 +105,11 @@ export default function PwaController() {
     };
 
     const handleControllerChange = () => {
-      if (reloading) {
+      if (isReloadingRef.current) {
         return;
       }
 
-      reloading = true;
+      isReloadingRef.current = true;
       window.location.reload();
     };
 

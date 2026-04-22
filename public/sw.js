@@ -91,18 +91,24 @@ async function handleAssetRequest(request) {
   const cache = await caches.open(STATIC_CACHE);
   const cachedResponse = await cache.match(request);
 
-  const networkResponsePromise = fetch(request)
-    .then((networkResponse) => {
-      if (networkResponse.ok) {
-        cache.put(request, networkResponse.clone());
-      }
+  const fetchAndCache = () =>
+    fetch(request)
+      .then((networkResponse) => {
+        if (networkResponse.ok) {
+          cache.put(request, networkResponse.clone());
+        }
 
-      return networkResponse;
-    })
-    .catch(() => {
-      // Network failures are expected offline: fall back to the last cached asset when present.
-      return cachedResponse;
-    });
+        return networkResponse;
+      })
+      .catch(() => {
+        // Network failures are expected offline: fall back to the last cached asset when present.
+        return cachedResponse;
+      });
 
-  return cachedResponse ?? networkResponsePromise;
+  if (cachedResponse) {
+    void fetchAndCache();
+    return cachedResponse;
+  }
+
+  return fetchAndCache();
 }
