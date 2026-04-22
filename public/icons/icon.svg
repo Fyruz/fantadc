@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Fantadc icon</title>
+  <desc id="desc">Blue and gold icon with Fantadc wordmark over a football field.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0107A3" />
+      <stop offset="100%" stop-color="#000669" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <rect x="64" y="96" width="384" height="320" rx="44" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="6"/>
+  <line x1="64" y1="256" x2="448" y2="256" stroke="rgba(255,255,255,0.18)" stroke-width="6"/>
+  <circle cx="256" cy="256" r="46" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="6"/>
+  <circle cx="256" cy="180" r="78" fill="#E8A000" opacity="0.95"/>
+  <text x="256" y="332" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700" fill="#ffffff">FANTA</text>
+  <text x="256" y="408" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="84" font-weight="900" fill="#E8A000">DC</text>
+</svg>

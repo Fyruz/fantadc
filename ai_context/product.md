@@ -45,6 +45,7 @@ Incluso nell'avvio del progetto:
 * calendario partite e dettaglio partita
 * indicazione dei giocatori che hanno preso parte alla partita
 * voto MVP per partita
+* notifiche push opzionali per apertura voto MVP
 * bonus e malus assegnati dagli admin
 * classifica cumulata e storico punteggi per partita
 * area admin con CRUD semplici ma sicuri
@@ -56,7 +57,6 @@ Fuori scope per ora:
 * multi stagione
 * asta o mercato trasferimenti
 * modifiche storicizzate automatiche della rosa
-* notifiche push
 * pagamenti
 * ruoli complessi oltre user e admin
 * reset password self service

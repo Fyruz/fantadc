@@ -79,11 +79,16 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [teamName, setTeamName] = useState("");
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
   const [menuSlot, setMenuSlot] = useState<SlotKey | null>(null);
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia("(max-width: 1023px)").matches;
+  });
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
-    setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
@@ -471,7 +476,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         currentPlayerId={activeSlot ? (slots[activeSlot]?.id ?? null) : null}
         onSelect={assignPlayerToActiveSlot}
         onHide={() => setActiveSlot(null)}
-        isMobile={isMobile ?? false}
+        isMobile={isMobile}
       />
     </form>
   );

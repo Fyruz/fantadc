@@ -60,9 +60,15 @@
 }
 
 body {
+  min-height: 100vh;
   background: var(--bg-base);
   color: var(--text-primary);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  overscroll-behavior-y: contain;
+}
+
+html {
+  background: var(--bg-base);
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────── */
