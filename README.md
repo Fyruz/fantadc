@@ -55,14 +55,14 @@ La parte PWA web è inclusa nel repository, ma la pubblicazione sugli store rich
 ### Android
 
 1. pubblica l'app web su dominio HTTPS definitivo
-2. usa PWABuilder oppure un wrapper TWA/Capacitor
+2. Usa PWABuilder oppure un wrapper TWA/Capacitor
 3. configura package name, firma e Play Console
 4. genera e carica l'APK/AAB firmato
 
 ### iOS
 
 1. pubblica l'app web su dominio HTTPS definitivo
-2. crea un wrapper iOS con Capacitor o PWABuilder
+2. Crea un wrapper iOS con Capacitor o PWABuilder
 3. configura bundle identifier, certificati e provisioning
 4. genera la build da Xcode e pubblicala su App Store Connect
 

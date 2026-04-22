@@ -93,7 +93,10 @@ async function handleAssetRequest(request) {
 
       return networkResponse;
     })
-    .catch(() => cachedResponse);
+    .catch(() => {
+      // Network failures are expected offline: fall back to the last cached asset when present.
+      return cachedResponse;
+    });
 
   return cachedResponse ?? networkResponsePromise;
 }

@@ -181,6 +181,16 @@ export default function PwaController() {
     window.location.reload();
   };
 
+  const handleInstallClick = () => {
+    // Intentionally fire-and-forget: the browser owns the native install dialog lifecycle.
+    void handleInstall();
+  };
+
+  const handleRefreshClick = () => {
+    // Intentionally fire-and-forget: the page reloads when the waiting service worker activates.
+    void handleRefresh();
+  };
+
   if (shouldHide) {
     return null;
   }
@@ -231,9 +241,7 @@ export default function PwaController() {
               <Button
                 label="Aggiorna"
                 size="small"
-                onClick={() => {
-                  void handleRefresh();
-                }}
+                onClick={handleRefreshClick}
               />
             </div>
           </>
@@ -273,9 +281,7 @@ export default function PwaController() {
                 <Button
                   label="Installa"
                   size="small"
-                  onClick={() => {
-                    void handleInstall();
-                  }}
+                  onClick={handleInstallClick}
                 />
               ) : null}
             </div>
