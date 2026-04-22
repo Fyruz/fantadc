@@ -1,8 +1,5 @@
 "use client";
 
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-
 type ScoreRow = {
   playerId: number;
   playerName: string;
@@ -16,49 +13,33 @@ type ScoreRow = {
 
 export default function ScoreTable({ rows }: { rows: ScoreRow[] }) {
   return (
-    <DataTable value={rows} size="small" className="text-xs mt-1">
-      <Column
-        header="Giocatore"
-        field="playerName"
-        body={(row: ScoreRow) => (
-          <span>
-            {row.isCaptain && <span className="text-amber-500 mr-0.5">★</span>}
-            {row.playerName}
-            {row.isMvp && <span className="ml-1 text-yellow-600 font-medium">(MVP)</span>}
-          </span>
-        )}
-      />
-      <Column
-        header="Bonus"
-        field="bonusPoints"
-        style={{ textAlign: "right" }}
-        body={(row: ScoreRow) => (
-          <span className="text-[var(--text-secondary)]">{row.bonusPoints.toFixed(1)}</span>
-        )}
-      />
-      <Column
-        header="MVP"
-        field="mvpPoints"
-        style={{ textAlign: "right" }}
-        body={(row: ScoreRow) => (
-          <span className="text-[var(--text-secondary)]">
-            {row.mvpPoints > 0 ? `+${row.mvpPoints.toFixed(1)}` : "—"}
-          </span>
-        )}
-      />
-      <Column
-        header="Totale"
-        field="finalPoints"
-        style={{ textAlign: "right" }}
-        body={(row: ScoreRow) => (
-          <span className="font-medium text-[var(--text-primary)]">
+    <div className="flex flex-col">
+      {rows.map((row) => (
+        <div
+          key={row.playerId}
+          className="flex items-center justify-between gap-3 border-t border-[var(--border-soft)] py-2.5 first:border-t-0"
+        >
+          <div className="flex min-w-0 items-center gap-1.5">
+            {row.isCaptain && (
+              <span className="shrink-0 text-[11px] text-amber-500">★</span>
+            )}
+            <span className="truncate text-sm font-medium text-[var(--text-primary)]">
+              {row.playerName}
+            </span>
+            {row.isMvp && (
+              <span className="shrink-0 rounded bg-yellow-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-yellow-700">
+                MVP
+              </span>
+            )}
+          </div>
+          <span className="shrink-0 text-sm font-bold text-[var(--text-primary)]">
             {row.finalPoints.toFixed(1)}
             {row.isCaptain && row.basePoints !== 0 && (
-              <span className="text-amber-600 text-xs ml-0.5">×2</span>
+              <span className="ml-0.5 text-[10px] text-amber-500">×2</span>
             )}
           </span>
-        )}
-      />
-    </DataTable>
+        </div>
+      ))}
+    </div>
   );
 }

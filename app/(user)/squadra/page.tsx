@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
-import { Button } from "primereact/button";
 import RosterTable from "./_roster-table";
 import ScoreTable from "./_score-table";
 
@@ -34,35 +32,47 @@ export default async function SquadraPage() {
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {/* Header */}
       <div>
         <div className="over-label mb-0.5">La mia squadra</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+        <h1
+          className="font-display text-3xl font-black uppercase"
+          style={{ color: "var(--text-primary)" }}
+        >
           {fantasyTeam.name.toUpperCase()}
         </h1>
         {history.length > 0 && (
-          <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="font-display font-black text-2xl" style={{ color: "var(--primary)" }}>
+          <div className="mt-1 flex items-baseline gap-1.5">
+            <span
+              className="font-display text-2xl font-black"
+              style={{ color: "var(--primary)" }}
+            >
               {totalPoints.toFixed(1)}
             </span>
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>punti totali</span>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+              punti totali
+            </span>
           </div>
         )}
       </div>
 
-      {/* Card premium squadra */}
+      {/* Hero card */}
       <div
-        className="rounded-[18px] p-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+        className="relative overflow-hidden rounded-[22px] p-5"
+        style={{
+          background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)",
+          boxShadow: "0 6px 24px rgba(1,7,163,0.30)",
+        }}
       >
-        <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 rounded-full border border-white/5 pointer-events-none" />
+        <div className="pointer-events-none absolute -bottom-5 -right-5 h-32 w-32 rounded-full border border-white/5" />
         <div className="relative">
-          <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-3">
-            Capitano: <span style={{ color: "#E8A000" }}>★ {fantasyTeam.captain.name}</span>
+          <div className="mb-4 text-[9px] font-bold uppercase tracking-widest text-white/50">
+            Capitano:{" "}
+            <span style={{ color: "#E8A000" }}>★ {fantasyTeam.captain.name}</span>
           </div>
-          {/* Attaccanti */}
-          <div className="flex flex-wrap gap-2 mb-2 justify-center">
+          {/* Outfield row */}
+          <div className="mb-2 flex flex-wrap justify-center gap-2">
             {outfield.map(({ player }) => (
               <PlayerChip
                 key={player.id}
@@ -72,7 +82,7 @@ export default async function SquadraPage() {
               />
             ))}
           </div>
-          {/* Portiere */}
+          {/* Goalkeeper */}
           {gk && (
             <div className="flex justify-center">
               <PlayerChip
@@ -98,11 +108,10 @@ export default async function SquadraPage() {
             isCaptain: player.id === fantasyTeam.captainPlayerId,
           }))}
         />
+        <p className="mt-2.5 text-[10px]" style={{ color: "var(--text-disabled)" }}>
+          La rosa è bloccata. Solo un admin può modificarla.
+        </p>
       </div>
-
-      <p className="text-[11px]" style={{ color: "var(--text-disabled)" }}>
-        La rosa è bloccata. Solo un admin può modificarla.
-      </p>
 
       {/* Storico punteggi */}
       {history.length > 0 && (
@@ -110,16 +119,25 @@ export default async function SquadraPage() {
           <div className="over-label mb-3">Storico punteggi</div>
           <div className="flex flex-col gap-2">
             {history.map((ms) => (
-              <details key={ms.matchId} className="card overflow-hidden">
-                <summary className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-[var(--surface-1)] transition-colors">
-                  <span className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
-                    {ms.label}
-                  </span>
-                  <span className="font-display font-black text-base" style={{ color: "var(--primary)" }}>
+              <details key={ms.matchId} className="group overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-white">
+                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]">
+                  <div className="flex items-center gap-2">
+                    <i className="pi pi-chevron-right text-[10px] text-[var(--text-muted)] transition-transform group-open:rotate-90" />
+                    <span
+                      className="font-display text-[13px] font-black uppercase"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      {ms.label}
+                    </span>
+                  </div>
+                  <span
+                    className="font-display text-base font-black"
+                    style={{ color: "var(--primary)" }}
+                  >
                     {ms.total.toFixed(1)} pt
                   </span>
                 </summary>
-                <div className="px-4 pb-3">
+                <div className="px-4 pb-3.5 pt-1">
                   <ScoreTable rows={ms.playerScores} />
                 </div>
               </details>
@@ -127,12 +145,6 @@ export default async function SquadraPage() {
           </div>
         </div>
       )}
-
-      <div>
-        <Link href="/dashboard">
-          <Button label="← Dashboard" outlined size="small" />
-        </Link>
-      </div>
     </div>
   );
 }
@@ -158,12 +170,19 @@ function PlayerChip({
       }
     >
       {isCaptain && (
-        <span className="text-[9px] font-black uppercase tracking-wide mb-0.5" style={{ color: "#E8A000" }}>
+        <span
+          className="mb-0.5 text-[9px] font-black uppercase tracking-wide"
+          style={{ color: "#E8A000" }}
+        >
           ★ CAP
         </span>
       )}
-      <span className="font-display font-black text-[11px] uppercase text-white leading-tight">{name}</span>
-      <span className="text-[9px] mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>{team}</span>
+      <span className="font-display text-[11px] font-black uppercase leading-tight text-white">
+        {name}
+      </span>
+      <span className="mt-0.5 text-[9px]" style={{ color: "rgba(255,255,255,0.5)" }}>
+        {team}
+      </span>
     </div>
   );
 }
