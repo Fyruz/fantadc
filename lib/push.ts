@@ -46,6 +46,9 @@ function ensurePushConfig() {
 
 function toStoredExpirationTime(expirationTime?: number | null) {
   if (typeof expirationTime !== "number" || !Number.isFinite(expirationTime) || expirationTime <= 0) {
+    if (expirationTime !== null && expirationTime !== undefined) {
+      console.warn("[Fantadc Push] Ignoring invalid push subscription expirationTime.", expirationTime);
+    }
     return null;
   }
 
@@ -154,7 +157,7 @@ export async function sendVoteOpenNotifications(matchId: number) {
         );
         deliveredSubscriptionIds.push(subscription.id);
       } catch (error) {
-        if (error instanceof WebPushError && [404, 410].includes(error.statusCode ?? 0)) {
+        if (error instanceof WebPushError && error.statusCode !== undefined && [404, 410].includes(error.statusCode)) {
           invalidSubscriptionIds.push(subscription.id);
           return;
         }

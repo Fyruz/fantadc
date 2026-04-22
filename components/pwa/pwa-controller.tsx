@@ -187,7 +187,9 @@ export default function PwaController() {
 
   const handleInstallClick = () => {
     // Intentionally fire-and-forget: the browser owns the native install dialog lifecycle and surfaces the UX itself.
-    void handleInstall();
+    void handleInstall().catch((error) => {
+      console.error("[Fantadc PWA] Install prompt failed.", error);
+    });
   };
 
   const handleRefreshClick = () => {

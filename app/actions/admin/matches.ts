@@ -45,7 +45,7 @@ async function notifyVoteWindowOpened(matchId: number, nextStatus: MatchStatus |
   try {
     await sendVoteOpenNotifications(matchId);
   } catch (error) {
-    console.error("[Fantadc Push] Failed to dispatch vote-open notifications.", error);
+    console.error(`[Fantadc Push] Failed to dispatch vote-open notifications for match ${matchId}.`, error);
   }
 }
 

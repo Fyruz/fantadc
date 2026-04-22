@@ -69,7 +69,7 @@ VAPID_PRIVATE_KEY="..."
 VAPID_SUBJECT="mailto:admin@fantadc.example.com"
 ```
 
-3. assicurati che `NEXTAUTH_URL` punti alla URL pubblica corretta per i deep link aperti dalle notifiche
+3. sostituisci l'indirizzo email d'esempio con quello reale del progetto e assicurati che `NEXTAUTH_URL` punti alla URL pubblica corretta per i deep link aperti dalle notifiche
 
 ### Comportamento
 
