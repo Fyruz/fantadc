@@ -68,6 +68,7 @@ export default function PlayerSheet({
       onHide={handleHide}
       header={isMobile ? mobileHeader : slotLabel}
       closable={!isMobile}
+      dismissableMask={isMobile}
       position={isMobile ? "bottom" : "center"}
       style={dialogStyle}
       pt={isMobile ? mobilePt : undefined}
