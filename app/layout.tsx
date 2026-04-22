@@ -1,13 +1,65 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import "./globals.css";
 import Providers from "@/components/providers";
+import PwaController from "@/components/pwa/pwa-controller";
+import { getSiteUrl, siteConfig } from "@/lib/site";
+
+const metadataBase = new URL(getSiteUrl());
 
 export const metadata: Metadata = {
-  title: "Fantadc",
-  description: "Fantacalcio — scegli i tuoi campioni e scala la classifica.",
+  metadataBase,
+  title: {
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
+  },
+  applicationName: siteConfig.name,
+  description: siteConfig.description,
+  manifest: "/manifest.webmanifest",
+  keywords: ["fantacalcio", "torneo", "pwa", "mvp", "classifica"],
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "black-translucent",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+  },
+  openGraph: {
+    type: "website",
+    locale: "it_IT",
+    siteName: siteConfig.name,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    url: metadataBase,
+    images: [{ url: "/icons/icon-1024.png", width: 1024, height: 1024, alt: "Fantadc" }],
+  },
+  twitter: {
+    card: "summary",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: ["/icons/icon-1024.png"],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: siteConfig.themeColor,
+  colorScheme: "light",
 };
 
 export default function RootLayout({
@@ -16,7 +68,10 @@ export default function RootLayout({
   return (
     <html lang="it" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <PwaController />
+        </Providers>
       </body>
     </html>
   );
