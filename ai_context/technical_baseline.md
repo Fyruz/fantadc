@@ -6,6 +6,7 @@
 * React `19.2.4`
 * TypeScript `5`
 * Tailwind CSS `4`
+* PWA nativa via App Router (`manifest.ts`, metadata, service worker custom, offline fallback)
 * Prisma ORM come target dichiarato nei documenti di dominio
 * PostgreSQL come database target
 
@@ -24,6 +25,7 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * auditing delle modifiche amministrative
 * rate limit richiesto su operazioni sensibili
 * captcha semplice valutabile in registrazione se il costo di integrazione resta basso
+* distribuzione mobile primaria come PWA installabile, con packaging store derivato dalla web app
 
 ## Principi architetturali iniziali
 
@@ -33,6 +35,7 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * costruire prima le basi del dominio e poi le viste UI
 * privilegiare semplicita e leggibilita rispetto a generalizzazioni premature
 * esplicitare bene gli stati di partita e i ricalcoli di punteggio
+* mantenere la PWA sicura: niente caching offline di HTML privato o risposte autenticate
 
 ## Aree applicative suggerite
 
@@ -75,3 +78,12 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 
 Nel repository e presente una regola esplicita: prima di implementare codice Next.js bisogna leggere la documentazione rilevante dentro `node_modules/next/dist/docs/`, perche questa versione ha breaking changes rispetto a convenzioni precedenti.
 Al momento quei file non sono presenti nel workspace, quindi quando inizieremo l'implementazione sara necessario installare o verificare le dipendenze e consultare la documentazione locale corretta.
+
+## Baseline PWA/store
+
+* la web app deve essere installabile su Android e iOS con icone, manifest e modalità standalone
+* il service worker deve coprire asset statici e fallback offline pubblico senza memorizzare pagine private
+* la pubblicazione su store richiede passaggi esterni al repo:
+  * Android: packaging TWA/WebAPK o wrapper nativo con firma e Play Console
+  * iOS: wrapper nativo (es. Capacitor/PWABuilder) con build Xcode e App Store Connect
+* le credenziali store, i bundle identifier, le chiavi di firma e gli asset marketing non devono stare nel repository
