@@ -71,7 +71,7 @@ export default function PwaController() {
 
     const registerServiceWorker = async () => {
       try {
-        const swRegistration = await navigator.serviceWorker.register("/sw.js");
+        const swRegistration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
         if (ignore) {
           return;
         }
@@ -98,8 +98,10 @@ export default function PwaController() {
             }
           });
         });
-      } catch {
-        // Silent fallback: the app still works without offline support.
+      } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+          console.error("[Fantadc PWA] Service worker registration failed.", error);
+        }
       }
     };
 

@@ -16,6 +16,8 @@ const ASSET_CACHE_PATTERNS = [
   /\.(?:css|js|woff2?|png|jpg|jpeg|svg|ico)$/i,
 ];
 
+const IS_DEV = ["localhost", "127.0.0.1"].includes(self.location.hostname);
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -75,7 +77,11 @@ self.addEventListener("fetch", (event) => {
 async function handleNavigationRequest(request) {
   try {
     return await fetch(request);
-  } catch {
+  } catch (error) {
+    if (IS_DEV) {
+      console.warn("[Fantadc PWA] Navigation request failed, serving offline fallback.", error);
+    }
+
     const cache = await caches.open(STATIC_CACHE);
     return (await cache.match(OFFLINE_URL)) ?? Response.error();
   }

@@ -35,6 +35,10 @@ export const siteConfig = {
 
 function normalizeUrl(value: string | undefined) {
   if (!value) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn("[Fantadc PWA] NEXTAUTH_URL/NEXT_PUBLIC_APP_URL not set, falling back to localhost metadata URLs.");
+    }
+
     return "http://localhost:3000";
   }
 

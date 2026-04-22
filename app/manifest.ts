@@ -1,9 +1,7 @@
 import type { MetadataRoute } from "next";
-import { getSiteUrl, siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 
 export default function manifest(): MetadataRoute.Manifest {
-  const baseUrl = getSiteUrl();
-
   return {
     id: siteConfig.scope,
     name: siteConfig.name,
@@ -51,14 +49,5 @@ export default function manifest(): MetadataRoute.Manifest {
         },
       ],
     })),
-    screenshots: [
-      {
-        src: `${baseUrl}/icons/icon-1024.png`,
-        sizes: "1024x1024",
-        type: "image/png",
-        form_factor: "narrow",
-        label: "Fantadc home",
-      },
-    ],
   };
 }
