@@ -8,11 +8,12 @@ export default async function AdminAreaLayout({
   children: React.ReactNode;
 }) {
   const user = await requireAdmin();
-  const initials = ((user.name ?? user.email) || "A").charAt(0).toUpperCase();
+  const displayName = user.name ?? user.email ?? "Admin";
+  const initials = displayName.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg-base)' }}>
-      <TopBar initials={initials} />
+      <TopBar initials={initials} userName={displayName} />
       <main className="max-w-screen-xl mx-auto w-full px-4 md:px-6 py-4 md:py-6 pb-24 md:pb-6">
         {children}
       </main>
