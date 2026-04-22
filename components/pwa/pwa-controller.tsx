@@ -70,7 +70,10 @@ export default function PwaController() {
     let ignore = false;
     const registerServiceWorker = async () => {
       try {
-        const swRegistration = await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+        const swRegistration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
+          updateViaCache: "none",
+        });
         if (ignore) {
           return;
         }

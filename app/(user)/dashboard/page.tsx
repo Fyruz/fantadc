@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { Button } from "primereact/button";
+import PushNotificationCard from "@/components/pwa/push-notification-card";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -151,6 +152,8 @@ export default async function DashboardPage() {
           })}
         </div>
       )}
+
+      <PushNotificationCard />
 
       {/* Quick links */}
       <div className="flex gap-2 flex-wrap">

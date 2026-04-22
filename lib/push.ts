@@ -1,7 +1,7 @@
 import webpush, { WebPushError, type PushSubscription as WebPushSubscription } from "web-push";
 import { PushNotificationType } from "@prisma/client";
 import { db } from "@/lib/db";
-import { getSiteUrl } from "@/lib/site";
+import { buildVoteOpenNotificationPayload } from "@/lib/push-payload";
 
 export type SerializablePushSubscription = {
   endpoint: string;
@@ -10,15 +10,6 @@ export type SerializablePushSubscription = {
     p256dh: string;
     auth: string;
   };
-};
-
-type VoteOpenNotificationPayload = {
-  title: string;
-  body: string;
-  url: string;
-  tag: string;
-  icon: string;
-  badge: string;
 };
 
 let vapidConfigured = false;
@@ -51,17 +42,6 @@ function ensurePushConfig() {
   }
 
   return config;
-}
-
-export function buildVoteOpenNotificationPayload(matchId: number, title: string): VoteOpenNotificationPayload {
-  return {
-    title: "Votazione MVP aperta",
-    body: `È finita ${title}. Apri subito il voto MVP.`,
-    url: `/vota/${matchId}`,
-    tag: `vote-open-${matchId}`,
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-192.png",
-  };
 }
 
 function toStoredExpirationTime(expirationTime?: number | null) {
@@ -206,8 +186,4 @@ export async function sendVoteOpenNotifications(matchId: number) {
     removed: invalidSubscriptionIds.length,
     skipped: false as const,
   };
-}
-
-export function getPublicAppUrl(path: string) {
-  return new URL(path, getSiteUrl()).toString();
 }

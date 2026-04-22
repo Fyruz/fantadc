@@ -7,6 +7,7 @@
 * TypeScript `5`
 * Tailwind CSS `4`
 * PWA nativa via App Router (`manifest.ts`, metadata, service worker custom, offline fallback)
+* Web Push notifications via service worker + chiavi VAPID
 * Prisma ORM come target dichiarato nei documenti di dominio
 * PostgreSQL come database target
 
@@ -26,6 +27,7 @@ Il modello Prisma e gia definito in forma documentale, ma non e ancora collegato
 * rate limit richiesto su operazioni sensibili
 * captcha semplice valutabile in registrazione se il costo di integrazione resta basso
 * distribuzione mobile primaria come PWA installabile, con packaging store derivato dalla web app
+* notifiche push MVP opzionali con opt-in esplicito dall'utente
 
 ## Principi architetturali iniziali
 
@@ -83,6 +85,7 @@ Al momento quei file non sono presenti nel workspace, quindi quando inizieremo l
 
 * la web app deve essere installabile su Android e iOS con icone, manifest e modalità standalone
 * il service worker deve coprire asset statici e fallback offline pubblico senza memorizzare pagine private
+* le push usano Web Push standard con chiavi VAPID e deep link diretti alla pagina voto MVP
 * la pubblicazione su store richiede passaggi esterni al repo:
   * Android: packaging TWA/WebAPK o wrapper nativo con firma e Play Console
   * iOS: wrapper nativo (es. Capacitor/PWABuilder) con build Xcode e App Store Connect

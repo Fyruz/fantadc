@@ -48,6 +48,60 @@ self.addEventListener("message", (event) => {
   }
 });
 
+self.addEventListener("push", (event) => {
+  const payload = (() => {
+    if (!event.data) {
+      return null;
+    }
+
+    try {
+      return event.data.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!payload?.title) {
+    return;
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon || "/icons/icon-192.png",
+      badge: payload.badge || "/icons/icon-192.png",
+      tag: payload.tag,
+      data: {
+        url: payload.url || "/dashboard",
+      },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  const targetUrl = new URL(event.notification.data?.url || "/dashboard", self.location.origin).toString();
+
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(async (clients) => {
+      for (const client of clients) {
+        if ("focus" in client) {
+          if (client.url === targetUrl) {
+            return client.focus();
+          }
+
+          if (client.url.startsWith(self.location.origin) && "navigate" in client) {
+            await client.navigate(targetUrl);
+            return client.focus();
+          }
+        }
+      }
+
+      return self.clients.openWindow(targetUrl);
+    }),
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 

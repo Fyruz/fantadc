@@ -52,12 +52,13 @@ Flusso base:
 
 1. un admin imposta la partita come conclusa
 2. si apre una finestra di voto di 1 ora
-3. l'utente apre la partita e vede i giocatori segnati come presenti
-4. l'interfaccia mostra un elenco semplice dei 10 giocatori della partita
-5. l'utente seleziona un solo giocatore come MVP
-6. il sistema registra il voto e blocca ulteriori modifiche lato utente
-7. dopo il voto, l'utente vede conferma e favorito provvisorio
-8. alla chiusura della finestra, il sistema mostra l'MVP finale della partita
+3. se ha attivato le notifiche push, l'utente riceve una push con link diretto a `/vota/{id}`
+4. l'utente apre la partita e vede i giocatori segnati come presenti
+5. l'interfaccia mostra un elenco semplice dei 10 giocatori della partita
+6. l'utente seleziona un solo giocatore come MVP
+7. il sistema registra il voto e blocca ulteriori modifiche lato utente
+8. dopo il voto, l'utente vede conferma e favorito provvisorio
+9. alla chiusura della finestra, il sistema mostra l'MVP finale della partita
 
 ## 5. Gestione admin del torneo
 

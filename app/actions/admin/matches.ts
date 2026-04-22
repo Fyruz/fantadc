@@ -7,6 +7,7 @@ import { MatchStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { sendVoteOpenNotifications } from "@/lib/push";
 import type { ActionResult } from "./football-teams";
 
 const scoreField = z.preprocess(
@@ -35,6 +36,18 @@ const CreateSchema = z.object({
   groupId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
   knockoutRoundId: z.preprocess((v) => (v === "" || v === null || v === undefined ? null : Number(v)), z.number().int().positive().nullable()).optional(),
 });
+
+async function notifyVoteWindowOpened(matchId: number, nextStatus: MatchStatus | undefined, beforeConcludedAt: Date | null) {
+  if (nextStatus !== MatchStatus.CONCLUDED || beforeConcludedAt) {
+    return;
+  }
+
+  try {
+    await sendVoteOpenNotifications(matchId);
+  } catch (error) {
+    console.error("[Fantadc Push] Failed to dispatch vote-open notifications.", error);
+  }
+}
 
 export async function createMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
@@ -137,6 +150,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
     { ...before, startsAt: before.startsAt.toISOString() },
     { ...match, startsAt: match.startsAt.toISOString() }
   );
+  await notifyVoteWindowOpened(id, parsed.data.status, before.concludedAt);
 
   revalidatePath("/admin/partite");
   revalidatePath(`/admin/partite/${id}`);
@@ -168,6 +182,7 @@ export async function advanceMatchStatus(
 
   await db.match.update({ where: { id }, data: updateData });
   await logAdminAction(Number(admin.id), "UPDATE", "Match", id, { status: match.status }, { status: newStatus });
+  await notifyVoteWindowOpened(id, newStatus, match.concludedAt);
 
   revalidatePath(`/admin/partite/${id}`);
   revalidatePath("/admin/partite");

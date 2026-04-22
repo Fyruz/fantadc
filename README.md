@@ -39,6 +39,7 @@ Il progetto è predisposto come Progressive Web App:
 * service worker custom in `public/sw.js`
 * fallback offline pubblico in `app/offline/page.tsx`
 * prompt di installazione/aggiornamento lato client in `components/pwa/pwa-controller.tsx`
+* notifiche push MVP via service worker, VAPID e deep link diretto a `/vota/{id}`
 
 ### Verifica rapida PWA
 
@@ -47,6 +48,35 @@ Il progetto è predisposto come Progressive Web App:
 3. controlla che compaia il prompt di installazione
 4. verifica `Application > Manifest` e `Application > Service Workers`
 5. metti offline il browser e controlla il fallback `/offline`
+
+## Notifiche push MVP
+
+Quando una partita passa a `CONCLUDED`, Fantadc può inviare una push con link diretto alla pagina voto `/vota/{id}`.
+
+### Configurazione
+
+1. genera le chiavi VAPID:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+2. copia i valori in `.env.local`:
+
+```bash
+NEXT_PUBLIC_VAPID_PUBLIC_KEY="..."
+VAPID_PRIVATE_KEY="..."
+VAPID_SUBJECT="mailto:admin@fantadc.example.com"
+```
+
+3. assicurati che `NEXTAUTH_URL` punti alla URL pubblica corretta per i deep link aperti dalle notifiche
+
+### Comportamento
+
+* l'utente attiva/disattiva le push dalla dashboard
+* ogni browser/dispositivo salva la propria subscription
+* quando l'admin conclude la partita, viene inviata una sola notifica `VOTE_OPEN` per subscription
+* le subscription scadute (`404` / `410`) vengono rimosse automaticamente
 
 ## Preparazione alla pubblicazione sugli store
 
