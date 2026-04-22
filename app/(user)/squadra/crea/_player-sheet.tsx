@@ -7,6 +7,13 @@ import { InputText } from "primereact/inputtext";
 import { filterGroups } from "./_types";
 import type { Player, PlayerGroup } from "./_types";
 
+const mobilePt = {
+  root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
+  header: { className: "!px-4 !py-0" },
+  headerActions: { className: "!hidden" },
+  content: { className: "!px-4 !pt-2 !pb-4" },
+};
+
 export default function PlayerSheet({
   visible,
   slotLabel,
@@ -32,7 +39,7 @@ export default function PlayerSheet({
   );
 
   const dialogStyle = isMobile
-    ? { width: "100%", margin: 0, borderRadius: "20px 20px 0 0", maxHeight: "75vh" }
+    ? { width: "100%", margin: 0, maxHeight: "75vh" }
     : { width: "min(34rem, 96vw)" };
 
   function handleHide() {
@@ -45,13 +52,25 @@ export default function PlayerSheet({
     setSearch("");
   }
 
+  const mobileHeader = (
+    <div className="flex flex-col">
+      <div className="flex justify-center py-3">
+        <div className="h-1 w-9 rounded-full bg-[var(--border-soft)]" />
+      </div>
+      <div className="pb-3 text-[13px] font-extrabold text-[var(--text-primary)]">
+        {slotLabel}
+      </div>
+    </div>
+  );
+
   return (
     <Dialog
       visible={visible}
       onHide={handleHide}
-      header={slotLabel}
+      header={isMobile ? mobileHeader : slotLabel}
       position={isMobile ? "bottom" : "center"}
       style={dialogStyle}
+      pt={isMobile ? mobilePt : undefined}
       modal
       draggable={false}
       resizable={false}
