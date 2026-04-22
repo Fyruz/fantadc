@@ -10,6 +10,27 @@ import type { Player, PlayerGroup, SlotKey, SlotsState } from "./_types";
 import SlotCard from "./_slot-card";
 import PlayerSheet from "./_player-sheet";
 
+type Validation = {
+  count: number;
+  gkOk: boolean;
+  playerOk: boolean;
+  teamsOk: boolean;
+  captainOk: boolean;
+  isValid: boolean;
+};
+
+function getMobileHint(v: Validation, teamName: string): string | null {
+  if (v.isValid || v.count === 0) return null;
+  if (v.count < 5) {
+    const rem = 5 - v.count;
+    return `Seleziona ancora ${rem} ${rem === 1 ? "giocatore" : "giocatori"}`;
+  }
+  if (!v.teamsOk) return "I giocatori devono essere di 5 squadre diverse";
+  if (!teamName.trim()) return "Inserisci il nome della squadra";
+  if (!v.captainOk) return "Tocca uno slot per scegliere il capitano";
+  return null;
+}
+
 const SLOT_META: Record<
   SlotKey,
   { label: string; role: Player["role"]; wrapperClassName: string }
@@ -176,8 +197,8 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       action={action}
       className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
     >
-      {/* Mobile: nome squadra centrato in cima */}
-      <div className="flex justify-center lg:hidden">
+      {/* Mobile: nome squadra + info statica */}
+      <div className="flex flex-col items-center gap-1.5 lg:hidden">
         <InputText
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
@@ -185,6 +206,15 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
           placeholder="es. I Guerrieri"
           maxLength={40}
         />
+        {state?.success === false && state.errors?.name ? (
+          <p className="text-center text-[11px] font-medium text-red-400">
+            {state.errors.name[0]}
+          </p>
+        ) : (
+          <p className="text-center text-[10px] text-white/45">
+            1 portiere · 4 giocatori · 5 squadre diverse
+          </p>
+        )}
       </div>
 
       {/* Campo + sidebar desktop */}
@@ -318,10 +348,10 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         </div>
       </div>
 
-      {/* Hint capitano mobile — visibile quando tutti gli slot sono pieni ma nessun capitano */}
-      {validation.count === 5 && !validation.captainOk && (
-        <p className="text-center text-xs text-white/70 lg:hidden">
-          Tocca uno slot per scegliere il capitano
+      {/* Hint validazione mobile — progressivo */}
+      {getMobileHint(validation, teamName) && (
+        <p className="text-center text-[11px] text-white/65 lg:hidden">
+          {getMobileHint(validation, teamName)}
         </p>
       )}
 
