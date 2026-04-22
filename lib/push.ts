@@ -52,7 +52,16 @@ function toStoredExpirationTime(expirationTime?: number | null) {
     return null;
   }
 
-  return new Date(expirationTime);
+  const expiresAt = new Date(expirationTime);
+  const now = Date.now();
+  const oneYearFromNow = now + 1000 * 60 * 60 * 24 * 366;
+
+  if (expirationTime <= now || expirationTime > oneYearFromNow) {
+    console.warn("[Fantadc Push] Ignoring unreasonable push subscription expirationTime.", expirationTime);
+    return null;
+  }
+
+  return expiresAt;
 }
 
 function toWebPushSubscription(subscription: SerializablePushSubscription): WebPushSubscription {
