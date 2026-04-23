@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "Fantadc",
-  shortName: "Fantadc",
+  name: "DCup 26'",
+  shortName: "DCup 26'",
   description: "Fantacalcio del torneo di paese: crea la squadra, vota l'MVP e segui classifica e partite anche da mobile.",
   themeColor: "#0107A3",
   backgroundColor: "#F5F6FF",

@@ -2,7 +2,7 @@ export default function PrivacyPage() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
-        <div className="over-label mb-1">Fantadc</div>
+        <div className="over-label mb-1">DCup 26&apos;</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
           PRIVACY POLICY
         </h1>
