@@ -75,6 +75,7 @@ export default function PlayerSheet({
       modal
       draggable={false}
       resizable={false}
+      focusOnShow={false}
     >
       <div className="flex flex-col gap-3">
         <InputText

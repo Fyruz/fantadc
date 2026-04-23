@@ -425,6 +425,15 @@ html {
   color: #fff !important;
 }
 
+/* ── Disabled (must come before variants to allow !important override) ─ */
+.p-button.p-disabled,
+.p-button:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+
 /* ── Outlined ─────────────────────────────────────────────── */
 .p-button.p-button-outlined {
   background: transparent !important;
