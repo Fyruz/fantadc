@@ -5,6 +5,7 @@ export type PlayerMatchScore = {
   playerId: number;
   playerName: string;
   footballTeamName: string;
+  goalPoints: number;
   bonusPoints: number;
   isMvp: boolean;
   mvpPoints: number;
@@ -51,6 +52,7 @@ export function accumulatePlayerTotals(
       playerId: number;
       points: number | string | { toString(): string };
     }>;
+    goals: Array<{ scorerId: number; isOwnGoal: boolean }>;
     votes: Array<{ playerId: number }>;
   }>,
   mvpBonus: number
@@ -65,6 +67,12 @@ export function accumulatePlayerTotals(
         bonus.playerId,
         (totals.get(bonus.playerId) ?? 0) + Number(bonus.points)
       );
+    }
+
+    for (const goal of match.goals) {
+      if (!goal.isOwnGoal) {
+        totals.set(goal.scorerId, (totals.get(goal.scorerId) ?? 0) + 1);
+      }
     }
 
     if (mvpId !== null) {
@@ -83,6 +91,7 @@ export async function computeRankings(): Promise<RankEntry[]> {
       select: {
         id: true,
         bonuses: { select: { playerId: true, points: true } },
+        goals: { select: { scorerId: true, isOwnGoal: true } },
         votes: { select: { playerId: true } },
       },
     }),
@@ -156,6 +165,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
         bonuses: { select: { playerId: true, points: true, bonusType: { select: { code: true, name: true } } } },
+        goals: { select: { scorerId: true, isOwnGoal: true } },
         votes: { select: { playerId: true } },
       },
       orderBy: { startsAt: "asc" },
@@ -169,12 +179,15 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
 
   return matches.map((match) => {
     const playerPoints = accumulatePlayerTotals(
-      [{ bonuses: match.bonuses, votes: match.votes }],
+      [{ bonuses: match.bonuses, goals: match.goals, votes: match.votes }],
       mvpBonus
     );
     const mvpId = computeMvpWinnerId(match.votes);
 
     const playerScores: PlayerMatchScore[] = ft.players.map(({ player }) => {
+      const goalPoints = match.goals.filter(
+        (g) => !g.isOwnGoal && g.scorerId === player.id
+      ).length;
       const bonusPoints = match.bonuses
         .filter((bonus) => bonus.playerId === player.id)
         .reduce((sum, bonus) => sum + Number(bonus.points), 0);
@@ -187,6 +200,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         playerId: player.id,
         playerName: player.name,
         footballTeamName: player.footballTeam.name,
+        goalPoints,
         bonusPoints,
         isMvp,
         mvpPoints,

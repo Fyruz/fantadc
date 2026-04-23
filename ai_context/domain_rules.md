@@ -59,6 +59,7 @@
 ### Punteggio e classifica
 
 * il punteggio fantasy deriva da bonus e malus assegnati dagli admin
+* ogni gol segnato (non autogol) vale 1 punto fantasy per il marcatore
 * il punteggio fantasy riceve anche un contributo dal risultato MVP
 * il punteggio di una squadra e la somma dei punteggi dei 5 giocatori della rosa
 * il raddoppio del capitano si applica al punteggio del singolo giocatore capitano
