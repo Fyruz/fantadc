@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function RegolamentoPage() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
@@ -102,6 +104,12 @@ export default function RegolamentoPage() {
           </ol>
         </section>
       </div>
+
+      <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
+        <Link href="/privacy" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+          Privacy Policy
+        </Link>
+      </p>
     </div>
   );
 }
