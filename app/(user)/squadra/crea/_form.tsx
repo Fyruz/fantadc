@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -79,6 +79,8 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [teamName, setTeamName] = useState("");
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
   const [menuSlot, setMenuSlot] = useState<SlotKey | null>(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") {
       return false;
@@ -170,6 +172,16 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const menuPlayer = menuSlot ? slots[menuSlot] : null;
   const menuIsCaptain = menuPlayer ? captainId === menuPlayer.id : false;
 
+  function handleConfermaClick() {
+    if (!validation.isValid || pending) return;
+    setConfirmVisible(true);
+  }
+
+  function handleConfirm() {
+    setConfirmVisible(false);
+    formRef.current?.requestSubmit();
+  }
+
   function openSlot(slotKey: SlotKey) {
     if (pending) return;
     setMenuSlot(null);
@@ -199,6 +211,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
 
   return (
     <form
+      ref={formRef}
       action={action}
       className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
     >
@@ -338,10 +351,11 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
 
             {/* Conferma desktop */}
             <Button
-              type="submit"
+              type="button"
               label={pending ? "Salvo..." : "Conferma squadra"}
               disabled={!validation.isValid || pending}
               className="w-full"
+              onClick={handleConfermaClick}
             />
           </div>
         </div>
@@ -349,9 +363,12 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
 
       {/* Hint validazione mobile — progressivo */}
       {getMobileHint(validation, teamName) && (
-        <p className="text-center text-[11px] text-[var(--text-muted)] lg:hidden">
-          {getMobileHint(validation, teamName)}
-        </p>
+        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 lg:hidden">
+          <i className="pi pi-info-circle shrink-0 text-sm text-amber-600" />
+          <p className="text-[12px] font-medium text-amber-800">
+            {getMobileHint(validation, teamName)}
+          </p>
+        </div>
       )}
 
       {/* Errori server mobile */}
@@ -372,10 +389,11 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       {/* Conferma mobile */}
       <div className="flex justify-center lg:hidden">
         <Button
-          type="submit"
+          type="button"
           label={pending ? "Salvo..." : "Conferma squadra"}
           disabled={!validation.isValid || pending}
           className="w-56"
+          onClick={handleConfermaClick}
         />
       </div>
 
@@ -385,6 +403,58 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       {selectedIds.map((id) => (
         <input key={id} type="hidden" name="playerIds" value={id} />
       ))}
+
+      {/* Dialog conferma squadra */}
+      <Dialog
+        visible={confirmVisible}
+        onHide={() => setConfirmVisible(false)}
+        closable={false}
+        dismissableMask
+        style={{ width: "300px" }}
+        pt={{
+          root: { style: { borderRadius: "16px", overflow: "hidden" } },
+          header: { className: "!hidden" },
+          content: { className: "!p-0" },
+        }}
+        modal
+        draggable={false}
+        resizable={false}
+      >
+        <div className="p-5">
+          <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
+              <i className="pi pi-exclamation-triangle text-lg text-amber-600" />
+            </div>
+            <div className="text-base font-bold text-[var(--text-primary)]">
+              Conferma squadra
+            </div>
+          </div>
+          <p className="mb-5 text-sm leading-relaxed text-[var(--text-secondary)]">
+            Una volta confermata, la tua squadra{" "}
+            <strong className="text-[var(--text-primary)]">
+              non potrà più essere modificata
+            </strong>
+            . Vuoi procedere?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              label="Annulla"
+              outlined
+              className="flex-1"
+              disabled={pending}
+              onClick={() => setConfirmVisible(false)}
+            />
+            <Button
+              type="button"
+              label={pending ? "Salvo..." : "Sì, conferma"}
+              className="flex-1"
+              disabled={pending}
+              onClick={handleConfirm}
+            />
+          </div>
+        </div>
+      </Dialog>
 
       {/* Menu contestuale slot pieno */}
       <Dialog
@@ -535,7 +605,7 @@ function StatusBadge({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span
       className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-        ok ? "" : "bg-[var(--surface-2)] text-[var(--text-secondary)]"
+        ok ? "" : "border border-amber-200 bg-amber-50 text-amber-700"
       }`}
       style={ok ? { background: "rgba(50,215,75,0.12)", color: "#32D74B" } : undefined}
     >

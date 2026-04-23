@@ -31,7 +31,8 @@
       "Bash(bash \"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.7/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")",
       "Bash(docker -H npipe:////./pipe/docker_engine ps --format \"{{.Names}}\\\\t{{.Ports}}\")",
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5433/fantadc\" npx prisma db push)",
-      "Bash(powershell.exe -Command \"netstat -an | Select-String '5432|5433'\")"
+      "Bash(powershell.exe -Command \"netstat -an | Select-String '5432|5433'\")",
+      "Bash(node_modules/.bin/tsc --noEmit)"
     ],
     "defaultMode": "bypassPermissions"
   }
