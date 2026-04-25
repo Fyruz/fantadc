@@ -54,6 +54,14 @@ export default async function AdminDashboardPage() {
   const top3standings = standings.slice(0, 3);
   const top3rankings = rankings.slice(0, 3);
 
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const [todayVisit, visitTotals] = await Promise.all([
+    db.siteVisit.findUnique({ where: { date: todayIso } }),
+    db.siteVisit.aggregate({ _sum: { count: true } }),
+  ]);
+  const visitesToday = todayVisit?.count ?? 0;
+  const visitesTotal = visitTotals._sum.count ?? 0;
+
   const today = new Date().toLocaleDateString("it-IT", {
     weekday: "long", day: "numeric", month: "long",
   });
@@ -385,6 +393,30 @@ export default async function AdminDashboardPage() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* ── Visite ─────────────────────────────────────────────────── */}
+      <div className="card overflow-hidden">
+        <div className="px-4 py-3" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+          <div className="over-label">Visite al sito</div>
+        </div>
+        <div className="grid grid-cols-3 divide-x divide-[var(--border-soft)]">
+          {[
+            { label: "Oggi",    value: visitesToday, icon: "pi-eye"  },
+            { label: "Totali",  value: visitesTotal, icon: "pi-chart-line" },
+            { label: "Utenti",  value: userCount,    icon: "pi-users" },
+          ].map((s) => (
+            <div key={s.label} className="flex flex-col items-center gap-1 py-5 px-3 text-center">
+              <i className={`pi ${s.icon} text-base`} style={{ color: "var(--primary)" }} />
+              <div className="font-display font-black text-2xl leading-none" style={{ color: "var(--text-primary)" }}>
+                {s.value}
+              </div>
+              <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+                {s.label}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ── Anomalie ───────────────────────────────────────────────── */}

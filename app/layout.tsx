@@ -5,6 +5,7 @@ import "primeicons/primeicons.css";
 import "./globals.css";
 import Providers from "@/components/providers";
 import PwaController from "@/components/pwa/pwa-controller";
+import VisitTracker from "@/components/visit-tracker";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 
 const metadataBase = new URL(getSiteUrl());
@@ -71,6 +72,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col">
         <Providers>
           {children}
+          <VisitTracker />
           <PwaController />
         </Providers>
       </body>

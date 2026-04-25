@@ -277,6 +277,12 @@ model PushNotificationDelivery {
   @@index([matchId, type])
 }
 
+// Aggregated daily page-view counter (one row per calendar day)
+model SiteVisit {
+  date  String @id // ISO date "YYYY-MM-DD"
+  count Int    @default(0)
+}
+
 enum UserRole {
   USER
   ADMIN
