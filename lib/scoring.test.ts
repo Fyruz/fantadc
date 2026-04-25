@@ -39,6 +39,7 @@ describe("accumulatePlayerTotals", () => {
             { playerId: 1, points: 1.5 },
             { playerId: 2, points: -1 },
           ],
+          goals: [],
           votes: [{ playerId: 1 }, { playerId: 3 }, { playerId: 1 }],
         },
         {
@@ -46,6 +47,7 @@ describe("accumulatePlayerTotals", () => {
             { playerId: 2, points: 3 },
             { playerId: 3, points: 0.5 },
           ],
+          goals: [],
           votes: [{ playerId: 3 }],
         },
       ],

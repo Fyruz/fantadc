@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
+import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import RosterTable from "./_roster-table";
 import ScoreTable from "./_score-table";
 
@@ -23,7 +24,7 @@ export default async function SquadraPage() {
     },
   });
 
-  if (!fantasyTeam) redirect("/squadra/crea");
+  if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
   const history = await computeTeamHistory(fantasyTeam.id);
   const totalPoints = history.reduce((s, m) => s + m.total, 0);

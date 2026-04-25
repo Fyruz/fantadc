@@ -108,6 +108,10 @@ export default function RegisterPage() {
               disabled={pending}
               className="w-full"
             />
+
+            <p className="text-xs leading-5" style={{ color: "var(--text-disabled)" }}>
+              Dopo la registrazione entrerai subito nell&apos;area personale.
+            </p>
           </form>
         </div>
 

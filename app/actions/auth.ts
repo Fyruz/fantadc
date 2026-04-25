@@ -3,10 +3,16 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { AuthError } from "next-auth";
+import { UserRole } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { signIn, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
+import {
+  AUTH_ONBOARDING_PATH,
+  resolvePostAuthRedirect,
+  sanitizeNextPath,
+} from "@/lib/post-auth";
 import {
   registerLimiter,
   loginLimiter,
@@ -68,9 +74,31 @@ export async function register(
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  await db.user.create({ data: { email, passwordHash, name } });
+  const user = await db.user.create({
+    data: { email, passwordHash, name },
+    select: { role: true },
+  });
 
-  redirect("/login?registered=1");
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+  } catch (e) {
+    if (e instanceof AuthError) {
+      return { message: "Registrazione completata, ma non è stato possibile avviare la sessione. Effettua il login." };
+    }
+    throw e;
+  }
+
+  redirect(
+    resolvePostAuthRedirect({
+      role: user.role,
+      hasFantasyTeam: false,
+      next: AUTH_ONBOARDING_PATH,
+    })
+  );
 }
 
 // --- Login ---
@@ -100,15 +128,10 @@ export async function login(
 
   const existingUser = await db.user.findUnique({
     where: { email: parsed.data.email },
-    select: { role: true },
+    select: { id: true, role: true, fantasyTeam: { select: { id: true } } },
   });
 
-  const next = typeof formData.get("next") === "string"
-    ? (formData.get("next") as string)
-    : "";
-  const defaultNext = existingUser?.role === "ADMIN" ? "/admin" : "/dashboard";
-  // Validate next: only allow internal relative paths
-  const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : defaultNext;
+  const safeNext = sanitizeNextPath(formData.get("next"));
 
   try {
     await signIn("credentials", {
@@ -126,7 +149,13 @@ export async function login(
     throw e;
   }
 
-  redirect(safeNext);
+  redirect(
+    resolvePostAuthRedirect({
+      role: existingUser?.role ?? UserRole.USER,
+      hasFantasyTeam: !!existingUser?.fantasyTeam,
+      next: safeNext,
+    })
+  );
 }
 
 // --- Logout ---

@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
+import { redirect } from "next/navigation";
 import { Button } from "primereact/button";
 import PushNotificationCard from "@/components/pwa/push-notification-card";
+import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -15,6 +17,10 @@ export default async function DashboardPage() {
     },
   });
 
+  if (!fantasyTeam) {
+    redirect(AUTH_ONBOARDING_PATH);
+  }
+
   const openMatches = await db.match.findMany({
     where: { status: "CONCLUDED" },
     orderBy: { concludedAt: "desc" },
@@ -25,12 +31,10 @@ export default async function DashboardPage() {
     },
   });
 
-  const hasVoted = fantasyTeam
-    ? await db.vote.findMany({
-        where: { userId, matchId: { in: openMatches.map((m) => m.id) } },
-        select: { matchId: true },
-      })
-    : [];
+  const hasVoted = await db.vote.findMany({
+    where: { userId, matchId: { in: openMatches.map((m) => m.id) } },
+    select: { matchId: true },
+  });
   const votedMatchIds = new Set(hasVoted.map((v) => v.matchId));
 
   return (
@@ -61,52 +65,34 @@ export default async function DashboardPage() {
       )}
 
       {/* Squadra */}
-      {!fantasyTeam ? (
-        <div
-          className="rounded-[18px] p-6 text-center relative overflow-hidden"
-          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
-        >
-          <div className="absolute right-[-20px] top-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
-          <div className="text-white/60 text-sm mb-4">Non hai ancora creato la tua squadra fanta.</div>
-          <Link href="/squadra/crea">
-            <button
-              className="rounded-full font-black text-sm uppercase tracking-wide px-6 py-2.5"
-              style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 8px rgba(232,160,0,0.4)" }}
-            >
-              CREA LA TUA SQUADRA →
-            </button>
-          </Link>
-        </div>
-      ) : (
-        <div
-          className="rounded-[18px] p-5 relative overflow-hidden"
-          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
-        >
-          <div className="absolute right-[-20px] bottom-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
-          <div className="relative">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-1">La mia squadra</div>
-                <div className="font-display font-black text-xl uppercase text-white">{fantasyTeam.name}</div>
-              </div>
-              <Link href="/squadra" className="text-[10px] font-bold uppercase tracking-wide text-white/60 hover:text-white transition-colors mt-1">
-                VEDI →
-              </Link>
+      <div
+        className="rounded-[18px] p-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+      >
+        <div className="absolute right-[-20px] bottom-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-1">La mia squadra</div>
+              <div className="font-display font-black text-xl uppercase text-white">{fantasyTeam.name}</div>
             </div>
-            <div className="flex flex-wrap gap-1.5">
-              {fantasyTeam.players.map(({ player }) => (
-                <span
-                  key={player.name}
-                  className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                  style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}
-                >
-                  {player.name}
-                </span>
-              ))}
-            </div>
+            <Link href="/squadra" className="text-[10px] font-bold uppercase tracking-wide text-white/60 hover:text-white transition-colors mt-1">
+              VEDI →
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {fantasyTeam.players.map(({ player }) => (
+              <span
+                key={player.name}
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}
+              >
+                {player.name}
+              </span>
+            ))}
           </div>
         </div>
-      )}
+      </div>
 
       {/* Vota MVP */}
       {openMatches.length > 0 && (

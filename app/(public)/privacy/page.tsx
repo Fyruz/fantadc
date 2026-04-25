@@ -18,7 +18,7 @@ export default function PrivacyPage() {
             Titolare del trattamento
           </h2>
           <p>
-            Il titolare del trattamento dei dati personali è l'organizzatore del torneo Fantadc.
+            Il titolare del trattamento dei dati personali è l&apos;organizzatore del torneo Fantadc.
           </p>
         </section>
 
@@ -40,11 +40,11 @@ export default function PrivacyPage() {
             </li>
             <li>
               <strong>Voti MVP</strong> — il voto espresso dopo ogni partita; i singoli voti sono
-              privati e non associati pubblicamente all'utente
+               privati e non associati pubblicamente all&apos;utente
             </li>
             <li>
               <strong>Token per notifiche push</strong> — solo se accetti esplicitamente le notifiche
-              dal browser; utilizzato esclusivamente per inviarti avvisi sull'apertura del voto MVP
+              dal browser; utilizzato esclusivamente per inviarti avvisi sull&apos;apertura del voto MVP
             </li>
             <li>
               <strong>Log di attività admin</strong> — solo per gli account con ruolo amministratore,
@@ -62,7 +62,7 @@ export default function PrivacyPage() {
               Gestire la tua partecipazione al gioco: registrazione, squadra fantasy, voti e classifica
             </li>
             <li>
-              Inviarti notifiche push sull'apertura delle finestre di voto (solo con tuo consenso
+               Inviarti notifiche push sull&apos;apertura delle finestre di voto (solo con tuo consenso
               esplicito)
             </li>
             <li>
@@ -109,7 +109,7 @@ export default function PrivacyPage() {
           <p>
             I tuoi dati vengono conservati per la durata del torneo e per un ragionevole
             periodo successivo necessario alla gestione amministrativa. Al termine del torneo
-            puoi richiedere la cancellazione del tuo account contattando l'organizzatore.
+             puoi richiedere la cancellazione del tuo account contattando l&apos;organizzatore.
           </p>
         </section>
 
@@ -132,8 +132,8 @@ export default function PrivacyPage() {
             </li>
           </ul>
           <p className="mt-2">
-            Per esercitare questi diritti contatta l'organizzatore del torneo. Hai inoltre il
-            diritto di presentare reclamo all'<strong>Autorità Garante per la Protezione dei
+             Per esercitare questi diritti contatta l&apos;organizzatore del torneo. Hai inoltre il
+             diritto di presentare reclamo all&apos;<strong>Autorità Garante per la Protezione dei
             Dati Personali</strong> (www.garanteprivacy.it).
           </p>
         </section>
@@ -143,8 +143,8 @@ export default function PrivacyPage() {
             Cookie e archiviazione locale
           </h2>
           <p>
-            Il sito utilizza un <strong>cookie di sessione</strong> necessario al funzionamento
-            dell'autenticazione. Non vengono usati cookie di tracciamento o di terze parti.
+             Il sito utilizza un <strong>cookie di sessione</strong> necessario al funzionamento
+             dell&apos;autenticazione. Non vengono usati cookie di tracciamento o di terze parti.
             Non viene utilizzato Google Analytics né alcun altro strumento di analisi esterno.
           </p>
         </section>
