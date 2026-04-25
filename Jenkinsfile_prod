@@ -48,8 +48,25 @@ pipeline {
                         ]) {
                             sh 'cp $ENV_DOCKER_FILE .env.docker'
                             sh 'docker network create fantadc_prod_net || true'
+                            // 1. Avvia postgres
                             sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d --force-recreate postgres'
-                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d --build fantadc'
+                            // 2. Attendi che postgres sia healthy
+                            sh '''
+                                echo "Waiting for postgres to be healthy..."
+                                for i in $(seq 1 30); do
+                                    STATUS=$(docker compose --env-file .env.docker -f docker-compose.prod.yml exec -T postgres pg_isready -q 2>/dev/null && echo "healthy" || echo "pending")
+                                    echo "  attempt $i: $STATUS"
+                                    [ "$STATUS" = "healthy" ] && echo "Postgres is healthy." && break
+                                    [ $i -eq 30 ] && echo "Timed out waiting for postgres." && exit 1
+                                    sleep 2
+                                done
+                            '''
+                            // 3. Builda l'immagine senza avviare il container
+                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml build fantadc'
+                            // 4. Applica le migration pendenti
+                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma migrate deploy --url "$DATABASE_URL"\''
+                            // 5. Avvia (o riavvia) il container app
+                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d fantadc'
                         }
                     }
                 }
