@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 import { UserRole } from "@prisma/client";
-import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { signIn, signOut } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -18,22 +17,7 @@ import {
   loginLimiter,
   checkRateLimit,
 } from "@/lib/rate-limit";
-
-// --- Schemas ---
-
-const RegisterSchema = z.object({
-  email: z.string().email({ message: "Email non valida." }).trim().toLowerCase(),
-  password: z
-    .string()
-    .min(8, { message: "La password deve essere di almeno 8 caratteri." })
-    .max(72, { message: "Password troppo lunga." }),
-  name: z.string().min(2, { message: "Il nome deve avere almeno 2 caratteri." }).trim().optional(),
-});
-
-const LoginSchema = z.object({
-  email: z.string().email().trim().toLowerCase(),
-  password: z.string().min(1),
-});
+import { RegisterSchema, LoginSchema } from "@/lib/auth-schemas";
 
 export type AuthActionResult = {
   errors?: Record<string, string[]>;
@@ -57,20 +41,32 @@ export async function register(
   }
 
   const parsed = RegisterSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-    name: formData.get("name") || undefined,
+    name: formData.get("name") ?? "",
+    email: formData.get("email") ?? "",
+    password: formData.get("password") ?? "",
   });
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   }
 
-  const { email, password, name } = parsed.data;
+  const { name, email, password } = parsed.data;
 
-  const existing = await db.user.findUnique({ where: { email } });
-  if (existing) {
-    return { errors: { email: ["Questa email è già registrata."] } };
+  const [existingEmail, existingName] = await Promise.all([
+    db.user.findUnique({ where: { email }, select: { id: true } }),
+    db.user.findFirst({
+      where: { name: { equals: name, mode: "insensitive" } },
+      select: { id: true },
+    }),
+  ]);
+
+  if (existingEmail || existingName) {
+    return {
+      errors: {
+        ...(existingEmail ? { email: ["Questa email è già registrata."] } : {}),
+        ...(existingName ? { name: ["Questo nome è già in uso. Scegline un altro."] } : {}),
+      },
+    };
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -87,7 +83,7 @@ export async function register(
     });
   } catch (e) {
     if (e instanceof AuthError) {
-      return { message: "Registrazione completata, ma non è stato possibile avviare la sessione. Effettua il login." };
+      return { message: "Registrazione completata, ma l'avvio automatico della sessione è fallito. Effettua il login manualmente." };
     }
     throw e;
   }

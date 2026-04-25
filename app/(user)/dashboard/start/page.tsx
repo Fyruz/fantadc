@@ -205,9 +205,9 @@ export default async function DashboardStartPage() {
           </div>
 
           <p className="text-xs" style={{ color: "var(--text-disabled)" }}>
-            Se cambi idea, puoi sempre tornare qui da{" "}
+            Se cambi idea, puoi sempre tornare qui dalla{" "}
             <Link href={AUTH_ONBOARDING_PATH} className="font-semibold" style={{ color: "var(--primary)" }}>
-              Il mio
+              tua area personale
             </Link>
             .
           </p>

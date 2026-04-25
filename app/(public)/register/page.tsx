@@ -41,13 +41,14 @@ export default function RegisterPage() {
           <form action={action} className="flex flex-col gap-5">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="name">
-                Nome <span className="font-normal normal-case tracking-normal" style={{ color: "var(--text-disabled)" }}>(opzionale)</span>
+                Nome
               </label>
               <InputText
                 id="name"
                 name="name"
                 type="text"
                 autoComplete="name"
+                required
                 className="w-full"
                 placeholder="Mario Rossi"
                 value={name}
