@@ -12,7 +12,7 @@ export default async function DashboardPage() {
   const fantasyTeam = await db.fantasyTeam.findUnique({
     where: { userId },
     include: {
-      players: { include: { player: { select: { name: true, role: true } } } },
+      players: { include: { player: { select: { id: true, name: true, role: true } } } },
     },
   });
 
@@ -84,15 +84,22 @@ export default async function DashboardPage() {
             </Link>
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {fantasyTeam.players.map(({ player }) => (
-              <span
-                key={player.name}
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }}
-              >
-                {player.name}
-              </span>
-            ))}
+            {fantasyTeam.players.map(({ player }) => {
+              const isCaptain = player.id === fantasyTeam.captainPlayerId;
+              return (
+                <span
+                  key={player.name}
+                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                  style={isCaptain
+                    ? { background: "rgba(232,160,0,0.15)", border: "1px solid #E8A000", color: "#E8A000" }
+                    : { background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }
+                  }
+                >
+                  {isCaptain && <span style={{ fontSize: "9px" }}>★</span>}
+                  {player.name}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>
