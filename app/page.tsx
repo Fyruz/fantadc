@@ -141,12 +141,20 @@ export default async function HomePage() {
           <div className="relative z-10 px-5 py-20 max-w-lg mx-auto flex flex-col items-center gap-6">
 
             {/* Wordmark */}
-            <h1
-              className="font-display font-black text-white uppercase leading-[0.88] tracking-tight"
-              style={{ fontSize: "clamp(4rem, 20vw, 7.5rem)" }}
-            >
-              FANTA<span style={{ color: "#E8A000" }}>DC</span>
-            </h1>
+            <div className="flex flex-col items-center gap-2">
+              <h1
+                className="font-display font-black text-white uppercase leading-[0.88] tracking-tight"
+                style={{ fontSize: "clamp(4rem, 20vw, 7.5rem)" }}
+              >
+                FANTA<span style={{ color: "#E8A000" }}>DC</span>
+              </h1>
+              <span
+                className="font-display font-black uppercase tracking-widest text-sm px-3 py-0.5 rounded-full"
+                style={{ background: "rgba(232,160,0,0.15)", color: "#E8A000", border: "1px solid rgba(232,160,0,0.30)" }}
+              >
+                DCUP 26
+              </span>
+            </div>
 
             {/* Tagline */}
             <p

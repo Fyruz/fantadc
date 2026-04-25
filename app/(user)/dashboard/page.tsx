@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { Button } from "primereact/button";
-import PushNotificationCard from "@/components/pwa/push-notification-card";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 
 export default async function DashboardPage() {
@@ -108,25 +107,27 @@ export default async function DashboardPage() {
             return (
               <div
                 key={m.id}
-                className="flex items-center justify-between px-4 py-3"
+                className="flex items-center justify-between gap-3 px-4 py-3"
                 style={index < openMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               >
-                <div>
-                  <div className="font-display font-black text-[12px] uppercase" style={{ color: "var(--text-primary)" }}>
-                    {m.homeTeam?.name ?? m.homeSeed ?? "TBD"} <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span> {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
-                  </div>
+                <div className="font-display font-black text-[12px] uppercase min-w-0 flex-1" style={{ color: "var(--text-primary)" }}>
+                  {m.homeTeam?.name ?? m.homeSeed ?? "TBD"}{" "}
+                  <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span>{" "}
+                  {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                 </div>
                 {voted ? (
-                  <span
-                    className="text-[10px] font-bold px-2.5 py-1 rounded-full"
-                    style={{ background: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0" }}
-                  >
-                    ✓ Votato
-                  </span>
+                  <Link href={`/vota/${m.id}`} className="flex-shrink-0">
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
+                      style={{ background: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0" }}
+                    >
+                      ✓ Votato
+                    </span>
+                  </Link>
                 ) : (
-                  <Link href={`/vota/${m.id}`}>
+                  <Link href={`/vota/${m.id}`} className="flex-shrink-0">
                     <button
-                      className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5"
+                      className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5 whitespace-nowrap"
                       style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
                     >
                       VOTA
@@ -138,8 +139,6 @@ export default async function DashboardPage() {
           })}
         </div>
       )}
-
-      <PushNotificationCard />
 
       {/* Quick links */}
       <div className="flex gap-2 flex-wrap">
