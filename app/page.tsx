@@ -145,7 +145,7 @@ export default async function HomePage() {
               className="font-display font-black text-white uppercase leading-[0.88] tracking-tight"
               style={{ fontSize: "clamp(4rem, 20vw, 7.5rem)" }}
             >
-              DC<span style={{ color: "#E8A000" }}>UP</span> 26
+              DCUP <span style={{ color: "#E8A000" }}>26</span>
             </h1>
 
             {/* Tagline */}

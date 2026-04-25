@@ -51,7 +51,7 @@ export default async function PublicNav() {
             className="font-display font-black text-[15px] uppercase tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
-            DC<span style={{ color: "var(--primary)" }}>UP</span> 26
+            <span style={{ color: "var(--primary)" }}>DCUP</span> <span style={{ color: "#E8A000" }}>26</span>
           </span>
         </Link>
 
