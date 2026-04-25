@@ -29,6 +29,13 @@ export default async function SquadraPage() {
   const history = await computeTeamHistory(fantasyTeam.id);
   const totalPoints = history.reduce((s, m) => s + m.total, 0);
 
+  const playerTotals = new Map<number, number>();
+  for (const ms of history) {
+    for (const ps of ms.playerScores) {
+      playerTotals.set(ps.playerId, (playerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
+    }
+  }
+
   const gk = fantasyTeam.players.find((p) => p.player.role === "P");
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
@@ -107,6 +114,7 @@ export default async function SquadraPage() {
             role: player.role,
             footballTeamName: player.footballTeam.name,
             isCaptain: player.id === fantasyTeam.captainPlayerId,
+            totalPoints: playerTotals.get(player.id) ?? 0,
           }))}
         />
         <p className="mt-2.5 text-[10px]" style={{ color: "var(--text-disabled)" }}>
