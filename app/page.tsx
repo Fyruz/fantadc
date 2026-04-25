@@ -92,7 +92,7 @@ export default async function HomePage() {
             preserveAspectRatio="xMidYMid slice"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <g stroke="rgba(255,255,255,0.055)" strokeWidth="1.2" fill="none">
+            <g stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" fill="none">
               {/* Bordo campo */}
               <rect x="40" y="60" width="320" height="480" />
               {/* Centrocampo */}
@@ -196,6 +196,14 @@ export default async function HomePage() {
                 </Link>
               </div>
             )}
+          </div>
+
+          {/* Scroll hint — mobile only */}
+          <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center gap-1.5 md:hidden pointer-events-none">
+            <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)" }}>
+              Scorri in basso
+            </span>
+            <i className="pi pi-chevron-down animate-bounce" style={{ color: "rgba(255,255,255,0.40)", fontSize: 13 }} />
           </div>
 
           {/* Bottom wave */}
@@ -397,7 +405,7 @@ export default async function HomePage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3.5 rounded-2xl px-4 py-4 transition-colors hover:bg-[var(--surface-2)]"
+                className="flex items-center gap-2.5 sm:gap-3.5 rounded-2xl px-3 sm:px-4 py-3.5 sm:py-4 transition-colors hover:bg-[var(--surface-2)]"
                 style={{
                   background: "#fff",
                   border: "1.5px solid var(--border-medium)",
@@ -405,13 +413,13 @@ export default async function HomePage() {
                 }}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: item.bg }}
                 >
-                  <i className={`pi ${item.icon}`} style={{ color: item.color, fontSize: 16 }} />
+                  <i className={`pi ${item.icon}`} style={{ color: item.color, fontSize: 15 }} />
                 </div>
                 <span
-                  className="font-display font-black text-sm uppercase tracking-wide"
+                  className="font-display font-black text-xs sm:text-sm uppercase tracking-wide min-w-0 leading-tight"
                   style={{ color: "var(--text-primary)" }}
                 >
                   {item.label}
