@@ -44,11 +44,6 @@ export default function RosterTable({ rows }: { rows: RosterRow[] }) {
               {row.totalPoints.toFixed(1)}
             </span>
           )}
-          {row.isCaptain && (
-            <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700">
-              Cap
-            </span>
-          )}
         </div>
       ))}
     </div>

@@ -9,7 +9,8 @@ const TORNEO_LINKS = [
   { href: "/eliminazione",       label: "Eliminazione" },
   { href: "/squadre",            label: "Squadre"      },
   { href: "/giocatori",          label: "Giocatori"    },
-  { href: "/classifica-torneo",  label: "Classifica"   },
+  { href: "/classifica-torneo",    label: "Classifica" },
+  { href: "/classifica-marcatori", label: "Marcatori"  },
 ];
 
 const FANTA_LINKS = [

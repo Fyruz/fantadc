@@ -13,15 +13,19 @@ type MainNavItem = {
 };
 
 const MAIN_NAV: readonly MainNavItem[] = [
-  { href: "/partite",            label: "PARTITE",    icon: "pi-calendar" },
-  { href: "/classifica-torneo",  label: "CLASSIFICA", icon: "pi-list"     },
-  { href: "/squadre-fanta",      label: "FANTA",      icon: "pi-trophy"   },
+  { href: "/partite",       label: "PARTITE", icon: "pi-calendar" },
+  { href: "/squadre-fanta", label: "FANTA",   icon: "pi-trophy"   },
   {
     href: "/dashboard",
     label: "IL MIO",
     icon: "pi-user",
     matchers: ["/dashboard", "/squadra", "/vota"],
   },
+] as const;
+
+const CLASSIFICA_NAV = [
+  { href: "/classifica-torneo",    label: "Classifica squadre",   icon: "pi-list"  },
+  { href: "/classifica-marcatori", label: "Classifica marcatori", icon: "pi-users" },
 ] as const;
 
 const MORE_NAV = [
@@ -35,6 +39,7 @@ const MORE_NAV = [
 export default function PublicBottomNav() {
   const pathname = usePathname();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [classificaOpen, setClassificaOpen] = useState(false);
 
   const isActive = (href: string, matchers?: readonly string[]) => {
     if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));
@@ -43,16 +48,57 @@ export default function PublicBottomNav() {
   };
 
   const moreIsActive = MORE_NAV.some((item) => isActive(item.href));
+  const classificaIsActive = CLASSIFICA_NAV.some((item) => isActive(item.href));
 
   return (
     <>
       {/* Overlay */}
-      {moreOpen && (
+      {(moreOpen || classificaOpen) && (
         <div
           className="fixed inset-0 z-40 md:hidden"
           style={{ background: "rgba(6,7,61,0.3)" }}
-          onClick={() => setMoreOpen(false)}
+          onClick={() => { setMoreOpen(false); setClassificaOpen(false); }}
         />
+      )}
+
+      {/* Classifica drawer */}
+      {classificaOpen && (
+        <div
+          className="fixed bottom-[64px] left-0 right-0 z-50 rounded-t-2xl md:hidden pb-safe"
+          style={{ background: "#fff", borderTop: "2px solid var(--border-medium)", boxShadow: "0 -4px 24px rgba(1,7,163,0.12)" }}
+        >
+          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+            <span className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+              CLASSIFICA
+            </span>
+            <Button
+              icon="pi pi-times"
+              text
+              type="button"
+              onClick={() => setClassificaOpen(false)}
+              className="!p-1"
+              style={{ color: "var(--text-muted)" }}
+              aria-label="Chiudi"
+            />
+          </div>
+          <div className="flex flex-col gap-1 px-3 pb-4">
+            {CLASSIFICA_NAV.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setClassificaOpen(false)}
+                  className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
+                  style={active ? { background: "var(--surface-1)", color: "var(--primary)" } : { color: "var(--text-secondary)" }}
+                >
+                  <i className={`pi ${item.icon} text-base`} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* More drawer */}
@@ -106,7 +152,7 @@ export default function PublicBottomNav() {
         }}
       >
         <div className="flex h-16">
-          {MAIN_NAV.map((item) => {
+          {MAIN_NAV.slice(0, 1).map((item) => {
             const active = isActive(item.href, item.matchers);
             return (
               <Link
@@ -121,15 +167,60 @@ export default function PublicBottomNav() {
                       style={{ background: "var(--primary)" }}
                     />
                   )}
-                  <i
-                    className={`pi ${item.icon} text-xl`}
-                    style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
-                  />
+                  <i className={`pi ${item.icon} text-xl`} style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }} />
                 </div>
+                <span className="text-[8px] font-black uppercase tracking-wide" style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+
+          {/* Classifica button */}
+          <Button
+            unstyled
+            type="button"
+            onClick={() => { setClassificaOpen((v) => !v); setMoreOpen(false); }}
+            className="flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors"
+          >
+            <div className="relative flex flex-col items-center">
+              {classificaIsActive && (
                 <span
-                  className="text-[8px] font-black uppercase tracking-wide"
-                  style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}
-                >
+                  className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-b-full"
+                  style={{ background: "var(--primary)" }}
+                />
+              )}
+              <i
+                className="pi pi-list text-xl"
+                style={{ color: classificaIsActive || classificaOpen ? "var(--primary)" : "var(--text-disabled)" }}
+              />
+            </div>
+            <span
+              className="text-[8px] font-black uppercase tracking-wide"
+              style={{ color: classificaIsActive || classificaOpen ? "var(--primary)" : "var(--text-disabled)" }}
+            >
+              CLASSIFICA
+            </span>
+          </Button>
+
+          {MAIN_NAV.slice(1).map((item) => {
+            const active = isActive(item.href, item.matchers);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex flex-1 flex-col items-center justify-center gap-0.5 transition-colors"
+              >
+                <div className="relative flex flex-col items-center">
+                  {active && (
+                    <span
+                      className="absolute -top-1 left-1/2 -translate-x-1/2 w-5 h-0.5 rounded-b-full"
+                      style={{ background: "var(--primary)" }}
+                    />
+                  )}
+                  <i className={`pi ${item.icon} text-xl`} style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }} />
+                </div>
+                <span className="text-[8px] font-black uppercase tracking-wide" style={{ color: active ? "var(--primary)" : "var(--text-disabled)" }}>
                   {item.label}
                 </span>
               </Link>

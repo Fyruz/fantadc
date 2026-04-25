@@ -71,6 +71,14 @@ html {
   background: var(--bg-base);
 }
 
+/* ─── No text selection on touch devices (not inputs) ────── */
+@media (pointer: coarse) {
+  *:not(input):not(textarea):not([contenteditable]) {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 /* ─── Scrollbar ─────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
