@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { Button } from "primereact/button";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
+import { computeTeamHistory } from "@/lib/scoring";
+import ScoreTable from "../squadra/_score-table";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -19,6 +21,8 @@ export default async function DashboardPage() {
   if (!fantasyTeam) {
     redirect(AUTH_ONBOARDING_PATH);
   }
+
+  const history = await computeTeamHistory(fantasyTeam.id);
 
   const openMatches = await db.match.findMany({
     where: { status: "CONCLUDED" },
@@ -151,6 +155,32 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Storico punteggi */}
+      {history.length > 0 && (
+        <div>
+          <div className="over-label mb-3">Storico punteggi</div>
+          <div className="flex flex-col gap-2">
+            {history.map((ms) => (
+              <details key={ms.matchId} className="group overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-white">
+                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]">
+                  <div className="flex items-center gap-2">
+                    <i className="pi pi-chevron-right text-[10px] text-[var(--text-muted)] transition-transform group-open:rotate-90" />
+                    <span className="font-display text-[13px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
+                      {ms.label}
+                    </span>
+                  </div>
+                  <span className="font-display text-base font-black" style={{ color: "var(--primary)" }}>
+                    {ms.total.toFixed(1)} pt
+                  </span>
+                </summary>
+                <div className="px-4 pb-3.5 pt-1">
+                  <ScoreTable rows={ms.playerScores} />
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
