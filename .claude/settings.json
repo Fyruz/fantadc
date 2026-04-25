@@ -1,7 +1,22 @@
 {
   "permissions": {
     "allow": [
-      "Read(//c/Users/Fyruz DEV/.claude/**)"
+      "Read(//c/Users/Fyruz DEV/.claude/**)",
+      "Bash(git -C E:/Developing/fantadc show ebdcfc6:ai_context/plans/2026-04-21-crea-squadra-redesign.md)",
+      "Bash(git -C E:/Developing/fantadc show ebdcfc6 --stat)",
+      "Bash(git -C E:/Developing/fantadc show 8028066 --stat)",
+      "Bash(git -C E:/Developing/fantadc show 8028066:.claude/plans/2026-04-21-crea-squadra-redesign.md)",
+      "Bash(git -C E:/Developing/fantadc show 8028066 --name-only)",
+      "Bash(grep -v \"^$\")",
+      "Bash(git -C E:/Developing/fantadc show 8028066:docs/superpowers/plans/2026-04-21-crea-squadra-redesign.md)",
+      "Bash(git -C E:/Developing/fantadc show 2d5d1f0:docs/superpowers/specs/2026-04-21-crea-squadra-redesign.md)",
+      "Bash(npx vitest *)",
+      "Bash(git -C E:/Developing/fantadc show 5e4e6e6 --stat)",
+      "Bash(git -C E:/Developing/fantadc show 5e4e6e6 -- app/\\\\\\(user\\\\\\)/squadra/crea/_form.tsx)",
+      "Bash(grep -v \"^.*//.*\")",
+      "Bash(git merge-base *)",
+      "Bash(git push *)",
+      "Bash(xargs sed *)"
     ]
   }
 }

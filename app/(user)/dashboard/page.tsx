@@ -30,11 +30,15 @@ export default async function DashboardPage() {
     },
   });
 
-  const hasVoted = await db.vote.findMany({
-    where: { userId, matchId: { in: openMatches.map((m) => m.id) } },
-    select: { matchId: true },
-  });
+  const [hasVoted, pushCount] = await Promise.all([
+    db.vote.findMany({
+      where: { userId, matchId: { in: openMatches.map((m) => m.id) } },
+      select: { matchId: true },
+    }),
+    db.pushSubscription.count({ where: { userId } }),
+  ]);
   const votedMatchIds = new Set(hasVoted.map((v) => v.matchId));
+  console.log(`[Dashboard] user=${userId} pushSubscriptions=${pushCount}`);
 
   return (
     <div className="flex flex-col gap-4">
@@ -119,7 +123,7 @@ export default async function DashboardPage() {
                   <Link href={`/vota/${m.id}`} className="flex-shrink-0">
                     <span
                       className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
-                      style={{ background: "#ECFDF5", color: "#065F46", border: "1px solid #A7F3D0" }}
+                      style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid rgba(1,7,163,0.15)" }}
                     >
                       ✓ Votato
                     </span>
