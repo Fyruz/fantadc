@@ -151,15 +151,6 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Quick links */}
-      <div className="flex gap-2 flex-wrap">
-        <Link href="/classifica">
-          <Button label="Classifica" outlined size="small" />
-        </Link>
-        <Link href="/partite">
-          <Button label="Partite" outlined size="small" />
-        </Link>
-      </div>
     </div>
   );
 }
