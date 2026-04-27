@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Button } from "primereact/button";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
+import { MVP_WINDOW_MS } from "@/lib/domain/vote";
 import ScoreTable from "../squadra/_score-table";
 
 export default async function DashboardPage() {
@@ -24,8 +25,9 @@ export default async function DashboardPage() {
 
   const history = await computeTeamHistory(fantasyTeam.id);
 
+  const voteCutoff = new Date(Date.now() - MVP_WINDOW_MS);
   const openMatches = await db.match.findMany({
-    where: { status: "CONCLUDED" },
+    where: { status: "CONCLUDED", concludedAt: { gte: voteCutoff } },
     orderBy: { concludedAt: "desc" },
     take: 3,
     include: {

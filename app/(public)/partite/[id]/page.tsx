@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
+import { getCurrentUser } from "@/lib/session";
 import StatusBadge from "@/components/status-badge";
 import RoleBadge from "@/components/role-badge";
 
@@ -30,6 +31,15 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   if (!match) notFound();
 
   const windowOpen = isMvpWindowOpen(match.concludedAt);
+  const user = await getCurrentUser();
+  const userId = user ? Number(user.id) : null;
+
+  const userVote = windowOpen && userId
+    ? await db.vote.findUnique({
+        where: { userId_matchId: { userId, matchId } },
+        select: { player: { select: { name: true } } },
+      })
+    : null;
 
   let mvpPlayer: { name: string; footballTeam: { name: string } } | null = null;
   if (!windowOpen && match.status === "CONCLUDED") {
@@ -158,15 +168,27 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
       {/* Finestra voto aperta */}
       {windowOpen && (
-        <div
-          className="rounded-xl p-3.5 text-center text-sm font-semibold"
-          style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid var(--border-medium)" }}
+        <Link
+          href={user ? `/vota/${matchId}` : "/login"}
+          className="rounded-xl p-4 flex items-center justify-between gap-3 transition-opacity hover:opacity-90"
+          style={{ background: "var(--primary-light)", border: "1px solid var(--border-medium)" }}
         >
-          🗳️ Finestra di voto MVP aperta —{" "}
-          <Link href="/login" className="font-black underline">
-            accedi per votare
-          </Link>
-        </div>
+          <div>
+            <div className="text-sm font-black" style={{ color: "var(--primary)" }}>
+              {userVote
+                ? `✓ Hai votato: ${userVote.player.name}`
+                : "🗳️ Finestra di voto MVP aperta"}
+            </div>
+            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+              {userVote
+                ? "Tocca per vedere il dettaglio del voto"
+                : user
+                ? "Tocca per votare il tuo MVP"
+                : "Accedi per votare"}
+            </div>
+          </div>
+          <i className="pi pi-chevron-right text-sm flex-shrink-0" style={{ color: "var(--primary)" }} />
+        </Link>
       )}
 
       {/* Giocatori in campo */}

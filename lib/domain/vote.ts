@@ -3,7 +3,7 @@ export type VoteValidationError =
   | "VOTING_WINDOW_CLOSED"
   | "ALREADY_VOTED";
 
-const MVP_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+export const MVP_WINDOW_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 export function isMvpWindowOpen(concludedAt: Date | null): boolean {
   if (!concludedAt) return false;
