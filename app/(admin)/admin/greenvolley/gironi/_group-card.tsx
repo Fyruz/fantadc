@@ -4,6 +4,7 @@ import { useActionState, useTransition } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -33,6 +34,7 @@ export default function GroupCard({
 
   return (
     <div className="admin-card p-4 flex flex-col gap-4">
+      <ConfirmPopup />
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-black text-base uppercase tracking-wide">{group.name}</h3>
@@ -41,14 +43,20 @@ export default function GroupCard({
           text
           size="small"
           severity="danger"
-          onClick={() => {
-            if (confirm(`Eliminare il girone "${group.name}"?`)) {
-              startTransition(async () => {
-                await deleteVolleyGroup(group.id);
-                router.refresh();
-              });
-            }
-          }}
+          onClick={(e) =>
+            confirmPopup({
+              target: e.currentTarget,
+              message: `Eliminare il girone "${group.name}"?`,
+              icon: "pi pi-exclamation-triangle",
+              acceptLabel: "Sì",
+              rejectLabel: "No",
+              accept: () =>
+                startTransition(async () => {
+                  await deleteVolleyGroup(group.id);
+                  router.refresh();
+                }),
+            })
+          }
           loading={isPending}
           aria-label="Elimina girone"
         />
