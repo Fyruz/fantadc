@@ -260,3 +260,23 @@ export async function deleteVolleyKnockoutRound(id: number): Promise<void> {
   await db.volleyKnockoutRound.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/eliminazione");
 }
+
+// ─── FORM DELETE VARIANTS (for ConfirmDeleteForm) ─────────────────────────────
+
+export async function deleteVolleyTeamForm(formData: FormData): Promise<void> {
+  const id = Number(formData.get("id"));
+  await db.volleyTeam.delete({ where: { id } });
+  revalidatePath("/admin/greenvolley/squadre");
+}
+
+export async function deleteVolleyPlayerForm(formData: FormData): Promise<void> {
+  const id = Number(formData.get("id"));
+  await db.volleyPlayer.delete({ where: { id } });
+  revalidatePath("/admin/greenvolley/giocatori");
+}
+
+export async function deleteVolleyMatchForm(formData: FormData): Promise<void> {
+  const id = Number(formData.get("id"));
+  await db.volleyMatch.delete({ where: { id } });
+  revalidatePath("/admin/greenvolley/partite");
+}
