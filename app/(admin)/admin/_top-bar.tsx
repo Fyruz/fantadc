@@ -101,6 +101,10 @@ export default function TopBar({
     return () => document.removeEventListener("mousedown", handler);
   }, [openGroup]);
 
+  useEffect(() => {
+    setOpenGroup(null);
+  }, [isGV]);
+
   return (
     <header
       className="sticky top-0 z-30 h-14 flex items-center px-4 md:px-6"
