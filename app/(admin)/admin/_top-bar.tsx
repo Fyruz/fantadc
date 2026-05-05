@@ -54,16 +54,6 @@ const GV_GROUPS = [
   },
 ];
 
-function NavDivider() {
-  return (
-    <span
-      className="flex-shrink-0 w-px h-4 rounded-full mx-1"
-      style={{ background: "var(--border-medium)" }}
-      aria-hidden
-    />
-  );
-}
-
 export default function TopBar({
   initials,
   userName,
@@ -72,8 +62,10 @@ export default function TopBar({
   userName: string;
 }) {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const [logoutPending, startTransition] = useTransition();
 
   const isGV = pathname.startsWith("/admin/greenvolley");
@@ -86,15 +78,28 @@ export default function TopBar({
     return pathname.startsWith(href);
   };
 
+  const isGroupActive = (group: (typeof GROUPS)[number]) =>
+    group.items.some((item) => isActive(item.href));
+
   useEffect(() => {
-    if (!open) return;
+    if (!avatarOpen) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node))
+        setAvatarOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [avatarOpen]);
+
+  useEffect(() => {
+    if (!openGroup) return;
+    const handler = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node))
+        setOpenGroup(null);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [openGroup]);
 
   return (
     <header
@@ -107,7 +112,10 @@ export default function TopBar({
     >
       <div className="flex items-center gap-3 w-full max-w-screen-xl mx-auto">
         {/* Logo */}
-        <Link href={isGV ? "/admin/greenvolley" : "/admin"} className="flex items-center gap-2 flex-shrink-0">
+        <Link
+          href={isGV ? "/admin/greenvolley" : "/admin"}
+          className="flex items-center gap-2 flex-shrink-0"
+        >
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
             style={{ background: primary }}
@@ -132,88 +140,128 @@ export default function TopBar({
           </span>
         </Link>
 
-        {/* Sport switcher */}
+        {/* Sport switcher — testo nascosto su mobile, visibile da md */}
         <div
           className="flex items-center gap-0.5 rounded-full p-1 flex-shrink-0"
           style={{ background: "var(--surface-1)" }}
         >
           <Link
             href="/admin"
-            className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
             style={
               !isGV
                 ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
                 : { color: "var(--text-muted)" }
             }
           >
-            ⚽ DCup
+            ⚽<span className="hidden md:inline"> DCup</span>
           </Link>
           <Link
             href="/admin/greenvolley"
-            className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
             style={
               isGV
                 ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
                 : { color: "var(--text-muted)" }
             }
           >
-            🏐 GreenVolley
+            🏐<span className="hidden md:inline"> GreenVolley</span>
           </Link>
         </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-x-auto">
-          {GROUPS.map((group, gi) => (
-            <div key={gi} className="flex items-center gap-0.5">
-              {gi > 0 && <NavDivider />}
-              {group.label && (
-                <span
-                  className="px-2 text-[9px] font-black uppercase tracking-widest flex-shrink-0"
-                  style={{
-                    color:
-                      group.label === "Fanta" || group.label === "GreenVolley"
-                        ? primary
-                        : "var(--text-disabled)",
-                  }}
+        {/* Desktop nav con dropdown */}
+        <nav ref={navRef} className="hidden md:flex items-center gap-1 flex-1">
+          {GROUPS.map((group) => {
+            if (group.label === null) {
+              const item = group.items[0];
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+                  style={
+                    active
+                      ? { background: primaryLight, color: primary }
+                      : { color: "var(--text-muted)" }
+                  }
+                >
+                  {item.label}
+                </Link>
+              );
+            }
+
+            const groupActive = isGroupActive(group);
+            const isOpen = openGroup === group.label;
+
+            return (
+              <div key={group.label} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setOpenGroup(isOpen ? null : group.label!)}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+                  style={
+                    groupActive || isOpen
+                      ? { background: primaryLight, color: primary }
+                      : { color: "var(--text-muted)" }
+                  }
                 >
                   {group.label}
-                </span>
-              )}
-              {group.items.map((item) => {
-                const active = isActive(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
-                    style={
-                      active
-                        ? { background: primaryLight, color: primary }
-                        : { color: "var(--text-muted)" }
-                    }
+                  <i
+                    className={`pi pi-chevron-down text-[10px] inline-block transition-transform duration-150 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {isOpen && (
+                  <div
+                    className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-[160px] rounded-xl overflow-hidden"
+                    style={{
+                      background: "#fff",
+                      border: "1px solid var(--border-soft)",
+                      boxShadow: "0 8px 24px rgba(1,7,163,0.13)",
+                    }}
                   >
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                    {group.items.map((item) => {
+                      const active = isActive(item.href);
+                      return (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          onClick={() => setOpenGroup(null)}
+                          className="flex items-center px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+                          style={
+                            active
+                              ? { color: primary }
+                              : { color: "var(--text-primary)" }
+                          }
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </nav>
 
         {/* Avatar + dropdown */}
-        <div ref={ref} className="ml-auto relative flex-shrink-0">
+        <div ref={avatarRef} className="ml-auto relative flex-shrink-0">
           <button
             type="button"
-            onClick={() => setOpen((v) => !v)}
+            onClick={() => setAvatarOpen((v) => !v)}
             className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
             style={{ background: primary }}
             aria-label="Menu utente"
-            aria-expanded={open}
+            aria-expanded={avatarOpen}
           >
             {initials}
           </button>
 
-          {open && (
+          {avatarOpen && (
             <div
               className="absolute right-0 top-10 w-52 overflow-hidden rounded-2xl z-50"
               style={{
@@ -244,7 +292,7 @@ export default function TopBar({
                 type="button"
                 disabled={logoutPending}
                 onClick={() => {
-                  setOpen(false);
+                  setAvatarOpen(false);
                   startTransition(() => logout());
                 }}
                 className="flex w-full items-center gap-2.5 px-4 py-3 text-left text-sm font-semibold transition-colors hover:bg-[var(--surface-1)] disabled:opacity-50"
