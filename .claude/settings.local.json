@@ -44,7 +44,9 @@
       "Bash(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\actions\" -File -Recurse)",
       "Bash(Select-Object FullName)",
       "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\" -Directory | Where-Object {$_.Name -eq \"actions\"})",
-      "Bash(grep \"^\\\\\\\\.claude\")"
+      "Bash(grep \"^\\\\\\\\.claude\")",
+      "Bash(scripts/start-server.sh --project-dir \"e:/Developing/fantadc\")",
+      "Bash(\"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
