@@ -43,7 +43,8 @@
       "PowerShell(\\(Get-Content \"e:\\\\Developing\\\\fantadc\\\\prisma\\\\schema.prisma\" | Measure-Object -Line\\).Lines)",
       "Bash(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\actions\" -File -Recurse)",
       "Bash(Select-Object FullName)",
-      "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\" -Directory | Where-Object {$_.Name -eq \"actions\"})"
+      "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\" -Directory | Where-Object {$_.Name -eq \"actions\"})",
+      "Bash(grep \"^\\\\\\\\.claude\")"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
