@@ -6,6 +6,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -26,6 +27,7 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
 
   return (
     <div className="flex flex-col gap-5">
+      <ConfirmPopup />
       {/* Lista turni */}
       <div className="admin-card">
         <DataTable value={rounds} emptyMessage="Nessun turno">
@@ -51,14 +53,20 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
                     ? "Rimuovi prima le partite associate"
                     : "Elimina turno"
                 }
-                onClick={() => {
-                  if (confirm(`Eliminare "${row.name}"?`)) {
-                    startTransition(async () => {
-                      await deleteVolleyKnockoutRound(row.id);
-                      router.refresh();
-                    });
-                  }
-                }}
+                onClick={(e) =>
+                  confirmPopup({
+                    target: e.currentTarget,
+                    message: `Eliminare "${row.name}"?`,
+                    icon: "pi pi-exclamation-triangle",
+                    acceptLabel: "Sì",
+                    rejectLabel: "No",
+                    accept: () =>
+                      startTransition(async () => {
+                        await deleteVolleyKnockoutRound(row.id);
+                        router.refresh();
+                      }),
+                  })
+                }
                 loading={isPending}
                 aria-label="Elimina"
               />
