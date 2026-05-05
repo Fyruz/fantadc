@@ -1,52 +1,86 @@
 "use client";
 
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Button } from "primereact/button";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteVolleyPlayer } from "@/app/actions/admin/volley";
+import { Button } from "primereact/button";
+import { deleteVolleyPlayerForm } from "@/app/actions/admin/volley";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
 
 type Row = { id: number; name: string; teamId: number; teamName: string };
 
+const PAGE_SIZE = 15;
+
 export default function VolleyPlayersTable({ players }: { players: Row[] }) {
   const router = useRouter();
+  const [page, setPage] = useState(0);
+  const total = players.length;
+  const start = page * PAGE_SIZE;
+  const slice = players.slice(start, start + PAGE_SIZE);
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <div className="admin-card">
-      <DataTable value={players} emptyMessage="Nessun giocatore">
-        <Column field="name" header="Nome" />
-        <Column field="teamName" header="Squadra" />
-        <Column
-          header=""
-          style={{ width: "100px" }}
-          body={(row: Row) => (
-            <div className="flex gap-1 justify-end">
-              <Button
-                icon="pi pi-pencil"
-                text
-                size="small"
-                onClick={() =>
-                  router.push(`/admin/greenvolley/giocatori/${row.id}/edit`)
-                }
-                aria-label="Modifica"
-              />
-              <Button
-                icon="pi pi-trash"
-                text
-                size="small"
-                severity="danger"
-                onClick={async () => {
-                  if (confirm(`Eliminare "${row.name}"?`)) {
-                    await deleteVolleyPlayer(row.id);
-                    router.refresh();
-                  }
-                }}
-                aria-label="Elimina"
-              />
+    <div className="card overflow-hidden">
+      {total === 0 ? (
+        <p className="px-4 py-10 text-center over-label">Nessun giocatore.</p>
+      ) : (
+        <>
+          {slice.map((row, idx) => (
+            <div
+              key={row.id}
+              className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
+              style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+              onClick={() => router.push(`/admin/greenvolley/giocatori/${row.id}/edit`)}
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                    {row.name}
+                  </span>
+                </div>
+                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                  {row.teamName}
+                </span>
+              </div>
+              <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                <ConfirmDeleteForm
+                  action={deleteVolleyPlayerForm}
+                  hiddenInputs={{ id: row.id }}
+                  confirmMessage={`Eliminare "${row.name}"?`}
+                />
+              </div>
+              <i className="pi pi-chevron-right text-xs flex-shrink-0" style={{ color: "var(--text-disabled)" }} />
+            </div>
+          ))}
+          {totalPages > 1 && (
+            <div
+              className="flex items-center justify-between px-4 py-2.5"
+              style={{ borderTop: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
+            >
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {start + 1}–{Math.min(start + PAGE_SIZE, total)} di {total}
+              </span>
+              <div className="flex gap-1">
+                <Button
+                  icon="pi pi-chevron-left"
+                  text
+                  size="small"
+                  disabled={page === 0}
+                  onClick={() => setPage((p) => p - 1)}
+                  aria-label="Precedente"
+                />
+                <Button
+                  icon="pi pi-chevron-right"
+                  text
+                  size="small"
+                  disabled={page >= totalPages - 1}
+                  onClick={() => setPage((p) => p + 1)}
+                  aria-label="Successiva"
+                />
+              </div>
             </div>
           )}
-        />
-      </DataTable>
+        </>
+      )}
     </div>
   );
 }
