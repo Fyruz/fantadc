@@ -5,28 +5,44 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
 import { logout } from "@/app/actions/auth";
 
-const NAV_GROUPS = [
-  {
-    label: null,
-    items: [
-      { href: "/admin", label: "Dashboard" },
-    ],
-  },
+const GV = "#3DD907";
+
+const DCUP_GROUPS = [
+  { label: null, items: [{ href: "/admin", label: "Dashboard" }] },
   {
     label: "Torneo",
     items: [
-      { href: "/admin/squadre",     label: "Squadre"    },
-      { href: "/admin/giocatori",   label: "Giocatori"  },
-      { href: "/admin/partite",     label: "Partite"    },
-      { href: "/admin/gironi",      label: "Gironi"     },
+      { href: "/admin/squadre",      label: "Squadre"      },
+      { href: "/admin/giocatori",    label: "Giocatori"    },
+      { href: "/admin/partite",      label: "Partite"      },
+      { href: "/admin/gironi",       label: "Gironi"       },
       { href: "/admin/eliminazione", label: "Eliminazione" },
-      { href: "/admin/bonus-types", label: "Tipi bonus" },
+      { href: "/admin/bonus-types",  label: "Tipi bonus"   },
     ],
   },
   {
     label: "Fanta",
+    items: [{ href: "/admin/squadre-fantasy", label: "Squadre Fanta" }],
+  },
+  {
+    label: "Sistema",
     items: [
-      { href: "/admin/squadre-fantasy", label: "Squadre Fanta" },
+      { href: "/admin/utenti", label: "Utenti" },
+      { href: "/admin/audit",  label: "Audit"  },
+    ],
+  },
+];
+
+const GV_GROUPS = [
+  { label: null, items: [{ href: "/admin/greenvolley", label: "Dashboard" }] },
+  {
+    label: "GreenVolley",
+    items: [
+      { href: "/admin/greenvolley/squadre",      label: "Squadre"      },
+      { href: "/admin/greenvolley/giocatori",    label: "Giocatori"    },
+      { href: "/admin/greenvolley/partite",      label: "Partite"      },
+      { href: "/admin/greenvolley/gironi",       label: "Gironi"       },
+      { href: "/admin/greenvolley/eliminazione", label: "Eliminazione" },
     ],
   },
   {
@@ -48,19 +64,33 @@ function NavDivider() {
   );
 }
 
-export default function TopBar({ initials, userName }: { initials: string; userName: string }) {
+export default function TopBar({
+  initials,
+  userName,
+}: {
+  initials: string;
+  userName: string;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const [logoutPending, startTransition] = useTransition();
 
-  const isActive = (href: string) =>
-    href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+  const isGV = pathname.startsWith("/admin/greenvolley");
+  const GROUPS = isGV ? GV_GROUPS : DCUP_GROUPS;
+  const primary = isGV ? GV : "var(--primary)";
+  const primaryLight = isGV ? "#f0fde7" : "var(--primary-light)";
+
+  const isActive = (href: string) => {
+    if (href === "/admin" || href === "/admin/greenvolley") return pathname === href;
+    return pathname.startsWith(href);
+  };
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -69,37 +99,82 @@ export default function TopBar({ initials, userName }: { initials: string; userN
   return (
     <header
       className="sticky top-0 z-30 h-14 flex items-center px-4 md:px-6"
-      style={{ background: "#fff", borderBottom: "1px solid var(--border-soft)", boxShadow: "0 1px 8px rgba(1,7,163,0.06)" }}
+      style={{
+        background: "#fff",
+        borderBottom: "1px solid var(--border-soft)",
+        boxShadow: "0 1px 8px rgba(1,7,163,0.06)",
+      }}
     >
-      <div className="flex items-center gap-4 w-full max-w-screen-xl mx-auto">
+      <div className="flex items-center gap-3 w-full max-w-screen-xl mx-auto">
         {/* Logo */}
-        <Link href="/admin" className="flex items-center gap-2 flex-shrink-0">
+        <Link href={isGV ? "/admin/greenvolley" : "/admin"} className="flex items-center gap-2 flex-shrink-0">
           <div
             className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
-            style={{ background: "var(--primary)" }}
+            style={{ background: primary }}
           >
-            ⚽
+            {isGV ? "🏐" : "⚽"}
           </div>
           <span
             className="font-display font-black text-[14px] uppercase tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
-            FANTA<span style={{ color: "var(--primary)" }}>DC</span>
-            <span className="ml-1.5 text-[10px] font-semibold normal-case tracking-normal" style={{ color: "var(--text-muted)" }}>
+            {isGV ? (
+              <>GREEN<span style={{ color: GV }}>VOLLEY</span></>
+            ) : (
+              <>FANTA<span style={{ color: "var(--primary)" }}>DC</span></>
+            )}
+            <span
+              className="ml-1.5 text-[10px] font-semibold normal-case tracking-normal"
+              style={{ color: "var(--text-muted)" }}
+            >
               admin
             </span>
           </span>
         </Link>
 
+        {/* Sport switcher */}
+        <div
+          className="flex items-center gap-0.5 rounded-full p-1 flex-shrink-0"
+          style={{ background: "var(--surface-1)" }}
+        >
+          <Link
+            href="/admin"
+            className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            style={
+              !isGV
+                ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
+                : { color: "var(--text-muted)" }
+            }
+          >
+            ⚽ DCup
+          </Link>
+          <Link
+            href="/admin/greenvolley"
+            className="px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            style={
+              isGV
+                ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
+                : { color: "var(--text-muted)" }
+            }
+          >
+            🏐 GreenVolley
+          </Link>
+        </div>
+
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-0.5 flex-1 overflow-x-auto">
-          {NAV_GROUPS.map((group, gi) => (
+          {GROUPS.map((group, gi) => (
             <div key={gi} className="flex items-center gap-0.5">
               {gi > 0 && <NavDivider />}
               {group.label && (
                 <span
                   className="px-2 text-[9px] font-black uppercase tracking-widest flex-shrink-0"
-                  style={{ color: group.label === "Fanta" ? "var(--primary)" : "var(--text-disabled)" }}
+                  style={{
+                    color:
+                      group.label === "Fanta" || group.label === "GreenVolley"
+                        ? primary
+                        : "var(--text-disabled)",
+                  }}
                 >
                   {group.label}
                 </span>
@@ -113,7 +188,7 @@ export default function TopBar({ initials, userName }: { initials: string; userN
                     className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
                     style={
                       active
-                        ? { background: "var(--primary-light)", color: "var(--primary)" }
+                        ? { background: primaryLight, color: primary }
                         : { color: "var(--text-muted)" }
                     }
                   >
@@ -131,7 +206,7 @@ export default function TopBar({ initials, userName }: { initials: string; userN
             type="button"
             onClick={() => setOpen((v) => !v)}
             className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
-            style={{ background: "var(--primary)" }}
+            style={{ background: primary }}
             aria-label="Menu utente"
             aria-expanded={open}
           >
@@ -147,12 +222,11 @@ export default function TopBar({ initials, userName }: { initials: string; userN
                 boxShadow: "0 8px 24px rgba(1,7,163,0.13)",
               }}
             >
-              {/* User identity */}
               <div className="border-b border-[var(--border-soft)] px-4 py-3">
                 <div className="flex items-center gap-2.5">
                   <div
                     className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black text-white"
-                    style={{ background: "var(--primary)" }}
+                    style={{ background: primary }}
                   >
                     {initials}
                   </div>
@@ -166,8 +240,6 @@ export default function TopBar({ initials, userName }: { initials: string; userN
                   </div>
                 </div>
               </div>
-
-              {/* Logout */}
               <button
                 type="button"
                 disabled={logoutPending}
