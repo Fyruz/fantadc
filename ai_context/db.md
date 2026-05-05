@@ -253,6 +253,34 @@ Alcune regole restano applicative anche se importanti:
 
 ---
 
+## GreenVolley (Volleyball Tournament)
+
+Sistema di gestione torneo pallavolo completamente separato dal fantacalcio.
+
+### Modelli
+
+* `VolleyTeam`: squadre reali del campionato volley
+* `VolleyPlayer`: giocatori, solo anagrafica (teamId)
+* `VolleyMatch`: partita con status DRAFT/SCHEDULED/CONCLUDED, collegabile a VolleyGroup o VolleyKnockoutRound
+* `VolleySet`: set della partita, setNumber (1-5), homePoints, awayPoints
+* `VolleyGroup`: girone con nome
+* `VolleyGroupTeam`: join VolleyGroup↔VolleyTeam, qualified flag
+* `VolleyKnockoutRound`: turno eliminazione diretta con ordine numerico
+
+### Classifica
+
+* Ogni set vinto = 1 punto
+* Tiebreaker primario: quoziente set (setsWon / setsLost)
+* Tiebreaker secondario: quoziente punti (pointsScored / pointsConceded)
+* Calcolato on-the-fly da `lib/volley/standings.ts`
+
+### Routes
+
+* Admin: `/admin/greenvolley/*` (squadre, giocatori, partite, gironi, eliminazione)
+* Public: `/greenvolley/*` (home, partite, classifica, gironi, eliminazione, squadre, giocatori)
+
+---
+
 ## Estensioni future
 
 * configurazione esplicita delle regole di spareggio
