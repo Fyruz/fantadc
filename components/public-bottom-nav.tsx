@@ -29,11 +29,12 @@ const CLASSIFICA_NAV = [
 ] as const;
 
 const MORE_NAV = [
-  { href: "/gironi",       label: "Gironi",      icon: "pi-th-large"  },
-  { href: "/eliminazione", label: "Eliminazione",icon: "pi-sitemap"   },
-  { href: "/giocatori",    label: "Giocatori",   icon: "pi-users"     },
-  { href: "/squadre",      label: "Squadre",     icon: "pi-shield"    },
-  { href: "/regolamento",  label: "Regolamento", icon: "pi-book"      },
+  { href: "/gironi",        label: "Gironi",       icon: "pi-th-large"  },
+  { href: "/eliminazione",  label: "Eliminazione", icon: "pi-sitemap"   },
+  { href: "/giocatori",     label: "Giocatori",    icon: "pi-users"     },
+  { href: "/squadre",       label: "Squadre",      icon: "pi-shield"    },
+  { href: "/regolamento",   label: "Regolamento",  icon: "pi-book"      },
+  { href: "/greenvolley",   label: "GreenVolley",  icon: "pi-circle-fill" },
 ] as const;
 
 export default function PublicBottomNav() {
@@ -124,15 +125,20 @@ export default function PublicBottomNav() {
           <div className="flex flex-col gap-1 px-3 pb-4">
             {MORE_NAV.map((item) => {
               const active = isActive(item.href);
+              const isGV = item.href === "/greenvolley";
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={() => setMoreOpen(false)}
                   className="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-colors"
-                  style={active ? { background: "var(--surface-1)", color: "var(--primary)" } : { color: "var(--text-secondary)" }}
+                  style={
+                    active
+                      ? { background: isGV ? "#f0fde7" : "var(--surface-1)", color: isGV ? "#3DD907" : "var(--primary)" }
+                      : { color: isGV ? "#3DD907" : "var(--text-secondary)" }
+                  }
                 >
-                  <i className={`pi ${item.icon} text-base`} />
+                  <i className={`pi ${item.icon} text-base`} style={isGV ? { color: "#3DD907" } : {}} />
                   {item.label}
                 </Link>
               );

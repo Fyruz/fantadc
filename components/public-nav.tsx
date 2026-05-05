@@ -97,6 +97,17 @@ export default async function PublicNav() {
               {n.label}
             </Link>
           ))}
+
+          <NavDivider />
+
+          {/* GreenVolley */}
+          <Link
+            href="/greenvolley"
+            className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1"
+            style={{ color: "#3DD907" }}
+          >
+            🏐 GreenVolley
+          </Link>
         </nav>
 
         {/* Actions */}
