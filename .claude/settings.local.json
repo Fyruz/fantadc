@@ -32,8 +32,23 @@
       "Bash(docker -H npipe:////./pipe/docker_engine ps --format \"{{.Names}}\\\\t{{.Ports}}\")",
       "Bash(DATABASE_URL=\"postgresql://fantadc:fantadc@localhost:5433/fantadc\" npx prisma db push)",
       "Bash(powershell.exe -Command \"netstat -an | Select-String '5432|5433'\")",
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(dir \"e:\\\\Developing\\\\fantadc\\\\app\")",
+      "Bash(\"C:\\\\Users\\\\Fyruz DEV\\\\.claude\\\\plugins\\\\cache\\\\claude-plugins-official\\\\superpowers\\\\5.1.0\\\\skills\\\\brainstorming\\\\scripts\\\\start-server.sh\" --project-dir \"e:\\\\Developing\\\\fantadc\")",
+      "Bash(grep -q \".superpowers\" \"e:\\\\Developing\\\\fantadc\\\\.gitignore\" && echo \"already there\" || echo \".superpowers/\" >> \"e:\\\\Developing\\\\fantadc\\\\.gitignore\" && echo \"added\")",
+      "Bash(mkdir -p \"e:\\\\Developing\\\\fantadc\\\\docs\\\\superpowers\\\\specs\")",
+      "Bash(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\\\(admin\\)\\\\admin\" -Filter \"*top-bar*\" -Recurse)",
+      "PowerShell(\\(Get-Content \"e:\\\\Developing\\\\fantadc\\\\prisma\\\\schema.prisma\" | Measure-Object -Line\\).Lines)",
+      "Bash(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\actions\" -File -Recurse)",
+      "Bash(Select-Object FullName)",
+      "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\" -Directory | Where-Object {$_.Name -eq \"actions\"})"
     ],
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": [
+      "e:\\Developing\\fantadc",
+      "e:\\Developing\\fantadc\\docs\\superpowers\\specs"
+    ]
   }
 }
