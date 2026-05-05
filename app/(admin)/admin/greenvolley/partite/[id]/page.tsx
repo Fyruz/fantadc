@@ -1,0 +1,112 @@
+import { db } from "@/lib/db";
+import { notFound } from "next/navigation";
+import AdminPageHeader from "@/components/admin-page-header";
+import { Tag } from "primereact/tag";
+import SetSection from "./_sets-section";
+
+const STATUS_LABEL: Record<string, string> = {
+  DRAFT: "Bozza",
+  SCHEDULED: "Programmata",
+  CONCLUDED: "Conclusa",
+};
+const STATUS_SEVERITY: Record<string, "secondary" | "info" | "success"> = {
+  DRAFT: "secondary",
+  SCHEDULED: "info",
+  CONCLUDED: "success",
+};
+
+export default async function VolleyMatchDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const match = await db.volleyMatch.findUnique({
+    where: { id: Number(id) },
+    include: {
+      homeTeam: { select: { id: true, name: true } },
+      awayTeam: { select: { id: true, name: true } },
+      sets: { orderBy: { setNumber: "asc" } },
+      group: { select: { id: true, name: true } },
+      knockoutRound: { select: { id: true, name: true } },
+    },
+  });
+  if (!match) notFound();
+
+  const homeSets = match.sets.filter((s) => s.homePoints > s.awayPoints).length;
+  const awaySets = match.sets.filter((s) => s.awayPoints > s.homePoints).length;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <AdminPageHeader
+        title="Gestione partita"
+        backHref="/admin/greenvolley/partite"
+      />
+
+      {/* Hero */}
+      <div
+        className="rounded-2xl p-5"
+        style={{ background: "linear-gradient(135deg, #1a3a1a 0%, #0d1f0d 100%)" }}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Tag
+              value={STATUS_LABEL[match.status] ?? match.status}
+              severity={STATUS_SEVERITY[match.status] ?? "secondary"}
+            />
+            {match.group && (
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(61,217,7,0.2)", color: "#3DD907" }}
+              >
+                {match.group.name}
+              </span>
+            )}
+            {match.knockoutRound && (
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                style={{ background: "rgba(61,217,7,0.2)", color: "#3DD907" }}
+              >
+                {match.knockoutRound.name}
+              </span>
+            )}
+          </div>
+          {match.date && (
+            <span className="text-xs text-white/50">
+              {match.date.toLocaleDateString("it-IT", {
+                weekday: "short",
+                day: "numeric",
+                month: "short",
+                year: "numeric",
+              })}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-center gap-6">
+          <span className="text-white font-black text-xl">{match.homeTeam.name}</span>
+          <div className="text-center">
+            <div className="text-4xl font-black" style={{ color: "#3DD907" }}>
+              {match.sets.length > 0 ? `${homeSets} – ${awaySets}` : "vs"}
+            </div>
+            {match.sets.length > 0 && (
+              <div className="text-xs text-white/50 mt-1">set vinti</div>
+            )}
+          </div>
+          <span className="text-white font-black text-xl">{match.awayTeam.name}</span>
+        </div>
+      </div>
+
+      {/* Sezione set */}
+      <SetSection
+        match={{
+          id: match.id,
+          status: match.status,
+          homeTeamName: match.homeTeam.name,
+          awayTeamName: match.awayTeam.name,
+          sets: match.sets,
+        }}
+      />
+    </div>
+  );
+}
