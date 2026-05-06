@@ -14,7 +14,7 @@ export default async function EditVolleySquadraPage({
 
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Modifica squadra"
         backHref="/admin/greenvolley/squadre"
       />

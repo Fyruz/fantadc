@@ -38,7 +38,7 @@ export default async function VolleyMatchDetailPage({
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Gestione partita"
         backHref="/admin/greenvolley/partite"
       />

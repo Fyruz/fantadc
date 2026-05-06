@@ -4,9 +4,10 @@ interface Props {
   title: string;
   cta?: { href: string; label: string };
   backHref?: string;
+  accentColor?: string;
 }
 
-export default function AdminPageHeader({ title, cta, backHref }: Props) {
+export default function AdminPageHeader({ title, cta, backHref, accentColor = "var(--primary)" }: Props) {
   return (
     <div className="mb-6">
       {backHref && (
@@ -30,7 +31,7 @@ export default function AdminPageHeader({ title, cta, backHref }: Props) {
           <Link
             href={cta.href}
             className="inline-flex items-center gap-1.5 text-white rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide transition-opacity hover:opacity-90 flex-shrink-0"
-            style={{ background: "var(--primary)" }}
+            style={{ background: accentColor }}
           >
             <i className="pi pi-plus text-[10px]" />
             {cta.label}

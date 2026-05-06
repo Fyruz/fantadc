@@ -17,7 +17,7 @@ export default async function EditVolleyGiocatorePage({
 
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Modifica giocatore"
         backHref="/admin/greenvolley/giocatori"
       />

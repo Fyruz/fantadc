@@ -12,7 +12,7 @@ export default function NuovoVolleyGironePage() {
 
   return (
     <div>
-      <AdminPageHeader title="Nuovo girone" backHref="/admin/greenvolley/gironi" />
+      <AdminPageHeader accentColor="#3DD907" title="Nuovo girone" backHref="/admin/greenvolley/gironi" />
       <div className="admin-card p-5 max-w-lg">
         <form action={formAction} className="flex flex-col gap-4">
           {state?.error && (

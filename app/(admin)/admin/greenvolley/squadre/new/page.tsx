@@ -4,7 +4,7 @@ import VolleyTeamForm from "../_form";
 export default function NuovaVolleySquadraPage() {
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Nuova squadra"
         backHref="/admin/greenvolley/squadre"
       />

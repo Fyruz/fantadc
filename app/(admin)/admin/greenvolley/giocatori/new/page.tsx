@@ -10,7 +10,7 @@ export default async function NuovoVolleyGiocatorePage() {
 
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Nuovo giocatore"
         backHref="/admin/greenvolley/giocatori"
       />

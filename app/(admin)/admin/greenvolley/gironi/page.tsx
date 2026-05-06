@@ -17,7 +17,7 @@ export default async function VolleyGironiPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Gironi GreenVolley"
         cta={{ href: "/admin/greenvolley/gironi/new", label: "Nuovo girone" }}
       />

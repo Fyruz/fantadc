@@ -10,7 +10,7 @@ export default async function VolleySquadrePage() {
 
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Squadre GreenVolley"
         cta={{ href: "/admin/greenvolley/squadre/new", label: "Nuova squadra" }}
       />

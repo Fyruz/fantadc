@@ -12,7 +12,7 @@ export default async function VolleyEliminazionePage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <AdminPageHeader title="Eliminazione GreenVolley" />
+      <AdminPageHeader accentColor="#3DD907" title="Eliminazione GreenVolley" />
       <KnockoutRoundsClient
         rounds={rounds.map((r) => ({
           id: r.id,

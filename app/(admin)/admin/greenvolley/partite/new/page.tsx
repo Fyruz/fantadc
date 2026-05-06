@@ -11,7 +11,7 @@ export default async function NuovaVolleyPartitaPage() {
 
   return (
     <div>
-      <AdminPageHeader
+      <AdminPageHeader accentColor="#3DD907"
         title="Nuova partita"
         backHref="/admin/greenvolley/partite"
       />
