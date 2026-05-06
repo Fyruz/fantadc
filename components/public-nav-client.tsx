@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
+import { Button } from "primereact/button";
 import { logout } from "@/app/actions/auth";
 import type { SessionUser } from "@/lib/session";
 
@@ -48,7 +49,6 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
-  const primaryLight = isGV ? GV_LIGHT : "var(--primary-light)";
 
   const isActive = (href: string, exact = false) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
@@ -232,15 +232,15 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
               >
                 Dashboard
               </Link>
-              <button
+              <Button
+                unstyled
                 type="button"
                 disabled={logoutPending}
                 onClick={() => startTransition(() => logout())}
                 className="text-xs px-3 py-1.5 rounded-full font-bold border uppercase tracking-wide transition-colors hover:bg-[var(--surface-1)] disabled:opacity-50"
                 style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)" }}
-              >
-                {logoutPending ? "..." : "ESCI"}
-              </button>
+                label={logoutPending ? "..." : "ESCI"}
+              />
             </>
           ) : (
             <>
