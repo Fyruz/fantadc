@@ -35,6 +35,7 @@ const DCUP_MORE = [
 // ─── GreenVolley ──────────────────────────────────────────────────────────────
 
 const GV_MAIN = [
+  { href: "/greenvolley",            label: "HOME",     icon: "pi-home"     },
   { href: "/greenvolley/partite",    label: "PARTITE",  icon: "pi-calendar" },
   { href: "/greenvolley/classifica", label: "CLASS.",   icon: "pi-list"     },
   { href: "/greenvolley/squadre",    label: "SQUADRE",  icon: "pi-shield"   },
@@ -43,7 +44,6 @@ const GV_MAIN = [
 const GV_MORE = [
   { href: "/greenvolley/gironi",       label: "Gironi",       icon: "pi-th-large" },
   { href: "/greenvolley/eliminazione", label: "Eliminazione", icon: "pi-sitemap"  },
-  { href: "/greenvolley",              label: "Home",         icon: "pi-home"     },
 ] as const;
 
 // ─── Helper ───────────────────────────────────────────────────────────────────
