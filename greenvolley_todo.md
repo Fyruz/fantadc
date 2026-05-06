@@ -58,7 +58,7 @@ Eseguire i task **nell'ordine numerico**. I task 1-3 sono fondamentali (schema +
 - 2. Sezione pubblica ✅ fatto
     - Rivedere il menu da desktop, anche qua organizzandolo magari in tendine
     - Usare lo switch come lato admin, e far cambiare anche il menu in alto (non deve essere un wrapper della parte greenvolley), il feeling deve essere di sito a parte (con colore suo)
-- 3. Aggiornare loghi
+- 3. Aggiornare loghi ✅ fatto
     - Aggiornare il logo nel menu quando siamo sulla sezione DCUP
     - Aggiornare il logo quando siamo nella sezione greenvolley
 - 4. Aggiornare ICO del sito e della PWA
