@@ -48,3 +48,17 @@ Sezione pallavolo separata dal calcio. Tracking partite (set con punteggi), clas
 ## Ordine di esecuzione consigliato
 
 Eseguire i task **nell'ordine numerico**. I task 1-3 sono fondamentali (schema + utility + actions) e vanno completati prima di qualsiasi pagina. I task 4-5 modificano la navigazione esistente. I task 6-15 sono indipendenti tra loro ma dipendono dai task 1-3.
+
+
+### TODO Round 2
+- 1. Sezione Admin ✅ fatto
+    - rendere il design della sezione admin piu simile alla gestione della dcup (stile, design, feeling semplice ma completo)
+    - Rivedere il menu in alto, magari organizzarlo a tendine, invece che a scorrimento verticale (da desktop)
+    - Da mobile, rivederlo per renderlo piu usabile (appare lo scroll horizontale)
+- 2. Sezione pubblica
+    - Rivedere il menu da desktop, anche qua organizzandolo magari in tendine
+    - Usare lo switch come lato admin, e far cambiare anche il menu in alto (non deve essere un wrapper della parte greenvolley), il feeling deve essere di sito a parte (con colore suo)
+- 3. Aggiornare loghi
+    - Aggiornare il logo nel menu quando siamo sulla sezione DCUP
+    - Aggiornare il logo quando siamo nella sezione greenvolley
+- 4. Aggiornare ICO del sito e della PWA
