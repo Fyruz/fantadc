@@ -38,7 +38,6 @@ const GV_MAIN = [
   { href: "/greenvolley/partite",    label: "PARTITE",  icon: "pi-calendar" },
   { href: "/greenvolley/classifica", label: "CLASS.",   icon: "pi-list"     },
   { href: "/greenvolley/squadre",    label: "SQUADRE",  icon: "pi-shield"   },
-  { href: "/greenvolley/giocatori",  label: "GIOC.",    icon: "pi-users"    },
 ] as const;
 
 const GV_MORE = [

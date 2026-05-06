@@ -39,7 +39,6 @@ const GV_LINKS = [
   { href: "/greenvolley/gironi",       label: "Gironi",      exact: false },
   { href: "/greenvolley/eliminazione", label: "Eliminazione",exact: false },
   { href: "/greenvolley/squadre",      label: "Squadre",     exact: false },
-  { href: "/greenvolley/giocatori",    label: "Giocatori",   exact: false },
 ];
 
 export default function PublicNavClient({ user }: { user: SessionUser | null }) {
