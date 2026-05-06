@@ -46,7 +46,12 @@
       "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\" -Directory | Where-Object {$_.Name -eq \"actions\"})",
       "Bash(grep \"^\\\\\\\\.claude\")",
       "Bash(scripts/start-server.sh --project-dir \"e:/Developing/fantadc\")",
-      "Bash(\"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")"
+      "Bash(\"C:/Users/Fyruz DEV/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh\" --project-dir \"e:/Developing/fantadc\")",
+      "Bash(git grep *)",
+      "Bash(echo \"Exit: $?\")",
+      "PowerShell(head -30)",
+      "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\\\(public\\)\" -Recurse | Where-Object { $_.Name -eq \"page.tsx\" -or $_.Name -eq \"layout.tsx\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(git rm *)"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
