@@ -129,7 +129,7 @@ export default function TopBar({
             className="rounded-lg"
           />
           <span
-            className="font-display font-black text-[14px] uppercase tracking-tight"
+            className="hidden sm:inline font-display font-black text-[14px] uppercase tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
             {isGV ? (

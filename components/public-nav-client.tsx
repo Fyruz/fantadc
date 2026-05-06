@@ -45,7 +45,9 @@ const GV_LINKS = [
 export default function PublicNavClient({ user }: { user: SessionUser | null }) {
   const pathname = usePathname();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const [avatarOpen, setAvatarOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
+  const avatarRef = useRef<HTMLDivElement>(null);
   const [logoutPending, startTransition] = useTransition();
 
   const isGV = pathname.startsWith("/greenvolley");
@@ -56,6 +58,8 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   const isGroupActive = (group: (typeof DCUP_GROUPS)[number]) =>
     group.items.some((item) => isActive(item.href));
+
+  const userInitial = user ? (user.name ?? user.email).charAt(0).toUpperCase() : "";
 
   useEffect(() => {
     setOpenGroup(null);
@@ -70,6 +74,16 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [openGroup]);
+
+  useEffect(() => {
+    if (!avatarOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node))
+        setAvatarOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [avatarOpen]);
 
   return (
     <header
@@ -217,33 +231,66 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         {/* Auth */}
         <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
           {user ? (
-            <>
-              {user.role === "ADMIN" && (
-                <Link
-                  href="/admin"
-                  className="text-sm font-semibold transition-colors px-2 hover:opacity-70"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  Admin
-                </Link>
-              )}
-              <Link
-                href="/dashboard"
-                className="text-sm font-semibold transition-colors px-2 hover:opacity-70"
-                style={{ color: "var(--text-muted)" }}
-              >
-                Dashboard
-              </Link>
-              <Button
-                unstyled
+            <div ref={avatarRef} className="relative">
+              <button
                 type="button"
-                disabled={logoutPending}
-                onClick={() => startTransition(() => logout())}
-                className="text-xs px-3 py-1.5 rounded-full font-bold border uppercase tracking-wide transition-colors hover:bg-[var(--surface-1)] disabled:opacity-50"
-                style={{ borderColor: "var(--border-medium)", color: "var(--text-secondary)" }}
-                label={logoutPending ? "..." : "ESCI"}
-              />
-            </>
+                onClick={() => setAvatarOpen((v) => !v)}
+                className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
+                style={{ background: primary }}
+                aria-label="Menu utente"
+                aria-expanded={avatarOpen}
+              >
+                {userInitial}
+              </button>
+              {avatarOpen && (
+                <div
+                  className="absolute right-0 top-10 w-52 overflow-hidden rounded-2xl z-50"
+                  style={{
+                    background: "#fff",
+                    border: "1px solid var(--border-soft)",
+                    boxShadow: "0 8px 24px rgba(1,7,163,0.13)",
+                  }}
+                >
+                  <div className="border-b border-[var(--border-soft)] px-4 py-3">
+                    <div className="truncate text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                      {user.name ?? user.email}
+                    </div>
+                  </div>
+                  <div className="py-1">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setAvatarOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <i className="pi pi-home text-sm" />
+                      Dashboard
+                    </Link>
+                    {user.role === "ADMIN" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setAvatarOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <i className="pi pi-cog text-sm" />
+                        Admin
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      disabled={logoutPending}
+                      onClick={() => { setAvatarOpen(false); startTransition(() => logout()); }}
+                      className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm font-semibold transition-colors hover:bg-[var(--surface-1)] disabled:opacity-50"
+                      style={{ color: "#991B1B" }}
+                    >
+                      <i className="pi pi-sign-out text-sm" />
+                      {logoutPending ? "Uscita in corso..." : "Esci"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               <Link
@@ -255,7 +302,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
               </Link>
               <Link
                 href="/register"
-                className="text-xs px-4 py-2 rounded-full font-black uppercase tracking-wide transition-colors hover:opacity-90"
+                className="hidden md:inline-flex text-xs px-4 py-2 rounded-full font-black uppercase tracking-wide transition-colors hover:opacity-90"
                 style={{ background: primary, color: "#fff" }}
               >
                 REGISTRATI
