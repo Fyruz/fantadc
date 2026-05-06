@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
@@ -82,12 +83,13 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
         {/* Logo */}
         <Link href={isGV ? "/greenvolley" : "/"} className="flex items-center gap-2 flex-shrink-0">
-          <div
-            className="w-7 h-7 rounded-lg flex items-center justify-center text-sm"
-            style={{ background: primary }}
-          >
-            {isGV ? "🏐" : "⚽"}
-          </div>
+          <Image
+            src={isGV ? "/logo_greenvolley.png" : "/logo_dc.png"}
+            width={28}
+            height={28}
+            alt={isGV ? "GreenVolley logo" : "DCup logo"}
+            className="rounded-lg"
+          />
           <span
             className="font-display font-black text-[15px] uppercase tracking-tight"
             style={{ color: "var(--text-primary)" }}
