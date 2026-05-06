@@ -55,7 +55,7 @@ Eseguire i task **nell'ordine numerico**. I task 1-3 sono fondamentali (schema +
     - rendere il design della sezione admin piu simile alla gestione della dcup (stile, design, feeling semplice ma completo)
     - Rivedere il menu in alto, magari organizzarlo a tendine, invece che a scorrimento verticale (da desktop)
     - Da mobile, rivederlo per renderlo piu usabile (appare lo scroll horizontale)
-- 2. Sezione pubblica
+- 2. Sezione pubblica ✅ fatto
     - Rivedere il menu da desktop, anche qua organizzandolo magari in tendine
     - Usare lo switch come lato admin, e far cambiare anche il menu in alto (non deve essere un wrapper della parte greenvolley), il feeling deve essere di sito a parte (con colore suo)
 - 3. Aggiornare loghi
