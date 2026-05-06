@@ -58,7 +58,6 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isGroupActive = (group: (typeof DCUP_GROUPS)[number]) =>
     group.items.some((item) => isActive(item.href));
 
-  const userInitial = user ? (user.name ?? user.email).charAt(0).toUpperCase() : "";
 
   useEffect(() => {
     setOpenGroup(null);
@@ -234,12 +233,12 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
               <button
                 type="button"
                 onClick={() => setAvatarOpen((v) => !v)}
-                className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
+                className="w-8 h-8 rounded-full text-white flex items-center justify-center transition-opacity hover:opacity-80"
                 style={{ background: primary }}
                 aria-label="Menu utente"
                 aria-expanded={avatarOpen}
               >
-                {userInitial}
+                <i className="pi pi-user text-sm" />
               </button>
               {avatarOpen && (
                 <div
