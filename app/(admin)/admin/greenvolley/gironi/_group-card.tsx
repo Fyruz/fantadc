@@ -98,10 +98,18 @@ export default function GroupCard({
                   text
                   size="small"
                   severity="danger"
-                  onClick={() =>
-                    startTransition(async () => {
-                      await removeTeamFromVolleyGroup(group.id, gt.teamId);
-                      router.refresh();
+                  onClick={(e) =>
+                    confirmPopup({
+                      target: e.currentTarget,
+                      message: `Rimuovere "${gt.teamName}" dal girone?`,
+                      icon: "pi pi-exclamation-triangle",
+                      acceptLabel: "Sì",
+                      rejectLabel: "No",
+                      accept: () =>
+                        startTransition(async () => {
+                          await removeTeamFromVolleyGroup(group.id, gt.teamId);
+                          router.refresh();
+                        }),
                     })
                   }
                   aria-label="Rimuovi"
