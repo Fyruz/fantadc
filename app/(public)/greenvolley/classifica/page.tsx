@@ -52,7 +52,7 @@ export default async function VolleyClassificaPage() {
             >
               {/* Header */}
               <div
-                className="grid grid-cols-[1fr_40px_40px_40px_40px_50px] px-4 py-2 text-xs font-black uppercase tracking-wide gap-2"
+                className="grid grid-cols-[1fr_36px_36px_36px_36px_44px] px-3 py-2 text-xs font-black uppercase tracking-wide gap-1"
                 style={{
                   background: "var(--surface-1)",
                   color: "var(--text-muted)",
@@ -70,7 +70,7 @@ export default async function VolleyClassificaPage() {
               {standings.map((row, i) => (
                 <div
                   key={row.teamId}
-                  className="grid grid-cols-[1fr_40px_40px_40px_40px_50px] px-4 py-3 text-sm gap-2 items-center"
+                  className="grid grid-cols-[1fr_36px_36px_36px_36px_44px] px-3 py-2.5 text-sm gap-1 items-center"
                   style={{
                     borderBottom:
                       i < standings.length - 1
@@ -78,7 +78,7 @@ export default async function VolleyClassificaPage() {
                         : "none",
                   }}
                 >
-                  <span className="font-semibold">{row.teamName}</span>
+                  <span className="font-semibold text-xs truncate">{row.teamName}</span>
                   <span className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
                     {row.played}
                   </span>
@@ -88,7 +88,7 @@ export default async function VolleyClassificaPage() {
                     {row.setRatio === 0 ? "0" : row.setRatio.toFixed(2)}
                   </span>
                   <span
-                    className="text-center font-black"
+                    className="text-center font-black text-sm"
                     style={{ color: "#3DD907" }}
                   >
                     {row.setsWon}

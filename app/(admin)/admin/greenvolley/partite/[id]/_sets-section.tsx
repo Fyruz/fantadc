@@ -169,6 +169,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
             }
             loading={isPending}
             outlined
+            style={{ color: "#3DD907", borderColor: "#3DD907" }}
           />
         )}
         {match.status === "SCHEDULED" && match.sets.length > 0 && (

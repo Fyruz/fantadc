@@ -31,8 +31,6 @@ const DCUP_MORE = [
 const GV_MORE = [
   { href: "/admin/greenvolley/gironi",       label: "Gironi",       icon: "pi-th-large" },
   { href: "/admin/greenvolley/eliminazione", label: "Eliminazione", icon: "pi-sitemap"  },
-  { href: "/admin/utenti",                   label: "Utenti",       icon: "pi-id-card"  },
-  { href: "/admin/audit",                    label: "Audit log",    icon: "pi-history"  },
 ];
 
 export default function BottomNav() {

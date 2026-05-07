@@ -1,16 +1,17 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { Tag } from "primereact/tag";
+
+const GV = "#3DD907";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Bozza",
   SCHEDULED: "Programmata",
   CONCLUDED: "Conclusa",
 };
-const STATUS_SEVERITY: Record<string, "secondary" | "info" | "success"> = {
-  DRAFT: "secondary",
-  SCHEDULED: "info",
-  CONCLUDED: "success",
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  DRAFT:     { bg: "rgba(0,0,0,0.08)",    color: "var(--text-muted)" },
+  SCHEDULED: { bg: "rgba(61,217,7,0.15)", color: GV },
+  CONCLUDED: { bg: "rgba(61,217,7,0.12)", color: "#166534" },
 };
 
 export default async function VolleyPartitePublicPage() {
@@ -32,40 +33,47 @@ export default async function VolleyPartitePublicPage() {
   const renderMatch = (m: (typeof matches)[number]) => {
     const homeSets = m.sets.filter((s) => s.homePoints > s.awayPoints).length;
     const awaySets = m.sets.filter((s) => s.awayPoints > s.homePoints).length;
+    const st = STATUS_STYLE[m.status] ?? STATUS_STYLE.DRAFT;
 
     return (
       <Link
         key={m.id}
         href={`/greenvolley/partite/${m.id}`}
-        className="flex items-center justify-between px-4 py-3 rounded-xl transition-colors hover:bg-[var(--surface-1)]"
+        className="flex flex-col px-4 py-3 rounded-xl transition-colors hover:bg-[var(--surface-1)]"
         style={{ border: "1px solid var(--border-soft)" }}
       >
-        <div className="flex flex-col gap-0.5 flex-1">
-          <span className="font-black text-sm">{m.homeTeam.name}</span>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {m.awayTeam.name}
+        {/* Top row: teams + score */}
+        <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+            <span className="font-black text-sm truncate">{m.homeTeam.name}</span>
+            <span className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
+              {m.awayTeam.name}
+            </span>
+          </div>
+          <div className="text-center flex-shrink-0 px-2">
+            {m.status === "CONCLUDED" ? (
+              <span className="font-black text-lg" style={{ color: GV }}>
+                {homeSets} – {awaySets}
+              </span>
+            ) : (
+              <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                {m.date
+                  ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short" })
+                  : "—"}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Bottom row: status badge + group */}
+        <div className="flex items-center gap-2 mt-2">
+          <span
+            className="text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0"
+            style={{ background: st.bg, color: st.color }}
+          >
+            {STATUS_LABEL[m.status] ?? m.status}
           </span>
-        </div>
-        <div className="text-center px-4">
-          {m.status === "CONCLUDED" ? (
-            <span className="font-black text-lg" style={{ color: "#3DD907" }}>
-              {homeSets} – {awaySets}
-            </span>
-          ) : (
-            <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
-              {m.date
-                ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short" })
-                : "—"}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <Tag
-            value={STATUS_LABEL[m.status]}
-            severity={STATUS_SEVERITY[m.status]}
-          />
           {(m.group || m.knockoutRound) && (
-            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            <span className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
               {m.group?.name ?? m.knockoutRound?.name}
             </span>
           )}

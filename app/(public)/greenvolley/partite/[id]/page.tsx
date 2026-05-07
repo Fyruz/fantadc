@@ -1,16 +1,17 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import { Tag } from "primereact/tag";
+
+const GV = "#3DD907";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Bozza",
   SCHEDULED: "Programmata",
   CONCLUDED: "Conclusa",
 };
-const STATUS_SEVERITY: Record<string, "secondary" | "info" | "success"> = {
-  DRAFT: "secondary",
-  SCHEDULED: "info",
-  CONCLUDED: "success",
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  DRAFT:     { bg: "rgba(0,0,0,0.08)",    color: "var(--text-muted)" },
+  SCHEDULED: { bg: "rgba(61,217,7,0.15)", color: GV },
+  CONCLUDED: { bg: "rgba(61,217,7,0.25)", color: "#166534" },
 };
 
 export default async function VolleyMatchPublicPage({
@@ -42,10 +43,17 @@ export default async function VolleyMatchPublicPage({
         style={{ background: "linear-gradient(135deg, #0d1f0d 0%, #1a3a1a 100%)" }}
       >
         <div className="flex items-center gap-2 mb-4">
-          <Tag
-            value={STATUS_LABEL[match.status]}
-            severity={STATUS_SEVERITY[match.status]}
-          />
+          {(() => {
+            const st = STATUS_STYLE[match.status] ?? STATUS_STYLE.DRAFT;
+            return (
+              <span
+                className="text-[10px] font-black px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{ background: st.bg, color: st.color }}
+              >
+                {STATUS_LABEL[match.status] ?? match.status}
+              </span>
+            );
+          })()}
           {(match.group || match.knockoutRound) && (
             <span
               className="text-[10px] font-black px-2 py-0.5 rounded-full"
@@ -115,8 +123,8 @@ export default async function VolleyMatchPublicPage({
               }}
             >
               <span>Set</span>
-              <span className="text-center">{match.homeTeam.name}</span>
-              <span className="text-center">{match.awayTeam.name}</span>
+              <span className="text-center truncate">{match.homeTeam.name}</span>
+              <span className="text-center truncate">{match.awayTeam.name}</span>
               <span className="text-center">Vince</span>
             </div>
             {match.sets.map((s, i) => {
@@ -137,19 +145,19 @@ export default async function VolleyMatchPublicPage({
                   </span>
                   <span
                     className={`text-center font-${homeWins ? "black" : "normal"}`}
-                    style={homeWins ? { color: "#3DD907" } : {}}
+                    style={homeWins ? { color: GV } : {}}
                   >
                     {s.homePoints}
                   </span>
                   <span
                     className={`text-center font-${!homeWins ? "black" : "normal"}`}
-                    style={!homeWins ? { color: "#3DD907" } : {}}
+                    style={!homeWins ? { color: GV } : {}}
                   >
                     {s.awayPoints}
                   </span>
                   <span
-                    className="text-center text-xs font-bold"
-                    style={{ color: "#3DD907" }}
+                    className="text-center text-xs font-bold truncate"
+                    style={{ color: GV }}
                   >
                     {homeWins ? match.homeTeam.name : match.awayTeam.name}
                   </span>

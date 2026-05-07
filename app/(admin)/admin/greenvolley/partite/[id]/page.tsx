@@ -1,7 +1,6 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import AdminPageHeader from "@/components/admin-page-header";
-import { Tag } from "primereact/tag";
 import SetSection from "./_sets-section";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -9,10 +8,10 @@ const STATUS_LABEL: Record<string, string> = {
   SCHEDULED: "Programmata",
   CONCLUDED: "Conclusa",
 };
-const STATUS_SEVERITY: Record<string, "secondary" | "info" | "success"> = {
-  DRAFT: "secondary",
-  SCHEDULED: "info",
-  CONCLUDED: "success",
+const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
+  DRAFT:     { bg: "rgba(0,0,0,0.08)",           color: "var(--text-muted)" },
+  SCHEDULED: { bg: "rgba(61,217,7,0.15)",        color: "#3DD907" },
+  CONCLUDED: { bg: "rgba(61,217,7,0.25)",        color: "#166534" },
 };
 
 export default async function VolleyMatchDetailPage({
@@ -50,10 +49,17 @@ export default async function VolleyMatchDetailPage({
       >
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Tag
-              value={STATUS_LABEL[match.status] ?? match.status}
-              severity={STATUS_SEVERITY[match.status] ?? "secondary"}
-            />
+            {(() => {
+              const s = STATUS_STYLE[match.status] ?? STATUS_STYLE.DRAFT;
+              return (
+                <span
+                  className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                  style={{ background: s.bg, color: s.color }}
+                >
+                  {STATUS_LABEL[match.status] ?? match.status}
+                </span>
+              );
+            })()}
             {match.group && (
               <span
                 className="text-[10px] font-black px-2 py-0.5 rounded-full"
