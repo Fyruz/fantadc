@@ -271,6 +271,7 @@ export async function createVolleyPlayerForTeam(
   await db.volleyPlayer.create({ data: { name, teamId } });
   revalidatePath(`/admin/greenvolley/squadre/${teamId}/edit`);
   revalidatePath("/admin/greenvolley/giocatori");
+  return undefined;
 }
 
 export async function removeVolleyPlayerById(playerId: number): Promise<void> {

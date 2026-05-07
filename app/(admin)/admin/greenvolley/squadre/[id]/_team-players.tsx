@@ -80,12 +80,12 @@ export default function TeamPlayersSection({
         <h3 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: GV }}>
           Aggiungi giocatore
         </h3>
+        {state?.error && (
+          <p className="text-xs font-semibold mb-2" style={{ color: "var(--error, #dc2626)" }}>
+            {state.error}
+          </p>
+        )}
         <form action={formAction} className="flex gap-2">
-          {state?.error && (
-            <p className="text-xs font-semibold" style={{ color: "var(--error, #dc2626)" }}>
-              {state.error}
-            </p>
-          )}
           <InputText
             name="name"
             placeholder="Nome giocatore"
