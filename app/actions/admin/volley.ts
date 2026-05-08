@@ -170,6 +170,32 @@ export async function addVolleySet(
   revalidatePath(`/admin/greenvolley/partite/${matchId}`);
 }
 
+export async function updateVolleySet(
+  setId: number,
+  matchId: number,
+  homePoints: number,
+  awayPoints: number
+): Promise<ActionResult> {
+  if (!Number.isInteger(homePoints) || homePoints < 0) {
+    return { error: "Punti casa non validi" };
+  }
+  if (!Number.isInteger(awayPoints) || awayPoints < 0) {
+    return { error: "Punti ospiti non validi" };
+  }
+
+  const targetSet = await db.volleySet.findFirst({
+    where: { id: setId, matchId },
+    select: { id: true },
+  });
+  if (!targetSet) return { error: "Set non trovato" };
+
+  await db.volleySet.update({
+    where: { id: setId },
+    data: { homePoints, awayPoints },
+  });
+  revalidatePath(`/admin/greenvolley/partite/${matchId}`);
+}
+
 export async function deleteVolleySet(setId: number, matchId: number): Promise<void> {
   await db.volleySet.delete({ where: { id: setId } });
   // Rinumera i set rimanenti

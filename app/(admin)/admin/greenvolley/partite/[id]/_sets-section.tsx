@@ -1,14 +1,14 @@
 "use client";
 
-import { useActionState, useTransition } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   addVolleySet,
+  updateVolleySet,
   deleteVolleySet,
   scheduleVolleyMatch,
   concludeVolleyMatch,
@@ -34,6 +34,10 @@ export default function SetSection({ match }: { match: MatchInfo }) {
   const router = useRouter();
   const [homePoints, setHomePoints] = useState<number | null>(null);
   const [awayPoints, setAwayPoints] = useState<number | null>(null);
+  const [editingSetId, setEditingSetId] = useState<number | null>(null);
+  const [editingHomePoints, setEditingHomePoints] = useState<number | null>(null);
+  const [editingAwayPoints, setEditingAwayPoints] = useState<number | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const addSetAction = addVolleySet.bind(null, match.id);
@@ -41,6 +45,43 @@ export default function SetSection({ match }: { match: MatchInfo }) {
 
   const isConcluded = match.status === "CONCLUDED";
   const canAddSet = !isConcluded && match.sets.length < 5;
+  const canSaveEdit =
+    editingSetId !== null &&
+    editingHomePoints !== null &&
+    editingAwayPoints !== null;
+
+  function startEdit(set: SetRow) {
+    if (isConcluded) return;
+    setEditingSetId(set.id);
+    setEditingHomePoints(set.homePoints);
+    setEditingAwayPoints(set.awayPoints);
+    setEditError(null);
+  }
+
+  function cancelEdit() {
+    setEditingSetId(null);
+    setEditingHomePoints(null);
+    setEditingAwayPoints(null);
+    setEditError(null);
+  }
+
+  function handleSaveEdit() {
+    if (!canSaveEdit || editingSetId === null) return;
+    startTransition(async () => {
+      const result = await updateVolleySet(
+        editingSetId,
+        match.id,
+        editingHomePoints,
+        editingAwayPoints
+      );
+      if (result?.error) {
+        setEditError(result.error);
+        return;
+      }
+      cancelEdit();
+      router.refresh();
+    });
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -52,52 +93,128 @@ export default function SetSection({ match }: { match: MatchInfo }) {
             {match.sets.length} / 5
           </span>
         </div>
-        <DataTable value={match.sets} emptyMessage="Nessun set registrato">
+        {!isConcluded && (
+          <div className="px-4 pb-2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+            Tocca un set per modificarlo.
+          </div>
+        )}
+        {editError && (
+          <div className="px-4 pb-2 text-sm font-semibold text-red-500">
+            {editError}
+          </div>
+        )}
+        <DataTable
+          value={match.sets}
+          emptyMessage="Nessun set registrato"
+          rowClassName={() => (!isConcluded ? "cursor-pointer" : "")}
+          onRowClick={(event) => startEdit(event.data as SetRow)}
+        >
           <Column field="setNumber" header="Set" style={{ width: "60px" }} />
           <Column
             header={match.homeTeamName}
             body={(s: SetRow) => (
-              <span className={s.homePoints > s.awayPoints ? "font-black" : ""}>
-                {s.homePoints}
-              </span>
+              !isConcluded && editingSetId === s.id ? (
+                <InputNumber
+                  value={editingHomePoints}
+                  onValueChange={(e) => setEditingHomePoints(e.value ?? null)}
+                  min={0}
+                  max={99}
+                  className="w-24"
+                  inputClassName="!text-center"
+                />
+              ) : (
+                <span className={s.homePoints > s.awayPoints ? "font-black" : ""}>
+                  {s.homePoints}
+                </span>
+              )
             )}
           />
           <Column
             header={match.awayTeamName}
             body={(s: SetRow) => (
-              <span className={s.awayPoints > s.homePoints ? "font-black" : ""}>
-                {s.awayPoints}
-              </span>
+              !isConcluded && editingSetId === s.id ? (
+                <InputNumber
+                  value={editingAwayPoints}
+                  onValueChange={(e) => setEditingAwayPoints(e.value ?? null)}
+                  min={0}
+                  max={99}
+                  className="w-24"
+                  inputClassName="!text-center"
+                />
+              ) : (
+                <span className={s.awayPoints > s.homePoints ? "font-black" : ""}>
+                  {s.awayPoints}
+                </span>
+              )
             )}
           />
           <Column
             header="Vincitore"
             body={(s: SetRow) => (
-              <span style={{ color: "#3DD907", fontWeight: 700 }}>
-                {s.homePoints > s.awayPoints
-                  ? match.homeTeamName
-                  : match.awayTeamName}
-              </span>
+              !isConcluded && editingSetId === s.id ? (
+                <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                  In modifica
+                </span>
+              ) : (
+                <span style={{ color: "#3DD907", fontWeight: 700 }}>
+                  {s.homePoints > s.awayPoints
+                    ? match.homeTeamName
+                    : match.awayTeamName}
+                </span>
+              )
             )}
           />
           {!isConcluded && (
             <Column
               header=""
-              style={{ width: "60px" }}
+              style={{ width: "110px" }}
               body={(s: SetRow) => (
-                <Button
-                  icon="pi pi-trash"
-                  text
-                  size="small"
-                  severity="danger"
-                  onClick={() =>
-                    startTransition(async () => {
-                      await deleteVolleySet(s.id, match.id);
-                      router.refresh();
-                    })
-                  }
-                  aria-label="Elimina set"
-                />
+                editingSetId === s.id ? (
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      icon="pi pi-check"
+                      text
+                      size="small"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSaveEdit();
+                      }}
+                      disabled={!canSaveEdit}
+                      loading={isPending}
+                      aria-label="Salva set"
+                    />
+                    <Button
+                      icon="pi pi-times"
+                      text
+                      size="small"
+                      severity="secondary"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        cancelEdit();
+                      }}
+                      disabled={isPending}
+                      aria-label="Annulla modifica set"
+                    />
+                  </div>
+                ) : (
+                  <Button
+                    icon="pi pi-trash"
+                    text
+                    size="small"
+                    severity="danger"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      startTransition(async () => {
+                        await deleteVolleySet(s.id, match.id);
+                        router.refresh();
+                      });
+                    }}
+                    aria-label="Elimina set"
+                  />
+                )
               )}
             />
           )}
