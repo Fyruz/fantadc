@@ -2,7 +2,6 @@ import Link from "next/link";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { Button } from "primereact/button";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
 import { MVP_WINDOW_MS } from "@/lib/domain/vote";
@@ -54,23 +53,6 @@ export default async function DashboardPage() {
           {user.name ? user.name.toUpperCase() : user.email.split("@")[0].toUpperCase()}
         </h1>
       </div>
-
-      {/* Admin CTA */}
-      {user.role === "ADMIN" && (
-        <div className="card p-4 flex items-center justify-between gap-4">
-          <div>
-            <div className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
-              ACCESSO AMMINISTRATORE
-            </div>
-            <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
-              Gestisci partite, bonus e dati del campionato.
-            </div>
-          </div>
-          <Link href="/admin">
-            <Button label="Admin →" size="small" />
-          </Link>
-        </div>
-      )}
 
       {/* Squadra */}
       <div
