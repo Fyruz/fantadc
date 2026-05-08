@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
@@ -23,6 +23,17 @@ export default function NewVolleyMatchForm({
   const [groupId, setGroupId] = useState<number | null>(null);
   const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(null);
   const [date, setDate] = useState<Date | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
@@ -67,6 +78,9 @@ export default function NewVolleyMatchForm({
           onChange={(e) => setDate(e.value as Date | null)}
           showTime
           hourFormat="24"
+          stepMinute={5}
+          touchUI={isMobile}
+          readOnlyInput={isMobile}
           dateFormat="dd/mm/yy"
           className="w-full"
           placeholder="Opzionale"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
@@ -41,6 +41,10 @@ export default function NuovaPartitaForm({
   const [status, setStatus]         = useState<string>("DRAFT");
   const [date, setDate]             = useState<Date | null>(null);
   const [time, setTime]             = useState<Date | null>(null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  });
   const [phase, setPhase] = useState<string>(
     defaultGroupId ? "group" : defaultKnockoutRoundId ? "knockout" : ""
   );
@@ -48,6 +52,13 @@ export default function NuovaPartitaForm({
   const [knockoutRoundId, setKnockoutRoundId] = useState<string>(
     defaultKnockoutRoundId ? String(defaultKnockoutRoundId) : ""
   );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const allTeamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
   const homeOptions    = allTeamOptions.filter((t) => t.value !== awayTeamId);
@@ -187,6 +198,9 @@ export default function NuovaPartitaForm({
               className="w-full"
               inputClassName="w-full"
               hourFormat="24"
+              stepMinute={5}
+              touchUI={isMobile}
+              readOnlyInput={isMobile}
             />
             {state?.errors?.time && (
               <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.time[0]}</p>

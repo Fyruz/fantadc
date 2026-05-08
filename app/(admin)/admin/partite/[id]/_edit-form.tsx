@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
@@ -69,6 +69,17 @@ export default function EditMatchForm({
   const [knockoutRoundId, setKnockoutRoundId] = useState<string>(
     match.knockoutRoundId ? String(match.knockoutRoundId) : ""
   );
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const teamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
   const groupOptions = groups.map((g) => ({ label: `Girone ${g.slug} — ${g.name}`, value: String(g.id) }));
@@ -148,7 +159,18 @@ export default function EditMatchForm({
             Ora
           </label>
           <input type="hidden" name="time" value={formattedTime} />
-          <Calendar value={time} onChange={(e) => setTime(e.value as Date | null)} timeOnly showIcon className="w-full" inputClassName="w-full" hourFormat="24" />
+          <Calendar
+            value={time}
+            onChange={(e) => setTime(e.value as Date | null)}
+            timeOnly
+            showIcon
+            className="w-full"
+            inputClassName="w-full"
+            hourFormat="24"
+            stepMinute={5}
+            touchUI={isMobile}
+            readOnlyInput={isMobile}
+          />
         </div>
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
