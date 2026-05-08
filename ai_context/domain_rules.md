@@ -38,7 +38,7 @@
 * una partita ha una squadra di casa e una squadra ospite
 * una partita deve avere stati espliciti: bozza, programmata, conclusa, pubblicata
 * quando un admin imposta una partita come conclusa, si apre la finestra di voto MVP
-* il voto MVP resta aperto per 1 ora dalla chiusura della partita
+* il voto MVP resta aperto per 2 ore dalla chiusura della partita
 * gli admin possono chiudere o riaprire la finestra di voto
 
 ### Giocatori presenti in partita

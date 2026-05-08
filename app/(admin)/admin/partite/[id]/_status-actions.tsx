@@ -30,7 +30,7 @@ const NEXT_ACTIONS: Record<string, NextAction[]> = {
     label: "Concludi partita",
     newStatus: "CONCLUDED",
     icon: "pi pi-flag",
-    confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (1 ora).",
+    confirmMsg: "Segnare la partita come conclusa? Si aprirà la finestra di voto MVP (2 ore).",
   }],
   CONCLUDED: [],
 };

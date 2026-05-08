@@ -235,7 +235,7 @@ Domande:
 Risposta:
 
 * `3.1.1`: appena un admin imposta la partita come conclusa
-* `3.1.2`: dopo un ora da sopra
+* `3.1.2`: dopo due ore da sopra
 * `3.1.3`: un admin che preme su "Partita Conclusa"
 
 ### 3.2 Modificabilita del voto

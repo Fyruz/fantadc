@@ -140,8 +140,12 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
 
   if (parsed.data.status) {
     updateData.status = parsed.data.status;
-    if (parsed.data.status === MatchStatus.CONCLUDED && !before.concludedAt) {
-      updateData.concludedAt = new Date();
+    if (parsed.data.status === MatchStatus.CONCLUDED) {
+      if (before.status !== MatchStatus.CONCLUDED || !before.concludedAt) {
+        updateData.concludedAt = new Date();
+      }
+    } else {
+      updateData.concludedAt = null;
     }
   }
 
@@ -175,10 +179,10 @@ export async function advanceMatchStatus(
   });
   if (!match) return { message: "Partita non trovata." };
 
-  const updateData: Parameters<typeof db.match.update>[0]["data"] = { status: newStatus };
-  if (newStatus === MatchStatus.CONCLUDED && !match.concludedAt) {
-    updateData.concludedAt = new Date();
-  }
+  const updateData: Parameters<typeof db.match.update>[0]["data"] = {
+    status: newStatus,
+    concludedAt: newStatus === MatchStatus.CONCLUDED ? new Date() : null,
+  };
 
   await db.match.update({ where: { id }, data: updateData });
   await logAdminAction(Number(admin.id), "UPDATE", "Match", id, { status: match.status }, { status: newStatus });

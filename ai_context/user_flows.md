@@ -51,7 +51,7 @@ Obiettivo: raccogliere un voto utente per ogni partita conclusa.
 Flusso base:
 
 1. un admin imposta la partita come conclusa
-2. si apre una finestra di voto di 1 ora
+2. si apre una finestra di voto di 2 ore
 3. se ha attivato le notifiche push, l'utente riceve una push con link diretto a `/vota/{id}`
 4. l'utente apre la partita e vede i giocatori segnati come presenti
 5. l'interfaccia mostra un elenco semplice dei 10 giocatori della partita

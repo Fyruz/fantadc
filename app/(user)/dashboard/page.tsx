@@ -29,7 +29,6 @@ export default async function DashboardPage() {
   const openMatches = await db.match.findMany({
     where: { status: "CONCLUDED", concludedAt: { gte: voteCutoff } },
     orderBy: { concludedAt: "desc" },
-    take: 3,
     include: {
       homeTeam: { select: { name: true } },
       awayTeam: { select: { name: true } },

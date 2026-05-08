@@ -11,7 +11,7 @@ Questo file non raccoglie piu le decisioni macro iniziali: ora elenca solo i pun
 * la rosa utente e bloccata dopo la creazione
 * il coach e stato rimosso dal dominio
 * esiste un capitano che raddoppia il punteggio del proprio giocatore
-* voto MVP aperto per 1 ora dopo che l'admin conclude la partita
+* voto MVP aperto per 2 ore dopo che l'admin conclude la partita
 * i voti singoli sono privati, ma si puo mostrare un favorito provvisorio
 * il punteggio e cumulato totale, con storico per partita e senza giornate
 * l'area pubblica mostra calendario, partite, classifica e squadre fantasy

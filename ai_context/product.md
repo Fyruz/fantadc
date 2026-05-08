@@ -15,7 +15,7 @@ L'MVP deve permettere di:
 4. imporre che i 5 giocatori provengano da 5 squadre reali diverse
 5. scegliere un capitano che raddoppia il proprio punteggio
 6. consultare squadre, giocatori, partite e classifica
-7. votare l'MVP di una partita in una finestra di 1 ora dopo la chiusura
+7. votare l'MVP di una partita in una finestra di 2 ore dopo la chiusura
 8. permettere agli admin di gestire partite, partecipanti al match, bonus e malus
 9. calcolare il punteggio fantasy sulla base di bonus, malus, capitano e premio MVP
 

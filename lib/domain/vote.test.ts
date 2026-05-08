@@ -1,7 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isMvpWindowOpen, validateVote } from "./vote";
-
-const ONE_HOUR_MS = 60 * 60 * 1000;
+import { isMvpWindowOpen, MVP_WINDOW_MS, validateVote } from "./vote";
 
 describe("isMvpWindowOpen", () => {
   it("returns false when concludedAt is null", () => {
@@ -13,19 +11,19 @@ describe("isMvpWindowOpen", () => {
     expect(isMvpWindowOpen(now)).toBe(true);
   });
 
-  it("returns true when concluded 59 minutes ago", () => {
-    const almostHourAgo = new Date(Date.now() - 59 * 60 * 1000);
-    expect(isMvpWindowOpen(almostHourAgo)).toBe(true);
+  it("returns true when concluded just before the window closes", () => {
+    const almostClosed = new Date(Date.now() - (MVP_WINDOW_MS - 1_000));
+    expect(isMvpWindowOpen(almostClosed)).toBe(true);
   });
 
-  it("returns false when concluded exactly 1 hour ago", () => {
-    const oneHourAgo = new Date(Date.now() - ONE_HOUR_MS);
-    expect(isMvpWindowOpen(oneHourAgo)).toBe(false);
+  it("returns false when concluded exactly at the window cutoff", () => {
+    const cutoff = new Date(Date.now() - MVP_WINDOW_MS);
+    expect(isMvpWindowOpen(cutoff)).toBe(false);
   });
 
-  it("returns false when concluded more than 1 hour ago", () => {
-    const twoHoursAgo = new Date(Date.now() - 2 * ONE_HOUR_MS);
-    expect(isMvpWindowOpen(twoHoursAgo)).toBe(false);
+  it("returns false when concluded well after the window cutoff", () => {
+    const oldDate = new Date(Date.now() - MVP_WINDOW_MS - 60_000);
+    expect(isMvpWindowOpen(oldDate)).toBe(false);
   });
 });
 
@@ -46,7 +44,7 @@ describe("validateVote", () => {
   });
 
   it("returns VOTING_WINDOW_CLOSED when window has expired", () => {
-    const oldDate = new Date(Date.now() - 2 * ONE_HOUR_MS);
+    const oldDate = new Date(Date.now() - MVP_WINDOW_MS - 60_000);
     expect(
       validateVote({ playerIds, candidatePlayerId: 2, concludedAt: oldDate, alreadyVoted: false })
     ).toBe("VOTING_WINDOW_CLOSED");
@@ -65,7 +63,7 @@ describe("validateVote", () => {
   });
 
   it("VOTING_WINDOW_CLOSED takes priority over ALREADY_VOTED", () => {
-    const oldDate = new Date(Date.now() - 2 * ONE_HOUR_MS);
+    const oldDate = new Date(Date.now() - MVP_WINDOW_MS - 60_000);
     expect(
       validateVote({ playerIds, candidatePlayerId: 2, concludedAt: oldDate, alreadyVoted: true })
     ).toBe("VOTING_WINDOW_CLOSED");

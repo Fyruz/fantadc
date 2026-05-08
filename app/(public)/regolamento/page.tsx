@@ -72,7 +72,7 @@ export default function RegolamentoPage() {
           </h2>
           <ul className="list-disc list-inside space-y-1">
             <li>
-              Dopo ogni partita si apre una <strong>finestra di voto</strong> di 1 ora
+              Dopo ogni partita si apre una <strong>finestra di voto</strong> di 2 ore
             </li>
             <li>Ogni utente registrato può votare <strong>una sola volta</strong> per partita</li>
             <li>Il giocatore più votato diventa il <strong>MVP della partita</strong> e guadagna punti bonus</li>
