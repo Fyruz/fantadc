@@ -52,13 +52,19 @@ export default function PlayerSheet({
   }
 
   const mobileHeader = (
-    <div className="flex flex-col">
-      <div className="flex justify-center py-3">
-        <div className="h-1 w-9 rounded-full bg-[var(--border-soft)]" />
-      </div>
-      <div className="pb-3 text-[13px] font-extrabold text-[var(--text-primary)]">
+    <div className="flex items-center justify-between gap-3 py-3">
+      <div className="text-[13px] font-extrabold text-[var(--text-primary)]">
         {slotLabel}
       </div>
+      <Button
+        type="button"
+        icon="pi pi-times"
+        text
+        rounded
+        severity="secondary"
+        aria-label="Chiudi selezione giocatori"
+        onClick={handleHide}
+      />
     </div>
   );
 
