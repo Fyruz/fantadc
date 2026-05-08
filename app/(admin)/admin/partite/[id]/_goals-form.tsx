@@ -40,9 +40,21 @@ export default function GoalsForm({
   players,
   goals,
 }: Props) {
-  const [state, action, pending] = useActionState(addGoal, undefined);
   const [scorerId, setScorerId] = useState<string>("");
   const [isOwnGoal, setIsOwnGoal] = useState(false);
+  const [state, action, pending] = useActionState(
+    async (prevState: Awaited<ReturnType<typeof addGoal>> | undefined, formData: FormData) => {
+      const nextState = await addGoal(prevState, formData);
+
+      if (!nextState?.message && !nextState?.errors) {
+        setScorerId("");
+        setIsOwnGoal(false);
+      }
+
+      return nextState;
+    },
+    undefined
+  );
 
   // Determine which team scored based on selected player
   // For the dropdown: show attacker's team players first (opposite team), then own team
