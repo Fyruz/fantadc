@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
-import { MVP_WINDOW_MS } from "@/lib/domain/vote";
+import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
 import ScoreTable from "../squadra/_score-table";
 
 export default async function DashboardPage() {
@@ -25,23 +25,42 @@ export default async function DashboardPage() {
   const history = await computeTeamHistory(fantasyTeam.id);
 
   const voteCutoff = new Date(Date.now() - MVP_WINDOW_MS);
-  const openMatches = await db.match.findMany({
-    where: { status: "CONCLUDED", concludedAt: { gte: voteCutoff } },
-    orderBy: { concludedAt: "desc" },
-    include: {
-      homeTeam: { select: { name: true } },
-      awayTeam: { select: { name: true } },
-    },
-  });
-
-  const [hasVoted, pushCount] = await Promise.all([
+  const [recentConcludedMatches, expressedVotes, pushCount] = await Promise.all([
+    db.match.findMany({
+      where: {
+        status: "CONCLUDED",
+        concludedAt: { not: null, gte: voteCutoff },
+      },
+      orderBy: { concludedAt: "desc" },
+      include: {
+        homeTeam: { select: { name: true } },
+        awayTeam: { select: { name: true } },
+      },
+    }),
     db.vote.findMany({
-      where: { userId, matchId: { in: openMatches.map((m) => m.id) } },
-      select: { matchId: true },
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      include: {
+        player: { select: { name: true } },
+        match: {
+          select: {
+            id: true,
+            startsAt: true,
+            homeSeed: true,
+            awaySeed: true,
+            homeTeam: { select: { name: true } },
+            awayTeam: { select: { name: true } },
+          },
+        },
+      },
     }),
     db.pushSubscription.count({ where: { userId } }),
   ]);
-  const votedMatchIds = new Set(hasVoted.map((v) => v.matchId));
+
+  const openMatches = recentConcludedMatches.filter((match) =>
+    isMvpWindowOpen(match.concludedAt)
+  );
+  const votedMatchIds = new Set(expressedVotes.map((vote) => vote.matchId));
   console.log(`[Dashboard] user=${userId} pushSubscriptions=${pushCount}`);
 
   return (
@@ -137,6 +156,14 @@ export default async function DashboardPage() {
           })}
         </div>
       )}
+      {openMatches.length === 0 && (
+        <div className="card px-4 py-3">
+          <div className="over-label">Vota MVP</div>
+          <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
+            Nessuna partita con votazione aperta in questo momento.
+          </p>
+        </div>
+      )}
 
       {/* Storico punteggi */}
       {history.length > 0 && (
@@ -170,6 +197,61 @@ export default async function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Storico voti MVP */}
+      <div>
+        <div className="over-label mb-3">Voti espressi</div>
+        <details className="group overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-white">
+          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]">
+            <div className="flex items-center gap-2">
+              <i className="pi pi-chevron-right text-[10px] text-[var(--text-muted)] transition-transform group-open:rotate-90" />
+              <span className="font-display text-[13px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
+                Storico voti MVP
+              </span>
+            </div>
+            <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+              {expressedVotes.length} voti
+            </span>
+          </summary>
+          <div className="border-t border-[var(--border-soft)] px-4 py-1">
+            {expressedVotes.length === 0 ? (
+              <p className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                Non hai ancora espresso voti MVP.
+              </p>
+            ) : (
+              expressedVotes.map((vote, index) => (
+                <Link
+                  key={vote.id}
+                  href={`/vota/${vote.matchId}`}
+                  className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:bg-[var(--surface-1)]"
+                  style={index < expressedVotes.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
+                >
+                  <div className="min-w-0">
+                    <div className="font-display text-[12px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
+                      {vote.match.homeTeam?.name ?? vote.match.homeSeed ?? "TBD"}{" "}
+                      <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span>{" "}
+                      {vote.match.awayTeam?.name ?? vote.match.awaySeed ?? "TBD"}
+                    </div>
+                    <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      MVP votato: <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{vote.player.name}</span>
+                    </div>
+                    <div className="text-[10px]" style={{ color: "var(--text-disabled)" }}>
+                      {vote.createdAt.toLocaleDateString("it-IT", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
+                  </div>
+                  <i className="pi pi-chevron-right text-[10px]" style={{ color: "var(--text-disabled)" }} />
+                </Link>
+              ))
+            )}
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
