@@ -157,7 +157,13 @@ export default async function DashboardPage() {
                   </span>
                 </summary>
                 <div className="px-4 pb-3.5 pt-1">
-                  <ScoreTable rows={ms.playerScores} />
+                  {ms.playerScores.some((ps) => ps.played) ? (
+                    <ScoreTable rows={ms.playerScores.filter((ps) => ps.played)} />
+                  ) : (
+                    <p className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
+                      Nessun giocatore della tua rosa risulta presente in questa partita.
+                    </p>
+                  )}
                 </div>
               </details>
             ))}

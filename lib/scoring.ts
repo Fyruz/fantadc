@@ -5,6 +5,7 @@ export type PlayerMatchScore = {
   playerId: number;
   playerName: string;
   footballTeamName: string;
+  played: boolean;
   goalPoints: number;
   bonusPoints: number;
   bonusDetails: Array<{
@@ -170,6 +171,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         awaySeed: true,
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
+        players: { select: { playerId: true } },
         bonuses: {
           select: {
             playerId: true,
@@ -196,8 +198,10 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       mvpBonus
     );
     const mvpId = computeMvpWinnerId(match.votes);
+    const playedPlayerIds = new Set(match.players.map((p) => p.playerId));
 
     const playerScores: PlayerMatchScore[] = ft.players.map(({ player }) => {
+      const played = playedPlayerIds.has(player.id);
       const goalPoints = match.goals.filter(
         (g) => !g.isOwnGoal && g.scorerId === player.id
       ).length;
@@ -230,6 +234,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         playerId: player.id,
         playerName: player.name,
         footballTeamName: player.footballTeam.name,
+        played,
         goalPoints,
         bonusPoints,
         bonusDetails,
