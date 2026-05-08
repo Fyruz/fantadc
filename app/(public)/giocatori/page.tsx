@@ -72,7 +72,7 @@ export default async function GiocatoriPublicPage() {
     const totalGoals = pGoals.filter((g) => !g.isOwnGoal).length;
     const totalOwnGoals = pGoals.filter((g) => g.isOwnGoal).length;
     const totalBonusPoints = pBonuses.reduce(
-      (s, b) => s + Number(b.points) * b.quantity,
+      (s, b) => s + Number(b.points),
       0
     );
 
@@ -90,7 +90,7 @@ export default async function GiocatoriPublicPage() {
       ).length;
       const matchBonusPoints = pBonuses
         .filter((b) => b.matchId === m.id)
-        .reduce((s, b) => s + Number(b.points) * b.quantity, 0);
+        .reduce((s, b) => s + Number(b.points), 0);
       const won =
         hs !== null && as_ !== null && hs > as_;
       const lost =

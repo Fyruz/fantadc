@@ -71,13 +71,13 @@ export default async function EditGiocatorePage({
   if (!player) notFound();
 
   // Compute total fantasy points
-  const totalPoints = bonuses.reduce((sum, b) => sum + Number(b.points) * b.quantity, 0);
+  const totalPoints = bonuses.reduce((sum, b) => sum + Number(b.points), 0);
 
   // Group bonuses by match for the breakdown
   const bonusByMatch = new Map<number, { matchId: number; points: number; bonuses: typeof bonuses }>();
   for (const b of bonuses) {
     const entry = bonusByMatch.get(b.matchId) ?? { matchId: b.matchId, points: 0, bonuses: [] };
-    entry.points += Number(b.points) * b.quantity;
+    entry.points += Number(b.points);
     entry.bonuses.push(b);
     bonusByMatch.set(b.matchId, entry);
   }

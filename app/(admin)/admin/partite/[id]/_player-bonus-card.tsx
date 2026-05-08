@@ -81,7 +81,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
     });
   };
 
-  const totalPoints = bonuses.reduce((s, b) => s + b.points * b.quantity, 0);
+  const totalPoints = bonuses.reduce((s, b) => s + b.points, 0);
 
   return (
     <>
@@ -231,7 +231,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
                     </span>
                     <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                       {b.quantity > 1 ? `×${b.quantity}  ` : ""}
-                      {b.points > 0 ? "+" : ""}{b.points * b.quantity}pt
+                      {b.points > 0 ? "+" : ""}{b.points}pt
                     </span>
                     <form action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
                       <input type="hidden" name="id" value={b.id} />
