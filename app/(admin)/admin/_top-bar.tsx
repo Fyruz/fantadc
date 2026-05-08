@@ -259,12 +259,12 @@ export default function TopBar({
           <button
             type="button"
             onClick={() => setAvatarOpen((v) => !v)}
-            className="w-8 h-8 rounded-full text-white flex items-center justify-center text-xs font-black transition-opacity hover:opacity-80"
+            className="w-8 h-8 rounded-full text-white flex items-center justify-center transition-opacity hover:opacity-80"
             style={{ background: primary }}
-            aria-label="Menu utente"
+            aria-label="Apri menu utente"
             aria-expanded={avatarOpen}
           >
-            {initials}
+            <i className="pi pi-user text-sm" aria-hidden />
           </button>
 
           {avatarOpen && (
@@ -294,6 +294,15 @@ export default function TopBar({
                   </div>
                 </div>
               </div>
+              <Link
+                href="/dashboard"
+                onClick={() => setAvatarOpen(false)}
+                className="flex w-full items-center gap-2.5 px-4 py-3 text-left text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+                style={{ color: "var(--text-primary)" }}
+              >
+                <i className="pi pi-user text-sm" />
+                Vista utente
+              </Link>
               <button
                 type="button"
                 disabled={logoutPending}
