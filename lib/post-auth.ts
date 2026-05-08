@@ -1,6 +1,6 @@
 import { UserRole } from "@prisma/client";
 
-export const AUTH_ONBOARDING_PATH = "/dashboard/start";
+export const AUTH_ONBOARDING_PATH = "/squadra/crea";
 
 export function sanitizeNextPath(next: FormDataEntryValue | null | undefined) {
   if (typeof next !== "string") {
