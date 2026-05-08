@@ -115,7 +115,7 @@ export default function TopBar({
         boxShadow: "0 1px 8px rgba(1,7,163,0.06)",
       }}
     >
-      <div className="flex items-center gap-3 w-full max-w-screen-xl mx-auto">
+      <div className="flex items-center gap-2 sm:gap-3 w-full max-w-screen-xl mx-auto">
         {/* Logo */}
         <Link
           href={isGV ? "/admin/greenvolley" : "/admin"}
@@ -153,25 +153,27 @@ export default function TopBar({
         >
           <Link
             href="/admin"
-            className="px-2 py-1 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap transition-colors"
+            className="min-w-[56px] sm:min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide whitespace-nowrap transition-colors"
             style={
               !isGV
                 ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
                 : { color: "var(--text-disabled)", opacity: 0.85 }
             }
           >
-            DCup
+            <span className="sm:hidden">DCup</span>
+            <span className="hidden sm:inline">⚽ DCup</span>
           </Link>
           <Link
             href="/admin/greenvolley"
-            className="px-2 py-1 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap transition-colors"
+            className="min-w-[92px] sm:min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide whitespace-nowrap transition-colors"
             style={
               isGV
                 ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
                 : { color: "var(--text-disabled)", opacity: 0.85 }
             }
           >
-            GreenVolley
+            <span className="sm:hidden">GreenVolley</span>
+            <span className="hidden sm:inline">🏐 GreenVolley</span>
           </Link>
         </div>
 
