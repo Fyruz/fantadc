@@ -181,11 +181,6 @@ export default async function EditGiocatorePage({
                     className="flex items-center gap-3 px-4 py-2.5 hover:bg-[var(--surface-1)] transition-colors"
                     style={{ borderBottom: idx < goals.length - 1 ? "1px solid var(--border-soft)" : undefined }}
                   >
-                    {g.minute && (
-                      <span className="text-[10px] font-black tabular-nums flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
-                        {g.minute}&apos;
-                      </span>
-                    )}
                     {g.isOwnGoal && (
                       <span className="text-[9px] font-black px-1 py-0.5 rounded flex-shrink-0" style={{ background: "#FEF2F2", color: "#991B1B" }}>
                         AG

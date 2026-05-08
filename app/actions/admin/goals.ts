@@ -44,10 +44,6 @@ const AddGoalSchema = z.object({
   matchId:   z.coerce.number().int().positive(),
   scorerId:  z.coerce.number().int().positive("Seleziona il marcatore"),
   isOwnGoal: z.preprocess((v) => v === "true" || v === true, z.boolean()).default(false),
-  minute:    z.preprocess(
-    (v) => (v === "" || v === null || v === undefined ? null : Number(v)),
-    z.number().int().min(1).max(120).nullable()
-  ),
 });
 
 export async function addGoal(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
@@ -56,7 +52,6 @@ export async function addGoal(_prev: ActionResult | undefined, formData: FormDat
     matchId:   formData.get("matchId"),
     scorerId:  formData.get("scorerId"),
     isOwnGoal: formData.get("isOwnGoal"),
-    minute:    formData.get("minute") || null,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
 
@@ -65,7 +60,6 @@ export async function addGoal(_prev: ActionResult | undefined, formData: FormDat
       matchId:   parsed.data.matchId,
       scorerId:  parsed.data.scorerId,
       isOwnGoal: parsed.data.isOwnGoal,
-      minute:    parsed.data.minute,
     },
   });
   await logAdminAction(Number(admin.id), "ADD_GOAL", "MatchGoal", goal.id, null, goal);

@@ -45,7 +45,7 @@ export default async function PartitaDetailPage({
     db.matchGoal.findMany({
       where: { matchId },
       include: { scorer: { select: { name: true, footballTeam: { select: { name: true } } } } },
-      orderBy: { minute: "asc" },
+      orderBy: { id: "asc" },
     }),
   ]);
 
@@ -163,7 +163,6 @@ export default async function PartitaDetailPage({
             id: g.id,
             scorerId: g.scorerId,
             isOwnGoal: g.isOwnGoal,
-            minute: g.minute,
             scorer: { name: g.scorer.name, footballTeam: { name: g.scorer.footballTeam.name } },
           }))}
         />

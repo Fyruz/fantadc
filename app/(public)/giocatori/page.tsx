@@ -28,7 +28,7 @@ export default async function GiocatoriPublicPage() {
       orderBy: { match: { startsAt: "desc" } },
     }),
     db.matchGoal.findMany({
-      select: { matchId: true, scorerId: true, isOwnGoal: true, minute: true },
+      select: { matchId: true, scorerId: true, isOwnGoal: true },
     }),
     db.playerMatchBonus.findMany({
       select: {

@@ -4,7 +4,6 @@ import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import { InputNumber } from "primereact/inputnumber";
 import { addGoal, deleteGoal } from "@/app/actions/admin/goals";
 
 type Player = {
@@ -19,7 +18,6 @@ type Goal = {
   id: number;
   scorerId: number;
   isOwnGoal: boolean;
-  minute: number | null;
   scorer: { name: string; footballTeam: { name: string } };
 };
 
@@ -45,7 +43,6 @@ export default function GoalsForm({
   const [state, action, pending] = useActionState(addGoal, undefined);
   const [scorerId, setScorerId] = useState<string>("");
   const [isOwnGoal, setIsOwnGoal] = useState(false);
-  const [minute, setMinute] = useState<number | null>(null);
 
   // Determine which team scored based on selected player
   // For the dropdown: show attacker's team players first (opposite team), then own team
@@ -125,46 +122,26 @@ export default function GoalsForm({
         <input type="hidden" name="matchId" value={matchId} />
         <input type="hidden" name="scorerId" value={scorerId} />
         <input type="hidden" name="isOwnGoal" value={String(isOwnGoal)} />
-        <input type="hidden" name="minute" value={minute ?? ""} />
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Scorer */}
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
-              Marcatore
-            </label>
-            <Dropdown
-              value={scorerId}
-              onChange={(e) => { setScorerId(e.value); setIsOwnGoal(false); }}
-              options={playerOptions}
-              optionGroupLabel="label"
-              optionGroupChildren="items"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Seleziona giocatore..."
-              className="w-full"
-              filter
-            />
-            {state?.errors?.scorerId && (
-              <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.scorerId[0]}</p>
-            )}
-          </div>
-
-          {/* Minute */}
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
-              Minuto (opz.)
-            </label>
-            <InputNumber
-              value={minute}
-              onValueChange={(e) => setMinute(e.value ?? null)}
-              min={1}
-              max={120}
-              placeholder="—"
-              className="w-full"
-              inputClassName="w-full"
-            />
-          </div>
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
+            Marcatore
+          </label>
+          <Dropdown
+            value={scorerId}
+            onChange={(e) => { setScorerId(e.value); setIsOwnGoal(false); }}
+            options={playerOptions}
+            optionGroupLabel="label"
+            optionGroupChildren="items"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Seleziona giocatore..."
+            className="w-full"
+            filter
+          />
+          {state?.errors?.scorerId && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.scorerId[0]}</p>
+          )}
         </div>
 
         {/* Autogoal toggle */}
@@ -215,11 +192,6 @@ function GoalRow({ goal, matchId }: { goal: Goal; matchId: number }) {
       className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
       style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
     >
-      {goal.minute && (
-        <span className="text-[10px] font-black tabular-nums flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
-          {goal.minute}&apos;
-        </span>
-      )}
       <span className="text-xs font-semibold flex-1 truncate" style={{ color: "var(--text-primary)" }}>
         {goal.scorer.name}
         {goal.isOwnGoal && (
@@ -231,16 +203,15 @@ function GoalRow({ goal, matchId }: { goal: Goal; matchId: number }) {
       <form ref={formRef} action={deleteGoal as unknown as (fd: FormData) => void} className="flex-shrink-0">
         <input type="hidden" name="id" value={goal.id} />
         <input type="hidden" name="matchId" value={matchId} />
-        <button
+        <Button
           type="submit"
-          className="w-6 h-6 flex items-center justify-center rounded-full transition-colors"
-          style={{ color: "var(--text-disabled)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
+          icon="pi pi-times"
+          text
+          rounded
+          severity="secondary"
+          aria-label="Rimuovi goal"
           title="Rimuovi"
-        >
-          <i className="pi pi-times text-[10px]" />
-        </button>
+        />
       </form>
     </div>
   );
