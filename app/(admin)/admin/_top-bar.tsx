@@ -146,32 +146,32 @@ export default function TopBar({
           </span>
         </Link>
 
-        {/* Sport switcher — testo nascosto su mobile, visibile da md */}
+        {/* Sport switcher */}
         <div
           className="flex items-center gap-0.5 rounded-full p-1 flex-shrink-0"
           style={{ background: "var(--surface-1)" }}
         >
           <Link
             href="/admin"
-            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="px-2 py-1 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap transition-colors"
             style={
               !isGV
                 ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-muted)" }
+                : { color: "var(--text-disabled)", opacity: 0.85 }
             }
           >
-            ⚽<span className="hidden md:inline"> DCup</span>
+            DCup
           </Link>
           <Link
             href="/admin/greenvolley"
-            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="px-2 py-1 sm:px-2.5 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-wide whitespace-nowrap transition-colors"
             style={
               isGV
                 ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-muted)" }
+                : { color: "var(--text-disabled)", opacity: 0.85 }
             }
           >
-            🏐<span className="hidden md:inline"> GreenVolley</span>
+            GreenVolley
           </Link>
         </div>
 
