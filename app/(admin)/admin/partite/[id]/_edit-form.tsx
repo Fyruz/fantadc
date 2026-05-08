@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useActionState } from "react";
+import Link from "next/link";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
@@ -84,6 +85,7 @@ export default function EditMatchForm({
   const teamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
   const groupOptions = groups.map((g) => ({ label: `Girone ${g.slug} — ${g.name}`, value: String(g.id) }));
   const roundOptions = rounds.map((r) => ({ label: r.name, value: String(r.id) }));
+  const hasKnockoutRounds = roundOptions.length > 0;
 
   const formattedDate = date
     ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
@@ -125,7 +127,23 @@ export default function EditMatchForm({
           <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }}>
             Turno eliminazione
           </label>
-          <Dropdown value={knockoutRoundId} onChange={(e) => setKnockoutRoundId(e.value)} options={roundOptions} className="w-full" placeholder="Seleziona turno" />
+          <Dropdown
+            value={knockoutRoundId}
+            onChange={(e) => setKnockoutRoundId(e.value)}
+            options={roundOptions}
+            className="w-full"
+            placeholder={hasKnockoutRounds ? "Seleziona turno" : "Nessun turno disponibile"}
+            disabled={!hasKnockoutRounds}
+          />
+          {!hasKnockoutRounds && (
+            <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+              Nessun turno configurato. Vai in{" "}
+              <Link href="/admin/eliminazione" className="font-semibold underline underline-offset-2" style={{ color: "var(--primary)" }}>
+                Eliminazione diretta
+              </Link>{" "}
+              per inizializzare il bracket.
+            </p>
+          )}
         </div>
       )}
 
