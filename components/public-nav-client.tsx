@@ -92,7 +92,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         boxShadow: "0 1px 8px rgba(1,7,163,0.06)",
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-3">
+      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2 sm:gap-3">
         {/* Logo */}
         <Link href={isGV ? "/greenvolley" : "/"} className="flex items-center gap-2 flex-shrink-0">
           <Image
@@ -103,7 +103,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             className="rounded-lg"
           />
           <span
-            className="font-display font-black text-[15px] uppercase tracking-tight"
+            className="hidden sm:inline font-display font-black text-[15px] uppercase tracking-tight"
             style={{ color: "var(--text-primary)" }}
           >
             {isGV ? (
@@ -116,30 +116,30 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
         {/* Sport switcher */}
         <div
-          className="flex items-center gap-0.5 rounded-full p-1 flex-shrink-0"
+          className="ml-0.5 flex flex-1 min-w-0 max-w-[220px] items-center gap-0.5 rounded-full p-1 sm:ml-0 sm:flex-initial sm:max-w-none"
           style={{ background: "var(--surface-1)" }}
         >
           <Link
             href="/"
-            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="flex-1 min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide transition-colors"
             style={
               !isGV
                 ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-muted)" }
+                : { color: "var(--text-disabled)", background: "transparent" }
             }
           >
-            ⚽<span className="hidden md:inline"> DCup</span>
+            <span className="block truncate">DCup</span>
           </Link>
           <Link
             href="/greenvolley"
-            className="px-1.5 py-1 md:px-3 md:py-1 rounded-full text-[11px] font-black uppercase tracking-wide transition-colors"
+            className="flex-1 min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide transition-colors"
             style={
               isGV
                 ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-muted)" }
+                : { color: "var(--text-disabled)", background: "transparent" }
             }
           >
-            🏐<span className="hidden md:inline"> GreenVolley</span>
+            <span className="block truncate">GreenVolley</span>
           </Link>
         </div>
 
