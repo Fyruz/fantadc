@@ -70,32 +70,32 @@ export default function BottomNav() {
         >
           {/* Sport switcher nel drawer */}
           <div
-            className="flex gap-2 px-4 pt-3 pb-2 border-b"
+            className="flex gap-1.5 px-4 pt-3 pb-2 border-b"
             style={{ borderColor: "var(--border-soft)" }}
           >
             <Link
               href="/admin"
               onClick={() => setMoreOpen(false)}
-              className="flex-1 py-1.5 text-center text-[11px] font-black uppercase rounded-full"
+              className="flex-1 py-1.5 text-center text-[10px] font-black uppercase rounded-full"
               style={
                 !isGV
                   ? { background: "var(--primary-light)", color: "var(--primary)" }
-                  : { background: "var(--surface-1)", color: "var(--text-muted)" }
+                  : { background: "transparent", color: "var(--text-disabled)" }
               }
             >
-              ⚽ DCup
+              DCup
             </Link>
             <Link
               href="/admin/greenvolley"
               onClick={() => setMoreOpen(false)}
-              className="flex-1 py-1.5 text-center text-[11px] font-black uppercase rounded-full"
+              className="flex-1 py-1.5 text-center text-[10px] font-black uppercase rounded-full"
               style={
                 isGV
                   ? { background: "#f0fde7", color: GV }
-                  : { background: "var(--surface-1)", color: "var(--text-muted)" }
+                  : { background: "transparent", color: "var(--text-disabled)" }
               }
             >
-              🏐 GreenVolley
+              GreenVolley
             </Link>
           </div>
 

@@ -148,32 +148,30 @@ export default function TopBar({
 
         {/* Sport switcher */}
         <div
-          className="flex items-center gap-0.5 rounded-full p-1 flex-shrink-0"
+          className="ml-0.5 flex flex-1 min-w-0 max-w-[220px] items-center gap-0.5 rounded-full p-1 sm:ml-0 sm:flex-initial sm:max-w-none"
           style={{ background: "var(--surface-1)" }}
         >
           <Link
             href="/admin"
-            className="min-w-[56px] sm:min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide whitespace-nowrap transition-colors"
+            className="flex-1 min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide transition-colors"
             style={
               !isGV
                 ? { background: "#fff", color: "var(--primary)", boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-disabled)", opacity: 0.85 }
+                : { color: "var(--text-disabled)", background: "transparent" }
             }
           >
-            <span className="sm:hidden">DCup</span>
-            <span className="hidden sm:inline">⚽ DCup</span>
+            <span className="block truncate">DCup</span>
           </Link>
           <Link
             href="/admin/greenvolley"
-            className="min-w-[92px] sm:min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide whitespace-nowrap transition-colors"
+            className="flex-1 min-w-0 px-2 py-1 sm:px-2.5 rounded-full text-center text-[9px] sm:text-[11px] font-black uppercase tracking-normal sm:tracking-wide transition-colors"
             style={
               isGV
                 ? { background: "#fff", color: GV, boxShadow: "0 1px 4px rgba(0,0,0,0.08)" }
-                : { color: "var(--text-disabled)", opacity: 0.85 }
+                : { color: "var(--text-disabled)", background: "transparent" }
             }
           >
-            <span className="sm:hidden">GreenVolley</span>
-            <span className="hidden sm:inline">🏐 GreenVolley</span>
+            <span className="block truncate">GreenVolley</span>
           </Link>
         </div>
 
