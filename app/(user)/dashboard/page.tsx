@@ -61,6 +61,7 @@ export default async function DashboardPage() {
     isMvpWindowOpen(match.concludedAt)
   );
   const votedMatchIds = new Set(expressedVotes.map((vote) => vote.matchId));
+  const pendingOpenMatches = openMatches.filter((match) => !votedMatchIds.has(match.id));
   console.log(`[Dashboard] user=${userId} pushSubscriptions=${pushCount}`);
 
   return (
@@ -111,52 +112,40 @@ export default async function DashboardPage() {
       </div>
 
       {/* Vota MVP */}
-      {openMatches.length > 0 && (
+      {pendingOpenMatches.length > 0 && (
         <div className="card overflow-hidden">
           <div className="px-4 pt-3 pb-2 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-soft)" }}>
             <div className="over-label">Vota MVP</div>
             <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "#E8A000" }}>
-              {openMatches.filter((m) => !votedMatchIds.has(m.id)).length} aperti
+              {pendingOpenMatches.length} aperti
             </span>
           </div>
-          {openMatches.map((m, index) => {
-            const voted = votedMatchIds.has(m.id);
+          {pendingOpenMatches.map((m, index) => {
             return (
               <div
                 key={m.id}
                 className="flex items-center justify-between gap-3 px-4 py-3"
-                style={index < openMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+                style={index < pendingOpenMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               >
                 <div className="font-display font-black text-[12px] uppercase min-w-0 flex-1" style={{ color: "var(--text-primary)" }}>
                   {m.homeTeam?.name ?? m.homeSeed ?? "TBD"}{" "}
                   <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span>{" "}
                   {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                 </div>
-                {voted ? (
-                  <Link href={`/vota/${m.id}`} className="flex-shrink-0">
-                    <span
-                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap"
-                      style={{ background: "var(--primary-light)", color: "var(--primary)", border: "1px solid rgba(1,7,163,0.15)" }}
-                    >
-                      ✓ Votato
-                    </span>
-                  </Link>
-                ) : (
-                  <Link href={`/vota/${m.id}`} className="flex-shrink-0">
-                    <button
-                      className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5 whitespace-nowrap"
-                      style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
-                    >
-                      VOTA
-                    </button>
-                  </Link>
-                )}
+                <Link href={`/vota/${m.id}`} className="flex-shrink-0">
+                  <button
+                    className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5 whitespace-nowrap"
+                    style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
+                  >
+                    VOTA
+                  </button>
+                </Link>
               </div>
             );
           })}
         </div>
       )}
-      {openMatches.length === 0 && (
+      {pendingOpenMatches.length === 0 && (
         <div className="card px-4 py-3">
           <div className="over-label">Vota MVP</div>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
