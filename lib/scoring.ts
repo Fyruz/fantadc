@@ -7,6 +7,12 @@ export type PlayerMatchScore = {
   footballTeamName: string;
   goalPoints: number;
   bonusPoints: number;
+  bonusDetails: Array<{
+    code: string;
+    name: string;
+    quantity: number;
+    points: number;
+  }>;
   isMvp: boolean;
   mvpPoints: number;
   basePoints: number;
@@ -164,7 +170,14 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         awaySeed: true,
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
-        bonuses: { select: { playerId: true, points: true, bonusType: { select: { code: true, name: true } } } },
+        bonuses: {
+          select: {
+            playerId: true,
+            quantity: true,
+            points: true,
+            bonusType: { select: { code: true, name: true } },
+          },
+        },
         goals: { select: { scorerId: true, isOwnGoal: true } },
         votes: { select: { playerId: true } },
       },
@@ -188,9 +201,26 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       const goalPoints = match.goals.filter(
         (g) => !g.isOwnGoal && g.scorerId === player.id
       ).length;
-      const bonusPoints = match.bonuses
-        .filter((bonus) => bonus.playerId === player.id)
-        .reduce((sum, bonus) => sum + Number(bonus.points), 0);
+      const bonuses = match.bonuses.filter((bonus) => bonus.playerId === player.id);
+      const bonusDetailsByCode = new Map<
+        string,
+        { code: string; name: string; quantity: number; points: number }
+      >();
+      for (const bonus of bonuses) {
+        const current = bonusDetailsByCode.get(bonus.bonusType.code) ?? {
+          code: bonus.bonusType.code,
+          name: bonus.bonusType.name,
+          quantity: 0,
+          points: 0,
+        };
+        current.quantity += bonus.quantity;
+        current.points += Number(bonus.points);
+        bonusDetailsByCode.set(current.code, current);
+      }
+      const bonusDetails = [...bonusDetailsByCode.values()].sort((a, b) =>
+        a.code.localeCompare(b.code, "it")
+      );
+      const bonusPoints = bonusDetails.reduce((sum, bonus) => sum + bonus.points, 0);
       const isMvp = player.id === mvpId;
       const totalPoints = playerPoints.get(player.id) ?? 0;
       const mvpPoints = isMvp ? mvpBonus : 0;
@@ -202,6 +232,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         footballTeamName: player.footballTeam.name,
         goalPoints,
         bonusPoints,
+        bonusDetails,
         isMvp,
         mvpPoints,
         basePoints: totalPoints,

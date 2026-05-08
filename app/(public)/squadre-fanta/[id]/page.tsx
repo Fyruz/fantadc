@@ -5,6 +5,10 @@ import RoleBadge from "@/components/role-badge";
 
 export const revalidate = 60;
 
+function formatPoints(points: number) {
+  return `${points > 0 ? "+" : ""}${points.toFixed(1)}`;
+}
+
 export default async function SquadraFantasyPublicPage({
   params,
 }: {
@@ -132,15 +136,36 @@ export default async function SquadraFantasyPublicPage({
                         className="flex items-center justify-between py-1.5 border-b last:border-0"
                         style={{ borderColor: "var(--border-soft)" }}
                       >
-                        <div className="flex items-center gap-1.5 min-w-0">
-                          {ps.isCaptain && <span className="text-[10px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>★ C</span>}
-                          {ps.isMvp && <span className="text-[10px] flex-shrink-0" style={{ color: "#E8A000" }}>MVP</span>}
-                          <span className="font-display font-black text-xs uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                            {ps.playerName}
-                          </span>
-                          <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                            ({ps.footballTeamName})
-                          </span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {ps.isCaptain && <span className="text-[10px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>★ C</span>}
+                            {ps.isMvp && <span className="text-[10px] flex-shrink-0" style={{ color: "#E8A000" }}>MVP</span>}
+                            <span className="font-display font-black text-xs uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                              {ps.playerName}
+                            </span>
+                            <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                              ({ps.footballTeamName})
+                            </span>
+                          </div>
+                          {ps.bonusDetails.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {ps.bonusDetails.map((bonus) => (
+                                <span
+                                  key={`${ps.playerId}-${bonus.code}`}
+                                  className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                                  style={{
+                                    borderColor: "var(--border-soft)",
+                                    color: "var(--text-muted)",
+                                  }}
+                                  title={bonus.name}
+                                >
+                                  {bonus.code}
+                                  {bonus.quantity > 1 ? ` ×${bonus.quantity}` : ""}
+                                  <span className="ml-1">{formatPoints(bonus.points)}</span>
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {ps.isCaptain && ps.basePoints > 0 && (
