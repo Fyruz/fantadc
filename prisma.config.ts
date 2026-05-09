@@ -19,5 +19,6 @@ if (!process.env.DATABASE_URL && typeof process.loadEnvFile === "function") {
 export default defineConfig({
   datasource: {
     url: process.env.DATABASE_URL ?? "postgresql://localhost:5432/fantadc",
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
   },
 });
