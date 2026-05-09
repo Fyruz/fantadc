@@ -51,7 +51,12 @@
       "Bash(echo \"Exit: $?\")",
       "PowerShell(head -30)",
       "PowerShell(Get-ChildItem -Path \"e:\\\\Developing\\\\fantadc\\\\app\\\\\\(public\\)\" -Recurse | Where-Object { $_.Name -eq \"page.tsx\" -or $_.Name -eq \"layout.tsx\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(ls app/favicon.ico app/icon.png app/apple-icon.png)",
+      "Bash(ls public/logo_*.png public/icons/logo_*.ico)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('prisma', {}\\)\\)\")",
+      "Bash(npx tsx *)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
