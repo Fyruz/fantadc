@@ -3,6 +3,10 @@ FROM node:20-alpine
 RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
+ARG NEXTAUTH_URL
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXTAUTH_URL=${NEXTAUTH_URL}
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
 COPY package.json package-lock.json ./
 COPY prisma ./prisma

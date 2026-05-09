@@ -26,7 +26,11 @@ services:
       retries: 5
 
   fantadc:
-    build: .
+    build:
+      context: .
+      args:
+        NEXTAUTH_URL: ${NEXTAUTH_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-}
     image: fantadc:latest
     container_name: fantadc
     ports:
