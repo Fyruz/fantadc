@@ -34,7 +34,7 @@ services:
     image: fantadc:prod
     container_name: fantadc-prod
     ports:
-      - "5679:3000"
+      - "4567:3000"
     environment:
       NODE_ENV: production
       DATABASE_URL: ${APP_DATABASE_URL}
