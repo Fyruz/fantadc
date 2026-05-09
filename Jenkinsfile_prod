@@ -64,7 +64,7 @@ pipeline {
                             // 3. Builda l'immagine senza avviare il container
                             sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml build fantadc'
                             // 4. Applica le migration pendenti
-                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma migrate deploy --url "$DATABASE_URL"\''
+                            sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml run --rm -e DATABASE_URL="$APP_DATABASE_URL" fantadc sh -c \'npx prisma migrate deploy\''
                             // 5. Avvia (o riavvia) il container app
                             sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d fantadc'
                         }

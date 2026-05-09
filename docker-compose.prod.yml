@@ -28,7 +28,6 @@ services:
   fantadc:
     build:
       context: .
-      target: runner
     image: fantadc:prod
     container_name: fantadc-prod
     ports:
