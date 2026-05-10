@@ -1,7 +1,7 @@
 export const siteConfig = {
-  name: "DCup 26'",
-  shortName: "DCup 26'",
-  description: "Fantacalcio del torneo di paese: crea la squadra, vota l'MVP e segui classifica e partite anche da mobile.",
+  name: "Danimarca's Cup",
+  shortName: "DCup",
+  description: "L'app ufficiale della Danimarca's Cup, il torneo di calcio più grevigiano di sempre.",
   themeColor: "#0107A3",
   backgroundColor: "#F5F6FF",
   scope: "/",

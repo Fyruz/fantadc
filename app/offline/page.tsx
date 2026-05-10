@@ -36,7 +36,8 @@ export default function OfflinePage() {
             Sei offline
           </h1>
           <p className="mt-3 text-sm leading-6" style={{ color: "rgba(255,255,255,0.72)" }}>
-            La connessione non è disponibile. Quando torni online, Fantadc aggiornerà automaticamente partite, classifica e dashboard.
+            Sei offline. Collegati a internet per continuare: quando torni online,
+            Fantadc aggiornerà automaticamente partite, classifica e dashboard.
           </p>
         </div>
 
