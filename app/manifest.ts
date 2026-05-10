@@ -18,12 +18,6 @@ export default function manifest(): MetadataRoute.Manifest {
     categories: [...siteConfig.categories],
     icons: [
       {
-        src: "/logo_dc.png",
-        sizes: "any",
-        type: "image/png",
-        purpose: "any",
-      },
-      {
         src: "/icons/icon-192.png",
         sizes: "192x192",
         type: "image/png",
