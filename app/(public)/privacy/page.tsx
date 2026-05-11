@@ -40,12 +40,6 @@ export default function PrivacyPage() {
             <li>
               <strong>Dati di gioco</strong>: squadra fantasy, capitano, voti MVP, punteggi e classifica.
             </li>
-            <li>
-              <strong>Dati tecnici dispositivo/browser</strong>: log tecnici di sicurezza e sessione, inclusi IP e user-agent.
-            </li>
-            <li>
-              <strong>Dati notifiche push</strong>: endpoint e chiavi tecniche del browser/dispositivo, solo con consenso esplicito.
-            </li>
           </ul>
           <p className="mt-2">
             Fantadc <strong>non</strong> accede a rubrica, foto, audio, posizione GPS o dati sanitari del dispositivo.
