@@ -25,7 +25,7 @@ export default function PrivacyPage() {
             Titolare del trattamento
           </h2>
           <p>
-            Il titolare del trattamento dei dati personali è l&apos;organizzatore del torneo Fantadc.
+            Il titolare del trattamento dei dati personali è lo sviluppatore dell&apos;applicazione, Qursor.
           </p>
         </section>
 
