@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "it.nuovapolisportivachianti.dcup",
+        "sha256_cert_fingerprints": ["2A:AB:0B:A0:AD:C8:8E:3A:AF:B2:06:8D:81:04:C0:B4:93:D4:B8:61:2F:87:CB:87:F4:E3:00:B8:6B:45:6E:7F"]
+      }
+    }]
