@@ -480,7 +480,11 @@ export default async function HomePage() {
         className="hidden md:block py-5 text-center text-[11px]"
         style={{ borderTop: "1px solid var(--border-soft)", color: "var(--text-disabled)" }}
       >
-        Fantadc
+        <span>Fantadc</span>
+        <span className="px-2">·</span>
+        <Link href="/privacy" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+          Norme sulla privacy
+        </Link>
       </footer>
 
       <PublicBottomNav />

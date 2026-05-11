@@ -1,16 +1,23 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Norme sulla privacy",
+  description: "Informativa privacy di Fantadc per utenti web e app pubblicata su Google Play Console.",
+};
+
 export default function PrivacyPage() {
   return (
     <div className="flex flex-col gap-4 max-w-2xl">
       <div>
-        <div className="over-label mb-1">DCup 26&apos;</div>
+        <div className="over-label mb-1">Fantadc</div>
         <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          PRIVACY POLICY
+          NORME SULLA PRIVACY
         </h1>
       </div>
 
       <div className="card p-6 flex flex-col gap-6 text-sm" style={{ color: "var(--text-muted)" }}>
         <p>
-          Ultimo aggiornamento: <strong>aprile 2026</strong>
+          Ultimo aggiornamento: <strong>11 maggio 2026</strong>
         </p>
 
         <section>
@@ -24,138 +31,93 @@ export default function PrivacyPage() {
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Quali dati raccogliamo
+            Dati raccolti
           </h2>
           <ul className="list-disc list-inside space-y-1">
             <li>
-              <strong>Indirizzo email</strong> — fornito al momento della registrazione, usato come
-              identificativo univoco per accedere alla piattaforma
+              <strong>Dati account</strong>: email e nome visualizzato (se inserito).
             </li>
             <li>
-              <strong>Nome visualizzato</strong> — facoltativo, inseribile in fase di registrazione
+              <strong>Dati di gioco</strong>: squadra fantasy, capitano, voti MVP, punteggi e classifica.
             </li>
             <li>
-              <strong>Dati della squadra fantasy</strong> — nome della squadra, giocatori scelti e
-              capitano selezionato
+              <strong>Dati tecnici dispositivo/browser</strong>: log tecnici di sicurezza e sessione, inclusi IP e user-agent.
             </li>
             <li>
-              <strong>Voti MVP</strong> — il voto espresso dopo ogni partita; i singoli voti sono
-               privati e non associati pubblicamente all&apos;utente
-            </li>
-            <li>
-              <strong>Token per notifiche push</strong> — solo se accetti esplicitamente le notifiche
-              dal browser; utilizzato esclusivamente per inviarti avvisi sull&apos;apertura del voto MVP
-            </li>
-            <li>
-              <strong>Log di attività admin</strong> — solo per gli account con ruolo amministratore,
-              vengono registrate le azioni compiute a fini di audit interno
+              <strong>Dati notifiche push</strong>: endpoint e chiavi tecniche del browser/dispositivo, solo con consenso esplicito.
             </li>
           </ul>
+          <p className="mt-2">
+            Fantadc <strong>non</strong> accede a rubrica, foto, audio, posizione GPS o dati sanitari del dispositivo.
+          </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Perché trattiamo i tuoi dati
+            Finalità del trattamento
           </h2>
           <ul className="list-disc list-inside space-y-1">
-            <li>
-              Gestire la tua partecipazione al gioco: registrazione, squadra fantasy, voti e classifica
-            </li>
-            <li>
-               Inviarti notifiche push sull&apos;apertura delle finestre di voto (solo con tuo consenso
-              esplicito)
-            </li>
-            <li>
-              Garantire la sicurezza della piattaforma e prevenire usi impropri
-            </li>
+            <li>Consentire registrazione, login e uso del servizio Fantadc.</li>
+            <li>Gestire il torneo fantasy, le votazioni MVP e la classifica.</li>
+            <li>Inviare notifiche push legate al gioco (es. apertura voto MVP), solo se abilitate.</li>
+            <li>Proteggere piattaforma e utenti da abusi tecnici e uso improprio.</li>
           </ul>
-          <p className="mt-2">
-            Base giuridica: <strong>esecuzione di un contratto</strong> (la tua partecipazione
-            volontaria al torneo) e <strong>consenso</strong> per le notifiche push.
-          </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Come utilizziamo i tuoi dati
+            Base giuridica
           </h2>
           <p>
-            I dati sono utilizzati esclusivamente per la gestione del Fantadc. Non vendiamo,
-            cediamo né condividiamo le tue informazioni con terze parti a fini commerciali.
-            I dati non vengono usati per profilazione, pubblicità o analisi di marketing.
+            Trattiamo i dati per esecuzione del servizio richiesto dall&apos;utente e, dove necessario,
+            sulla base del consenso (es. notifiche push).
           </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Visibilità pubblica
+            Condivisione dei dati
           </h2>
           <p>
-            Alcune informazioni sono visibili pubblicamente senza autenticazione:
-          </p>
-          <ul className="list-disc list-inside space-y-1 mt-1">
-            <li>Il nome della tua squadra fantasy e la sua composizione (giocatori e capitano)</li>
-            <li>Il punteggio della tua squadra e la posizione in classifica</li>
-          </ul>
-          <p className="mt-2">
-            Il tuo indirizzo email e il tuo voto MVP non sono mai visibili pubblicamente.
+            I dati non sono venduti né ceduti per finalità pubblicitarie. Possono essere trattati da fornitori
+            tecnici strettamente necessari al funzionamento del servizio (hosting, database, infrastruttura push).
           </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Conservazione dei dati
+            Visibilità pubblica dei contenuti
+          </h2>
+          <p>Sono pubblici: nome squadra fantasy, composizione, punteggio e posizione in classifica.</p>
+          <p className="mt-2">Email, dati di accesso e voto MVP del singolo utente non sono pubblici.</p>
+        </section>
+
+        <section>
+          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
+            Conservazione
           </h2>
           <p>
-            I tuoi dati vengono conservati per la durata del torneo e per un ragionevole
-            periodo successivo necessario alla gestione amministrativa. Al termine del torneo
-             puoi richiedere la cancellazione del tuo account contattando l&apos;organizzatore.
+            I dati sono conservati per la durata del torneo e per il periodo tecnico-amministrativo necessario
+            alla gestione del servizio e alla sicurezza.
           </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            I tuoi diritti (GDPR)
+            Diritti dell&apos;utente
           </h2>
-          <p className="mb-1">
-            In base al Regolamento UE 2016/679 (GDPR) hai il diritto di:
-          </p>
-          <ul className="list-disc list-inside space-y-1">
-            <li><strong>Accesso</strong> — sapere quali dati conserviamo su di te</li>
-            <li><strong>Rettifica</strong> — correggere dati inesatti</li>
-            <li><strong>Cancellazione</strong> — richiedere la rimozione del tuo account e dei dati associati</li>
-            <li><strong>Portabilità</strong> — ricevere i tuoi dati in formato leggibile</li>
-            <li><strong>Opposizione</strong> — opporti al trattamento in determinate circostanze</li>
-            <li>
-              <strong>Revoca del consenso</strong> — disattivare le notifiche push in qualsiasi momento
-              dalle impostazioni del browser
-            </li>
-          </ul>
-          <p className="mt-2">
-             Per esercitare questi diritti contatta l&apos;organizzatore del torneo. Hai inoltre il
-             diritto di presentare reclamo all&apos;<strong>Autorità Garante per la Protezione dei
-            Dati Personali</strong> (www.garanteprivacy.it).
+          <p className="mb-1">Ai sensi del GDPR puoi richiedere accesso, rettifica, cancellazione e limitazione del trattamento.</p>
+          <p>
+            Puoi inoltre revocare in ogni momento il consenso alle notifiche push dalle impostazioni del tuo browser/dispositivo.
           </p>
         </section>
 
         <section>
           <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Cookie e archiviazione locale
+            Contatti privacy
           </h2>
           <p>
-             Il sito utilizza un <strong>cookie di sessione</strong> necessario al funzionamento
-             dell&apos;autenticazione. Non vengono usati cookie di tracciamento o di terze parti.
-            Non viene utilizzato Google Analytics né alcun altro strumento di analisi esterno.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="font-bold text-base mb-2" style={{ color: "var(--primary)" }}>
-            Aggiornamenti
-          </h2>
-          <p>
-            Questa informativa può essere aggiornata nel corso del torneo. Le modifiche
-            sostanziali verranno comunicate agli utenti registrati.
+            Per richieste privacy o cancellazione account contatta l&apos;organizzatore del torneo tramite i canali ufficiali Fantadc.
           </p>
         </section>
       </div>
