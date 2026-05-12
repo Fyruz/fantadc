@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/confirm-dialog";
+import { useAppToast } from "@/components/toast-provider";
 import { createVolleyPlayerForTeam, removeVolleyPlayerById } from "@/app/actions/admin/volley";
 
 type Player = { id: number; name: string };
@@ -21,6 +22,7 @@ export default function TeamPlayersSection({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const { error } = useAppToast();
   const [dialog, setDialog] = useState<{
     visible: boolean;
     message: string;
@@ -73,8 +75,12 @@ export default function TeamPlayersSection({
                     message: `Rimuovere "${p.name}" dalla squadra?`,
                     onConfirm: () =>
                       startTransition(async () => {
-                        await removeVolleyPlayerById(p.id);
-                        router.refresh();
+                        try {
+                          await removeVolleyPlayerById(p.id);
+                          router.refresh();
+                        } catch {
+                          error("Impossibile rimuovere il giocatore.");
+                        }
                       }),
                   })
                 }

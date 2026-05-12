@@ -9,6 +9,7 @@ import { Column } from "primereact/column";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/confirm-dialog";
+import { useAppToast } from "@/components/toast-provider";
 import {
   createVolleyKnockoutRound,
   deleteVolleyKnockoutRound,
@@ -20,6 +21,7 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [order, setOrder] = useState<number | null>(null);
+  const { error } = useAppToast();
   const [dialog, setDialog] = useState<{
     visible: boolean;
     message: string;
@@ -72,8 +74,12 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
                     message: `Eliminare "${row.name}"?`,
                     onConfirm: () =>
                       startTransition(async () => {
-                        await deleteVolleyKnockoutRound(row.id);
-                        router.refresh();
+                        try {
+                          await deleteVolleyKnockoutRound(row.id);
+                          router.refresh();
+                        } catch {
+                          error("Impossibile eliminare il turno.");
+                        }
                       }),
                   })
                 }

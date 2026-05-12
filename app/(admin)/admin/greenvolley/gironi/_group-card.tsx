@@ -7,6 +7,7 @@ import { Tag } from "primereact/tag";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ConfirmDialog from "@/components/confirm-dialog";
+import { useAppToast } from "@/components/toast-provider";
 import {
   addTeamToVolleyGroup,
   removeTeamFromVolleyGroup,
@@ -28,6 +29,7 @@ export default function GroupCard({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const { error } = useAppToast();
   const [dialog, setDialog] = useState<{
     visible: boolean;
     message: string;
@@ -62,8 +64,12 @@ export default function GroupCard({
               message: `Eliminare il girone "${group.name}"?`,
               onConfirm: () =>
                 startTransition(async () => {
-                  await deleteVolleyGroup(group.id);
-                  router.refresh();
+                  try {
+                    await deleteVolleyGroup(group.id);
+                    router.refresh();
+                  } catch {
+                    error("Impossibile eliminare il girone.");
+                  }
                 }),
             })
           }
@@ -114,8 +120,12 @@ export default function GroupCard({
                       message: `Rimuovere "${gt.teamName}" dal girone?`,
                       onConfirm: () =>
                         startTransition(async () => {
-                          await removeTeamFromVolleyGroup(group.id, gt.teamId);
-                          router.refresh();
+                          try {
+                            await removeTeamFromVolleyGroup(group.id, gt.teamId);
+                            router.refresh();
+                          } catch {
+                            error("Impossibile rimuovere la squadra.");
+                          }
                         }),
                     })
                   }

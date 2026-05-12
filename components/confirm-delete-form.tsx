@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useActionState } from "react";
 import { Button } from "primereact/button";
 import ConfirmDialog from "./confirm-dialog";
+import { useAppToast } from "./toast-provider";
+
+type ActionResult = { message?: string; errors?: Record<string, string[]> };
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: (formData: FormData) => any;
+  action: (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult>;
   hiddenInputs: Record<string, string | number>;
   confirmMessage: string;
   buttonLabel?: string;
@@ -24,6 +26,12 @@ export default function ConfirmDeleteForm({
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [visible, setVisible] = useState(false);
+  const [state, formAction, pending] = useActionState(action, undefined);
+  const { error } = useAppToast();
+
+  useEffect(() => {
+    if (state?.message) error(state.message);
+  }, [state]);
 
   return (
     <>
@@ -35,7 +43,7 @@ export default function ConfirmDeleteForm({
         confirmLabel="Elimina"
         severity="danger"
       />
-      <form ref={formRef} action={action} className={formClassName}>
+      <form ref={formRef} action={formAction} className={formClassName}>
         {Object.entries(hiddenInputs).map(([name, value]) => (
           <input key={name} type="hidden" name={name} value={String(value)} />
         ))}
@@ -45,6 +53,7 @@ export default function ConfirmDeleteForm({
           severity="danger"
           text
           size="small"
+          loading={pending}
           className={buttonClassName}
           onClick={() => setVisible(true)}
         />
