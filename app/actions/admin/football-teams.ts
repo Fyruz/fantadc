@@ -54,7 +54,7 @@ export async function updateFootballTeam(_prev: ActionResult | undefined, formDa
   redirect("/admin/squadre");
 }
 
-export async function deleteFootballTeam(formData: FormData): Promise<ActionResult> {
+export async function deleteFootballTeam(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
 
