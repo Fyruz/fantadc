@@ -51,7 +51,7 @@ export async function updatePlayer(_prev: ActionResult | undefined, formData: Fo
   redirect("/admin/giocatori");
 }
 
-export async function deletePlayer(formData: FormData): Promise<ActionResult> {
+export async function deletePlayer(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
 

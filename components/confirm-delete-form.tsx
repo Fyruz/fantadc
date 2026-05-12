@@ -8,7 +8,7 @@ import { useAppToast } from "./toast-provider";
 type ActionResult = { message?: string; errors?: Record<string, string[]> };
 
 interface Props {
-  action: (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult>;
+  action: (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult | void>;
   hiddenInputs: Record<string, string | number>;
   confirmMessage: string;
   buttonLabel?: string;
@@ -26,7 +26,10 @@ export default function ConfirmDeleteForm({
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const [visible, setVisible] = useState(false);
-  const [state, formAction, pending] = useActionState(action, undefined);
+  const [state, formAction, pending] = useActionState(
+    action as (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult>,
+    undefined
+  );
   const { error } = useAppToast();
 
   useEffect(() => {

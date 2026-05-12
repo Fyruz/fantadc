@@ -221,7 +221,7 @@ export async function updateMatchScore(_prev: ActionResult | undefined, formData
   return {};
 }
 
-export async function deleteMatch(formData: FormData): Promise<ActionResult> {
+export async function deleteMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
 
