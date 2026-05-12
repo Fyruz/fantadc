@@ -4,9 +4,9 @@ import { useActionState, useTransition } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/components/confirm-dialog";
 import {
   addTeamToVolleyGroup,
   removeTeamFromVolleyGroup,
@@ -28,13 +28,26 @@ export default function GroupCard({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ visible: false, message: "", onConfirm: () => {} });
+  const hideDialog = () => setDialog((d) => ({ ...d, visible: false }));
 
   const addAction = addTeamToVolleyGroup.bind(null, group.id);
   const [addState, formAction, addPending] = useActionState(addAction, undefined);
 
   return (
     <div className="admin-card p-4 flex flex-col gap-4">
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={dialog.visible}
+        onHide={hideDialog}
+        onConfirm={dialog.onConfirm}
+        message={dialog.message}
+        severity="danger"
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-black text-base uppercase tracking-wide">{group.name}</h3>
@@ -43,14 +56,11 @@ export default function GroupCard({
           text
           size="small"
           severity="danger"
-          onClick={(e) =>
-            confirmPopup({
-              target: e.currentTarget,
+          onClick={() =>
+            setDialog({
+              visible: true,
               message: `Eliminare il girone "${group.name}"?`,
-              icon: "pi pi-exclamation-triangle",
-              acceptLabel: "Sì",
-              rejectLabel: "No",
-              accept: () =>
+              onConfirm: () =>
                 startTransition(async () => {
                   await deleteVolleyGroup(group.id);
                   router.refresh();
@@ -98,14 +108,11 @@ export default function GroupCard({
                   text
                   size="small"
                   severity="danger"
-                  onClick={(e) =>
-                    confirmPopup({
-                      target: e.currentTarget,
+                  onClick={() =>
+                    setDialog({
+                      visible: true,
                       message: `Rimuovere "${gt.teamName}" dal girone?`,
-                      icon: "pi pi-exclamation-triangle",
-                      acceptLabel: "Sì",
-                      rejectLabel: "No",
-                      accept: () =>
+                      onConfirm: () =>
                         startTransition(async () => {
                           await removeTeamFromVolleyGroup(group.id, gt.teamId);
                           router.refresh();

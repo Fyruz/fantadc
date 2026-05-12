@@ -4,7 +4,7 @@ import { useActionState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { useState } from "react";
 import { updateGroup, deleteGroup, addTeamToGroup, removeTeamFromGroup, setTeamQualified } from "@/app/actions/admin/groups";
 import type { ActionResult } from "@/app/actions/admin/football-teams";
@@ -61,20 +61,17 @@ export function DeleteGroupForm({ groupId }: { groupId: number }) {
   );
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: "Eliminare questo girone? Verranno rimosse anche tutte le squadre associate.",
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => formRef.current?.requestSubmit(),
-    });
-  };
+  const [visible, setVisible] = useState(false);
 
   return (
     <>
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Eliminare questo girone? Verranno rimosse anche tutte le squadre associate."
+        severity="danger"
+      />
       <form ref={formRef} action={action}>
         <input type="hidden" name="id" value={groupId} />
         {state?.message && <p className="text-xs mb-2" style={{ color: "#991B1B" }}>{state.message}</p>}
@@ -85,7 +82,7 @@ export function DeleteGroupForm({ groupId }: { groupId: number }) {
           size="small"
           severity="danger"
           outlined
-          onClick={handleDelete}
+          onClick={() => setVisible(true)}
         />
       </form>
     </>
@@ -133,27 +130,24 @@ export function RemoveTeamForm({ groupId, footballTeamId }: { groupId: number; f
   );
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: "Rimuovere questa squadra dal girone?",
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => formRef.current?.requestSubmit(),
-    });
-  };
+  const [visible, setVisible] = useState(false);
 
   return (
     <>
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Rimuovere questa squadra dal girone?"
+        severity="danger"
+      />
       <form ref={formRef} action={action}>
         <input type="hidden" name="groupId" value={groupId} />
         <input type="hidden" name="footballTeamId" value={footballTeamId} />
         <button
           type="button"
           disabled={pending}
-          onClick={handleRemove}
+          onClick={() => setVisible(true)}
           className="text-[11px] font-bold px-2 py-0.5 rounded transition-colors"
           style={{ color: "#991B1B", background: "#FEF2F2" }}
         >

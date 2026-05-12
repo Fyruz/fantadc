@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { assignBonus, deleteBonus } from "@/app/actions/admin/bonuses";
 import { removeMatchPlayer } from "@/app/actions/admin/match-players";
 import RoleBadge from "@/components/role-badge";
@@ -46,6 +46,12 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   const [visible, setVisible] = useState(false);
   const [selectedBonusType, setSelectedBonusType] = useState<string>("");
   const [qty, setQty] = useState(1);
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ visible: false, message: "", onConfirm: () => {} });
+  const hideDialog = () => setDialog((d) => ({ ...d, visible: false }));
   const [state, action, pending] = useActionState(
     async (prevState: Awaited<ReturnType<typeof assignBonus>> | undefined, formData: FormData) => {
       const nextState = await assignBonus(prevState, formData);
@@ -71,13 +77,10 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
 
   const handleRemove = (e: React.MouseEvent<HTMLElement>) => {
     e.stopPropagation();
-    confirmPopup({
-      target: e.currentTarget,
+    setDialog({
+      visible: true,
       message: `Rimuovere ${player.name} dalla partita?`,
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => removeFormRef.current?.requestSubmit(),
+      onConfirm: () => removeFormRef.current?.requestSubmit(),
     });
   };
 
@@ -85,7 +88,13 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
 
   return (
     <>
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={dialog.visible}
+        onHide={hideDialog}
+        onConfirm={dialog.onConfirm}
+        message={dialog.message}
+        severity="danger"
+      />
 
       {/* Hidden remove form */}
       <form ref={removeFormRef} action={removeMatchPlayer as unknown as (fd: FormData) => void} className="hidden">
@@ -307,51 +316,52 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
 
 function BonusRow({ bonus, matchId }: { bonus: Bonus; matchId: number }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [visible, setVisible] = useState(false);
 
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: `Rimuovere il bonus ${bonus.bonusType.code}?`,
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => formRef.current?.requestSubmit(),
-    });
-  };
+  const handleDelete = () => setVisible(true);
 
   return (
-    <div
-      className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-      style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
-    >
-      <span
-        className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0 min-w-[2.5rem] text-center"
-        style={{
-          background: bonus.points >= 0 ? "#ECFDF5" : "#FEF2F2",
-          color: bonus.points >= 0 ? "#065F46" : "#991B1B",
-        }}
+    <>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message={`Rimuovere il bonus ${bonus.bonusType.code}?`}
+        severity="danger"
+      />
+      <div
+        className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+        style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
       >
-        {bonus.bonusType.code}
-      </span>
-      <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-        {bonus.quantity > 1 ? `×${bonus.quantity}  ` : ""}
-        {bonus.points > 0 ? "+" : ""}{bonus.points}pt
-      </span>
-      <form ref={formRef} action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
-        <input type="hidden" name="id" value={bonus.id} />
-        <input type="hidden" name="matchId" value={matchId} />
-        <button
-          type="button"
-          className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
-          style={{ color: "var(--text-disabled)" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
-          title="Rimuovi"
-          onClick={handleDelete}
+        <span
+          className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0 min-w-[2.5rem] text-center"
+          style={{
+            background: bonus.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+            color: bonus.points >= 0 ? "#065F46" : "#991B1B",
+          }}
         >
-          <i className="pi pi-trash text-xs" />
-        </button>
-      </form>
-    </div>
+          {bonus.bonusType.code}
+        </span>
+        <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+          {bonus.quantity > 1 ? `×${bonus.quantity}  ` : ""}
+          {bonus.points > 0 ? "+" : ""}{bonus.points}pt
+        </span>
+        <form ref={formRef} action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
+          <input type="hidden" name="id" value={bonus.id} />
+          <input type="hidden" name="matchId" value={matchId} />
+          <button
+            type="button"
+            className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
+            style={{ color: "var(--text-disabled)" }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
+            title="Rimuovi"
+            onClick={handleDelete}
+          >
+            <i className="pi pi-trash text-xs" />
+          </button>
+        </form>
+      </div>
+    </>
   );
 }

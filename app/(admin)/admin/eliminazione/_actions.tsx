@@ -3,7 +3,7 @@
 import { useActionState, useRef } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { useState } from "react";
 import { initBracket, assignKnockoutTeams, deleteBracket } from "@/app/actions/admin/knockout";
 
@@ -29,20 +29,17 @@ export function DeleteBracketForm() {
   const [state, action, pending] = useActionState(deleteBracket, undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: "Eliminare l'intero bracket eliminazione? L'operazione è irreversibile.",
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => formRef.current?.requestSubmit(),
-    });
-  };
+  const [visible, setVisible] = useState(false);
 
   return (
     <>
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Eliminare l'intero bracket eliminazione? L'operazione è irreversibile."
+        severity="danger"
+      />
       <form ref={formRef} action={action} className="flex flex-col gap-3">
         {state?.message && <p className="text-sm" style={{ color: "#991B1B" }}>{state.message}</p>}
         <Button
@@ -52,7 +49,7 @@ export function DeleteBracketForm() {
           outlined
           disabled={pending}
           size="small"
-          onClick={handleDelete}
+          onClick={() => setVisible(true)}
         />
       </form>
     </>
