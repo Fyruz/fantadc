@@ -42,7 +42,7 @@ function ToastContent({ msg, severity }: { msg: string; severity: Severity }) {
   const c = CONFIG[severity];
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3.5 w-full"
+      className="flex items-center gap-3 px-4 py-3.5"
       style={{
         background: "#fff",
         borderRadius: "16px",
@@ -82,10 +82,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const ref = useRef<Toast>(null);
 
   const show = (severity: Severity, msg: string) => {
-    const c = CONFIG[severity];
     ref.current?.show({
       severity,
-      life: c.life,
+      life: CONFIG[severity].life,
       content: () => <ToastContent msg={msg} severity={severity} />,
     });
   };
@@ -100,24 +99,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <Toast
         ref={ref}
         position="top-right"
+        unstyled
         pt={{
           root: {
-            style: { top: "1.25rem", right: "1.25rem", gap: "8px" },
-          },
-          message: {
             style: {
-              background: "transparent",
-              border: "none",
-              boxShadow: "none",
-              borderRadius: 0,
-              margin: 0,
-              padding: 0,
+              position: "fixed",
+              top: "1.25rem",
+              right: "1.25rem",
+              zIndex: 9999,
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
             },
           },
           content: { style: { padding: 0 } },
-          icon: { style: { display: "none" } },
-          text: { style: { display: "none" } },
-          closeButton: { style: { display: "none" } },
         }}
       />
       {children}
