@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "it.nuovapolisportivachianti.dcup",
-        "sha256_cert_fingerprints": ["2A:AB:0B:A0:AD:C8:8E:3A:AF:B2:06:8D:81:04:C0:B4:93:D4:B8:61:2F:87:CB:87:F4:E3:00:B8:6B:45:6E:7F"]
+        "sha256_cert_fingerprints": ["EA:F6:12:8C:77:C2:CE:46:49:23:A0:3D:20:A0:60:D6:2B:B3:E5:04:9A:66:1A:66:8B:69:7B:DD:A5:88:99:55"]
       }
     }]
