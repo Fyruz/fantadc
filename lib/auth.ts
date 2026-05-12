@@ -76,10 +76,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async jwt({ token, user }) {
       if (user) {
+        // Sign-in: popola il token con i dati utente
         (token as { id: string; role: UserRole }).id = user.id!;
         (token as { id: string; role: UserRole }).role = user.role;
+      } else {
+        // Richiesta successiva: valida il token contro lo stato DB corrente.
+        // Restituire null invalida la sessione (NextAuth v5 cancella il cookie).
+        const id = Number((token as { id?: string }).id);
+        if (!id) return null;
+
+        const dbUser = await db.user.findUnique({
+          where: { id },
+          select: { isSuspended: true, passwordChangedAt: true },
+        });
+
+        if (!dbUser || dbUser.isSuspended) return null;
+
+        // Se la password è cambiata dopo l'emissione del token, invalida la sessione.
+        const iat = (token as { iat?: number }).iat;
+        if (iat && dbUser.passwordChangedAt && dbUser.passwordChangedAt > new Date(iat * 1000)) {
+          return null;
+        }
       }
       return token;
     },

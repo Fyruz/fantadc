@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import AdminPageHeader from "@/components/admin-page-header";
 import UserActionsForm from "./_actions-form";
+import AdminSetPasswordForm from "./_set-password-form";
 import RoleBadge from "@/components/role-badge";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -108,6 +109,12 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
       <div className="card p-4">
         <div className="over-label mb-3">Azioni</div>
         <UserActionsForm userId={user.id} isSuspended={user.isSuspended} isAdmin={user.role === "ADMIN"} />
+      </div>
+
+      {/* ── Imposta password ─────────────────────────────────────── */}
+      <div className="card p-4">
+        <div className="over-label mb-4">Imposta password</div>
+        <AdminSetPasswordForm userId={user.id} />
       </div>
 
       {/* ── Info account ─────────────────────────────────────────── */}
