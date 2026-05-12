@@ -86,7 +86,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
   return (
     <div className="flex flex-col gap-4">
       {/* Set table */}
-      <div className="admin-card">
+      <div className="admin-card overflow-hidden">
         <div className="px-4 pt-4 pb-2 flex items-center justify-between">
           <h2 className="font-black text-base uppercase tracking-wide">Set</h2>
           <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
@@ -117,13 +117,19 @@ export default function SetSection({ match }: { match: MatchInfo }) {
               return (
                 <div
                   key={s.id}
-                  role={!isConcluded ? "button" : undefined}
-                  tabIndex={!isConcluded ? 0 : undefined}
-                  className={`px-4 py-3 ${!isConcluded ? "cursor-pointer transition-colors active:bg-[var(--surface-1)]" : ""}`}
+                  role={!isConcluded && !isEditing ? "button" : undefined}
+                  tabIndex={!isConcluded && !isEditing ? 0 : undefined}
+                  className={`px-4 py-3 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--primary-light)] ${
+                    !isConcluded && !isEditing
+                      ? "cursor-pointer transition-colors active:bg-[var(--surface-1)]"
+                      : ""
+                  }`}
                   style={idx < match.sets.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
-                  onClick={() => startEdit(s)}
+                  onClick={() => {
+                    if (!isConcluded && !isEditing) startEdit(s);
+                  }}
                   onKeyDown={(event) => {
-                    if (!isConcluded && (event.key === "Enter" || event.key === " ")) {
+                    if (!isConcluded && !isEditing && (event.key === "Enter" || event.key === " ")) {
                       event.preventDefault();
                       startEdit(s);
                     }
@@ -144,7 +150,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                               onValueChange={(e) => setEditingHomePoints(e.value ?? null)}
                               min={0}
                               max={99}
-                              className="w-full"
+                              className="w-full min-w-0"
                               inputClassName="!text-center"
                             />
                           </label>
@@ -158,7 +164,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                               onValueChange={(e) => setEditingAwayPoints(e.value ?? null)}
                               min={0}
                               max={99}
-                              className="w-full"
+                              className="w-full min-w-0"
                               inputClassName="!text-center"
                             />
                           </label>
@@ -392,7 +398,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                   min={0}
                   max={99}
                   placeholder="0"
-                  className="w-full"
+                  className="w-full min-w-0"
                   inputClassName="!text-center"
                 />
                 <input type="hidden" name="homePoints" value={homePoints ?? ""} />
@@ -408,7 +414,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                   min={0}
                   max={99}
                   placeholder="0"
-                  className="w-full"
+                  className="w-full min-w-0"
                   inputClassName="!text-center"
                 />
                 <input type="hidden" name="awayPoints" value={awayPoints ?? ""} />
