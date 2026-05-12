@@ -103,128 +103,278 @@ export default function SetSection({ match }: { match: MatchInfo }) {
             {editError}
           </div>
         )}
-        <DataTable
-          value={match.sets}
-          emptyMessage="Nessun set registrato"
-          rowClassName={() => (!isConcluded ? "cursor-pointer" : "")}
-          onRowClick={(event) => startEdit(event.data as SetRow)}
-        >
-          <Column field="setNumber" header="Set" style={{ width: "60px" }} />
-          <Column
-            header={match.homeTeamName}
-            body={(s: SetRow) => (
-              !isConcluded && editingSetId === s.id ? (
-                <InputNumber
-                  value={editingHomePoints}
-                  onValueChange={(e) => setEditingHomePoints(e.value ?? null)}
-                  min={0}
-                  max={99}
-                  className="w-24"
-                  inputClassName="!text-center"
-                />
-              ) : (
-                <span className={s.homePoints > s.awayPoints ? "font-black" : ""}>
-                  {s.homePoints}
-                </span>
-              )
-            )}
-          />
-          <Column
-            header={match.awayTeamName}
-            body={(s: SetRow) => (
-              !isConcluded && editingSetId === s.id ? (
-                <InputNumber
-                  value={editingAwayPoints}
-                  onValueChange={(e) => setEditingAwayPoints(e.value ?? null)}
-                  min={0}
-                  max={99}
-                  className="w-24"
-                  inputClassName="!text-center"
-                />
-              ) : (
-                <span className={s.awayPoints > s.homePoints ? "font-black" : ""}>
-                  {s.awayPoints}
-                </span>
-              )
-            )}
-          />
-          <Column
-            header="Vincitore"
-            body={(s: SetRow) => (
-              !isConcluded && editingSetId === s.id ? (
-                <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
-                  In modifica
-                </span>
-              ) : (
-                <span style={{ color: "#3DD907", fontWeight: 700 }}>
-                  {s.homePoints > s.awayPoints
-                    ? match.homeTeamName
-                    : match.awayTeamName}
-                </span>
-              )
-            )}
-          />
-          {!isConcluded && (
-            <Column
-              header=""
-              style={{ width: "110px" }}
-              body={(s: SetRow) => (
-                editingSetId === s.id ? (
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      icon="pi pi-check"
-                      text
-                      size="small"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleSaveEdit();
-                      }}
-                      disabled={!canSaveEdit}
-                      loading={isPending}
-                      aria-label="Salva set"
-                    />
-                    <Button
-                      icon="pi pi-times"
-                      text
-                      size="small"
-                      severity="secondary"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        cancelEdit();
-                      }}
-                      disabled={isPending}
-                      aria-label="Annulla modifica set"
-                    />
+        <div className="md:hidden">
+          {match.sets.length === 0 ? (
+            <p className="px-4 py-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+              Nessun set registrato
+            </p>
+          ) : (
+            match.sets.map((s, idx) => {
+              const isEditing = !isConcluded && editingSetId === s.id;
+              const homeWon = s.homePoints > s.awayPoints;
+              const winnerName = homeWon ? match.homeTeamName : match.awayTeamName;
+
+              return (
+                <div
+                  key={s.id}
+                  role={!isConcluded ? "button" : undefined}
+                  tabIndex={!isConcluded ? 0 : undefined}
+                  className={`px-4 py-3 ${!isConcluded ? "cursor-pointer transition-colors active:bg-[var(--surface-1)]" : ""}`}
+                  style={idx < match.sets.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
+                  onClick={() => startEdit(s)}
+                  onKeyDown={(event) => {
+                    if (!isConcluded && (event.key === "Enter" || event.key === " ")) {
+                      event.preventDefault();
+                      startEdit(s);
+                    }
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="over-label mb-1">Set {s.setNumber}</div>
+                      {isEditing ? (
+                        <div
+                          className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <label className="min-w-0 text-xs font-semibold">
+                            <span className="mb-1 block truncate">{match.homeTeamName}</span>
+                            <InputNumber
+                              value={editingHomePoints}
+                              onValueChange={(e) => setEditingHomePoints(e.value ?? null)}
+                              min={0}
+                              max={99}
+                              className="w-full"
+                              inputClassName="!text-center"
+                            />
+                          </label>
+                          <span className="pb-2 text-sm font-black" style={{ color: "var(--text-muted)" }}>
+                            -
+                          </span>
+                          <label className="min-w-0 text-xs font-semibold">
+                            <span className="mb-1 block truncate">{match.awayTeamName}</span>
+                            <InputNumber
+                              value={editingAwayPoints}
+                              onValueChange={(e) => setEditingAwayPoints(e.value ?? null)}
+                              min={0}
+                              max={99}
+                              className="w-full"
+                              inputClassName="!text-center"
+                            />
+                          </label>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-2">
+                          <span
+                            className="text-2xl font-black leading-none"
+                            style={!homeWon ? { color: "var(--text-muted)" } : undefined}
+                          >
+                            {s.homePoints}
+                          </span>
+                          <span className="text-sm font-black" style={{ color: "var(--text-muted)" }}>
+                            -
+                          </span>
+                          <span
+                            className="text-2xl font-black leading-none"
+                            style={homeWon ? { color: "var(--text-muted)" } : undefined}
+                          >
+                            {s.awayPoints}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {!isConcluded && !isEditing && (
+                      <Button
+                        icon="pi pi-trash"
+                        text
+                        size="small"
+                        severity="danger"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          startTransition(async () => {
+                            await deleteVolleySet(s.id, match.id);
+                            router.refresh();
+                          });
+                        }}
+                        aria-label="Elimina set"
+                      />
+                    )}
                   </div>
-                ) : (
-                  <Button
-                    icon="pi pi-trash"
-                    text
-                    size="small"
-                    severity="danger"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      startTransition(async () => {
-                        await deleteVolleySet(s.id, match.id);
-                        router.refresh();
-                      });
-                    }}
-                    aria-label="Elimina set"
+
+                  {isEditing ? (
+                    <div
+                      className="mt-3 flex items-center justify-end gap-1"
+                      onClick={(event) => event.stopPropagation()}
+                    >
+                      <Button
+                        icon="pi pi-check"
+                        text
+                        size="small"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          handleSaveEdit();
+                        }}
+                        disabled={!canSaveEdit}
+                        loading={isPending}
+                        aria-label="Salva set"
+                      />
+                      <Button
+                        icon="pi pi-times"
+                        text
+                        size="small"
+                        severity="secondary"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          cancelEdit();
+                        }}
+                        disabled={isPending}
+                        aria-label="Annulla modifica set"
+                      />
+                    </div>
+                  ) : (
+                    <div className="mt-2 flex items-start justify-between gap-3 text-xs">
+                      <span className="font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+                        Vincitore
+                      </span>
+                      <span className="min-w-0 text-right text-sm font-black leading-tight" style={{ color: "#28C900" }}>
+                        {winnerName}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden md:block">
+          <DataTable
+            value={match.sets}
+            emptyMessage="Nessun set registrato"
+            rowClassName={() => (!isConcluded ? "cursor-pointer" : "")}
+            onRowClick={(event) => startEdit(event.data as SetRow)}
+          >
+            <Column field="setNumber" header="Set" style={{ width: "60px" }} />
+            <Column
+              header={match.homeTeamName}
+              body={(s: SetRow) => (
+                !isConcluded && editingSetId === s.id ? (
+                  <InputNumber
+                    value={editingHomePoints}
+                    onValueChange={(e) => setEditingHomePoints(e.value ?? null)}
+                    min={0}
+                    max={99}
+                    className="w-24"
+                    inputClassName="!text-center"
                   />
+                ) : (
+                  <span className={s.homePoints > s.awayPoints ? "font-black" : ""}>
+                    {s.homePoints}
+                  </span>
                 )
               )}
             />
-          )}
-        </DataTable>
+            <Column
+              header={match.awayTeamName}
+              body={(s: SetRow) => (
+                !isConcluded && editingSetId === s.id ? (
+                  <InputNumber
+                    value={editingAwayPoints}
+                    onValueChange={(e) => setEditingAwayPoints(e.value ?? null)}
+                    min={0}
+                    max={99}
+                    className="w-24"
+                    inputClassName="!text-center"
+                  />
+                ) : (
+                  <span className={s.awayPoints > s.homePoints ? "font-black" : ""}>
+                    {s.awayPoints}
+                  </span>
+                )
+              )}
+            />
+            <Column
+              header="Vincitore"
+              body={(s: SetRow) => (
+                !isConcluded && editingSetId === s.id ? (
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
+                    In modifica
+                  </span>
+                ) : (
+                  <span style={{ color: "#3DD907", fontWeight: 700 }}>
+                    {s.homePoints > s.awayPoints
+                      ? match.homeTeamName
+                      : match.awayTeamName}
+                  </span>
+                )
+              )}
+            />
+            {!isConcluded && (
+              <Column
+                header=""
+                style={{ width: "110px" }}
+                body={(s: SetRow) => (
+                  editingSetId === s.id ? (
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        icon="pi pi-check"
+                        text
+                        size="small"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSaveEdit();
+                        }}
+                        disabled={!canSaveEdit}
+                        loading={isPending}
+                        aria-label="Salva set"
+                      />
+                      <Button
+                        icon="pi pi-times"
+                        text
+                        size="small"
+                        severity="secondary"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          cancelEdit();
+                        }}
+                        disabled={isPending}
+                        aria-label="Annulla modifica set"
+                      />
+                    </div>
+                  ) : (
+                    <Button
+                      icon="pi pi-trash"
+                      text
+                      size="small"
+                      severity="danger"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        startTransition(async () => {
+                          await deleteVolleySet(s.id, match.id);
+                          router.refresh();
+                        });
+                      }}
+                      aria-label="Elimina set"
+                    />
+                  )
+                )}
+              />
+            )}
+          </DataTable>
+        </div>
       </div>
 
       {/* Aggiungi set */}
       {canAddSet && (
-        <div className="admin-card p-5">
-          <h3 className="font-black text-sm uppercase tracking-wide mb-4">
+        <div className="admin-card p-4 sm:p-5">
+          <h3 className="mb-3 text-sm font-black uppercase tracking-wide sm:mb-4">
             Aggiungi Set {match.sets.length + 1}
           </h3>
           <form action={formAction} className="flex flex-col gap-3">
@@ -233,9 +383,9 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                 {addState.error}
               </p>
             )}
-            <div className="flex gap-4 items-end">
-              <div className="flex flex-col gap-1 flex-1">
-                <label className="text-sm font-semibold">{match.homeTeamName}</label>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-end gap-2 sm:gap-4">
+              <div className="flex min-w-0 flex-col gap-1">
+                <label className="truncate text-xs font-semibold sm:text-sm">{match.homeTeamName}</label>
                 <InputNumber
                   value={homePoints}
                   onValueChange={(e) => setHomePoints(e.value ?? null)}
@@ -243,14 +393,15 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                   max={99}
                   placeholder="0"
                   className="w-full"
+                  inputClassName="!text-center"
                 />
                 <input type="hidden" name="homePoints" value={homePoints ?? ""} />
               </div>
-              <span className="text-xl font-black pb-2" style={{ color: "var(--text-muted)" }}>
-                –
+              <span className="pb-2 text-lg font-black sm:text-xl" style={{ color: "var(--text-muted)" }}>
+                -
               </span>
-              <div className="flex flex-col gap-1 flex-1">
-                <label className="text-sm font-semibold">{match.awayTeamName}</label>
+              <div className="flex min-w-0 flex-col gap-1">
+                <label className="truncate text-xs font-semibold sm:text-sm">{match.awayTeamName}</label>
                 <InputNumber
                   value={awayPoints}
                   onValueChange={(e) => setAwayPoints(e.value ?? null)}
@@ -258,6 +409,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                   max={99}
                   placeholder="0"
                   className="w-full"
+                  inputClassName="!text-center"
                 />
                 <input type="hidden" name="awayPoints" value={awayPoints ?? ""} />
               </div>
@@ -266,6 +418,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
               type="submit"
               label="Aggiungi set"
               loading={addPending}
+              className="w-full sm:w-auto sm:self-start"
               style={{ background: "#3DD907", border: "none", color: "#fff" }}
             />
           </form>
@@ -273,11 +426,12 @@ export default function SetSection({ match }: { match: MatchInfo }) {
       )}
 
       {/* Azioni stato */}
-      <div className="admin-card p-4 flex gap-3 flex-wrap">
+      <div className="admin-card flex flex-col gap-2 p-4 sm:flex-row sm:flex-wrap sm:gap-3">
         {match.status === "DRAFT" && (
           <Button
             label="Segna come programmata"
             icon="pi pi-calendar"
+            className="w-full sm:w-auto"
             onClick={() =>
               startTransition(async () => {
                 await scheduleVolleyMatch(match.id);
@@ -293,6 +447,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
           <Button
             label="Segna come conclusa"
             icon="pi pi-check"
+            className="w-full sm:w-auto"
             onClick={() =>
               startTransition(async () => {
                 await concludeVolleyMatch(match.id);
@@ -308,6 +463,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
             label="Riapri partita"
             icon="pi pi-refresh"
             severity="warning"
+            className="w-full sm:w-auto"
             onClick={() =>
               startTransition(async () => {
                 await reopenVolleyMatch(match.id);
