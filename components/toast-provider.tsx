@@ -99,20 +99,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <Toast
         ref={ref}
         position="top-right"
-        unstyled
         pt={{
-          root: {
-            style: {
-              position: "fixed",
-              top: "1.25rem",
-              right: "1.25rem",
-              zIndex: 9999,
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-            },
-          },
-          content: { style: { padding: 0 } },
+          root: { style: { top: "1.25rem", right: "1.25rem" } },
         }}
       />
       {children}
