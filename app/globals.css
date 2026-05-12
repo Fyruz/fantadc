@@ -543,27 +543,14 @@ html {
   border-top: 1px solid var(--border-soft) !important;
 }
 
-/* ─── PrimeReact Toast — custom content only ────────────── */
-/* Strip all default toast styling so only our custom ToastContent div is visible */
-.p-toast { z-index: 9999 !important; }
-.p-toast-message {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
+/* ─── Toast animations ───────────────────────────────────── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
 }
-.p-toast-message-content {
-  background: transparent !important;
-  padding: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-.p-toast-message-icon,
-.p-toast-message-text,
-.p-toast-icon-close {
-  display: none !important;
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0)     scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.96); }
 }
 
 /* ─── PrimeReact ConfirmPopup (light) ───────────────────── */

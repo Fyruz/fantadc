@@ -1,77 +1,68 @@
 "use client";
 
-import { createContext, useContext, useRef, type ReactNode } from "react";
-import { Toast } from "primereact/toast";
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+  type ReactNode,
+} from "react";
+import { createPortal } from "react-dom";
 
 type Severity = "error" | "success";
 
-type ToastCtx = {
-  error: (msg: string) => void;
-  success: (msg: string) => void;
-};
+type ToastCtx = { error: (msg: string) => void; success: (msg: string) => void };
 
 const Ctx = createContext<ToastCtx>({ error: () => {}, success: () => {} });
 
-const CONFIG: Record<Severity, {
-  icon: string;
-  label: string;
-  accent: string;
-  iconBg: string;
-  iconColor: string;
-  life: number;
-}> = {
-  error: {
-    icon: "pi-times-circle",
-    label: "Errore",
-    accent: "#DC2626",
-    iconBg: "#FEF2F2",
-    iconColor: "#DC2626",
-    life: 6000,
-  },
-  success: {
-    icon: "pi-check-circle",
-    label: "Completato",
-    accent: "#059669",
-    iconBg: "#ECFDF5",
-    iconColor: "#059669",
-    life: 3500,
-  },
+interface ToastItem {
+  id: number;
+  msg: string;
+  severity: Severity;
+  exiting: boolean;
+}
+
+const CONFIG: Record<Severity, { icon: string; label: string; accent: string; iconBg: string; iconColor: string; life: number }> = {
+  error:   { icon: "pi-times-circle", label: "Errore",      accent: "#DC2626", iconBg: "#FEF2F2", iconColor: "#DC2626", life: 6000 },
+  success: { icon: "pi-check-circle", label: "Completato",  accent: "#059669", iconBg: "#ECFDF5", iconColor: "#059669", life: 3500 },
 };
 
-function ToastContent({ msg, severity }: { msg: string; severity: Severity }) {
-  const c = CONFIG[severity];
+let uid = 0;
+
+function ToastCard({ item }: { item: ToastItem }) {
+  const c = CONFIG[item.severity];
   return (
     <div
-      className="flex items-center gap-3 px-4 py-3.5"
       style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "14px 16px",
         background: "#fff",
         borderRadius: "16px",
         border: "1.5px solid var(--border-medium)",
         borderLeft: `4px solid ${c.accent}`,
         boxShadow: "0 8px 24px rgba(1,7,163,0.13)",
-        minWidth: "260px",
-        maxWidth: "360px",
+        width: "min(340px, calc(100vw - 2rem))",
+        animation: `${item.exiting ? "toast-out" : "toast-in"} 0.22s ease forwards`,
       }}
     >
       <div
-        className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-        style={{ background: c.iconBg }}
+        style={{
+          width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: c.iconBg,
+        }}
       >
-        <i className={`pi ${c.icon} text-sm`} style={{ color: c.iconColor }} />
+        <i className={`pi ${c.icon}`} style={{ fontSize: 15, color: c.iconColor }} />
       </div>
-
-      <div className="flex-1 min-w-0">
-        <div
-          className="text-[10px] font-black uppercase tracking-widest mb-0.5"
-          style={{ color: c.accent }}
-        >
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 10, fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.12em", marginBottom: 2, color: c.accent }}>
           {c.label}
         </div>
-        <div
-          className="text-sm font-semibold leading-snug"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {msg}
+        <div style={{ fontSize: 14, fontWeight: 600, lineHeight: 1.35, color: "var(--text-primary)" }}>
+          {item.msg}
         </div>
       </div>
     </div>
@@ -79,31 +70,43 @@ function ToastContent({ msg, severity }: { msg: string; severity: Severity }) {
 }
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const ref = useRef<Toast>(null);
+  const [toasts, setToasts] = useState<ToastItem[]>([]);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  const show = (severity: Severity, msg: string) => {
-    ref.current?.show({
-      severity,
-      life: CONFIG[severity].life,
-      content: () => <ToastContent msg={msg} severity={severity} />,
-    });
-  };
+  const dismiss = useCallback((id: number) => {
+    setToasts((prev) => prev.map((t) => t.id === id ? { ...t, exiting: true } : t));
+    setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 220);
+  }, []);
+
+  const show = useCallback((severity: Severity, msg: string) => {
+    const id = uid++;
+    setToasts((prev) => [...prev, { id, msg, severity, exiting: false }]);
+    setTimeout(() => dismiss(id), CONFIG[severity].life);
+  }, [dismiss]);
 
   return (
-    <Ctx.Provider
-      value={{
-        error: (msg) => show("error", msg),
-        success: (msg) => show("success", msg),
-      }}
-    >
-      <Toast
-        ref={ref}
-        position="top-right"
-        pt={{
-          root: { style: { top: "1.25rem", right: "1.25rem" } },
-        }}
-      />
+    <Ctx.Provider value={{ error: (msg) => show("error", msg), success: (msg) => show("success", msg) }}>
       {children}
+      {mounted && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            top: "1.25rem",
+            left: "50%",
+            transform: "translateX(-50%)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            alignItems: "center",
+            pointerEvents: "none",
+          }}
+        >
+          {toasts.map((t) => <ToastCard key={t.id} item={t} />)}
+        </div>,
+        document.body
+      )}
     </Ctx.Provider>
   );
 }
