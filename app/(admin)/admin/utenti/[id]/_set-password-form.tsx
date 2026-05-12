@@ -1,18 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { Password } from "primereact/password";
 import { Button } from "primereact/button";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { adminSetPassword } from "@/app/actions/admin/users";
 
 export default function AdminSetPasswordForm({ userId }: { userId: number }) {
   const [state, action, pending] = useActionState(adminSetPassword, undefined);
   const [newPw, setNewPw] = useState("");
   const [confirm, setConfirm] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: "Impostare una nuova password per questo utente? La sessione attiva verrà invalidata.",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRef.current?.requestSubmit(),
+    });
+  };
 
   return (
-    <form action={action} className="flex flex-col gap-4 max-w-sm">
+    <>
+    <ConfirmPopup />
+    <form ref={formRef} action={action} className="flex flex-col gap-4 max-w-sm">
       <input type="hidden" name="userId" value={userId} />
 
       <div>
@@ -82,13 +97,15 @@ export default function AdminSetPasswordForm({ userId }: { userId: number }) {
 
       <div>
         <Button
-          type="submit"
+          type="button"
           label={pending ? "Salvataggio..." : "Imposta password"}
           icon="pi pi-lock"
           severity="warning"
           disabled={pending}
+          onClick={handleSubmit}
         />
       </div>
     </form>
+    </>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { useState } from "react";
 import { initBracket, assignKnockoutTeams, deleteBracket } from "@/app/actions/admin/knockout";
 
@@ -26,18 +27,35 @@ export function InitBracketForm() {
 /* ── Delete bracket ─────────────────────────────────────────────── */
 export function DeleteBracketForm() {
   const [state, action, pending] = useActionState(deleteBracket, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: "Eliminare l'intero bracket eliminazione? L'operazione è irreversibile.",
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRef.current?.requestSubmit(),
+    });
+  };
+
   return (
-    <form action={action} className="flex flex-col gap-3">
-      {state?.message && <p className="text-sm" style={{ color: "#991B1B" }}>{state.message}</p>}
-      <Button
-        type="submit"
-        label={pending ? "..." : "Elimina bracket"}
-        severity="danger"
-        outlined
-        disabled={pending}
-        size="small"
-      />
-    </form>
+    <>
+      <ConfirmPopup />
+      <form ref={formRef} action={action} className="flex flex-col gap-3">
+        {state?.message && <p className="text-sm" style={{ color: "#991B1B" }}>{state.message}</p>}
+        <Button
+          type="button"
+          label={pending ? "..." : "Elimina bracket"}
+          severity="danger"
+          outlined
+          disabled={pending}
+          size="small"
+          onClick={handleDelete}
+        />
+      </form>
+    </>
   );
 }
 

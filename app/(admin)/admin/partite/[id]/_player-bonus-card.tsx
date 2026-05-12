@@ -215,39 +215,7 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
               </div>
               <div className="flex flex-col gap-1.5">
                 {bonuses.map((b) => (
-                  <div
-                    key={b.id}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-                    style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
-                  >
-                    <span
-                      className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0 min-w-[2.5rem] text-center"
-                      style={{
-                        background: b.points >= 0 ? "#ECFDF5" : "#FEF2F2",
-                        color: b.points >= 0 ? "#065F46" : "#991B1B",
-                      }}
-                    >
-                      {b.bonusType.code}
-                    </span>
-                    <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
-                      {b.quantity > 1 ? `×${b.quantity}  ` : ""}
-                      {b.points > 0 ? "+" : ""}{b.points}pt
-                    </span>
-                    <form action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
-                      <input type="hidden" name="id" value={b.id} />
-                      <input type="hidden" name="matchId" value={matchId} />
-                      <button
-                        type="submit"
-                        className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
-                        style={{ color: "var(--text-disabled)" }}
-                        onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
-                        onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
-                        title="Rimuovi"
-                      >
-                        <i className="pi pi-trash text-xs" />
-                      </button>
-                    </form>
-                  </div>
+                  <BonusRow key={b.id} bonus={b} matchId={matchId} />
                 ))}
               </div>
             </div>
@@ -334,5 +302,56 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
         </div>
       </Dialog>
     </>
+  );
+}
+
+function BonusRow({ bonus, matchId }: { bonus: Bonus; matchId: number }) {
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const handleDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
+    confirmPopup({
+      target: e.currentTarget,
+      message: `Rimuovere il bonus ${bonus.bonusType.code}?`,
+      icon: "pi pi-exclamation-triangle",
+      acceptLabel: "Sì",
+      rejectLabel: "No",
+      accept: () => formRef.current?.requestSubmit(),
+    });
+  };
+
+  return (
+    <div
+      className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+      style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+    >
+      <span
+        className="text-[11px] font-black px-2 py-1 rounded-lg flex-shrink-0 min-w-[2.5rem] text-center"
+        style={{
+          background: bonus.points >= 0 ? "#ECFDF5" : "#FEF2F2",
+          color: bonus.points >= 0 ? "#065F46" : "#991B1B",
+        }}
+      >
+        {bonus.bonusType.code}
+      </span>
+      <span className="flex-1 text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+        {bonus.quantity > 1 ? `×${bonus.quantity}  ` : ""}
+        {bonus.points > 0 ? "+" : ""}{bonus.points}pt
+      </span>
+      <form ref={formRef} action={deleteBonus as unknown as (fd: FormData) => void} className="flex-shrink-0">
+        <input type="hidden" name="id" value={bonus.id} />
+        <input type="hidden" name="matchId" value={matchId} />
+        <button
+          type="button"
+          className="w-7 h-7 flex items-center justify-center rounded-full transition-colors"
+          style={{ color: "var(--text-disabled)" }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-disabled)")}
+          title="Rimuovi"
+          onClick={handleDelete}
+        >
+          <i className="pi pi-trash text-xs" />
+        </button>
+      </form>
+    </div>
   );
 }
