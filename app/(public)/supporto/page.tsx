@@ -43,7 +43,7 @@ export default function SupportPage() {
             <li>Non riesco ad accedere all&apos;account.</li>
             <li>La mia squadra fantasy non è visibile o non è aggiornata.</li>
             <li>Non riesco a votare l&apos;MVP entro la finestra disponibile.</li>
-            <li>Notifiche push non ricevute su dispositivo.</li>
+            <li>Avvisi non ricevuti su dispositivo.</li>
           </ul>
         </section>
 

@@ -47,6 +47,17 @@ export default function ContattiPage() {
                 instagram.com/nuovapolisportivachianti
               </a>
             </li>
+            <li>
+              GreenVolley Cup:{" "}
+              <a
+                href="https://www.instagram.com/greenvolley_cup/"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2 hover:opacity-70 transition-opacity"
+              >
+                instagram.com/greenvolley_cup
+              </a>
+            </li>
           </ul>
         </section>
 
@@ -56,6 +67,17 @@ export default function ContattiPage() {
           </h2>
           <ul className="list-disc list-inside space-y-2">
             <li>Gianmarco Ferruzzi, Qursor</li>
+            <li>
+              Instagram:{" "}
+              <a
+                href="https://www.instagram.com/gianmarcoferruzzi/"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-2 hover:opacity-70 transition-opacity"
+              >
+                instagram.com/gianmarcoferruzzi
+              </a>
+            </li>
             <li>
               Sito web:{" "}
               <a

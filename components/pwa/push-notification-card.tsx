@@ -77,7 +77,7 @@ export default function PushNotificationCard() {
         if (!cancelled) {
           console.error("[Fantadc Push] Failed to initialize push notifications.", error);
           setSupportState("unsupported");
-          setMessage("Impossibile inizializzare le notifiche su questo dispositivo.");
+          setMessage("Impossibile inizializzare gli avvisi su questo dispositivo.");
         }
       }
     };
@@ -108,11 +108,11 @@ export default function PushNotificationCard() {
 
   const description = useMemo(() => {
     if (supportState === "unsupported") {
-      return "Questo browser non supporta le push web. Su iPhone servono Safari e l'app aggiunta alla Home.";
+      return "Questo browser non supporta gli avvisi web. Su iPhone servono Safari e l'app aggiunta alla Home.";
     }
 
     if (supportState === "config-missing") {
-      return "Mancano le chiavi VAPID sul server: configura l'ambiente prima di attivare le push.";
+      return "Mancano le chiavi VAPID sul server: configura l'ambiente prima di attivare gli avvisi.";
     }
 
     if (supportState === "permission-denied") {
@@ -123,7 +123,7 @@ export default function PushNotificationCard() {
       return "Riceverai una notifica appena una partita viene conclusa, con il collegamento diretto alla pagina di voto MVP.";
     }
 
-    return "Attiva le push per ricevere il promemoria di voto MVP appena una partita viene conclusa.";
+    return "Attiva gli avvisi per ricevere il promemoria di voto MVP appena una partita viene conclusa.";
   }, [subscription, supportState]);
 
   const handleEnable = () => {
@@ -134,7 +134,7 @@ export default function PushNotificationCard() {
         const permission = await Notification.requestPermission();
         if (permission !== "granted") {
           setSupportState(permission === "denied" ? "permission-denied" : "ready");
-          setMessage("Permesso notifiche non concesso.");
+          setMessage("Permesso avvisi non concesso.");
           return;
         }
 
@@ -152,7 +152,7 @@ export default function PushNotificationCard() {
           !serializedSubscription.keys?.p256dh ||
           !serializedSubscription.keys?.auth
         ) {
-          setMessage("Subscription push incompleta.");
+          setMessage("Configurazione avvisi incompleta.");
           return;
         }
 
@@ -175,7 +175,7 @@ export default function PushNotificationCard() {
         setMessage(result.message);
       } catch (error) {
         console.error("[Fantadc Push] Failed to enable push notifications.", error);
-        setMessage("Non sono riuscito ad attivare le notifiche push.");
+        setMessage("Non sono riuscito ad attivare gli avvisi.");
       }
     });
   };
@@ -197,7 +197,7 @@ export default function PushNotificationCard() {
         setMessage(result.message);
       } catch (error) {
         console.error("[Fantadc Push] Failed to disable push notifications.", error);
-        setMessage("Non sono riuscito a disattivare le notifiche push.");
+        setMessage("Non sono riuscito a disattivare gli avvisi.");
       }
     });
   };
@@ -206,7 +206,7 @@ export default function PushNotificationCard() {
     <div className="card flex flex-col gap-3 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="over-label mb-1">Notifiche push</div>
+          <div className="over-label mb-1">Avvisi</div>
           <div className="font-display text-base font-black uppercase" style={{ color: "var(--text-primary)" }}>
             Voto MVP diretto
           </div>
@@ -227,7 +227,7 @@ export default function PushNotificationCard() {
       <div className="flex flex-wrap justify-end gap-2">
         {supportState === "ready" && subscription ? (
           <Button
-            label="Disattiva push"
+            label="Disattiva avvisi"
             outlined
             size="small"
             onClick={handleDisable}
@@ -236,7 +236,7 @@ export default function PushNotificationCard() {
         ) : null}
         {supportState === "ready" && !subscription ? (
           <Button
-            label="Attiva push"
+            label="Attiva avvisi"
             size="small"
             onClick={handleEnable}
             loading={isPending}

@@ -61,3 +61,4 @@ networks:
 
 volumes:
   pgdata:
+    name: dcup-dev_pgdata

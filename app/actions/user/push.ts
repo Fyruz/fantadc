@@ -28,22 +28,22 @@ export async function subscribeToPush(
   const user = await requireAuth();
   const parsed = SubscriptionSchema.safeParse(subscription);
   if (!parsed.success) {
-    return { success: false, message: "Subscription push non valida." };
+    return { success: false, message: "Configurazione avvisi non valida." };
   }
 
   await savePushSubscription(Number(user.id), parsed.data);
   revalidatePath("/dashboard");
-  return { success: true, message: "Notifiche push attivate." };
+  return { success: true, message: "Avvisi attivati." };
 }
 
 export async function unsubscribeFromPush(endpoint: string): Promise<PushSubscriptionResult> {
   const user = await requireAuth();
   const parsed = z.string().url().max(2048).safeParse(endpoint);
   if (!parsed.success) {
-    return { success: false, message: "Endpoint push non valido." };
+    return { success: false, message: "Endpoint avvisi non valido." };
   }
 
   await removePushSubscription(Number(user.id), parsed.data);
   revalidatePath("/dashboard");
-  return { success: true, message: "Notifiche push disattivate." };
+  return { success: true, message: "Avvisi disattivati." };
 }

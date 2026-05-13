@@ -53,7 +53,7 @@ export default function PrivacyPage() {
           <ul className="list-disc list-inside space-y-1">
             <li>Consentire registrazione, login e uso del servizio Fantadc.</li>
             <li>Gestire il torneo fantasy, le votazioni MVP e la classifica.</li>
-            <li>Inviare notifiche push legate al gioco (es. apertura voto MVP), solo se abilitate.</li>
+            <li>Inviare comunicazioni legate al gioco e agli aggiornamenti del torneo.</li>
             <li>Proteggere piattaforma e utenti da abusi tecnici e uso improprio.</li>
           </ul>
         </section>
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           </h2>
           <p>
             Trattiamo i dati per esecuzione del servizio richiesto dall&apos;utente e, dove necessario,
-            sulla base del consenso (es. notifiche push).
+            sulla base del consenso.
           </p>
         </section>
 
@@ -74,7 +74,7 @@ export default function PrivacyPage() {
           </h2>
           <p>
             I dati non sono venduti né ceduti per finalità pubblicitarie. Possono essere trattati da fornitori
-            tecnici strettamente necessari al funzionamento del servizio (hosting, database, infrastruttura push).
+            tecnici strettamente necessari al funzionamento del servizio (hosting e database).
           </p>
         </section>
 
@@ -101,9 +101,6 @@ export default function PrivacyPage() {
             Diritti dell&apos;utente
           </h2>
           <p className="mb-1">Ai sensi del GDPR puoi richiedere accesso, rettifica, cancellazione e limitazione del trattamento.</p>
-          <p>
-            Puoi inoltre revocare in ogni momento il consenso alle notifiche push dalle impostazioni del tuo browser/dispositivo.
-          </p>
         </section>
 
         <section>

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
   const history = await computeTeamHistory(fantasyTeam.id);
 
   const voteCutoff = new Date(Date.now() - MVP_WINDOW_MS);
-  const [recentConcludedMatches, expressedVotes, pushCount] = await Promise.all([
+  const [recentConcludedMatches, expressedVotes] = await Promise.all([
     db.match.findMany({
       where: {
         status: "CONCLUDED",
@@ -54,7 +54,6 @@ export default async function DashboardPage() {
         },
       },
     }),
-    db.pushSubscription.count({ where: { userId } }),
   ]);
 
   const openMatches = recentConcludedMatches.filter((match) =>
@@ -62,7 +61,6 @@ export default async function DashboardPage() {
   );
   const votedMatchIds = new Set(expressedVotes.map((vote) => vote.matchId));
   const pendingOpenMatches = openMatches.filter((match) => !votedMatchIds.has(match.id));
-  console.log(`[Dashboard] user=${userId} pushSubscriptions=${pushCount}`);
 
   return (
     <div className="flex flex-col gap-4">
