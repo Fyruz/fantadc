@@ -27,7 +27,11 @@ export default function SupportPage() {
           </h2>
           <p>
             Per problemi di accesso, malfunzionamenti, segnalazioni o richieste di supporto,
-            contatta l&apos;organizzatore tramite i canali ufficiali Fantadc.
+            contatta l&apos;organizzatore dalla pagina{" "}
+            <Link href="/contatti" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+              Contatti
+            </Link>
+            .
           </p>
         </section>
 
