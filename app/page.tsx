@@ -317,7 +317,7 @@ export default async function HomePage() {
                 {[
                   { v: teamCount,    label: "Squadre",   show: teamCount > 0 },
                   { v: playerCount,  label: "Giocatori", show: playerCount > 0 },
-                  { v: fantasyCount, label: "Fanta",     show: fantasyCount > 0 },
+                  { v: fantasyCount, label: "Fanta Allenatori", show: fantasyCount > 0 },
                 ].filter(s => s.show).map((s, i, arr) => (
                   <div
                     key={s.label}
@@ -330,7 +330,9 @@ export default async function HomePage() {
                     >
                       {s.v}
                     </div>
-                    <div className="over-label mt-1">{s.label}</div>
+                    <div className="over-label mt-1 px-1 leading-tight whitespace-normal break-words text-center" title={s.label}>
+                      {s.label}
+                    </div>
                   </div>
                 ))}
               </div>

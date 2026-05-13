@@ -376,7 +376,7 @@ export default async function AdminDashboardPage() {
           { label: "Giocatori", value: playerCount,      href: "/admin/giocatori",        icon: "pi-users"    },
           { label: "Partite",   value: matchCount,       href: "/admin/partite",          icon: "pi-calendar" },
           { label: "Utenti",    value: userCount,        href: "/admin/utenti",           icon: "pi-id-card"  },
-          { label: "Fanta",     value: fantasyTeamCount, href: "/admin/squadre-fantasy",  icon: "pi-trophy"   },
+          { label: "Fanta Allenatori", value: fantasyTeamCount, href: "/admin/squadre-fantasy", icon: "pi-trophy" },
         ].map((s) => (
           <Link
             key={s.href}
@@ -388,7 +388,11 @@ export default async function AdminDashboardPage() {
             <div className="font-display font-black text-2xl leading-none" style={{ color: "var(--text-primary)" }}>
               {s.value}
             </div>
-            <div className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+            <div
+              className="text-[10px] font-semibold uppercase tracking-wide leading-tight whitespace-normal break-words text-center"
+              style={{ color: "var(--text-muted)" }}
+              title={s.label}
+            >
               {s.label}
             </div>
           </Link>
