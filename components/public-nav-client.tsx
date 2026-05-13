@@ -223,6 +223,17 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             >
               Regolamento
             </Link>
+            <Link
+              href="/supporto"
+              className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+              style={
+                isActive("/supporto")
+                  ? { background: "var(--primary-light)", color: "var(--primary)" }
+                  : { color: "var(--text-muted)" }
+              }
+            >
+              Supporto
+            </Link>
           </nav>
         )}
 

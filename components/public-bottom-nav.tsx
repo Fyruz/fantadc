@@ -30,6 +30,7 @@ const DCUP_MORE = [
   { href: "/giocatori",    label: "Giocatori",    icon: "pi-users"    },
   { href: "/squadre",      label: "Squadre",      icon: "pi-shield"   },
   { href: "/regolamento",  label: "Regolamento",  icon: "pi-book"     },
+  { href: "/supporto",     label: "Supporto",     icon: "pi-question-circle" },
 ] as const;
 
 // ─── GreenVolley ──────────────────────────────────────────────────────────────

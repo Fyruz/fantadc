@@ -482,6 +482,10 @@ export default async function HomePage() {
       >
         <span>Fantadc</span>
         <span className="px-2">·</span>
+        <Link href="/supporto" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+          Supporto app
+        </Link>
+        <span className="px-2">·</span>
         <Link href="/privacy" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
           Norme sulla privacy
         </Link>

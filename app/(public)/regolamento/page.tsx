@@ -106,6 +106,10 @@ export default function RegolamentoPage() {
       </div>
 
       <p className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
+        <Link href="/supporto" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+          Supporto app
+        </Link>
+        <span className="px-2">·</span>
         <Link href="/privacy" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
           Privacy Policy
         </Link>
