@@ -55,7 +55,7 @@ export default function ContattiPage() {
             Sviluppatori
           </h2>
           <ul className="list-disc list-inside space-y-2">
-            <li>Nome: Gianmarco Ferruzzi</li>
+            <li>Gianmarco Ferruzzi, Qursor</li>
             <li>
               Sito web:{" "}
               <a
@@ -77,8 +77,11 @@ export default function ContattiPage() {
               </a>
             </li>
           </ul>
-          <p className="mt-3">
-            Ti serve una applicazione? Contattaci: siamo aperti a sviluppare nuovi progetti digitali.
+          <p
+            className="mt-4 rounded-xl px-4 py-3 font-display font-black text-lg uppercase"
+            style={{ color: "var(--text-primary)", background: "var(--surface-1)", border: "1px solid var(--border-medium)" }}
+          >
+            Ti serve una applicazione? Contattaci: siamo aperti a sviluppare nuovi progetti.
           </p>
         </section>
       </div>
