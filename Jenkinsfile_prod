@@ -48,6 +48,9 @@ pipeline {
                         ]) {
                             sh 'cp $ENV_DOCKER_FILE .env.docker'
                             sh 'docker network create fantadc_prod_net || true'
+                            // Evita conflitti quando esiste già un container con nome fisso
+                            // (es. residuo di deploy precedente o stack non agganciato al project corrente).
+                            sh 'docker rm -f fantadc-postgres-prod || true'
                             // 1. Avvia postgres
                             sh 'docker compose --env-file .env.docker -f docker-compose.prod.yml up -d --force-recreate postgres'
                             // 2. Attendi che postgres sia healthy
