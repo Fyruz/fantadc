@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { useState } from "react";
 import { initBracket, assignKnockoutTeams, deleteBracket } from "@/app/actions/admin/knockout";
 
@@ -26,18 +27,32 @@ export function InitBracketForm() {
 /* ── Delete bracket ─────────────────────────────────────────────── */
 export function DeleteBracketForm() {
   const [state, action, pending] = useActionState(deleteBracket, undefined);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [visible, setVisible] = useState(false);
+
   return (
-    <form action={action} className="flex flex-col gap-3">
-      {state?.message && <p className="text-sm" style={{ color: "#991B1B" }}>{state.message}</p>}
-      <Button
-        type="submit"
-        label={pending ? "..." : "Elimina bracket"}
+    <>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Eliminare l'intero bracket eliminazione? L'operazione è irreversibile."
         severity="danger"
-        outlined
-        disabled={pending}
-        size="small"
       />
-    </form>
+      <form ref={formRef} action={action} className="flex flex-col gap-3">
+        {state?.message && <p className="text-sm" style={{ color: "#991B1B" }}>{state.message}</p>}
+        <Button
+          type="button"
+          label={pending ? "..." : "Elimina bracket"}
+          severity="danger"
+          outlined
+          disabled={pending}
+          size="small"
+          onClick={() => setVisible(true)}
+        />
+      </form>
+    </>
   );
 }
 

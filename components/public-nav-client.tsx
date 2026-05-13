@@ -223,6 +223,17 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             >
               Regolamento
             </Link>
+            <Link
+              href="/supporto"
+              className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
+              style={
+                isActive("/supporto")
+                  ? { background: "var(--primary-light)", color: "var(--primary)" }
+                  : { color: "var(--text-muted)" }
+              }
+            >
+              Supporto
+            </Link>
           </nav>
         )}
 
@@ -263,6 +274,15 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                     >
                       <i className="pi pi-home text-sm" />
                       Dashboard
+                    </Link>
+                    <Link
+                      href="/account"
+                      onClick={() => setAvatarOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold transition-colors hover:bg-[var(--surface-1)]"
+                      style={{ color: "var(--text-primary)" }}
+                    >
+                      <i className="pi pi-user-edit text-sm" />
+                      Account
                     </Link>
                     {user.role === "ADMIN" && (
                       <Link

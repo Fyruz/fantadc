@@ -9,7 +9,7 @@ interface Props {
 
 export default function AdminPageHeader({ title, cta, backHref, accentColor = "var(--primary)" }: Props) {
   return (
-    <div className="mb-6">
+    <div className="mb-4 sm:mb-6">
       {backHref && (
         <Link
           href={backHref}
@@ -22,7 +22,7 @@ export default function AdminPageHeader({ title, cta, backHref, accentColor = "v
       )}
       <div className="flex items-center justify-between gap-4">
         <h1
-          className="font-display font-black text-2xl uppercase"
+          className="font-display text-xl font-black uppercase leading-tight sm:text-2xl"
           style={{ color: "var(--text-primary)" }}
         >
           {title}

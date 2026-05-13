@@ -56,7 +56,9 @@
       "Bash(ls public/logo_*.png public/icons/logo_*.ico)",
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\('prisma', {}\\)\\)\")",
       "Bash(npx tsx *)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\DEV\\\\Personale\\\\git\\\\fantadc\" -Name)",
+      "Bash(Get-ChildItem -Path \"c:\\\\DEV\\\\Personale\\\\git\\\\fantadc\" -Directory)"
     ],
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [

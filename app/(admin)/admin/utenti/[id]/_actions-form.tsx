@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { suspendUser, unsuspendUser, promoteToAdmin, demoteToUser } from "@/app/actions/admin/users";
 
 export default function UserActionsForm({
@@ -17,31 +17,26 @@ export default function UserActionsForm({
   const suspendFormRef = useRef<HTMLFormElement>(null);
   const demoteFormRef = useRef<HTMLFormElement>(null);
 
-  const handleSuspend = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: "Sospendere questo utente?",
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => suspendFormRef.current?.requestSubmit(),
-    });
-  };
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    message: string;
+    confirmLabel: string;
+    severity: "danger" | "warning";
+    onConfirm: () => void;
+  }>({ visible: false, message: "", confirmLabel: "Sì, confermo", severity: "danger", onConfirm: () => {} });
 
-  const handleDemote = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: "Rimuovere i privilegi admin da questo utente?",
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => demoteFormRef.current?.requestSubmit(),
-    });
-  };
+  const hide = () => setDialog((d) => ({ ...d, visible: false }));
 
   return (
     <div className="flex flex-wrap gap-3">
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={dialog.visible}
+        onHide={hide}
+        onConfirm={dialog.onConfirm}
+        message={dialog.message}
+        confirmLabel={dialog.confirmLabel}
+        severity={dialog.severity}
+      />
 
       {/* Promozione / Retrocessione ruolo */}
       {isAdmin ? (
@@ -52,7 +47,15 @@ export default function UserActionsForm({
             label="Rimuovi admin"
             icon="pi pi-user-minus"
             severity="warning"
-            onClick={handleDemote}
+            onClick={() =>
+              setDialog({
+                visible: true,
+                message: "Rimuovere i privilegi admin da questo utente?",
+                confirmLabel: "Sì, rimuovi",
+                severity: "warning",
+                onConfirm: () => demoteFormRef.current?.requestSubmit(),
+              })
+            }
           />
         </form>
       ) : (
@@ -80,7 +83,15 @@ export default function UserActionsForm({
             label="Sospendi utente"
             severity="danger"
             icon="pi pi-ban"
-            onClick={handleSuspend}
+            onClick={() =>
+              setDialog({
+                visible: true,
+                message: "Sospendere questo utente? Non potrà più accedere fino alla riattivazione.",
+                confirmLabel: "Sì, sospendi",
+                severity: "danger",
+                onConfirm: () => suspendFormRef.current?.requestSubmit(),
+              })
+            }
           />
         </form>
       )}

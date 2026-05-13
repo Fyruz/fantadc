@@ -49,7 +49,7 @@ export async function updateBonusType(_prev: ActionResult | undefined, formData:
   return {};
 }
 
-export async function deleteBonusType(formData: FormData): Promise<ActionResult> {
+export async function deleteBonusType(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const id = Number(formData.get("id"));
 

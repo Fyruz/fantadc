@@ -6,9 +6,10 @@ import { InputNumber } from "primereact/inputnumber";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import ConfirmDialog from "@/components/confirm-dialog";
+import { useAppToast } from "@/components/toast-provider";
 import {
   createVolleyKnockoutRound,
   deleteVolleyKnockoutRound,
@@ -20,6 +21,13 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [order, setOrder] = useState<number | null>(null);
+  const { error } = useAppToast();
+  const [dialog, setDialog] = useState<{
+    visible: boolean;
+    message: string;
+    onConfirm: () => void;
+  }>({ visible: false, message: "", onConfirm: () => {} });
+  const hideDialog = () => setDialog((d) => ({ ...d, visible: false }));
   const [state, formAction, pending] = useActionState(
     createVolleyKnockoutRound,
     undefined
@@ -27,7 +35,14 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      <ConfirmPopup />
+      <ConfirmDialog
+        visible={dialog.visible}
+        onHide={hideDialog}
+        onConfirm={dialog.onConfirm}
+        message={dialog.message}
+        severity="danger"
+      />
+
       {/* Lista turni */}
       <div className="admin-card">
         <DataTable value={rounds} emptyMessage="Nessun turno">
@@ -53,17 +68,18 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
                     ? "Rimuovi prima le partite associate"
                     : "Elimina turno"
                 }
-                onClick={(e) =>
-                  confirmPopup({
-                    target: e.currentTarget,
+                onClick={() =>
+                  setDialog({
+                    visible: true,
                     message: `Eliminare "${row.name}"?`,
-                    icon: "pi pi-exclamation-triangle",
-                    acceptLabel: "Sì",
-                    rejectLabel: "No",
-                    accept: () =>
+                    onConfirm: () =>
                       startTransition(async () => {
-                        await deleteVolleyKnockoutRound(row.id);
-                        router.refresh();
+                        try {
+                          await deleteVolleyKnockoutRound(row.id);
+                          router.refresh();
+                        } catch {
+                          error("Impossibile eliminare il turno.");
+                        }
                       }),
                   })
                 }

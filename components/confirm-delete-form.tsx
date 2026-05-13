@@ -1,11 +1,14 @@
 "use client";
-import { useRef } from "react";
-import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
+
+import { useRef, useState, useEffect, useActionState } from "react";
 import { Button } from "primereact/button";
+import ConfirmDialog from "./confirm-dialog";
+import { useAppToast } from "./toast-provider";
+
+type ActionResult = { message?: string; errors?: Record<string, string[]> };
 
 interface Props {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  action: (formData: FormData) => any;
+  action: (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult | void>;
   hiddenInputs: Record<string, string | number>;
   confirmMessage: string;
   buttonLabel?: string;
@@ -22,22 +25,28 @@ export default function ConfirmDeleteForm({
   formClassName,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [visible, setVisible] = useState(false);
+  const [state, formAction, pending] = useActionState(
+    action as (_prev: ActionResult | undefined, formData: FormData) => Promise<ActionResult>,
+    undefined
+  );
+  const { error } = useAppToast();
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    confirmPopup({
-      target: e.currentTarget,
-      message: confirmMessage,
-      icon: "pi pi-exclamation-triangle",
-      acceptLabel: "Sì",
-      rejectLabel: "No",
-      accept: () => formRef.current?.requestSubmit(),
-    });
-  };
+  useEffect(() => {
+    if (state?.message) error(state.message);
+  }, [state]);
 
   return (
     <>
-      <ConfirmPopup />
-      <form ref={formRef} action={action} className={formClassName}>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message={confirmMessage}
+        confirmLabel="Elimina"
+        severity="danger"
+      />
+      <form ref={formRef} action={formAction} className={formClassName}>
         {Object.entries(hiddenInputs).map(([name, value]) => (
           <input key={name} type="hidden" name={name} value={String(value)} />
         ))}
@@ -47,8 +56,9 @@ export default function ConfirmDeleteForm({
           severity="danger"
           text
           size="small"
+          loading={pending}
           className={buttonClassName}
-          onClick={handleClick}
+          onClick={() => setVisible(true)}
         />
       </form>
     </>

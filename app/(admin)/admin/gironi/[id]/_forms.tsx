@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { useState } from "react";
 import { updateGroup, deleteGroup, addTeamToGroup, removeTeamFromGroup, setTeamQualified } from "@/app/actions/admin/groups";
 import type { ActionResult } from "@/app/actions/admin/football-teams";
@@ -58,19 +59,33 @@ export function DeleteGroupForm({ groupId }: { groupId: number }) {
     (_prev: ActionResult | undefined, fd: FormData) => deleteGroup(fd),
     undefined
   );
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [visible, setVisible] = useState(false);
+
   return (
-    <form action={action}>
-      <input type="hidden" name="id" value={groupId} />
-      {state?.message && <p className="text-xs mb-2" style={{ color: "#991B1B" }}>{state.message}</p>}
-      <Button
-        type="submit"
-        label={pending ? "..." : "Elimina girone"}
-        disabled={pending}
-        size="small"
+    <>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Eliminare questo girone? Verranno rimosse anche tutte le squadre associate."
         severity="danger"
-        outlined
       />
-    </form>
+      <form ref={formRef} action={action}>
+        <input type="hidden" name="id" value={groupId} />
+        {state?.message && <p className="text-xs mb-2" style={{ color: "#991B1B" }}>{state.message}</p>}
+        <Button
+          type="button"
+          label={pending ? "..." : "Elimina girone"}
+          disabled={pending}
+          size="small"
+          severity="danger"
+          outlined
+          onClick={() => setVisible(true)}
+        />
+      </form>
+    </>
   );
 }
 
@@ -113,19 +128,33 @@ export function RemoveTeamForm({ groupId, footballTeamId }: { groupId: number; f
     (_prev: ActionResult | undefined, fd: FormData) => removeTeamFromGroup(fd),
     undefined
   );
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const [visible, setVisible] = useState(false);
+
   return (
-    <form action={action}>
-      <input type="hidden" name="groupId" value={groupId} />
-      <input type="hidden" name="footballTeamId" value={footballTeamId} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="text-[11px] font-bold px-2 py-0.5 rounded transition-colors"
-        style={{ color: "#991B1B", background: "#FEF2F2" }}
-      >
-        {pending ? "..." : "Rimuovi"}
-      </button>
-    </form>
+    <>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message="Rimuovere questa squadra dal girone?"
+        severity="danger"
+      />
+      <form ref={formRef} action={action}>
+        <input type="hidden" name="groupId" value={groupId} />
+        <input type="hidden" name="footballTeamId" value={footballTeamId} />
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => setVisible(true)}
+          className="text-[11px] font-bold px-2 py-0.5 rounded transition-colors"
+          style={{ color: "#991B1B", background: "#FEF2F2" }}
+        >
+          {pending ? "..." : "Rimuovi"}
+        </button>
+      </form>
+    </>
   );
 }
 

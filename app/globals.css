@@ -490,7 +490,20 @@ html {
 .p-button.p-button-text.p-button-danger:hover { background: rgba(239,68,68,0.08) !important; }
 
 /* ─── PrimeReact InputNumber (light) ────────────────────── */
-.p-inputnumber .p-inputtext { border-radius: 0 !important; }
+.p-inputnumber {
+  display: inline-flex !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+.p-inputnumber.w-full {
+  width: 100% !important;
+}
+.p-inputnumber .p-inputtext {
+  min-width: 0 !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  border-radius: 12px !important;
+}
 .p-inputnumber.p-inputnumber-buttons-stacked .p-inputnumber-input { border-radius: 12px 0 0 12px !important; }
 .p-inputnumber-button.p-button {
   background: var(--surface-2) !important;
@@ -541,6 +554,16 @@ html {
 .p-dialog .p-dialog-footer {
   background: transparent !important;
   border-top: 1px solid var(--border-soft) !important;
+}
+
+/* ─── Toast animations ───────────────────────────────────── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)     scale(1); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0)     scale(1); }
+  to   { opacity: 0; transform: translateY(-10px) scale(0.96); }
 }
 
 /* ─── PrimeReact ConfirmPopup (light) ───────────────────── */

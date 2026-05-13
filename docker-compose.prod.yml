@@ -1,3 +1,5 @@
+name: fantadc-prod
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -57,6 +59,7 @@ networks:
     name: fantadc_prod_net
   internal_prod:
     driver: bridge
+    name: fantadc_prod_internal
 
 volumes:
   pgdata_prod:

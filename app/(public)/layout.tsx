@@ -10,6 +10,10 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       <footer className="hidden md:block py-4 text-center text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-soft)" }}>
         <span>Fantadc</span>
         <span className="px-2">·</span>
+        <Link href="/supporto" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+          Supporto app
+        </Link>
+        <span className="px-2">·</span>
         <Link href="/privacy" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
           Norme sulla privacy
         </Link>

@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
+import ConfirmDialog from "@/components/confirm-dialog";
 import { addGoal, deleteGoal } from "@/app/actions/admin/goals";
 
 type Player = {
@@ -198,33 +199,44 @@ export default function GoalsForm({
 
 function GoalRow({ goal, matchId }: { goal: Goal; matchId: number }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const [visible, setVisible] = useState(false);
 
   return (
-    <div
-      className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
-      style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
-    >
-      <span className="text-xs font-semibold flex-1 truncate" style={{ color: "var(--text-primary)" }}>
-        {goal.scorer.name}
-        {goal.isOwnGoal && (
-          <span className="ml-1 text-[9px] font-black px-1 py-0.5 rounded" style={{ background: "#FEF2F2", color: "#991B1B" }}>
-            AG
-          </span>
-        )}
-      </span>
-      <form ref={formRef} action={deleteGoal as unknown as (fd: FormData) => void} className="flex-shrink-0">
-        <input type="hidden" name="id" value={goal.id} />
-        <input type="hidden" name="matchId" value={matchId} />
-        <Button
-          type="submit"
-          icon="pi pi-times"
-          text
-          rounded
-          severity="secondary"
-          aria-label="Rimuovi goal"
-          title="Rimuovi"
-        />
-      </form>
-    </div>
+    <>
+      <ConfirmDialog
+        visible={visible}
+        onHide={() => setVisible(false)}
+        onConfirm={() => formRef.current?.requestSubmit()}
+        message={`Eliminare il goal di ${goal.scorer.name}?`}
+        severity="danger"
+      />
+      <div
+        className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg"
+        style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+      >
+        <span className="text-xs font-semibold flex-1 truncate" style={{ color: "var(--text-primary)" }}>
+          {goal.scorer.name}
+          {goal.isOwnGoal && (
+            <span className="ml-1 text-[9px] font-black px-1 py-0.5 rounded" style={{ background: "#FEF2F2", color: "#991B1B" }}>
+              AG
+            </span>
+          )}
+        </span>
+        <form ref={formRef} action={deleteGoal as unknown as (fd: FormData) => void} className="flex-shrink-0">
+          <input type="hidden" name="id" value={goal.id} />
+          <input type="hidden" name="matchId" value={matchId} />
+          <Button
+            type="button"
+            icon="pi pi-times"
+            text
+            rounded
+            severity="secondary"
+            aria-label="Rimuovi goal"
+            title="Rimuovi"
+            onClick={() => setVisible(true)}
+          />
+        </form>
+      </div>
+    </>
   );
 }

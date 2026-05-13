@@ -76,6 +76,47 @@ const CreateAdminSchema = z.object({
   name: z.string().trim().optional(),
 });
 
+const SetPasswordSchema = z
+  .object({
+    userId: z.coerce.number().int().positive(),
+    newPassword: z
+      .string()
+      .min(8, "La password deve avere almeno 8 caratteri.")
+      .max(72, "Password troppo lunga."),
+    confirmPassword: z.string().min(1, "Conferma la password."),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    message: "Le password non coincidono.",
+    path: ["confirmPassword"],
+  });
+
+export async function adminSetPassword(
+  _prev: ActionResult | undefined,
+  formData: FormData
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+
+  const parsed = SetPasswordSchema.safeParse({
+    userId: formData.get("userId"),
+    newPassword: formData.get("newPassword"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+  }
+
+  const { userId, newPassword } = parsed.data;
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return { message: "Utente non trovato." };
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await db.user.update({ where: { id: userId }, data: { passwordHash, passwordChangedAt: new Date() } });
+  await logAdminAction(Number(admin.id), "SET_PASSWORD", "User", userId, null, { passwordChanged: true });
+
+  revalidatePath(`/admin/utenti/${userId}`);
+  return { message: "Password aggiornata con successo." };
+}
+
 export async function createAdmin(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const parsed = CreateAdminSchema.safeParse({
