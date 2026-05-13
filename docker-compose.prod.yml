@@ -63,3 +63,5 @@ networks:
 
 volumes:
   pgdata_prod:
+    external: true
+    name: dcup-prod_pgdata_prod
