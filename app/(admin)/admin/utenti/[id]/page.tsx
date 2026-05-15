@@ -108,7 +108,7 @@ export default async function UtenteDetailPage({ params }: { params: Promise<{ i
       {/* ── Azioni ───────────────────────────────────────────────── */}
       <div className="card p-4">
         <div className="over-label mb-3">Azioni</div>
-        <UserActionsForm userId={user.id} isSuspended={user.isSuspended} isAdmin={user.role === "ADMIN"} />
+        <UserActionsForm userId={user.id} isSuspended={user.isSuspended} isAdmin={user.role === "ADMIN"} userEmail={user.email} />
       </div>
 
       {/* ── Imposta password ─────────────────────────────────────── */}

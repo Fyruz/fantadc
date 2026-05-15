@@ -28,6 +28,13 @@ export const passwordChangeLimiter = new RateLimiterMemory({
   blockDuration: 3600,
 });
 
+// Cancellazione account: max 5 tentativi per utente all'ora
+export const deleteAccountLimiter = new RateLimiterMemory({
+  points: 5,
+  duration: 3600,
+  blockDuration: 3600,
+});
+
 export async function checkRateLimit(
   limiter: RateLimiterMemory,
   key: string

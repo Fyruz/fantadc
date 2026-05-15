@@ -16,7 +16,19 @@
       "Bash(grep -v \"^.*//.*\")",
       "Bash(git merge-base *)",
       "Bash(git push *)",
-      "Bash(xargs sed *)"
+      "Bash(xargs sed *)",
+      "Skill(superpowers:brainstorming)",
+      "Skill(superpowers:brainstorming:*)",
+      "Bash(New-Item -ItemType Directory -Force \"e:\\\\Developing\\\\fantadc\\\\docs\\\\superpowers\\\\specs\")",
+      "Bash(Out-Null)",
+      "Bash(mkdir -p \"e:/Developing/fantadc/docs/superpowers/specs\")",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:writing-plans:*)",
+      "Skill(superpowers:executing-plans)",
+      "Skill(superpowers:executing-plans:*)"
+    ],
+    "additionalDirectories": [
+      "e:\\Developing\\fantadc\\docs\\superpowers\\specs"
     ]
   }
 }

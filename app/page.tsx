@@ -5,7 +5,14 @@ import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import StatusBadge from "@/components/status-badge";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ deleted?: string }>;
+}) {
+  const params = await searchParams;
+  const accountDeleted = params.deleted === "1";
+
   const [user, teamCount, playerCount, fantasyCount, spotlight, upcoming, groups] = await Promise.all([
     getCurrentUser(),
     db.footballTeam.count(),
@@ -76,6 +83,21 @@ export default async function HomePage() {
       <PublicNav />
 
       <main className="flex-1 pb-24 md:pb-0">
+
+        {/* ══ BANNER ACCOUNT ELIMINATO ══════════════════════════════ */}
+        {accountDeleted && (
+          <div className="max-w-lg mx-auto w-full px-4 pt-4" style={{ position: "relative", zIndex: 20 }}>
+            <div
+              className="flex items-center gap-3 rounded-2xl px-4 py-3"
+              style={{ background: "#ECFDF5", border: "1.5px solid #A7F3D0" }}
+            >
+              <i className="pi pi-check-circle flex-shrink-0" style={{ color: "#059669" }} />
+              <p className="text-sm font-semibold" style={{ color: "#065F46" }}>
+                Account eliminato con successo.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ══ HERO ══════════════════════════════════════════════════ */}
         <section

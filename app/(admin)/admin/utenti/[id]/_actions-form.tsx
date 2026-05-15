@@ -1,21 +1,27 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import ConfirmDialog from "@/components/confirm-dialog";
-import { suspendUser, unsuspendUser, promoteToAdmin, demoteToUser } from "@/app/actions/admin/users";
+import DeleteAccountDialog from "@/components/delete-account-dialog";
+import { suspendUser, unsuspendUser, promoteToAdmin, demoteToUser, adminDeleteUser } from "@/app/actions/admin/users";
 
 export default function UserActionsForm({
   userId,
   isSuspended,
   isAdmin,
+  userEmail,
 }: {
   userId: number;
   isSuspended: boolean;
   isAdmin: boolean;
+  userEmail: string;
 }) {
+  const router = useRouter();
   const suspendFormRef = useRef<HTMLFormElement>(null);
   const demoteFormRef = useRef<HTMLFormElement>(null);
+  const [deleteVisible, setDeleteVisible] = useState(false);
 
   const [dialog, setDialog] = useState<{
     visible: boolean;
@@ -27,6 +33,16 @@ export default function UserActionsForm({
 
   const hide = () => setDialog((d) => ({ ...d, visible: false }));
 
+  const handleDeleteConfirm = async (password: string) => {
+    const fd = new FormData();
+    fd.append("userId", String(userId));
+    fd.append("password", password);
+    const result = await adminDeleteUser(undefined, fd);
+    if (result.error) return { error: result.error };
+    router.push("/admin/utenti");
+    return {};
+  };
+
   return (
     <div className="flex flex-wrap gap-3">
       <ConfirmDialog
@@ -36,6 +52,13 @@ export default function UserActionsForm({
         message={dialog.message}
         confirmLabel={dialog.confirmLabel}
         severity={dialog.severity}
+      />
+
+      <DeleteAccountDialog
+        visible={deleteVisible}
+        onHide={() => setDeleteVisible(false)}
+        onConfirm={handleDeleteConfirm}
+        description={`Eliminare definitivamente l'account di ${userEmail}? Inserisci la tua password admin per confermare. Questa azione è irreversibile.`}
       />
 
       {/* Promozione / Retrocessione ruolo */}
@@ -94,6 +117,18 @@ export default function UserActionsForm({
             }
           />
         </form>
+      )}
+
+      {/* Eliminazione — solo utenti non admin */}
+      {!isAdmin && (
+        <Button
+          type="button"
+          label="Elimina utente"
+          severity="danger"
+          outlined
+          icon="pi pi-trash"
+          onClick={() => setDeleteVisible(true)}
+        />
       )}
     </div>
   );

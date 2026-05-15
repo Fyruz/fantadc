@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { signOut } from "@/lib/auth";
-import { passwordChangeLimiter, checkRateLimit } from "@/lib/rate-limit";
+import { passwordChangeLimiter, deleteAccountLimiter, checkRateLimit } from "@/lib/rate-limit";
 
 export type ChangePasswordResult = {
   errors?: Record<string, string[]>;
@@ -76,5 +76,42 @@ export async function changePassword(
   // signOut({ redirectTo }) lancia internamente NEXT_REDIRECT — la riga
   // successiva è irraggiungibile ma serve al type-checker.
   await signOut({ redirectTo: "/login" });
+  return { success: true };
+}
+
+export type DeleteOwnAccountResult = { error?: string; success?: boolean };
+
+export async function deleteOwnAccount(
+  _prev: DeleteOwnAccountResult | undefined,
+  formData: FormData
+): Promise<DeleteOwnAccountResult> {
+  const user = await requireAuth();
+
+  const { limited, retryAfter } = await checkRateLimit(
+    deleteAccountLimiter,
+    `delete-account-${user.id}`
+  );
+  if (limited) {
+    return { error: `Troppi tentativi. Riprova tra ${retryAfter} secondi.` };
+  }
+
+  const password = formData.get("password");
+  if (!password || typeof password !== "string" || password.length < 1) {
+    return { error: "Inserisci la password." };
+  }
+
+  const dbUser = await db.user.findUnique({
+    where: { id: Number(user.id) },
+    select: { passwordHash: true },
+  });
+  if (!dbUser) return { error: "Utente non trovato." };
+
+  const valid = await bcrypt.compare(password, dbUser.passwordHash);
+  if (!valid) return { error: "Password non corretta." };
+
+  await db.user.delete({ where: { id: Number(user.id) } });
+
+  // signOut lancia NEXT_REDIRECT internamente — la riga successiva è irraggiungibile.
+  await signOut({ redirectTo: "/?deleted=1" });
   return { success: true };
 }

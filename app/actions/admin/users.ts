@@ -117,6 +117,50 @@ export async function adminSetPassword(
   return { message: "Password aggiornata con successo." };
 }
 
+export type AdminDeleteUserResult = { error?: string; success?: boolean };
+
+export async function adminDeleteUser(
+  _prev: AdminDeleteUserResult | undefined,
+  formData: FormData
+): Promise<AdminDeleteUserResult> {
+  const admin = await requireAdmin();
+
+  const userId = Number(formData.get("userId"));
+  const password = formData.get("password");
+
+  if (!password || typeof password !== "string" || password.length < 1) {
+    return { error: "Inserisci la tua password." };
+  }
+
+  const targetUser = await db.user.findUnique({ where: { id: userId } });
+  if (!targetUser) return { error: "Utente non trovato." };
+  if (targetUser.role !== UserRole.USER) return { error: "Non puoi eliminare un admin." };
+  if (targetUser.id === Number(admin.id)) return { error: "Non puoi eliminare te stesso." };
+
+  const adminDbUser = await db.user.findUnique({
+    where: { id: Number(admin.id) },
+    select: { passwordHash: true },
+  });
+  if (!adminDbUser) return { error: "Sessione non valida." };
+
+  const valid = await bcrypt.compare(password, adminDbUser.passwordHash);
+  if (!valid) return { error: "Password admin non corretta." };
+
+  await logAdminAction(
+    Number(admin.id),
+    "DELETE_USER",
+    "User",
+    userId,
+    { email: targetUser.email, role: targetUser.role, name: targetUser.name },
+    null
+  );
+
+  await db.user.delete({ where: { id: userId } });
+
+  revalidatePath("/admin/utenti");
+  return { success: true };
+}
+
 export async function createAdmin(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const parsed = CreateAdminSchema.safeParse({
