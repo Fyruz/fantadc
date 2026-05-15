@@ -84,18 +84,21 @@ export default async function HomePage({
 
       <main className="flex-1 pb-24 md:pb-0">
 
-        {/* ══ BANNER ACCOUNT ELIMINATO ══════════════════════════════ */}
+        {/* ══ TOAST ACCOUNT ELIMINATO ═══════════════════════════════ */}
         {accountDeleted && (
-          <div className="max-w-lg mx-auto w-full px-4 pt-4" style={{ position: "relative", zIndex: 20 }}>
-            <div
-              className="flex items-center gap-3 rounded-2xl px-4 py-3"
-              style={{ background: "#ECFDF5", border: "1.5px solid #A7F3D0" }}
-            >
-              <i className="pi pi-check-circle flex-shrink-0" style={{ color: "#059669" }} />
-              <p className="text-sm font-semibold" style={{ color: "#065F46" }}>
-                Account eliminato con successo.
-              </p>
-            </div>
+          <div
+            className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-2rem)] px-4 py-3 rounded-2xl flex items-center gap-3"
+            style={{
+              background: "#ECFDF5",
+              border: "1.5px solid #A7F3D0",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+              zIndex: 9999,
+            }}
+          >
+            <i className="pi pi-check-circle flex-shrink-0" style={{ color: "#059669" }} />
+            <p className="text-sm font-semibold whitespace-nowrap" style={{ color: "#065F46" }}>
+              Account eliminato con successo.
+            </p>
           </div>
         )}
 
