@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
-import { Tag } from "primereact/tag";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
@@ -74,7 +73,17 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
                     </span>
                   )}
                   {!row.countryCode && (
-                    <Tag value="Nazione non impostata" severity="secondary" className="!text-[10px] !font-bold" />
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "var(--surface-2)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border-medium)",
+                      }}
+                    >
+                      <i className="pi pi-globe text-[9px]" />
+                      Nazione non impostata
+                    </span>
                   )}
                 </div>
               </div>
