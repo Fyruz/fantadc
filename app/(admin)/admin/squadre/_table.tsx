@@ -74,7 +74,7 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
                     </span>
                   )}
                   {!row.countryCode && (
-                    <Tag value="Nazione non impostata" severity="secondary" />
+                    <Tag value="Nazione non impostata" severity="secondary" className="!text-[10px] !font-bold" />
                   )}
                 </div>
               </div>
@@ -129,7 +129,7 @@ function TeamFlagAvatar({ row }: { row: Row }) {
     <img
       src={src}
       alt={row.name}
-      className="w-9 h-9 object-cover rounded-lg border border-[var(--border-soft)] flex-shrink-0"
+      className="w-9 h-9 object-contain rounded-lg border border-[var(--border-soft)] bg-white p-0.5 flex-shrink-0"
       onError={() => setBroken(true)}
     />
   );

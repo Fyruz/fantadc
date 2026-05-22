@@ -46,7 +46,7 @@ function TeamCard({ team }: { team: Team }) {
           <img
             src={flagSrc}
             alt={team.name}
-            className="w-10 h-10 object-contain flex-shrink-0 rounded-lg"
+            className="w-10 h-10 object-contain flex-shrink-0 rounded-lg border border-[var(--border-soft)] bg-white p-0.5"
             onError={() => setImageBroken(true)}
           />
         ) : (

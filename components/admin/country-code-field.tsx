@@ -13,6 +13,7 @@ type Props = {
 
 export default function CountryCodeField({ value, onChange, error }: Props) {
   const [previewBroken, setPreviewBroken] = useState(false);
+  const inputId = "countryCode";
 
   const selectedCountry = useMemo(
     () => COUNTRY_OPTIONS.find((option) => option.value === value) ?? null,
@@ -27,12 +28,13 @@ export default function CountryCodeField({ value, onChange, error }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      <label className="block text-xs font-medium text-[var(--text-secondary)]">
+      <label htmlFor={inputId} className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
         Nazione
       </label>
 
       <input type="hidden" name="countryCode" value={value} />
       <Dropdown
+        inputId={inputId}
         value={value}
         onChange={handleChange}
         options={COUNTRY_OPTIONS}
@@ -41,13 +43,30 @@ export default function CountryCodeField({ value, onChange, error }: Props) {
         placeholder="Seleziona nazione"
         className="w-full"
         filter
+        valueTemplate={(option: CountryOption | undefined, props) => {
+          if (!option) return <span>{props.placeholder}</span>;
+          return (
+            <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={option.flagUrl}
+                alt={`${option.label} flag`}
+                className="w-5 h-4 object-contain rounded-sm border border-slate-200 bg-white"
+              />
+              <span className="truncate">{option.label}</span>
+              <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>
+                {option.value}
+              </span>
+            </div>
+          );
+        }}
         itemTemplate={(option: CountryOption) => (
           <div className="flex items-center gap-2 py-0.5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={option.flagUrl}
               alt={`${option.label} flag`}
-              className="w-5 h-4 object-cover rounded-sm border border-slate-200 flex-shrink-0"
+              className="w-5 h-4 object-contain rounded-sm border border-slate-200 bg-white flex-shrink-0"
             />
             <span className="text-sm font-medium">{option.label}</span>
             <span className="text-xs text-[var(--text-muted)] ml-auto">
@@ -57,27 +76,36 @@ export default function CountryCodeField({ value, onChange, error }: Props) {
         )}
       />
 
-      {selectedCountry ? (
-        <div className="flex items-center gap-2 text-xs">
-          <span style={{ color: "var(--text-muted)" }}>Anteprima:</span>
-          {previewBroken ? (
-            <Tag value={`${selectedCountry.value} non disponibile`} severity="secondary" />
-          ) : (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={selectedCountry.flagUrl}
-              alt={`Bandiera ${selectedCountry.label}`}
-              className="w-6 h-4 object-cover rounded-sm border border-slate-200"
-              onError={() => setPreviewBroken(true)}
-            />
-          )}
-          <span className="font-semibold" style={{ color: "var(--text-primary)" }}>
-            {selectedCountry.label}
+      <div
+        className="rounded-xl px-3 py-2.5 flex items-center gap-2"
+        style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+      >
+        {selectedCountry ? (
+          <>
+            {previewBroken ? (
+              <Tag value={`${selectedCountry.value} non disponibile`} severity="secondary" className="!text-[10px] !font-bold" />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={selectedCountry.flagUrl}
+                alt={`Bandiera ${selectedCountry.label}`}
+                className="w-6 h-4 object-contain rounded-sm border border-slate-200 bg-white"
+                onError={() => setPreviewBroken(true)}
+              />
+            )}
+            <span className="text-xs font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+              {selectedCountry.label}
+            </span>
+            <span className="text-[10px] font-black ml-auto" style={{ color: "var(--text-muted)" }}>
+              {selectedCountry.value}
+            </span>
+          </>
+        ) : (
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Nazione non impostata
           </span>
-        </div>
-      ) : (
-        <Tag value="Nazione non impostata" severity="secondary" />
-      )}
+        )}
+      </div>
 
       {error ? <p className="text-red-500 text-xs">{error}</p> : null}
     </div>
