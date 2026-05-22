@@ -20,6 +20,8 @@ export default async function SquadrePage() {
     id: t.id,
     name: t.name,
     shortName: t.shortName,
+    countryCode: t.countryCode,
+    logoUrl: t.logoUrl,
     playerCount: t._count.players,
     matchCount: t._count.homeMatches + t._count.awayMatches,
   }));

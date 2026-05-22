@@ -52,6 +52,8 @@ Stack target:
 ### Squadre reali vs squadre fantasy
 
 * `FootballTeam` -> squadre reali del torneo
+* `FootballTeam.countryCode` (ISO2) identifica la nazione della squadra quando disponibile
+* `FootballTeam.logoUrl` puo puntare alla bandiera della nazione (es. FlagsAPI)
 * `FantasyTeam` -> squadre create dagli utenti
 
 ### Ruoli giocatore

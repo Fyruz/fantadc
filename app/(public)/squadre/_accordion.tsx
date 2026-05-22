@@ -2,20 +2,24 @@
 
 import { useState } from "react";
 import RoleBadge from "@/components/role-badge";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
 type Player = { id: number; name: string; role: string };
 type Team = {
   id: number;
   name: string;
   shortName: string | null;
+  countryCode: string | null;
   logoUrl: string | null;
   players: Player[];
 };
 
 function TeamCard({ team }: { team: Team }) {
   const [open, setOpen] = useState(false);
+  const [imageBroken, setImageBroken] = useState(false);
 
   const gkCount = team.players.filter((p) => p.role === "GK").length;
+  const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
 
   return (
     <div
@@ -37,12 +41,13 @@ function TeamCard({ team }: { team: Team }) {
         aria-expanded={open}
       >
         {/* Avatar */}
-        {team.logoUrl ? (
+        {flagSrc && !imageBroken ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={team.logoUrl}
+            src={flagSrc}
             alt={team.name}
             className="w-10 h-10 object-contain flex-shrink-0 rounded-lg"
+            onError={() => setImageBroken(true)}
           />
         ) : (
           <div
