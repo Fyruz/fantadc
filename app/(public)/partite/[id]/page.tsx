@@ -3,8 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
 import { getCurrentUser } from "@/lib/session";
-import StatusBadge from "@/components/status-badge";
-import RoleBadge from "@/components/role-badge";
 
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,17 +12,25 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const match = await db.match.findUnique({
     where: { id: matchId, status: { not: "DRAFT" } },
     include: {
-      homeTeam: { select: { name: true, shortName: true } },
-      awayTeam: { select: { name: true, shortName: true } },
+      homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+      awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
       group: { select: { name: true, slug: true } },
       knockoutRound: { select: { name: true } },
-      players: {
-        include: { player: { include: { footballTeam: { select: { name: true } } } } },
-        orderBy: { player: { name: "asc" } },
+      goals: {
+        include: {
+          scorer: {
+            select: { id: true, name: true, footballTeamId: true },
+          },
+        },
+        orderBy: { minute: "asc" },
       },
-      bonuses: {
-        include: { bonusType: true, player: { select: { name: true } } },
-        orderBy: { id: "asc" },
+      players: {
+        include: {
+          player: {
+            select: { id: true, name: true, role: true, footballTeamId: true },
+          },
+        },
+        orderBy: { player: { name: "asc" } },
       },
     },
   });
@@ -41,7 +47,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       })
     : null;
 
-  let mvpPlayer: { name: string; footballTeam: { name: string } } | null = null;
+  let mvpPlayer: { name: string; footballTeamId: number } | null = null;
   if (!windowOpen && match.status === "CONCLUDED") {
     const topVote = await db.vote.groupBy({
       by: ["playerId"],
@@ -56,201 +62,208 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
     }
   }
 
-  const bonusByPlayer = new Map<string, typeof match.bonuses>();
-  for (const b of match.bonuses) {
-    const arr = bonusByPlayer.get(b.player.name) ?? [];
-    arr.push(b);
-    bonusByPlayer.set(b.player.name, arr);
-  }
+  const homeId = match.homeTeam?.id ?? null;
+  const awayId = match.awayTeam?.id ?? null;
+
+  const homeGoals = match.goals.filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === homeId)
+    .concat(match.goals.filter((g) => g.isOwnGoal && g.scorer.footballTeamId === awayId));
+  const awayGoals = match.goals.filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === awayId)
+    .concat(match.goals.filter((g) => g.isOwnGoal && g.scorer.footballTeamId === homeId));
+
+  const homePlayers = match.players.filter((p) => p.player.footballTeamId === homeId);
+  const awayPlayers = match.players.filter((p) => p.player.footballTeamId === awayId);
+
+  const scored = match.homeScore !== null && match.awayScore !== null;
+
+  const TeamLogo = ({ team }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null }) => {
+    if (!team) return <div className="w-16 h-16" />;
+    if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} className="w-16 h-16 object-contain" />;
+    if (team.countryCode) return <img src={`https://flagcdn.com/w80/${team.countryCode.toLowerCase()}.png`} alt={team.name} className="w-16 h-10 object-contain rounded-sm" />;
+    return <div className="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>;
+  };
 
   return (
-    <div className="flex flex-col gap-5">
-      <Link
-        href="/partite"
-        className="flex items-center gap-1.5 text-xs font-semibold w-fit transition-colors hover:opacity-70"
-        style={{ color: "var(--text-muted)" }}
-      >
-        <i className="pi pi-arrow-left text-[10px]" /> Tutte le partite
+    <div className="max-w-lg mx-auto w-full px-4 py-10 flex flex-col gap-6">
+
+      {/* Back */}
+      <Link href="/partite" className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-primary)">
+        <i className="pi pi-arrow-left" style={{ fontSize: 10 }} />
+        Tutte le partite
       </Link>
 
-      {/* Header partita */}
+      {/* ── Match card ─────────────────────────────────────────────── */}
       <div
-        className="rounded-[20px] overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+        className="bg-white rounded-3xl overflow-hidden"
+        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
       >
-        {/* Top bar */}
-        <div
-          className="flex items-center justify-between px-5 py-3 gap-3"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}
-        >
-          <div className="flex items-center gap-2">
-            <StatusBadge status={match.status} />
-            {match.group && (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/70" style={{ background: "rgba(255,255,255,0.12)" }}>
-                Girone {match.group.slug}
-              </span>
-            )}
-            {match.knockoutRound && (
-              <span className="text-[10px] font-black px-2 py-0.5 rounded-full text-white/70" style={{ background: "rgba(255,255,255,0.12)" }}>
-                {match.knockoutRound.name}
-              </span>
-            )}
-          </div>
-          <span className="text-[11px] font-semibold capitalize text-white/50">
-            {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })}
-          </span>
-        </div>
-
-        {/* Body */}
-        <div className="px-5 py-6 flex items-center gap-3">
+        {/* Teams + score */}
+        <div className="px-6 pt-6 pb-4 flex items-start gap-4">
           {/* Home */}
-          <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
-            <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
+          <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+            <TeamLogo team={match.homeTeam} />
+            <span className="text-sm text-black text-center leading-tight">
               {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.homeTeam?.name ?? match.homeSeed ?? "—"}
-            </span>
           </div>
 
-          {/* Score / VS */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
-            {match.homeScore !== null && match.awayScore !== null ? (
-              <div className="font-display font-black text-4xl leading-none text-white">
-                {match.homeScore}
-                <span className="text-white/30"> — </span>
-                {match.awayScore}
-              </div>
+          {/* Center */}
+          <div className="flex flex-col items-center gap-1 shrink-0 pt-2">
+            {match.group && (
+              <span className="text-xs text-black/40">{match.group.name}</span>
+            )}
+            {match.knockoutRound && (
+              <span className="text-xs text-black/40">{match.knockoutRound.name}</span>
+            )}
+            {scored ? (
+              <span className="text-4xl font-bold text-(--text-primary) tabular-nums">
+                {match.homeScore} – {match.awayScore}
+              </span>
             ) : (
-              <>
-                <div className="font-display font-black text-2xl leading-none text-white/30">VS</div>
-                <div className="text-[12px] font-bold text-white/50 tabular-nums">
-                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
-                </div>
-              </>
+              <span className="text-4xl font-bold text-(--text-primary)">
+                {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+            )}
+            <span className="text-xs text-black/40">
+              {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+            </span>
+            {match.status === "CONCLUDED" && (
+              <span className="text-xs text-black/40 mt-1">Fischio finale</span>
             )}
           </div>
 
           {/* Away */}
-          <div className="flex-1 flex flex-col items-center gap-1.5 min-w-0">
-            <span className="font-display font-black text-3xl uppercase leading-none tracking-tight text-white">
+          <div className="flex flex-col items-center gap-2 flex-1 min-w-0">
+            <TeamLogo team={match.awayTeam} />
+            <span className="text-sm text-black text-center leading-tight">
               {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
-            </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wide text-white/40 truncate max-w-full">
-              {match.awayTeam?.name ?? match.awaySeed ?? "—"}
             </span>
           </div>
         </div>
 
-        {/* Bottom strip — date + time when score is present */}
-        {match.homeScore !== null && match.awayScore !== null && (
-          <div
-            className="px-5 py-2.5 text-center text-[11px] font-semibold text-white/40 capitalize"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            {match.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
-            {" · "}
-            {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+        {/* Scorers */}
+        {match.goals.length > 0 && (
+          <div className="px-6 pb-6 pt-2 flex gap-4" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+            {/* Home scorers */}
+            <div className="flex-1 flex flex-col items-end gap-1">
+              {homeGoals.map((g, i) => (
+                <span key={i} className="text-xs text-black/60">
+                  {g.scorer.name}{g.isOwnGoal ? " (A)" : ""}
+                  {g.minute ? ` ${g.minute}'` : ""}
+                </span>
+              ))}
+            </div>
+            {/* Ball icon */}
+            <div className="shrink-0 flex flex-col gap-1 pt-0.5">
+              {match.goals.map((_, i) => (
+                <i key={i} className="pi pi-circle-fill" style={{ fontSize: 8, color: "rgba(9,20,76,0.2)" }} />
+              ))}
+            </div>
+            {/* Away scorers */}
+            <div className="flex-1 flex flex-col items-start gap-1">
+              {awayGoals.map((g, i) => (
+                <span key={i} className="text-xs text-black/60">
+                  {g.scorer.name}{g.isOwnGoal ? " (A)" : ""}
+                  {g.minute ? ` ${g.minute}'` : ""}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
-      {/* MVP */}
+      {/* ── MVP ────────────────────────────────────────────────────── */}
       {mvpPlayer && (
-        <div className="card p-5 text-center" style={{ borderLeft: "3px solid #E8A000" }}>
-          <div className="over-label mb-1">MVP della partita</div>
-          <div className="font-display font-black text-2xl uppercase" style={{ color: "var(--text-primary)" }}>
-            ★ {mvpPlayer.name}
-          </div>
-          <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>{mvpPlayer.footballTeam.name}</div>
+        <div
+          className="bg-white rounded-3xl p-6"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+        >
+          <p className="text-xs text-black/40 mb-1">MVP della partita</p>
+          <p className="text-base font-semibold text-(--text-primary)">⭐ {mvpPlayer.name}</p>
         </div>
       )}
 
-      {/* Finestra voto aperta */}
+      {/* ── Vota MVP ───────────────────────────────────────────────── */}
       {windowOpen && (
         <Link
           href={user ? `/vota/${matchId}` : "/login"}
-          className="rounded-xl p-4 flex items-center justify-between gap-3 transition-opacity hover:opacity-90"
-          style={{ background: "var(--primary-light)", border: "1px solid var(--border-medium)" }}
+          className="bg-white rounded-3xl p-6 flex items-center gap-4"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
-          <div>
-            <div className="text-sm font-black" style={{ color: "var(--primary)" }}>
-              {userVote
-                ? `✓ Hai votato: ${userVote.player.name}`
-                : "🗳️ Finestra di voto MVP aperta"}
-            </div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-              {userVote
-                ? "Tocca per vedere il dettaglio del voto"
-                : user
-                ? "Tocca per votare il tuo MVP"
-                : "Accedi per votare"}
-            </div>
+          <div className="flex-1">
+            <h2
+              className="uppercase text-base font-medium text-(--text-primary) mb-1"
+              style={{ fontFamily: "var(--font-tallica)" }}
+            >
+              Vota l&apos;MVP della giornata
+            </h2>
+            <p className="text-sm text-black/60 mb-3">
+              Scegli il migliore in campo e fai contare il tuo voto!
+            </p>
+            <span className="text-sm font-semibold text-(--text-primary)">
+              {userVote ? `✓ Hai votato: ${userVote.player.name}` : "Accedi e vota"}
+            </span>
           </div>
-          <i className="pi pi-chevron-right text-sm flex-shrink-0" style={{ color: "var(--primary)" }} />
+          <i className="pi pi-chevron-right shrink-0" style={{ color: "var(--primary)", fontSize: 14 }} />
         </Link>
       )}
 
-      {/* Giocatori in campo */}
+      {/* ── Giocatori ──────────────────────────────────────────────── */}
       {match.players.length > 0 && (
-        <div>
-          <div className="over-label mb-3">
-            Giocatori in campo ({match.players.length})
+        <div
+          className="bg-white rounded-3xl overflow-hidden"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+        >
+          <div className="px-6 pt-6 pb-3">
+            <h2
+              className="uppercase text-base font-medium text-(--text-primary)"
+              style={{ fontFamily: "var(--font-tallica)" }}
+            >
+              Giocatori
+            </h2>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {match.players.map(({ player }) => (
-              <div
-                key={player.id}
-                className="card p-3 flex items-center gap-2.5"
-              >
-                <RoleBadge role={player.role} />
-                <div className="min-w-0">
-                  <div className="font-display font-black text-[12px] uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                    {player.name}
-                  </div>
-                  <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
-                    {player.footballTeam.name}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Bonus */}
-      {match.status === "CONCLUDED" && match.bonuses.length > 0 && (
-        <div>
-          <div className="over-label mb-3">Bonus assegnati</div>
-          <div className="card overflow-hidden">
-            {[...bonusByPlayer.entries()].map(([playerName, bonuses], index, entries) => (
-              <div
-                key={playerName}
-                className="px-4 py-3"
-                style={index < entries.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
-              >
-                <div className="font-display font-black text-[13px] uppercase mb-2" style={{ color: "var(--text-primary)" }}>
-                  {playerName}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {bonuses.map((b) => (
-                    <span
-                      key={b.id}
-                      className="text-[11px] px-2 py-0.5 rounded-full font-bold"
-                      style={
-                        Number(b.points) >= 0
-                          ? { background: "#ECFDF5", color: "#065F46" }
-                          : { background: "#FEF2F2", color: "#991B1B" }
-                      }
-                    >
-                      {b.bonusType.code}
-                      {b.quantity > 1 && ` ×${b.quantity}`} {Number(b.points) > 0 ? "+" : ""}
-                      {Number(b.points)}pt
-                    </span>
-                  ))}
-                </div>
+          <div className="flex" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+            {/* Home column */}
+            <div className="flex-1 min-w-0" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
+              {/* Team header */}
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
+                {match.homeTeam?.logoUrl ? (
+                  <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-5 h-5 object-contain shrink-0" />
+                ) : match.homeTeam?.countryCode ? (
+                  <img src={`https://flagcdn.com/w40/${match.homeTeam.countryCode.toLowerCase()}.png`} alt={match.homeTeam.name} className="w-5 h-3 object-contain rounded-sm shrink-0" />
+                ) : null}
+                <span className="text-xs font-semibold text-(--text-primary) truncate">
+                  {match.homeTeam?.shortName ?? match.homeTeam?.name ?? "Casa"}
+                </span>
               </div>
-            ))}
+              {homePlayers.map(({ player }) => (
+                <div key={player.id} className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: "1px solid rgba(9,20,76,0.03)" }}>
+                  <i className="pi pi-user shrink-0" style={{ fontSize: 12, color: "rgba(9,20,76,0.3)" }} />
+                  <span className="text-sm text-black truncate">{player.name}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Away column */}
+            <div className="flex-1 min-w-0">
+              {/* Team header */}
+              <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
+                {match.awayTeam?.logoUrl ? (
+                  <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-5 h-5 object-contain shrink-0" />
+                ) : match.awayTeam?.countryCode ? (
+                  <img src={`https://flagcdn.com/w40/${match.awayTeam.countryCode.toLowerCase()}.png`} alt={match.awayTeam.name} className="w-5 h-3 object-contain rounded-sm shrink-0" />
+                ) : null}
+                <span className="text-xs font-semibold text-(--text-primary) truncate">
+                  {match.awayTeam?.shortName ?? match.awayTeam?.name ?? "Ospiti"}
+                </span>
+              </div>
+              {awayPlayers.map(({ player }) => (
+                <div key={player.id} className="flex items-center gap-2 px-4 py-2.5" style={{ borderBottom: "1px solid rgba(9,20,76,0.03)" }}>
+                  <i className="pi pi-user shrink-0" style={{ fontSize: 12, color: "rgba(9,20,76,0.3)" }} />
+                  <span className="text-sm text-black truncate">{player.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
