@@ -276,7 +276,7 @@ export default async function HomePage({
           <section className="max-w-lg mx-auto w-full px-4 my-10">
             <div className="flex items-center justify-between mb-6">
               <div
-                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium flex items-center gap-1"
+                className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium flex items-center gap-1"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
                 <span>Prossime</span>
@@ -284,7 +284,7 @@ export default async function HomePage({
               </div>
               <Link
                 href="/partite"
-                className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
               >
                 Vedi tutto
                 <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
@@ -301,7 +301,7 @@ export default async function HomePage({
                     {/* Home team */}
                     <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
                       <MatchTeamLogo name={m.homeTeam!.name} shortName={m.homeTeam!.shortName} countryCode={m.homeTeam!.countryCode} logoUrl={m.homeTeam!.logoUrl} />
-                      <span className="text-xs font-normal leading-normal text-center w-full text-black">
+                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
                         {m.homeTeam!.shortName ?? m.homeTeam!.name}
                       </span>
                     </div>
@@ -324,7 +324,7 @@ export default async function HomePage({
                     {/* Away team */}
                     <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
                       <MatchTeamLogo name={m.awayTeam!.name} shortName={m.awayTeam!.shortName} countryCode={m.awayTeam!.countryCode} logoUrl={m.awayTeam!.logoUrl} />
-                      <span className="text-xs font-normal leading-normal text-center w-full text-black">
+                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
                         {m.awayTeam!.shortName ?? m.awayTeam!.name}
                       </span>
                     </div>
@@ -372,7 +372,7 @@ export default async function HomePage({
         {/* ══ GIOCA ═════════════════════════════════════════════════ */}
         <section className="max-w-lg mx-auto w-full px-4">
           <h2
-            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium mb-6"
+            className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium mb-6"
             style={{ fontFamily: "var(--font-tallica)" }}
           >
             Gioca
@@ -391,7 +391,7 @@ export default async function HomePage({
             </div>
             <div className="flex flex-col gap-3">
               <p
-                className="uppercase text-(--text-primary) text-sm leading-[34px] font-medium"
+                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
                 Fantasy Football
@@ -409,7 +409,7 @@ export default async function HomePage({
           <section className="max-w-lg mx-auto px-4 my-10">
             <div className="mx-auto flex items-center justify-between mb-6">
               <h2
-                className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
+                className="uppercase text-xl font-medium leading-8.5 text-(--text-primary)"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
                 CLASSIFICA
@@ -430,21 +430,21 @@ export default async function HomePage({
                 >
                   {/* Card header */}
                   <div className="px-6 pt-6 pb-3">
-                    <h3
-                      className="uppercase text-sm font-medium text-(--text-primary)"
+                    <p
+                      className="uppercase text-base font-medium text-(--text-primary)"
                       style={{ fontFamily: "var(--font-tallica)" }}
                     >
                       {g.name}
-                    </h3>
+                    </p>
                   </div>
 
                   {/* Table header */}
                   <div className="flex items-center gap-4 px-6 pb-3">
-                    <span className="text-[10px] font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
-                    <span className="text-[10px] font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
-                    <span className="text-[10px] font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
-                    <span className="text-[10px] font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
-                    <span className="text-[10px] font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
                   </div>
 
                   {/* Rows */}
@@ -455,21 +455,21 @@ export default async function HomePage({
                       style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
                     >
                       <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
                         {row.logoUrl ? (
                           <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
                         ) : row.countryCode ? (
                           <img src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
                         ) : null}
-                        <span className="text-xs font-normal text-(--text-primary) truncate">
+                        <span className="text-sm font-normal text-(--text-primary) truncate">
                           {row.shortName ?? row.name}
                         </span>
                       </div>
-                      <span className="text-xs text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-                      <span className="text-xs text-black w-7 text-center shrink-0 tabular-nums">
+                      <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
+                      <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
                         {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
                       </span>
-                      <span className="text-xs font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.points}</span>
+                      <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.points}</span>
                     </div>
                   ))}
                 </Link>
@@ -497,8 +497,8 @@ export default async function HomePage({
 
               {/* Table header */}
               <div className="flex items-center px-6 pb-3 gap-4">
-                <span className="text-[10px] font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
-                <span className="text-[10px] font-semibold uppercase text-black/65 shrink-0">GOL</span>
+                <span className="text-xs font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
+                <span className="text-xs font-semibold uppercase text-black/65 shrink-0">GOL</span>
               </div>
 
               {/* Rows */}
@@ -517,9 +517,9 @@ export default async function HomePage({
                         <img src={`https://flagcdn.com/w40/${player.footballTeam.countryCode.toLowerCase()}.png`} alt={player.footballTeam.name} className="w-full h-auto object-contain rounded-sm" />
                       ) : null}
                     </div>
-                    <span className="text-xs font-normal text-black truncate">{player.name}</span>
+                    <span className="text-sm font-normal text-black truncate">{player.name}</span>
                   </div>
-                  <span className="text-xs font-bold text-black shrink-0 tabular-nums">
+                  <span className="text-sm font-bold text-black shrink-0 tabular-nums">
                     {player._count.goals}
                   </span>
                 </div>
