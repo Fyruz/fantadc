@@ -273,19 +273,21 @@ export default async function HomePage({
 
         {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
         {upcomingMatches.length > 0 && (
-          <section className="max-w-lg mx-auto w-full px-4 pb-2">
+          <section className="max-w-lg mx-auto w-full px-4 my-10">
             <div className="flex items-center justify-between mb-6">
-              <h2
-                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+              <div
+                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium flex items-center gap-1"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
-                PROSSIME PARTITE
-              </h2>
+                <span>Prossime</span>
+                <span>partite</span>
+              </div>
               <Link
                 href="/partite"
-                className="text-xs font-semibold text-(--text-primary)"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)"
               >
-                Vedi tutte
+                Vedi tutto
+                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
               </Link>
             </div>
 
@@ -307,14 +309,14 @@ export default async function HomePage({
                     {/* Center — girone + orario + data */}
                     <div className="flex flex-col items-center gap-2 shrink-0">
                       {m.group && (
-                        <span className="text-[10px] text-black/65">
+                        <span className="text-xs font-light text-black/65">
                           {m.group.name}
                         </span>
                       )}
                       <span className="text-base font-semibold leading-6 tabular-nums text-black">
                         {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                       </span>
-                      <span className="text-[10px] text-black/65">
+                      <span className="text-xs font-light text-black/65">
                         {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
                       </span>
                     </div>
@@ -335,7 +337,7 @@ export default async function HomePage({
 
         {/* ══ STATS ═════════════════════════════════════════════════ */}
         {/* {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4">
+          <section className="max-w-lg mx-auto w-full px-4 my-10">
             <div
               className="rounded-2xl overflow-hidden"
               style={{ background: "#fff", border: "1.5px solid var(--border-medium)", boxShadow: "0 2px 12px rgba(1,7,163,0.06)" }}
@@ -367,28 +369,64 @@ export default async function HomePage({
           </section>
         )} */}
 
+        {/* ══ GIOCA ═════════════════════════════════════════════════ */}
+        <section className="max-w-lg mx-auto w-full px-4">
+          <h2
+            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium mb-6"
+            style={{ fontFamily: "var(--font-tallica)" }}
+          >
+            Gioca
+          </h2>
+          <Link
+            href="/squadra"
+            className="flex flex-col gap-3 bg-white rounded-3xl overflow-hidden p-6"
+            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+          >
+            <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
+              <img
+                src="/images/fantasy-football-shirt.png"
+                alt="Fantasy Football"
+                className="h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col gap-3">
+              <p
+                className="uppercase text-(--text-primary) text-sm leading-[34px] font-medium"
+                style={{ fontFamily: "var(--font-tallica)" }}
+              >
+                Fantasy Football
+              </p>
+              <p className="text-sm text-black font-normal max-w-48">
+                Gestisci il tuo dream team in Danimarca&apos;s Cup!
+              </p>
+              <p className="text-sm font-semibold text-black">Gioca al FantaDC</p>
+            </div>
+          </Link>
+        </section>
+
         {/* ══ GIRONI ════════════════════════════════════════════════ */}
         {groupStandings.length > 0 && (
-          <section className="w-full py-4">
-            <div className="max-w-lg mx-auto px-4 flex items-center justify-between mb-3">
+          <section className="max-w-lg mx-auto px-4 my-10">
+            <div className="mx-auto flex items-center justify-between mb-6">
               <h2
                 className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
                 CLASSIFICA
               </h2>
-              <Link href="/gironi" className="text-xs font-semibold text-primary">
+              <Link href="/gironi" className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)">
                 Vedi tutto
+                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
               </Link>
             </div>
 
-            <div className="flex gap-4 overflow-x-auto px-4 py-3 [&::-webkit-scrollbar]:hidden">
+            <div className="grid grid-cols-1 gap-4">
               {groupStandings.map((g) => (
                 <Link
                   key={g.id}
                   href="/gironi"
-                  className="block shrink-0 rounded-3xl bg-white overflow-hidden pb-3"
-                  style={{ width: 360, border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+                  className="block rounded-3xl bg-white overflow-hidden pb-3"
+                  style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                 >
                   {/* Card header */}
                   <div className="px-6 pt-6 pb-3">
@@ -402,11 +440,11 @@ export default async function HomePage({
 
                   {/* Table header */}
                   <div className="flex items-center gap-4 px-6 pb-3">
-                    <span className="text-[8px] font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
-                    <span className="text-[8px] font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
-                    <span className="text-[8px] font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
-                    <span className="text-[8px] font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
-                    <span className="text-[8px] font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
+                    <span className="text-[10px] font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
+                    <span className="text-[10px] font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
+                    <span className="text-[10px] font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
+                    <span className="text-[10px] font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
+                    <span className="text-[10px] font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
                   </div>
 
                   {/* Rows */}
@@ -442,28 +480,25 @@ export default async function HomePage({
 
         {/* ══ MARCATORI ════════════════════════════════════════════ */}
         {topScorers.length > 0 && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4">
+          <section className="max-w-lg mx-auto px-4 pb-10">
             <div
               className="bg-white rounded-3xl overflow-hidden"
               style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
             >
               {/* Card header */}
-              <div className="flex items-center justify-between px-6 pt-6 pb-3">
+              <div className="px-6 pt-6 pb-3">
                 <h2
                   className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
                   style={{ fontFamily: "var(--font-tallica)" }}
                 >
                   MARCATORI
                 </h2>
-                <Link href="/marcatori" className="text-xs font-semibold text-primary">
-                  Vedi tutto
-                </Link>
               </div>
 
               {/* Table header */}
               <div className="flex items-center px-6 pb-3 gap-4">
-                <span className="text-[8px] font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
-                <span className="text-[8px] font-semibold uppercase text-black/65 shrink-0">GOL</span>
+                <span className="text-[10px] font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
+                <span className="text-[10px] font-semibold uppercase text-black/65 shrink-0">GOL</span>
               </div>
 
               {/* Rows */}
@@ -489,6 +524,12 @@ export default async function HomePage({
                   </span>
                 </div>
               ))}
+              <div className="px-6 py-4" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+                <Link href="/marcatori" className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)">
+                  Vedi classifica completa
+                  <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
+                </Link>
+              </div>
             </div>
           </section>
         )}
@@ -529,51 +570,6 @@ export default async function HomePage({
           </div>
         </section> */}
 
-        {/* ══ CTA BOTTOM — solo guest ═══════════════════════════════ */}
-        {!user && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4 pb-8">
-            <div
-              className="relative overflow-hidden rounded-3xl px-7 py-9 text-center"
-              style={{
-                background: "linear-gradient(140deg, #000228 0%, #0107A3 100%)",
-                boxShadow: "0 8px 40px rgba(1,7,163,0.28)",
-              }}
-            >
-              {/* Glow */}
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  top: "-30%", right: "-10%",
-                  width: "60%", height: "160%",
-                  background: "radial-gradient(circle, rgba(232,160,0,0.18) 0%, transparent 65%)",
-                }}
-              />
-              <div className="relative">
-                <div
-                  className="font-display font-black uppercase text-white leading-tight mb-2"
-                  style={{ fontSize: "clamp(1.6rem, 6vw, 2.2rem)" }}
-                >
-                  Pronto a giocare?
-                </div>
-                <p className="text-sm mb-7 max-w-xs mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
-                  Registrati, scegli i tuoi campioni e parti alla conquista della classifica.
-                </p>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-full font-display font-black text-base uppercase tracking-wide px-10 py-4"
-                  style={{
-                    background: "#E8A000",
-                    color: "#06073D",
-                    boxShadow: "0 6px 24px rgba(232,160,0,0.5)",
-                  }}
-                >
-                  <i className="pi pi-user-plus" style={{ fontSize: 14 }} />
-                  Inizia ora
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
 
       <footer

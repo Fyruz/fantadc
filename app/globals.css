@@ -17,10 +17,11 @@
 }
 
 :root {
-  --font-geist-sans: "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-geist-sans: var(--font-inter, "Inter"), "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-geist-mono: "SFMono-Regular", "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
   --font-barlow-condensed: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", "Franklin Gothic Medium", Arial, sans-serif;
   --font-tallica: "Tallica", "Arial Narrow", Arial, sans-serif;
+  --tallica-tracking: 0.04em;
 
   /* ── Brand ─────────────────────────────── */
   --primary: #0107A3;
@@ -45,7 +46,7 @@
   --border-active: #0107A3;
 
   /* ── Text ───────────────────────────────── */
-  --text-primary: #06073D;
+  --text-primary: #09144C;
   --text-secondary: #2D2F7A;
   --text-muted: #6466A3;
   --text-disabled: #9A9CC4;

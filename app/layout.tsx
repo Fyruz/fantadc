@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
@@ -7,6 +8,13 @@ import Providers from "@/components/providers";
 import PwaController from "@/components/pwa/pwa-controller";
 import VisitTracker from "@/components/visit-tracker";
 import { getSiteUrl, siteConfig } from "@/lib/site";
+
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "900"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 const metadataBase = new URL(getSiteUrl());
 
@@ -67,8 +75,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="it" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
+    <html lang="it" className={`h-full antialiased ${inter.variable}`}>
+      <body className="min-h-full flex flex-col font-[var(--font-inter)]">
         <Providers>
           {children}
           <VisitTracker />
