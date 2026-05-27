@@ -171,7 +171,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               </div>
               {/* Ball icon */}
               <div className="shrink-0 flex items-start justify-center w-10">
-                <i className="pi pi-circle-fill" style={{ fontSize: 10, color: "rgba(9,20,76,0.2)" }} />
+                <img src="/icons/ball.svg" alt="goal" className="w-3 h-3" />
               </div>
               {/* Away scorers */}
               <div className="flex-1 flex flex-col items-start gap-2">
@@ -285,7 +285,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                     <img src={`https://flagcdn.com/w40/${match.awayTeam.countryCode.toLowerCase()}.png`} alt={match.awayTeam.name} className="w-full h-auto object-contain rounded-sm" />
                   ) : null}
                 </div>
-                <span className="text-xs font-semibold text-(--text-primary) truncate">
+                <span className="text-sm font-medium text-black truncate">
                   {match.awayTeam?.shortName ?? match.awayTeam?.name ?? "Ospiti"}
                 </span>
               </div>

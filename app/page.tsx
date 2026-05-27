@@ -414,7 +414,7 @@ export default async function HomePage({
               >
                 CLASSIFICA
               </h2>
-              <Link href="/gironi" className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)">
+              <Link href="/gironi" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
                 Vedi tutto
                 <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
               </Link>
@@ -524,8 +524,8 @@ export default async function HomePage({
                   </span>
                 </div>
               ))}
-              <div className="px-6 py-4" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
-                <Link href="/marcatori" className="inline-flex items-center gap-2 text-xs font-semibold text-(--text-primary)">
+              <div className="p-6" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+                <Link href="/marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
                   Vedi classifica completa
                   <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
                 </Link>
