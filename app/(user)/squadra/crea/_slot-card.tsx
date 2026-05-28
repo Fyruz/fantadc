@@ -5,11 +5,11 @@ import { getTeamCode } from "./_types";
 import type { Player, SlotKey } from "./_types";
 
 const SLOT_LABEL: Record<SlotKey, string> = {
-  goalkeeper: "GK",
-  topLeft: "G1",
-  topRight: "G2",
-  bottomLeft: "G3",
-  bottomRight: "G4",
+  goalkeeper: "Portiere",
+  topLeft: "Giocat. 1",
+  topRight: "Giocat. 2",
+  bottomLeft: "Giocat. 3",
+  bottomRight: "Giocat. 4",
 };
 
 const baseClass =
