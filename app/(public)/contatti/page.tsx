@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "Contatti",
@@ -109,12 +110,13 @@ export default function ContattiPage() {
             <div className="px-5 py-5 flex flex-col gap-4">
               {/* Icon + headline */}
               <div className="flex items-start gap-3">
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: "rgba(255,255,255,0.12)" }}
-                >
-                  <i className="pi pi-bolt text-lg text-white" />
-                </div>
+                <Image
+                  src="/logo_qursor.png"
+                  alt="Qursor"
+                  width={40}
+                  height={40}
+                  className="rounded-xl shrink-0"
+                />
                 <div>
                   <div className="text-[11px] font-black uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.5)" }}>
                     Qursor
