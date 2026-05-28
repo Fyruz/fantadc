@@ -548,42 +548,54 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         closable={false}
         dismissableMask
         position={isMobile ? "bottom" : "center"}
-        style={isMobile ? { width: "100%", margin: 0 } : { width: "min(26rem, 96vw)" }}
+        style={isMobile ? { width: "100%", margin: 0 } : { width: "min(28rem, 96vw)" }}
         pt={
           isMobile
             ? {
                 root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
                 header: { className: "!px-4 !py-0" },
-                content: { className: "!px-4 !pt-0 !pb-6" },
+                content: { className: "!px-4 !pt-0 !pb-8" },
               }
             : {
                 root: { style: { borderRadius: "22px", overflow: "hidden" } },
-                header: { className: "!px-6 !py-4 !border-b !border-[var(--border-soft)]" },
-                content: { className: "!px-6 !pt-4 !pb-6" },
+                header: { className: "!px-5 !py-0 !border-b !border-[var(--border-soft)]" },
+                content: { className: "!px-5 !pt-3 !pb-6" },
               }
         }
         header={
-          <div className="flex items-center justify-between gap-3 py-3">
-            <div className="flex items-center gap-2">
-              <div
-                className="flex h-8 w-8 items-center justify-center rounded-full"
-                style={{ background: "var(--primary-light)" }}
-              >
-                <i className="pi pi-star text-sm" style={{ color: "var(--primary)" }} />
+          <div className="flex flex-col">
+            {isMobile && (
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="h-1 w-10 rounded-full" style={{ background: "var(--border-medium)" }} />
               </div>
-              <span className="text-[14px] font-extrabold" style={{ color: "var(--text-primary)" }}>
-                Come funziona il fanta
-              </span>
+            )}
+            <div className="flex items-center justify-between gap-3 py-3">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-xl"
+                  style={{ background: "var(--primary-light)" }}
+                >
+                  <i className="pi pi-star-fill text-sm" style={{ color: "var(--primary)" }} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    Guida rapida
+                  </div>
+                  <div className="text-[15px] font-extrabold leading-tight" style={{ color: "var(--text-primary)" }}>
+                    Come funziona il Fanta
+                  </div>
+                </div>
+              </div>
+              <Button
+                type="button"
+                icon="pi pi-times"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Chiudi"
+                onClick={() => setRulesVisible(false)}
+              />
             </div>
-            <Button
-              type="button"
-              icon="pi pi-times"
-              text
-              rounded
-              severity="secondary"
-              aria-label="Chiudi"
-              onClick={() => setRulesVisible(false)}
-            />
           </div>
         }
         modal
@@ -591,65 +603,70 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         resizable={false}
         focusOnShow={false}
       >
-        <div className="flex flex-col gap-3">
-          {[
-            {
-              icon: "pi-users",
-              color: "var(--primary)",
-              bg: "var(--primary-light)",
-              title: "La tua rosa",
-              text: "Scegli 1 portiere e 4 giocatori di movimento.",
-            },
-            {
-              icon: "pi-shield",
-              color: "#7C3AED",
-              bg: "#F5F3FF",
-              title: "Una squadra per slot",
-              text: "Puoi prendere al massimo 1 giocatore per squadra. Quando selezioni un giocatore, la sua squadra sparisce dalle opzioni disponibili.",
-            },
-            {
-              icon: "pi-lock",
-              color: "#DC2626",
-              bg: "#FEF2F2",
-              title: "La rosa è definitiva",
-              text: "Una volta confermata, la squadra non si può più modificare. Scegli con cura.",
-            },
-            {
-              icon: "pi-bolt",
-              color: "#D97706",
-              bg: "#FFFBEB",
-              title: "Punti e bonus segreti",
-              text: "I punti non si assegnano solo per i goal. Ci sono bonus segreti per le giocate più spettacolari — sprona i tuoi giocatori a fare cose epiche.",
-            },
-            {
-              icon: "pi-trophy",
-              color: "#059669",
-              bg: "#ECFDF5",
-              title: "Vota l'MVP",
-              text: "Dopo ogni partita puoi votare il tuo MVP. Non dimenticarti — è un modo concreto per fare punti.",
-            },
-          ].map((rule) => (
-            <div
-              key={rule.title}
-              className="flex items-start gap-3 rounded-2xl p-3"
-              style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
-            >
+        <div className="overflow-y-auto" style={{ maxHeight: isMobile ? "58vh" : "70vh" }}>
+          <div
+            className="overflow-hidden rounded-2xl"
+            style={{ border: "1px solid var(--border-soft)" }}
+          >
+            {[
+              {
+                icon: "pi-users",
+                color: "var(--primary)",
+                bg: "var(--primary-light)",
+                title: "La tua rosa",
+                text: "Scegli 1 portiere e 4 giocatori di movimento.",
+              },
+              {
+                icon: "pi-shield",
+                color: "#7C3AED",
+                bg: "#F5F3FF",
+                title: "Una squadra per slot",
+                text: "Puoi prendere al massimo 1 giocatore per squadra. Quando selezioni un giocatore, la sua squadra sparisce dalle opzioni disponibili.",
+              },
+              {
+                icon: "pi-lock",
+                color: "#DC2626",
+                bg: "#FEF2F2",
+                title: "La rosa è definitiva",
+                text: "Una volta confermata, la squadra non si può più modificare. Scegli con cura.",
+              },
+              {
+                icon: "pi-bolt",
+                color: "#D97706",
+                bg: "#FFFBEB",
+                title: "Punti e bonus segreti",
+                text: "I punti non si assegnano solo per i goal. Ci sono bonus segreti per le giocate più spettacolari - sprona i tuoi giocatori a fare cose epiche.",
+              },
+              {
+                icon: "pi-trophy",
+                color: "#059669",
+                bg: "#ECFDF5",
+                title: "Vota l'MVP",
+                text: "Dopo ogni partita puoi votare il tuo MVP. Non dimenticarti - è un modo concreto per fare punti.",
+              },
+            ].map((rule, i, arr) => (
               <div
-                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
-                style={{ background: rule.bg }}
+                key={rule.title}
+                className="flex items-start gap-3 px-4 py-3.5 bg-white"
+                style={i < arr.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
               >
-                <i className={`pi ${rule.icon} text-sm`} style={{ color: rule.color }} />
-              </div>
-              <div>
-                <div className="text-[12px] font-extrabold" style={{ color: "var(--text-primary)" }}>
-                  {rule.title}
+                <div
+                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: rule.bg }}
+                >
+                  <i className={`pi ${rule.icon} text-xs`} style={{ color: rule.color }} />
                 </div>
-                <div className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                  {rule.text}
+                <div className="min-w-0">
+                  <div className="text-[12px] font-extrabold" style={{ color: "var(--text-primary)" }}>
+                    {rule.title}
+                  </div>
+                  <div className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                    {rule.text}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </Dialog>
 

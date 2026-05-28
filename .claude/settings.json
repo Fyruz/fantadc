@@ -25,7 +25,10 @@
       "Skill(superpowers:writing-plans)",
       "Skill(superpowers:writing-plans:*)",
       "Skill(superpowers:executing-plans)",
-      "Skill(superpowers:executing-plans:*)"
+      "Skill(superpowers:executing-plans:*)",
+      "Bash(Get-ChildItem -Recurse -Filter \"page.tsx\" \"e:\\\\Developing\\\\fantadc\\\\app\\\\\\(admin\\)\")",
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(Sort-Object)"
     ],
     "additionalDirectories": [
       "e:\\Developing\\fantadc\\docs\\superpowers\\specs"
