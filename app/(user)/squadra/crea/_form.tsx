@@ -80,6 +80,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
   const [menuSlot, setMenuSlot] = useState<SlotKey | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [rulesVisible, setRulesVisible] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") {
@@ -215,18 +216,24 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       action={action}
       className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
     >
-      {/* Mobile: nome squadra + info statica */}
+      {/* Mobile: nome squadra + link regole */}
       <div className="flex flex-col items-center gap-1.5 lg:hidden">
         <InputText
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           className="w-full max-w-xs text-center"
-          placeholder="es. I Guerrieri"
+          placeholder="Inserisci il nome della tua squadra"
           maxLength={40}
         />
-        <p className="text-center text-[10px] text-[var(--text-muted)]">
-          1 portiere · 4 giocatori · 5 squadre diverse
-        </p>
+        <button
+          type="button"
+          onClick={() => setRulesVisible(true)}
+          className="flex items-center gap-1 text-center text-[10px] font-semibold transition-colors hover:text-[var(--primary)]"
+          style={{ color: "var(--text-muted)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
+        >
+          <i className="pi pi-info-circle text-[10px]" />
+          Come funziona il Fanta
+        </button>
       </div>
 
       {/* Campo + sidebar desktop */}
@@ -287,7 +294,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="w-full"
-                placeholder="es. I Guerrieri"
+                placeholder="Inserisci il nome della tua squadra"
                 maxLength={40}
               />
               {state?.success === false && state.errors?.name && (
@@ -532,6 +539,118 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
             </div>
           </div>
         )}
+      </Dialog>
+
+      {/* Bottom sheet: regole del fanta */}
+      <Dialog
+        visible={rulesVisible}
+        onHide={() => setRulesVisible(false)}
+        closable={false}
+        dismissableMask
+        position={isMobile ? "bottom" : "center"}
+        style={isMobile ? { width: "100%", margin: 0 } : { width: "min(26rem, 96vw)" }}
+        pt={
+          isMobile
+            ? {
+                root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
+                header: { className: "!px-4 !py-0" },
+                content: { className: "!px-4 !pt-0 !pb-6" },
+              }
+            : {
+                root: { style: { borderRadius: "22px", overflow: "hidden" } },
+                header: { className: "!px-6 !py-4 !border-b !border-[var(--border-soft)]" },
+                content: { className: "!px-6 !pt-4 !pb-6" },
+              }
+        }
+        header={
+          <div className="flex items-center justify-between gap-3 py-3">
+            <div className="flex items-center gap-2">
+              <div
+                className="flex h-8 w-8 items-center justify-center rounded-full"
+                style={{ background: "var(--primary-light)" }}
+              >
+                <i className="pi pi-star text-sm" style={{ color: "var(--primary)" }} />
+              </div>
+              <span className="text-[14px] font-extrabold" style={{ color: "var(--text-primary)" }}>
+                Come funziona il fanta
+              </span>
+            </div>
+            <Button
+              type="button"
+              icon="pi pi-times"
+              text
+              rounded
+              severity="secondary"
+              aria-label="Chiudi"
+              onClick={() => setRulesVisible(false)}
+            />
+          </div>
+        }
+        modal
+        draggable={false}
+        resizable={false}
+        focusOnShow={false}
+      >
+        <div className="flex flex-col gap-3">
+          {[
+            {
+              icon: "pi-users",
+              color: "var(--primary)",
+              bg: "var(--primary-light)",
+              title: "La tua rosa",
+              text: "Scegli 1 portiere e 4 giocatori di movimento.",
+            },
+            {
+              icon: "pi-shield",
+              color: "#7C3AED",
+              bg: "#F5F3FF",
+              title: "Una squadra per slot",
+              text: "Puoi prendere al massimo 1 giocatore per squadra. Quando selezioni un giocatore, la sua squadra sparisce dalle opzioni disponibili.",
+            },
+            {
+              icon: "pi-lock",
+              color: "#DC2626",
+              bg: "#FEF2F2",
+              title: "La rosa è definitiva",
+              text: "Una volta confermata, la squadra non si può più modificare. Scegli con cura.",
+            },
+            {
+              icon: "pi-bolt",
+              color: "#D97706",
+              bg: "#FFFBEB",
+              title: "Punti e bonus segreti",
+              text: "I punti non si assegnano solo per i goal. Ci sono bonus segreti per le giocate più spettacolari — sprona i tuoi giocatori a fare cose epiche.",
+            },
+            {
+              icon: "pi-trophy",
+              color: "#059669",
+              bg: "#ECFDF5",
+              title: "Vota l'MVP",
+              text: "Dopo ogni partita puoi votare il tuo MVP. Non dimenticarti — è un modo concreto per fare punti.",
+            },
+          ].map((rule) => (
+            <div
+              key={rule.title}
+              className="flex items-start gap-3 rounded-2xl p-3"
+              style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
+            >
+              <div
+                className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+                style={{ background: rule.bg }}
+              >
+                <i className={`pi ${rule.icon} text-sm`} style={{ color: rule.color }} />
+              </div>
+              <div>
+                <div className="text-[12px] font-extrabold" style={{ color: "var(--text-primary)" }}>
+                  {rule.title}
+                </div>
+                <div className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  {rule.text}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </Dialog>
 
       {/* Sheet selezione giocatore */}
