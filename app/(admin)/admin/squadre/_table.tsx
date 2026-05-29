@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
 type Row = {
   id: number;
   name: string;
   shortName: string | null;
+  countryCode: string | null;
+  logoUrl: string | null;
   playerCount: number;
   matchCount: number;
 };
@@ -37,6 +40,7 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
               style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
               onClick={() => router.push(`/admin/squadre/${row.id}/edit`)}
             >
+              <TeamFlagAvatar row={row} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
                   <span className="font-semibold text-sm truncate" style={{ color: "var(--text-primary)" }}>
@@ -68,6 +72,19 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
                       ⚠ nessun giocatore
                     </span>
                   )}
+                  {!row.countryCode && (
+                    <span
+                      className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{
+                        background: "var(--surface-2)",
+                        color: "var(--text-secondary)",
+                        border: "1px solid var(--border-medium)",
+                      }}
+                    >
+                      <i className="pi pi-globe text-[9px]" />
+                      Nazione non impostata
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex items-center gap-1 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -97,5 +114,32 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
         </>
       )}
     </div>
+  );
+}
+
+function TeamFlagAvatar({ row }: { row: Row }) {
+  const [broken, setBroken] = useState(false);
+  const fallback = (row.shortName ?? row.name).slice(0, 2).toUpperCase();
+  const src = row.logoUrl ?? getFlagUrlFromCountryCode(row.countryCode);
+
+  if (!src || broken) {
+    return (
+      <div
+        className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-[11px] flex-shrink-0"
+        style={{ background: "var(--surface-2)", color: "var(--text-secondary)" }}
+      >
+        {fallback}
+      </div>
+    );
+  }
+
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={row.name}
+      className="w-9 h-9 object-contain rounded-lg border border-[var(--border-soft)] bg-white p-0.5 flex-shrink-0"
+      onError={() => setBroken(true)}
+    />
   );
 }

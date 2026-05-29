@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DISCORD_WEBHOOK_URL = credentials('discord-webhook-internal')
+        DISCORD_WEBHOOK_URL = credentials('discord-qursor-webhook')
         FULL_PATH_BRANCH = "${sh(script:'git name-rev --name-only HEAD', returnStdout: true).trim()}"
         BRANCH_NAME = FULL_PATH_BRANCH.substring(FULL_PATH_BRANCH.lastIndexOf('/') + 1, FULL_PATH_BRANCH.length())
         PROJECT_NAME = 'FANTADC'

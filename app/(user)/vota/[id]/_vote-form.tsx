@@ -2,107 +2,257 @@
 
 import { useActionState, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
 import { castVote } from "@/app/actions/user/vote";
 
-type Player = { id: number; name: string; footballTeam: { name: string } };
+type Team = { id: number; name: string; countryCode: string | null; logoUrl: string | null };
+type Player = {
+  id: number;
+  name: string;
+  role: string;
+  footballTeamId: number;
+  footballTeam: Team;
+};
 
-export default function VoteForm({ matchId, players }: { matchId: number; players: Player[] }) {
+function TeamLogo({ team, size = 24 }: { team: Team; size?: number }) {
+  if (team.logoUrl)
+    return <img src={team.logoUrl} alt={team.name} style={{ width: size, height: size, objectFit: "contain" }} />;
+  if (team.countryCode)
+    return <img src={`https://flagcdn.com/w40/${team.countryCode.toLowerCase()}.png`} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
+  return null;
+}
+
+export default function VoteForm({
+  matchId,
+  userVote,
+  homeTeam,
+  awayTeam,
+  players,
+}: {
+  matchId: number;
+  userVote: { playerName: string } | null;
+  homeTeam: Team | null;
+  awayTeam: Team | null;
+  players: Player[];
+}) {
   const [state, action, pending] = useActionState(castVote, undefined);
-  const [pendingPlayer, setPendingPlayer] = useState<Player | null>(null);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [teamFilter, setTeamFilter] = useState<number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const playerIdRef = useRef<HTMLInputElement>(null);
 
   const handleConfirm = () => {
-    if (!pendingPlayer || !playerIdRef.current || !formRef.current) return;
-    playerIdRef.current.value = String(pendingPlayer.id);
-    setPendingPlayer(null);
+    if (!selectedPlayer || !playerIdRef.current || !formRef.current) return;
+    playerIdRef.current.value = String(selectedPlayer.id);
     formRef.current.requestSubmit();
   };
 
+  const filteredPlayers = teamFilter
+    ? players.filter((p) => p.footballTeamId === teamFilter)
+    : players;
+
+  const outfield = filteredPlayers.filter((p) => p.role !== "P");
+  const goalkeepers = filteredPlayers.filter((p) => p.role === "P");
+
   if (state?.success) {
     return (
-      <div className="card p-8 text-center">
-        <div className="text-3xl mb-2">✓</div>
-        <div className="font-display font-black text-lg uppercase" style={{ color: "#065F46" }}>
-          VOTO REGISTRATO!
-        </div>
-        <div className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Il risultato sarà visibile alla chiusura della finestra di voto.
-        </div>
+      <div
+        className="bg-white rounded-3xl p-8 text-center"
+        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+      >
+        <p className="text-sm font-semibold text-(--text-primary)">✓ Voto registrato!</p>
+        <p className="text-xs text-black/50 mt-1">Il risultato sarà visibile alla chiusura della finestra di voto.</p>
       </div>
     );
   }
 
+  const votedName = userVote?.playerName;
+
   return (
     <>
-      <form ref={formRef} action={action} className="flex flex-col gap-2">
+      <form ref={formRef} action={action} style={{ display: "contents" }}>
         <input type="hidden" name="matchId" value={matchId} />
         <input type="hidden" name="playerId" ref={playerIdRef} />
-        {players.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            disabled={pending}
-            onClick={() => setPendingPlayer(p)}
-            className="card px-4 py-3.5 flex items-center justify-between text-left w-full transition-colors hover:bg-[var(--surface-1)] active:bg-[var(--surface-2)] disabled:opacity-50"
-          >
-            <span className="font-display font-black text-[13px] uppercase" style={{ color: "var(--text-primary)" }}>
-              {p.name}
-            </span>
-            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>{p.footballTeam.name}</span>
-          </button>
-        ))}
-        {state?.success === false && (
-          <p className="text-sm text-center" style={{ color: "#EF4444" }}>{state.message}</p>
-        )}
       </form>
 
+      {/* Selection card */}
+      <div
+        className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 text-center"
+        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+      >
+        <p className="text-base text-(--text-primary)">Chi sarà il Player of the Match?</p>
+
+        {selectedPlayer ? (
+          /* Selected state */
+          <>
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                <TeamLogo team={selectedPlayer.footballTeam} size={40} />
+              </div>
+              <span className="text-sm font-semibold text-(--text-primary)">{selectedPlayer.name}</span>
+              <button
+                type="button"
+                onClick={() => setSelectOpen(true)}
+                className="text-xs text-black/40 underline-offset-2 underline"
+              >
+                Cambia
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={pending}
+              className="w-full py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
+              style={{ background: "var(--primary)" }}
+            >
+              {pending ? "..." : "Conferma voto"}
+            </button>
+          </>
+        ) : votedName ? (
+          /* Already voted state */
+          <div className="flex flex-col items-center gap-1">
+            <i className="pi pi-check-circle text-2xl" style={{ color: "var(--primary)" }} />
+            <span className="text-sm font-semibold text-(--text-primary)">{votedName}</span>
+          </div>
+        ) : (
+          /* Default state */
+          <>
+            <button
+              type="button"
+              onClick={() => setSelectOpen(true)}
+              disabled={pending}
+              className="w-12 h-12 rounded-full flex items-center justify-center disabled:opacity-40"
+              style={{ border: "1.5px solid rgba(9,20,76,0.15)" }}
+            >
+              <i className="pi pi-plus" style={{ color: "var(--primary)", fontSize: 18 }} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelectOpen(true)}
+              disabled={pending}
+              className="text-sm font-semibold text-(--text-primary) disabled:opacity-40"
+            >
+              Seleziona giocatore
+            </button>
+          </>
+        )}
+
+        {state?.success === false && (
+          <p className="text-xs text-red-500">{state.message}</p>
+        )}
+      </div>
+
+      {/* Player selection modal */}
       <Dialog
-        visible={!!pendingPlayer}
-        onHide={() => setPendingPlayer(null)}
+        visible={selectOpen}
+        onHide={() => setSelectOpen(false)}
         header={null}
         closable={false}
         modal
         draggable={false}
         resizable={false}
-        style={{ width: "min(22rem, 92vw)" }}
-        contentStyle={{ padding: 0 }}
-        pt={{ root: { style: { borderRadius: "20px", overflow: "hidden" } } }}
+        style={{ width: "min(500px, 96vw)", maxHeight: "90vh" }}
+        contentStyle={{ padding: 0, overflowY: "auto" }}
+        pt={{ root: { style: { borderRadius: "24px", overflow: "hidden" } } }}
       >
-        <div className="px-6 pt-6 pb-2 text-center">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
-            style={{ background: "rgba(232,160,0,0.12)" }}
-          >
-            <i className="pi pi-star-fill text-xl" style={{ color: "#E8A000" }} />
+        <div className="flex flex-col">
+          {/* Close + title */}
+          <div className="flex items-start justify-between px-6 pt-6 pb-4">
+            <p className="text-base text-(--text-primary) flex-1 text-center">Chi sarà il Player of the Match?</p>
+            <button type="button" onClick={() => setSelectOpen(false)} className="shrink-0 ml-2">
+              <i className="pi pi-times" style={{ fontSize: 14, color: "rgba(9,20,76,0.4)" }} />
+            </button>
           </div>
-          <div className="font-display font-black text-lg uppercase mb-1" style={{ color: "var(--text-primary)" }}>
-            Conferma voto MVP
-          </div>
-          <p className="text-sm leading-5" style={{ color: "var(--text-muted)" }}>
-            Stai per votare
-          </p>
-          <p className="font-display font-black text-base uppercase mt-1" style={{ color: "var(--primary)" }}>
-            {pendingPlayer?.name}
-          </p>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-disabled)" }}>
-            {pendingPlayer?.footballTeam.name}
-          </p>
-        </div>
-        <div className="flex gap-2 px-4 pt-4 pb-5">
-          <Button
-            label="Annulla"
-            outlined
-            className="flex-1"
-            onClick={() => setPendingPlayer(null)}
-          />
-          <Button
-            label="Vota"
-            className="flex-1"
-            loading={pending}
-            onClick={handleConfirm}
-          />
+
+          {/* Team filter pills */}
+          {(homeTeam || awayTeam) && (
+            <div className="flex gap-3 px-6 pb-5 justify-center flex-wrap">
+              {homeTeam && (
+                <button
+                  type="button"
+                  onClick={() => setTeamFilter(teamFilter === homeTeam.id ? null : homeTeam.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+                  style={{
+                    border: `1.5px solid ${teamFilter === homeTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
+                    color: teamFilter === homeTeam.id ? "var(--primary)" : "var(--text-primary)",
+                    background: teamFilter === homeTeam.id ? "rgba(9,20,76,0.04)" : "white",
+                  }}
+                >
+                  <TeamLogo team={homeTeam} size={20} />
+                  {homeTeam.name}
+                </button>
+              )}
+              {awayTeam && (
+                <button
+                  type="button"
+                  onClick={() => setTeamFilter(teamFilter === awayTeam.id ? null : awayTeam.id)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+                  style={{
+                    border: `1.5px solid ${teamFilter === awayTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
+                    color: teamFilter === awayTeam.id ? "var(--primary)" : "var(--text-primary)",
+                    background: teamFilter === awayTeam.id ? "rgba(9,20,76,0.04)" : "white",
+                  }}
+                >
+                  <TeamLogo team={awayTeam} size={20} />
+                  {awayTeam.name}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Outfield players */}
+          {outfield.length > 0 && (
+            <div className="px-6 pb-4">
+              <p className="text-sm font-semibold text-(--text-primary) mb-4">Giocatori di movimento</p>
+              <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+                {outfield.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
+                    className="flex flex-col items-center gap-2 text-center"
+                  >
+                    <div className="relative flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                      <TeamLogo team={p.footballTeam} size={40} />
+                      {selectedPlayer?.id === p.id && (
+                        <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
+                      )}
+                    </div>
+                    <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
+                      {p.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Goalkeepers */}
+          {goalkeepers.length > 0 && (
+            <div className="px-6 pb-6">
+              <p className="text-sm font-semibold text-(--text-primary) mb-4">Portieri</p>
+              <div className="grid grid-cols-3 gap-x-4 gap-y-6">
+                {goalkeepers.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
+                    className="flex flex-col items-center gap-2 text-center"
+                  >
+                    <div className="relative flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                      <TeamLogo team={p.footballTeam} size={40} />
+                      {selectedPlayer?.id === p.id && (
+                        <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
+                      )}
+                    </div>
+                    <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
+                      {p.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </Dialog>
     </>

@@ -3,7 +3,35 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
-import StatusBadge from "@/components/status-badge";
+
+function MatchTeamLogo({
+  name, shortName, countryCode, logoUrl,
+}: {
+  name: string;
+  shortName: string | null;
+  countryCode: string | null;
+  logoUrl: string | null;
+}) {
+  const label = (shortName ?? name).slice(0, 2).toUpperCase();
+  const wrapClass = "w-12 h-12 p-1 flex justify-center items-center aspect-square shrink-0";
+  if (logoUrl) {
+    return <img src={logoUrl} alt={name} className={`${wrapClass} object-contain`} />;
+  }
+  if (countryCode) {
+    return (
+      <img
+        src={`https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`}
+        alt={name}
+        className={`${wrapClass} object-contain rounded`}
+      />
+    );
+  }
+  return (
+    <div className={`${wrapClass} rounded-full font-black text-sm text-white bg-primary`}>
+      {label}
+    </div>
+  );
+}
 
 export default async function HomePage({
   searchParams,
@@ -13,27 +41,20 @@ export default async function HomePage({
   const params = await searchParams;
   const accountDeleted = params.deleted === "1";
 
-  const [user, teamCount, playerCount, fantasyCount, spotlight, upcoming, groups] = await Promise.all([
+  const [user, teamCount, playerCount, fantasyCount, upcomingMatches, groups, topScorers] = await Promise.all([
     getCurrentUser(),
     db.footballTeam.count(),
     db.player.count(),
     db.fantasyTeam.count(),
-    // Ultima partita conclusa (con risultato)
-    db.match.findFirst({
-      where: { status: "CONCLUDED" },
-      orderBy: { startsAt: "desc" },
-      include: {
-        homeTeam: { select: { name: true, shortName: true } },
-        awayTeam: { select: { name: true, shortName: true } },
-      },
-    }),
-    // Prossima partita programmata
-    db.match.findFirst({
+    // Prossime partite programmate
+    db.match.findMany({
       where: { status: "SCHEDULED" },
       orderBy: { startsAt: "asc" },
+      take: 4,
       include: {
-        homeTeam: { select: { name: true, shortName: true } },
-        awayTeam: { select: { name: true, shortName: true } },
+        homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+        awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+        group: { select: { name: true } },
       },
     }),
     // Gironi — solo se esistono
@@ -41,7 +62,7 @@ export default async function HomePage({
       orderBy: { order: "asc" },
       include: {
         teams: {
-          include: { footballTeam: { select: { id: true, name: true, shortName: true } } },
+          include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
         },
         matches: {
           where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
@@ -49,12 +70,20 @@ export default async function HomePage({
         },
       },
     }),
+    // Top marcatori
+    db.player.findMany({
+      where: { goals: { some: { isOwnGoal: false } } },
+      orderBy: { goals: { _count: "desc" } },
+      take: 5,
+      include: {
+        footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+        _count: { select: { goals: { where: { isOwnGoal: false } } } },
+      },
+    }),
   ]);
 
-  const featured = upcoming ?? spotlight;
-
   // Compute inline standings per group (no DB round-trip needed — data already fetched)
-  type GroupRow = { teamId: number; name: string; shortName: string | null; played: number; points: number; qualified: boolean };
+  type GroupRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; goalDiff: number; points: number; qualified: boolean };
   const groupStandings = groups.map((g) => {
     const map = new Map<number, GroupRow>();
     for (const gt of g.teams) {
@@ -62,7 +91,10 @@ export default async function HomePage({
         teamId: gt.footballTeamId,
         name: gt.footballTeam.name,
         shortName: gt.footballTeam.shortName,
+        countryCode: gt.footballTeam.countryCode,
+        logoUrl: gt.footballTeam.logoUrl,
         played: 0,
+        goalDiff: 0,
         points: 0,
         qualified: gt.qualified,
       });
@@ -71,10 +103,10 @@ export default async function HomePage({
       if (!m.homeTeamId || !m.awayTeamId) continue;
       const hs = m.homeScore!; const as_ = m.awayScore!;
       const home = map.get(m.homeTeamId); const away = map.get(m.awayTeamId);
-      if (home) { home.played++; if (hs > as_) home.points += 3; else if (hs === as_) home.points += 1; }
-      if (away) { away.played++; if (as_ > hs) away.points += 3; else if (hs === as_) away.points += 1; }
+      if (home) { home.played++; home.goalDiff += hs - as_; if (hs > as_) home.points += 3; else if (hs === as_) home.points += 1; }
+      if (away) { away.played++; away.goalDiff += as_ - hs; if (as_ > hs) away.points += 3; else if (hs === as_) away.points += 1; }
     }
-    const rows = [...map.values()].sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, "it"));
+    const rows = [...map.values()].sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it"));
     return { id: g.id, slug: g.slug, name: g.name, rows };
   });
 
@@ -239,101 +271,73 @@ export default async function HomePage({
           </div>
         </section>
 
-        {/* ══ SPOTLIGHT PARTITA ═════════════════════════════════════ */}
-        {featured && (
-          <section className="max-w-lg mx-auto w-full px-4 -mt-1 pb-4">
-            <Link href={`/partite/${featured.id}`} className="block group">
+        {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
+        {upcomingMatches.length > 0 && (
+          <section className="max-w-lg mx-auto w-full px-4 my-10">
+            <div className="flex items-center justify-between mb-6">
               <div
-                className="rounded-3xl overflow-hidden"
-                style={{
-                  background: "#fff",
-                  border: "1.5px solid var(--border-medium)",
-                  boxShadow: "0 4px 24px rgba(1,7,163,0.10)",
-                }}
+                className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium flex items-center gap-1"
+                style={{ fontFamily: "var(--font-tallica)" }}
               >
-                {/* Header */}
-                <div
-                  className="flex items-center justify-between px-5 pt-4 pb-3"
-                  style={{ borderBottom: "1px solid var(--border-soft)" }}
-                >
-                  <span className="over-label">{upcoming ? "Prossima partita" : "Ultimo risultato"}</span>
-                  <StatusBadge status={featured.status} />
-                </div>
-
-                {/* Match */}
-                <div className="px-5 py-5 flex items-center gap-3">
-                  {/* Home */}
-                  <div className="flex-1 text-right">
-                    <div
-                      className="font-display font-black uppercase leading-tight"
-                      style={{ fontSize: "clamp(1rem, 4vw, 1.4rem)", color: "var(--text-primary)" }}
-                    >
-                      {featured.homeTeam?.shortName ?? featured.homeTeam?.name ?? featured.homeSeed ?? "TBD"}
-                    </div>
-                  </div>
-
-                  {/* Score or VS */}
-                  <div className="flex-shrink-0 text-center w-24">
-                    {featured.homeScore !== null && featured.awayScore !== null ? (
-                      <div
-                        className="font-display font-black tabular-nums"
-                        style={{ fontSize: "clamp(2rem, 8vw, 3rem)", color: "var(--primary)", lineHeight: 1 }}
-                      >
-                        {featured.homeScore}
-                        <span style={{ color: "var(--border-medium)", fontSize: "0.6em", margin: "0 2px" }}>–</span>
-                        {featured.awayScore}
-                      </div>
-                    ) : (
-                      <div>
-                        <div
-                          className="font-display font-black uppercase tracking-widest"
-                          style={{ fontSize: "1.5rem", color: "var(--border-medium)" }}
-                        >
-                          VS
-                        </div>
-                        <div className="text-[11px] font-bold mt-1" style={{ color: "var(--text-muted)" }}>
-                          {featured.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Away */}
-                  <div className="flex-1 text-left">
-                    <div
-                      className="font-display font-black uppercase leading-tight"
-                      style={{ fontSize: "clamp(1rem, 4vw, 1.4rem)", color: "var(--text-primary)" }}
-                    >
-                      {featured.awayTeam?.shortName ?? featured.awayTeam?.name ?? featured.awaySeed ?? "TBD"}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div
-                  className="flex items-center justify-between px-5 py-3"
-                  style={{ background: "var(--surface-1)", borderTop: "1px solid var(--border-soft)" }}
-                >
-                  <span className="text-[11px] font-semibold" style={{ color: "var(--text-muted)" }}>
-                    {featured.startsAt.toLocaleDateString("it-IT", {
-                      weekday: "long", day: "numeric", month: "long",
-                    })}
-                  </span>
-                  <span
-                    className="text-[11px] font-black uppercase tracking-wide group-hover:underline"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    Dettagli →
-                  </span>
-                </div>
+                <span>Prossime</span>
+                <span>partite</span>
               </div>
-            </Link>
+              <Link
+                href="/partite"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
+              >
+                Vedi tutto
+                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
+              </Link>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {upcomingMatches.filter((m) => m.homeTeam && m.awayTeam).map((m) => (
+                <Link key={m.id} href={`/partite/${m.id}`} className="block group">
+                  <div
+                    className="flex items-center gap-3 p-6 bg-white rounded-3xl transition-shadow group-hover:shadow-md"
+                    style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+                  >
+                    {/* Home team */}
+                    <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                      <MatchTeamLogo name={m.homeTeam!.name} shortName={m.homeTeam!.shortName} countryCode={m.homeTeam!.countryCode} logoUrl={m.homeTeam!.logoUrl} />
+                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
+                        {m.homeTeam!.shortName ?? m.homeTeam!.name}
+                      </span>
+                    </div>
+
+                    {/* Center — girone + orario + data */}
+                    <div className="flex flex-col items-center gap-2 shrink-0">
+                      {m.group && (
+                        <span className="text-xs font-light text-black/65">
+                          {m.group.name}
+                        </span>
+                      )}
+                      <span className="text-base font-semibold leading-6 tabular-nums text-black">
+                        {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                      <span className="text-xs font-light text-black/65">
+                        {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                      </span>
+                    </div>
+
+                    {/* Away team */}
+                    <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                      <MatchTeamLogo name={m.awayTeam!.name} shortName={m.awayTeam!.shortName} countryCode={m.awayTeam!.countryCode} logoUrl={m.awayTeam!.logoUrl} />
+                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
+                        {m.awayTeam!.shortName ?? m.awayTeam!.name}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </section>
         )}
 
         {/* ══ STATS ═════════════════════════════════════════════════ */}
-        {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4">
+        {/* {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
+          <section className="max-w-lg mx-auto w-full px-4 my-10">
             <div
               className="rounded-2xl overflow-hidden"
               style={{ background: "#fff", border: "1.5px solid var(--border-medium)", boxShadow: "0 2px 12px rgba(1,7,163,0.06)" }}
@@ -363,65 +367,175 @@ export default async function HomePage({
               </div>
             </div>
           </section>
-        )}
+        )} */}
+
+        {/* ══ GIOCA ═════════════════════════════════════════════════ */}
+        <section className="max-w-lg mx-auto w-full px-4">
+          <h2
+            className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium mb-6"
+            style={{ fontFamily: "var(--font-tallica)" }}
+          >
+            Gioca
+          </h2>
+          <Link
+            href="/squadra"
+            className="flex flex-col gap-3 bg-white rounded-3xl overflow-hidden p-6"
+            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+          >
+            <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
+              <img
+                src="/images/fantasy-football-shirt.png"
+                alt="Fantasy Football"
+                className="h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col gap-3">
+              <p
+                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+                style={{ fontFamily: "var(--font-tallica)" }}
+              >
+                Fantasy Football
+              </p>
+              <p className="text-sm text-black font-normal max-w-48">
+                Gestisci il tuo dream team in Danimarca&apos;s Cup!
+              </p>
+              <p className="text-sm font-semibold text-black">Gioca al FantaDC</p>
+            </div>
+          </Link>
+        </section>
 
         {/* ══ GIRONI ════════════════════════════════════════════════ */}
         {groupStandings.length > 0 && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="over-label">Fase a gironi</span>
-              <Link href="/gironi" className="text-[11px] font-black uppercase tracking-wide" style={{ color: "var(--primary)" }}>
-                Vedi tutto →
+          <section className="max-w-lg mx-auto px-4 my-10">
+            <div className="mx-auto flex items-center justify-between mb-6">
+              <h2
+                className="uppercase text-xl font-medium leading-8.5 text-(--text-primary)"
+                style={{ fontFamily: "var(--font-tallica)" }}
+              >
+                CLASSIFICA
+              </h2>
+              <Link href="/gironi" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+                Vedi tutto
+                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
               </Link>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+
+            <div className="grid grid-cols-1 gap-4">
               {groupStandings.map((g) => (
                 <Link
                   key={g.id}
                   href="/gironi"
-                  className="block rounded-2xl overflow-hidden transition-colors hover:opacity-90"
-                  style={{ background: "#fff", border: "1.5px solid var(--border-medium)", boxShadow: "0 2px 8px rgba(1,7,163,0.06)" }}
+                  className="block rounded-3xl bg-white overflow-hidden pb-3"
+                  style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                 >
-                  {/* Group header */}
-                  <div
-                    className="px-3 py-2 flex items-center gap-2"
-                    style={{ background: "linear-gradient(135deg, #0107A3, #000669)" }}
-                  >
-                    <span className="font-display font-black text-sm uppercase text-white">Girone {g.slug}</span>
+                  {/* Card header */}
+                  <div className="px-6 pt-6 pb-3">
+                    <p
+                      className="uppercase text-base font-medium text-(--text-primary)"
+                      style={{ fontFamily: "var(--font-tallica)" }}
+                    >
+                      {g.name}
+                    </p>
                   </div>
+
+                  {/* Table header */}
+                  <div className="flex items-center gap-4 px-6 pb-3">
+                    <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
+                    <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
+                  </div>
+
                   {/* Rows */}
-                  {g.rows.length === 0 ? (
-                    <div className="px-3 py-3 text-[11px]" style={{ color: "var(--text-muted)" }}>Nessuna squadra</div>
-                  ) : (
-                    g.rows.map((row, idx) => (
-                      <div
-                        key={row.teamId}
-                        className="flex items-center gap-2 px-3 py-1.5"
-                        style={idx < g.rows.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
-                      >
-                        <span className="text-[10px] font-black w-4 text-center flex-shrink-0" style={{ color: "var(--text-disabled)" }}>
-                          {idx + 1}
-                        </span>
-                        <span className="flex-1 text-[11px] font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+                  {g.rows.map((row, idx) => (
+                    <div
+                      key={row.teamId}
+                      className="flex items-center gap-4 px-6"
+                      style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
+                    >
+                      <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {row.logoUrl ? (
+                          <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
+                        ) : row.countryCode ? (
+                          <img src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                        ) : null}
+                        <span className="text-sm font-normal text-(--text-primary) truncate">
                           {row.shortName ?? row.name}
                         </span>
-                        {row.qualified && (
-                          <span className="text-[9px] font-black flex-shrink-0" style={{ color: "#10B981" }}>Q</span>
-                        )}
-                        <span className="text-[11px] font-display font-black flex-shrink-0 tabular-nums" style={{ color: "var(--primary)" }}>
-                          {row.points}
-                        </span>
                       </div>
-                    ))
-                  )}
+                      <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
+                      <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
+                        {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
+                      </span>
+                      <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.points}</span>
+                    </div>
+                  ))}
                 </Link>
               ))}
             </div>
           </section>
         )}
 
+        {/* ══ MARCATORI ════════════════════════════════════════════ */}
+        {topScorers.length > 0 && (
+          <section className="max-w-lg mx-auto px-4 pb-10">
+            <div
+              className="bg-white rounded-3xl overflow-hidden"
+              style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+            >
+              {/* Card header */}
+              <div className="px-6 pt-6 pb-3">
+                <h2
+                  className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
+                  style={{ fontFamily: "var(--font-tallica)" }}
+                >
+                  MARCATORI
+                </h2>
+              </div>
+
+              {/* Table header */}
+              <div className="flex items-center px-6 pb-3 gap-4">
+                <span className="text-xs font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
+                <span className="text-xs font-semibold uppercase text-black/65 shrink-0">GOL</span>
+              </div>
+
+              {/* Rows */}
+              {topScorers.map((player, idx) => (
+                <div
+                  key={player.id}
+                  className="flex items-center gap-4 px-6 py-3"
+                  style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
+                >
+                  <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
+                      {player.footballTeam.logoUrl ? (
+                        <img src={player.footballTeam.logoUrl} alt={player.footballTeam.name} className="w-full h-full object-contain" />
+                      ) : player.footballTeam.countryCode ? (
+                        <img src={`https://flagcdn.com/w40/${player.footballTeam.countryCode.toLowerCase()}.png`} alt={player.footballTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                      ) : null}
+                    </div>
+                    <span className="text-sm font-normal text-black truncate">{player.name}</span>
+                  </div>
+                  <span className="text-sm font-bold text-black shrink-0 tabular-nums">
+                    {player._count.goals}
+                  </span>
+                </div>
+              ))}
+              <div className="p-6" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+                <Link href="/marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+                  Vedi classifica completa
+                  <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* ══ QUICK ACTIONS ═════════════════════════════════════════ */}
-        <section className="max-w-lg mx-auto w-full px-4 py-4">
+        {/* <section className="max-w-lg mx-auto w-full px-4 py-4">
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: "/classifica",  label: "Classifica",  icon: "pi-trophy",   bg: "rgba(232,160,0,0.10)", color: "#C48A00" },
@@ -454,53 +568,8 @@ export default async function HomePage({
               </Link>
             ))}
           </div>
-        </section>
+        </section> */}
 
-        {/* ══ CTA BOTTOM — solo guest ═══════════════════════════════ */}
-        {!user && (
-          <section className="max-w-lg mx-auto w-full px-4 py-4 pb-8">
-            <div
-              className="relative overflow-hidden rounded-3xl px-7 py-9 text-center"
-              style={{
-                background: "linear-gradient(140deg, #000228 0%, #0107A3 100%)",
-                boxShadow: "0 8px 40px rgba(1,7,163,0.28)",
-              }}
-            >
-              {/* Glow */}
-              <div
-                className="absolute pointer-events-none"
-                style={{
-                  top: "-30%", right: "-10%",
-                  width: "60%", height: "160%",
-                  background: "radial-gradient(circle, rgba(232,160,0,0.18) 0%, transparent 65%)",
-                }}
-              />
-              <div className="relative">
-                <div
-                  className="font-display font-black uppercase text-white leading-tight mb-2"
-                  style={{ fontSize: "clamp(1.6rem, 6vw, 2.2rem)" }}
-                >
-                  Pronto a giocare?
-                </div>
-                <p className="text-sm mb-7 max-w-xs mx-auto" style={{ color: "rgba(255,255,255,0.55)" }}>
-                  Registrati, scegli i tuoi campioni e parti alla conquista della classifica.
-                </p>
-                <Link
-                  href="/register"
-                  className="inline-flex items-center gap-2 rounded-full font-display font-black text-base uppercase tracking-wide px-10 py-4"
-                  style={{
-                    background: "#E8A000",
-                    color: "#06073D",
-                    boxShadow: "0 6px 24px rgba(232,160,0,0.5)",
-                  }}
-                >
-                  <i className="pi pi-user-plus" style={{ fontSize: 14 }} />
-                  Inizia ora
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
       </main>
 
       <footer

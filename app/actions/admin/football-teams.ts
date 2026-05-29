@@ -2,16 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import {
+  buildFootballTeamPayload,
+  FootballTeamFormSchema,
+} from "@/lib/football-team-form";
 
-const Schema = z.object({
-  name: z.string().min(1, "Nome obbligatorio").trim(),
-  shortName: z.string().trim().optional(),
-  logoUrl: z.string().url("URL non valido").trim().optional().or(z.literal("")),
-});
+const Schema = FootballTeamFormSchema;
 
 export type ActionResult = { errors?: Record<string, string[]>; message?: string };
 
@@ -20,14 +19,15 @@ export async function createFootballTeam(_prev: ActionResult | undefined, formDa
   const parsed = Schema.safeParse({
     name: formData.get("name"),
     shortName: formData.get("shortName") || undefined,
-    logoUrl: formData.get("logoUrl") || undefined,
+    countryCode: formData.get("countryCode") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+  const payload = buildFootballTeamPayload(parsed.data);
 
   const existing = await db.footballTeam.findUnique({ where: { name: parsed.data.name } });
   if (existing) return { errors: { name: ["Nome già esistente."] } };
 
-  const team = await db.footballTeam.create({ data: { name: parsed.data.name, shortName: parsed.data.shortName, logoUrl: parsed.data.logoUrl || null } });
+  const team = await db.footballTeam.create({ data: payload });
   await logAdminAction(Number(admin.id), "CREATE", "FootballTeam", team.id, null, team);
 
   revalidatePath("/admin/squadre");
@@ -40,14 +40,15 @@ export async function updateFootballTeam(_prev: ActionResult | undefined, formDa
   const parsed = Schema.safeParse({
     name: formData.get("name"),
     shortName: formData.get("shortName") || undefined,
-    logoUrl: formData.get("logoUrl") || undefined,
+    countryCode: formData.get("countryCode") || undefined,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
+  const payload = buildFootballTeamPayload(parsed.data);
 
   const before = await db.footballTeam.findUnique({ where: { id } });
   if (!before) return { message: "Squadra non trovata." };
 
-  const team = await db.footballTeam.update({ where: { id }, data: { name: parsed.data.name, shortName: parsed.data.shortName, logoUrl: parsed.data.logoUrl || null } });
+  const team = await db.footballTeam.update({ where: { id }, data: payload });
   await logAdminAction(Number(admin.id), "UPDATE", "FootballTeam", id, before, team);
 
   revalidatePath("/admin/squadre");

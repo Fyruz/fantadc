@@ -43,6 +43,7 @@ model FootballTeam {
   id          Int           @id @default(autoincrement())
   name        String        @unique
   shortName   String?
+  countryCode String?
   logoUrl     String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
-import { Button } from "primereact/button";
 import VoteForm from "./_vote-form";
 
 export default async function VotaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -15,10 +14,23 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
   const match = await db.match.findUnique({
     where: { id: matchId },
     include: {
-      homeTeam: { select: { name: true } },
-      awayTeam: { select: { name: true } },
+      homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+      awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+      group: { select: { name: true } },
+      knockoutRound: { select: { name: true } },
       players: {
-        include: { player: { include: { footballTeam: { select: { name: true } } } } },
+        include: {
+          player: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+              footballTeamId: true,
+              footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+            },
+          },
+        },
+        orderBy: { player: { name: "asc" } },
       },
     },
   });
@@ -30,121 +42,126 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
     include: { player: { select: { name: true } } },
   });
 
-  const voteCounts = await db.vote.groupBy({
-    by: ["playerId"],
-    where: { matchId },
-    _count: { playerId: true },
-    orderBy: { _count: { playerId: "desc" } },
-  });
-  const topVotedId = voteCounts[0]?.playerId ?? null;
-  const topPlayer = topVotedId
-    ? match.players.find((mp) => mp.playerId === topVotedId)?.player
-    : null;
-
-  const title = `${match.homeTeam?.name ?? match.homeSeed ?? "TBD"} vs ${match.awayTeam?.name ?? match.awaySeed ?? "TBD"}`;
-
   if (match.status === "DRAFT" || match.status === "SCHEDULED") {
     return (
-      <div className="flex flex-col gap-4 items-center py-12 max-w-sm mx-auto text-center">
-        <h1 className="font-display font-black text-2xl uppercase" style={{ color: "var(--text-primary)" }}>
-          {title}
-        </h1>
-        <p style={{ color: "var(--text-muted)" }}>La partita non è ancora conclusa.</p>
-        <Link href="/dashboard">
-          <Button label="← Dashboard" outlined size="small" />
+      <div className="max-w-lg mx-auto px-4 py-10 text-center">
+        <p className="text-sm text-black/40">La partita non è ancora conclusa.</p>
+        <Link href="/partite" className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-primary)">
+          <i className="pi pi-arrow-left" style={{ fontSize: 10 }} />
+          Tutte le partite
         </Link>
       </div>
     );
   }
 
+  const scored = match.homeScore !== null && match.awayScore !== null;
+  const label = match.group?.name ?? match.knockoutRound?.name ?? null;
+
+  const TeamLogo = ({ team }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null }) => {
+    if (!team) return <div style={{ width: 64, height: 64 }} />;
+    return (
+      <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64, padding: 4 }}>
+        {team.logoUrl ? (
+          <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
+        ) : team.countryCode ? (
+          <img src={`https://flagcdn.com/w80/${team.countryCode.toLowerCase()}.png`} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
+        ) : (
+          <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="flex flex-col gap-5 max-w-sm mx-auto">
-      {/* Header partita */}
+    <div className="max-w-lg mx-auto w-full px-4 py-10 flex flex-col gap-6">
+
+      {/* Back + title */}
+      <div className="flex items-center relative">
+        <Link href={`/partite/${matchId}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-primary) absolute left-0">
+          <i className="pi pi-arrow-left" style={{ fontSize: 10 }} />
+        </Link>
+        <h1
+          className="uppercase text-base font-medium text-(--text-primary) mx-auto"
+          style={{ fontFamily: "var(--font-tallica)" }}
+        >
+          MVP della giornata
+        </h1>
+      </div>
+
+      {/* Match card */}
       <div
-        className="rounded-[18px] p-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
+        className="bg-white rounded-3xl overflow-hidden"
+        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
       >
-        <div className="absolute right-[-20px] top-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
-        <div className="relative">
-          <div className="over-label mb-1" style={{ color: "rgba(255,255,255,0.45)" }}>Vota MVP</div>
-          <div className="font-display font-black text-xl uppercase text-white leading-tight">{title}</div>
-          <div className="mt-2">
-            {windowOpen ? (
-              <span
-                className="text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(34,197,94,0.2)", color: "#86efac", border: "1px solid rgba(34,197,94,0.3)" }}
-              >
-                ● FINESTRA APERTA
+        <div className="p-6 flex items-center gap-4">
+          <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <TeamLogo team={match.homeTeam} />
+            <span className="text-sm text-black text-center leading-tight">
+              {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-1 shrink-0">
+            {label && <span className="text-xs text-black/65 font-light">{label}</span>}
+            {scored ? (
+              <span className="font-bold text-(--text-primary) tabular-nums" style={{ fontSize: 24 }}>
+                {match.homeScore} - {match.awayScore}
               </span>
             ) : (
-              <span
-                className="text-[10px] font-bold uppercase tracking-wide px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.5)" }}
-              >
-                VOTAZIONE CHIUSA
+              <span className="font-bold text-(--text-primary)" style={{ fontSize: 24 }}>
+                {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
+            <span className="text-xs text-black/65">
+              {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+            </span>
+          </div>
+          <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <TeamLogo team={match.awayTeam} />
+            <span className="text-sm text-black text-center leading-tight">
+              {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Hai già votato */}
-      {userVote && (
+      {/* Voting section */}
+      {windowOpen ? (
+        <VoteForm
+          matchId={matchId}
+          userVote={userVote ? { playerName: userVote.player.name } : null}
+          homeTeam={match.homeTeam ? {
+            id: match.homeTeam.id,
+            name: match.homeTeam.shortName ?? match.homeTeam.name,
+            countryCode: match.homeTeam.countryCode,
+            logoUrl: match.homeTeam.logoUrl,
+          } : null}
+          awayTeam={match.awayTeam ? {
+            id: match.awayTeam.id,
+            name: match.awayTeam.shortName ?? match.awayTeam.name,
+            countryCode: match.awayTeam.countryCode,
+            logoUrl: match.awayTeam.logoUrl,
+          } : null}
+          players={match.players.map((mp) => ({
+            id: mp.player.id,
+            name: mp.player.name,
+            role: mp.player.role,
+            footballTeamId: mp.player.footballTeamId,
+            footballTeam: {
+              id: mp.player.footballTeam.id,
+              name: mp.player.footballTeam.shortName ?? mp.player.footballTeam.name,
+              countryCode: mp.player.footballTeam.countryCode,
+              logoUrl: mp.player.footballTeam.logoUrl,
+            },
+          }))}
+        />
+      ) : (
         <div
-          className="card p-4 text-center"
-          style={{ borderLeft: "3px solid #22C55E" }}
+          className="bg-white rounded-3xl p-6 text-center"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
-          <div className="font-black text-sm" style={{ color: "#065F46" }}>✓ Hai votato</div>
-          <div className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-            Il tuo MVP: <span className="font-display font-black uppercase" style={{ color: "var(--text-primary)" }}>{userVote.player.name}</span>
-          </div>
+          <p className="text-sm text-black/60">La finestra di voto è chiusa.</p>
         </div>
       )}
-
-      {/* Form di voto */}
-      {windowOpen && !userVote && (
-        <>
-          <div className="over-label">Scegli il giocatore MVP</div>
-          <VoteForm
-            matchId={matchId}
-            players={match.players.map((mp) => ({
-              id: mp.player.id,
-              name: mp.player.name,
-              footballTeam: mp.player.footballTeam,
-            }))}
-          />
-        </>
-      )}
-
-      {/* Favorito provvisorio */}
-      {windowOpen && topPlayer && (userVote || voteCounts.length > 0) && (
-        <div className="card p-4 text-center">
-          <div className="over-label mb-1">Favorito provvisorio</div>
-          <div className="font-display font-black text-xl uppercase" style={{ color: "var(--primary)" }}>
-            {topPlayer.name}
-          </div>
-          <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{topPlayer.footballTeam.name}</div>
-        </div>
-      )}
-
-      {/* MVP finale */}
-      {!windowOpen && topPlayer && (
-        <div className="card p-5 text-center" style={{ borderLeft: "3px solid #E8A000" }}>
-          <div className="over-label mb-1">MVP della partita</div>
-          <div className="font-display font-black text-2xl uppercase" style={{ color: "var(--text-primary)" }}>
-            ★ {topPlayer.name}
-          </div>
-          <div className="text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>{topPlayer.footballTeam.name}</div>
-        </div>
-      )}
-
-      {!windowOpen && !topPlayer && (
-        <p className="text-sm text-center" style={{ color: "var(--text-muted)" }}>Nessun voto registrato per questa partita.</p>
-      )}
-
-      <Link href="/dashboard">
-        <Button label="← Dashboard" outlined size="small" />
-      </Link>
     </div>
   );
 }

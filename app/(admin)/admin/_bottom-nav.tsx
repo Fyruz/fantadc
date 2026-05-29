@@ -22,10 +22,12 @@ const GV_MAIN = [
 ];
 
 const DCUP_MORE = [
-  { href: "/admin/utenti",          label: "Utenti",        icon: "pi-id-card" },
-  { href: "/admin/bonus-types",     label: "Tipi bonus",    icon: "pi-star"    },
-  { href: "/admin/squadre-fantasy", label: "Squadre Fanta", icon: "pi-trophy"  },
-  { href: "/admin/audit",           label: "Audit log",     icon: "pi-history" },
+  { href: "/admin/gironi",          label: "Gironi",        icon: "pi-th-large" },
+  { href: "/admin/eliminazione",    label: "Eliminazione",  icon: "pi-sitemap"  },
+  { href: "/admin/utenti",          label: "Utenti",        icon: "pi-id-card"  },
+  { href: "/admin/bonus-types",     label: "Tipi bonus",    icon: "pi-star"     },
+  { href: "/admin/squadre-fantasy", label: "Squadre Fanta", icon: "pi-trophy"   },
+  { href: "/admin/audit",           label: "Audit log",     icon: "pi-history"  },
 ];
 
 const GV_MORE = [

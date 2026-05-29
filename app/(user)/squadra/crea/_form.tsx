@@ -80,6 +80,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
   const [menuSlot, setMenuSlot] = useState<SlotKey | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [rulesVisible, setRulesVisible] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") {
@@ -215,42 +216,91 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       action={action}
       className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
     >
-      {/* Mobile: nome squadra + info statica */}
+      {/* Mobile: nome squadra + link regole */}
       <div className="flex flex-col items-center gap-1.5 lg:hidden">
         <InputText
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
           className="w-full max-w-xs text-center"
-          placeholder="es. I Guerrieri"
+          placeholder="Inserisci il nome della tua squadra"
           maxLength={40}
         />
-        <p className="text-center text-[10px] text-[var(--text-muted)]">
-          1 portiere · 4 giocatori · 5 squadre diverse
-        </p>
+        <button
+          type="button"
+          onClick={() => setRulesVisible(true)}
+          className="flex items-center gap-1 text-center text-[10px] font-semibold transition-colors hover:text-[var(--primary)]"
+          style={{ color: "var(--text-muted)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
+        >
+          <i className="pi pi-info-circle text-[10px]" />
+          Come funziona il Fanta
+        </button>
       </div>
 
       {/* Campo + sidebar desktop */}
       <div className="flex flex-1 flex-col lg:grid lg:flex-none lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
         {/* Campo di gioco */}
         <div
-          className="relative flex-1 overflow-hidden rounded-[28px] border border-white/20 px-4 py-5 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)] lg:aspect-[5/6] lg:w-full lg:flex-none lg:max-w-[26rem] lg:mx-auto"
+          className="relative flex-1 overflow-hidden rounded-[32px] lg:aspect-[5/6] lg:w-full lg:flex-none lg:max-w-[26rem] lg:mx-auto"
           style={{
-            background:
-              "linear-gradient(180deg, #179B54 0%, #138748 48%, #0D6D38 100%)",
+            background: "linear-gradient(175deg, #21c05a 0%, #17964a 35%, #116e35 70%, #0c5529 100%)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15)",
           }}
         >
-          {/* Righe del campo */}
+          {/* Strisce erba alternate */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(180deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 42px, transparent 42px, transparent 84px)",
+                "repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 46px, rgba(0,0,0,0.05) 46px, rgba(0,0,0,0.05) 92px)",
             }}
           />
-          <div className="pointer-events-none absolute inset-x-[14%] top-[12%] h-[58%] rounded-[30px] border border-white/30" />
-          <div className="pointer-events-none absolute left-1/2 top-[18%] h-[46%] w-[42%] -translate-x-1/2 rounded-[999px] border border-white/25" />
-          <div className="pointer-events-none absolute left-1/2 top-[64%] h-[22%] w-[54%] -translate-x-1/2 rounded-t-[22px] border border-b-0 border-white/25" />
-          <div className="pointer-events-none absolute left-1/2 top-[64%] h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/70 shadow-[0_0_0_6px_rgba(255,255,255,0.08)]" />
+
+          {/* Segni del campo SVG */}
+          <svg
+            className="pointer-events-none absolute inset-0 w-full h-full"
+            viewBox="0 0 100 120"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            {/* Bordo campo */}
+            <rect x="4" y="3" width="92" height="114" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
+            {/* Linea di metà campo (in alto = lato avversario) */}
+            <line x1="4" y1="3" x2="96" y2="3" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
+            {/* Semicerchio centrocampo (arco visibile nella nostra metà) */}
+            <path d="M 36 3 A 14 14 0 0 0 64 3" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
+            {/* Pallino centrocampo */}
+            <circle cx="50" cy="3" r="1.1" fill="rgba(255,255,255,0.5)" />
+
+            {/* Area di rigore (grande) */}
+            <rect x="20" y="67" width="60" height="34" stroke="rgba(255,255,255,0.5)" strokeWidth="0.65" />
+            {/* Arco dell'area */}
+            <path d="M 26 67 A 13.5 13.5 0 0 1 74 67" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
+            {/* Dischetto del rigore */}
+            <circle cx="50" cy="78" r="1.1" fill="rgba(255,255,255,0.6)" />
+
+            {/* Piccola area */}
+            <rect x="34" y="88" width="32" height="13" stroke="rgba(255,255,255,0.38)" strokeWidth="0.55" />
+
+            {/* Porta */}
+            <rect x="37" y="101" width="26" height="16" fill="rgba(0,0,0,0.12)" stroke="rgba(255,255,255,0.6)" strokeWidth="0.75" />
+            {/* Rete porta - linee orizzontali */}
+            <line x1="37" y1="105" x2="63" y2="105" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
+            <line x1="37" y1="109" x2="63" y2="109" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
+            <line x1="37" y1="113" x2="63" y2="113" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
+            {/* Rete porta - linee verticali */}
+            <line x1="42.5" y1="101" x2="42.5" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
+            <line x1="48" y1="101" x2="48" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
+            <line x1="53.5" y1="101" x2="53.5" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
+            <line x1="59" y1="101" x2="59" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
+          </svg>
+
+          {/* Vignette per profondità */}
+          <div
+            className="pointer-events-none absolute inset-0 rounded-[32px]"
+            style={{
+              background: "radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.18) 100%)",
+            }}
+          />
 
           {/* Slot */}
           {SLOT_ORDER.map((slotKey) => {
@@ -287,7 +337,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
                 className="w-full"
-                placeholder="es. I Guerrieri"
+                placeholder="Inserisci il nome della tua squadra"
                 maxLength={40}
               />
               {state?.success === false && state.errors?.name && (
@@ -532,6 +582,135 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
             </div>
           </div>
         )}
+      </Dialog>
+
+      {/* Bottom sheet: regole del fanta */}
+      <Dialog
+        visible={rulesVisible}
+        onHide={() => setRulesVisible(false)}
+        closable={false}
+        dismissableMask
+        position={isMobile ? "bottom" : "center"}
+        style={isMobile ? { width: "100%", margin: 0 } : { width: "min(28rem, 96vw)" }}
+        pt={
+          isMobile
+            ? {
+                root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
+                header: { className: "!px-4 !py-0" },
+                content: { className: "!px-4 !pt-0 !pb-8" },
+              }
+            : {
+                root: { style: { borderRadius: "22px", overflow: "hidden" } },
+                header: { className: "!px-5 !py-0 !border-b !border-[var(--border-soft)]" },
+                content: { className: "!px-5 !pt-3 !pb-6" },
+              }
+        }
+        header={
+          <div className="flex flex-col">
+            {isMobile && (
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="h-1 w-10 rounded-full" style={{ background: "var(--border-medium)" }} />
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-3 py-3">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className="flex h-8 w-8 items-center justify-center rounded-xl"
+                  style={{ background: "var(--primary-light)" }}
+                >
+                  <i className="pi pi-star-fill text-sm" style={{ color: "var(--primary)" }} />
+                </div>
+                <div>
+                  <div className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
+                    Guida rapida
+                  </div>
+                  <div className="text-[15px] font-extrabold leading-tight" style={{ color: "var(--text-primary)" }}>
+                    Come funziona il Fanta
+                  </div>
+                </div>
+              </div>
+              <Button
+                type="button"
+                icon="pi pi-times"
+                text
+                rounded
+                severity="secondary"
+                aria-label="Chiudi"
+                onClick={() => setRulesVisible(false)}
+              />
+            </div>
+          </div>
+        }
+        modal
+        draggable={false}
+        resizable={false}
+        focusOnShow={false}
+      >
+        <div className="overflow-y-auto" style={{ maxHeight: isMobile ? "58vh" : "70vh" }}>
+          <div
+            className="overflow-hidden rounded-2xl"
+            style={{ border: "1px solid var(--border-soft)" }}
+          >
+            {[
+              {
+                icon: "pi-users",
+                color: "var(--primary)",
+                bg: "var(--primary-light)",
+                title: "La tua rosa",
+                text: "Scegli 1 portiere e 4 giocatori di movimento.",
+              },
+              {
+                icon: "pi-shield",
+                color: "#7C3AED",
+                bg: "#F5F3FF",
+                title: "Una squadra per slot",
+                text: "Puoi prendere al massimo 1 giocatore per squadra. Quando selezioni un giocatore, la sua squadra sparisce dalle opzioni disponibili.",
+              },
+              {
+                icon: "pi-lock",
+                color: "#DC2626",
+                bg: "#FEF2F2",
+                title: "La rosa è definitiva",
+                text: "Una volta confermata, la squadra non si può più modificare. Scegli con cura.",
+              },
+              {
+                icon: "pi-bolt",
+                color: "#D97706",
+                bg: "#FFFBEB",
+                title: "Punti e bonus segreti",
+                text: "I punti non si assegnano solo per i goal. Ci sono bonus segreti per le giocate più spettacolari - sprona i tuoi giocatori a fare cose epiche.",
+              },
+              {
+                icon: "pi-trophy",
+                color: "#059669",
+                bg: "#ECFDF5",
+                title: "Vota l'MVP",
+                text: "Dopo ogni partita puoi votare il tuo MVP. Non dimenticarti - è un modo concreto per fare punti.",
+              },
+            ].map((rule, i, arr) => (
+              <div
+                key={rule.title}
+                className="flex items-start gap-3 px-4 py-3.5 bg-white"
+                style={i < arr.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
+              >
+                <div
+                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                  style={{ background: rule.bg }}
+                >
+                  <i className={`pi ${rule.icon} text-xs`} style={{ color: rule.color }} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[12px] font-extrabold" style={{ color: "var(--text-primary)" }}>
+                    {rule.title}
+                  </div>
+                  <div className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                    {rule.text}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </Dialog>
 
       {/* Sheet selezione giocatore */}
