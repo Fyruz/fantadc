@@ -748,20 +748,20 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
             ].map((rule, i, arr) => (
               <div
                 key={rule.title}
-                className="flex items-start gap-3 px-4 py-3.5 bg-white"
+                className="flex items-start gap-4 px-5 py-5 bg-white"
                 style={i < arr.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
               >
                 <div
-                  className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
+                  className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                   style={{ background: rule.bg }}
                 >
-                  <i className={`pi ${rule.icon} text-xs`} style={{ color: rule.color }} />
+                  <i className={`pi ${rule.icon} text-sm`} style={{ color: rule.color }} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[12px] font-extrabold" style={{ color: "var(--text-primary)" }}>
+                  <div className="text-[13px] font-extrabold" style={{ color: "var(--text-primary)" }}>
                     {rule.title}
                   </div>
-                  <div className="mt-0.5 text-[11px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  <div className="mt-1.5 text-[12px] leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {rule.text}
                   </div>
                 </div>
