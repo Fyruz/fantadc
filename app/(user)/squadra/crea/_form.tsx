@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
@@ -9,6 +10,7 @@ import { getTeamCode, SLOT_ORDER } from "./_types";
 import type { Player, PlayerGroup, SlotKey, SlotsState } from "./_types";
 import SlotCard from "./_slot-card";
 import PlayerSheet from "./_player-sheet";
+import ShareStoryButton from "../_share-story-button";
 
 type Validation = {
   count: number;
@@ -73,6 +75,7 @@ function createEmptySlots(): SlotsState {
 }
 
 export default function CreaSquadraForm({ players }: { players: Player[] }) {
+  const router = useRouter();
   const [state, action, pending] = useActionState(createFantasyTeam, undefined);
   const [slots, setSlots] = useState<SlotsState>(() => createEmptySlots());
   const [captainId, setCaptainId] = useState<number | null>(null);
@@ -80,6 +83,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(null);
   const [menuSlot, setMenuSlot] = useState<SlotKey | null>(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [shareVisible, setShareVisible] = useState(false);
   const [rulesVisible, setRulesVisible] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const [isMobile, setIsMobile] = useState(() => {
@@ -96,6 +100,12 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
+
+  useEffect(() => {
+    if (state?.success === true) {
+      setShareVisible(true);
+    }
+  }, [state]);
 
   const selectedPlayers = useMemo(
     () =>
@@ -503,6 +513,54 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
               onClick={handleConfirm}
             />
           </div>
+        </div>
+      </Dialog>
+
+      {/* Dialog condivisione Instagram post-creazione */}
+      <Dialog
+        visible={shareVisible}
+        onHide={() => {
+          setShareVisible(false);
+          router.push("/squadra");
+        }}
+        closable={false}
+        dismissableMask
+        style={{ width: "320px" }}
+        pt={{
+          root: { style: { borderRadius: "20px", overflow: "hidden" } },
+          header: { className: "!hidden" },
+          content: { className: "!p-0" },
+        }}
+        modal
+        draggable={false}
+        resizable={false}
+      >
+        <div className="p-6">
+          <div className="mb-4 flex flex-col items-center gap-2 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+              <i className="pi pi-check-circle text-2xl text-green-600" />
+            </div>
+            <div className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+              Squadra creata!
+            </div>
+            <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+              Condividi la tua squadra nelle storie di Instagram
+            </p>
+          </div>
+          {state?.success === true && (
+            <ShareStoryButton teamId={state.teamId} />
+          )}
+          <button
+            type="button"
+            onClick={() => {
+              setShareVisible(false);
+              router.push("/squadra");
+            }}
+            className="mt-3 w-full text-center text-sm font-medium transition-colors hover:text-[var(--primary)]"
+            style={{ color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer" }}
+          >
+            Vai alla squadra →
+          </button>
         </div>
       </Dialog>
 

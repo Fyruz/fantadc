@@ -5,6 +5,7 @@ import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import RosterTable from "./_roster-table";
 import ScoreTable from "./_score-table";
+import ShareStoryButton from "./_share-story-button";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -103,6 +104,9 @@ export default async function SquadraPage() {
           )}
         </div>
       </div>
+
+      {/* Condividi su Instagram */}
+      <ShareStoryButton teamId={fantasyTeam.id} />
 
       {/* Rosa */}
       <div>
