@@ -122,7 +122,7 @@ export async function GET(
 
             {/* Owner */}
             <div style={{ fontSize: 22, color: "#64748b", marginBottom: 32 }}>
-              di {ownerName}
+              {`di ${ownerName}`}
             </div>
 
             {/* Divider */}
@@ -178,7 +178,7 @@ export async function GET(
                         width: 65,
                       }}
                     >
-                      {isCaptain ? "★ CAP" : isGk ? "POR" : "OUT"}
+                      {isCaptain ? "CAP" : isGk ? "POR" : "OUT"}
                     </div>
 
                     {/* Nome giocatore */}
