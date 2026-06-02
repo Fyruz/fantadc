@@ -57,7 +57,6 @@ export async function GET(
           display: "flex",
           flexDirection: "column",
           backgroundColor: "#ffffff",
-          fontFamily: "sans-serif",
         }}
       >
         {/* Header navy */}
@@ -102,7 +101,6 @@ export async function GET(
           style={{
             display: "flex",
             flexDirection: "column",
-            flex: 1,
             padding: "80px 80px 60px",
           }}
         >
@@ -139,7 +137,6 @@ export async function GET(
               display: "flex",
               flexDirection: "column",
               gap: 22,
-              flex: 1,
             }}
           >
             {sortedPlayers.map(({ player }) => {
