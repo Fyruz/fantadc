@@ -24,7 +24,10 @@ export default function ShareStoryButton({ teamId }: { teamId: number }) {
     try {
       // 1. Genera immagine
       const res = await fetch(`/api/story/${teamId}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(body || `HTTP ${res.status}`);
+      }
       const blob = await res.blob();
       const file = new File([blob], "squadra-dcup.png", { type: "image/png" });
 
@@ -43,8 +46,9 @@ export default function ShareStoryButton({ teamId }: { teamId: number }) {
       // 3. Fallback: scarica e avvisa
       triggerDownload(blob);
       showSuccess("Immagine scaricata! Aprila dalla galleria e condividila nelle Storie.");
-    } catch {
-      showError("Impossibile generare l'immagine. Controlla la connessione e riprova.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Errore sconosciuto";
+      showError(`Impossibile generare l'immagine: ${msg}`);
     } finally {
       setLoading(false);
     }

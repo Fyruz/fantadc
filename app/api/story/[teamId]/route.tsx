@@ -11,6 +11,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ teamId: string }> }
 ) {
+  try {
   const { teamId: teamIdStr } = await params;
   const teamId = parseInt(teamIdStr, 10);
   if (isNaN(teamId)) return new Response("Invalid teamId", { status: 400 });
@@ -250,4 +251,9 @@ export async function GET(
     ),
     { width: 1080, height: 1920 }
   );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("[story route]", msg, err);
+    return new Response(`Story generation failed: ${msg}`, { status: 500 });
+  }
 }
