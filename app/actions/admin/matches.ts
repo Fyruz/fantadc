@@ -146,6 +146,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
       }
     } else {
       updateData.concludedAt = null;
+      updateData.mvpOverridePlayerId = null;
     }
   }
 
@@ -183,6 +184,9 @@ export async function advanceMatchStatus(
     status: newStatus,
     concludedAt: newStatus === MatchStatus.CONCLUDED ? new Date() : null,
   };
+  if (newStatus !== MatchStatus.CONCLUDED) {
+    updateData.mvpOverridePlayerId = null;
+  }
 
   await db.match.update({ where: { id }, data: updateData });
   await logAdminAction(Number(admin.id), "UPDATE", "Match", id, { status: match.status }, { status: newStatus });
@@ -190,6 +194,62 @@ export async function advanceMatchStatus(
 
   revalidatePath(`/admin/partite/${id}`);
   revalidatePath("/admin/partite");
+  return {};
+}
+
+export async function updateMatchMvpOverride(
+  _prev: ActionResult | undefined,
+  formData: FormData
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const matchId = Number(formData.get("matchId"));
+  const rawPlayerId = formData.get("playerId");
+  const playerId = rawPlayerId === "" || rawPlayerId === null ? null : Number(rawPlayerId);
+
+  if (!Number.isInteger(matchId) || matchId <= 0) {
+    return { message: "Partita non valida." };
+  }
+  if (playerId !== null && (!Number.isInteger(playerId) || playerId <= 0)) {
+    return { message: "MVP non valido." };
+  }
+
+  const match = await db.match.findUnique({
+    where: { id: matchId },
+    select: {
+      id: true,
+      status: true,
+      mvpOverridePlayerId: true,
+      players: { select: { playerId: true } },
+    },
+  });
+  if (!match) return { message: "Partita non trovata." };
+  if (match.status !== MatchStatus.CONCLUDED) {
+    return { message: "Puoi impostare l'MVP solo per partite concluse." };
+  }
+
+  if (playerId !== null && !match.players.some((player) => player.playerId === playerId)) {
+    return { message: "Il giocatore scelto non è presente in questa partita." };
+  }
+
+  const updated = await db.match.update({
+    where: { id: matchId },
+    data: { mvpOverridePlayerId: playerId },
+    select: { id: true, mvpOverridePlayerId: true },
+  });
+
+  await logAdminAction(
+    Number(admin.id),
+    "UPDATE_MVP_OVERRIDE",
+    "Match",
+    matchId,
+    { mvpOverridePlayerId: match.mvpOverridePlayerId },
+    { mvpOverridePlayerId: updated.mvpOverridePlayerId }
+  );
+
+  revalidatePath(`/admin/partite/${matchId}`);
+  revalidatePath(`/partite/${matchId}`);
+  revalidatePath("/classifica-fanta");
+  revalidatePath("/dashboard");
   return {};
 }
 

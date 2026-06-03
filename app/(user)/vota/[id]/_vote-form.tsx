@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useRef, useState } from "react";
+import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { castVote } from "@/app/actions/user/vote";
 
@@ -79,23 +80,24 @@ export default function VoteForm({
                 <TeamLogo team={selectedPlayer.footballTeam} size={40} />
               </div>
               <span className="text-sm font-semibold text-(--text-primary)">{selectedPlayer.name}</span>
-              <button
+              <Button
                 type="button"
                 onClick={() => setSelectOpen(true)}
                 className="text-xs text-black/40 underline-offset-2 underline"
+                text
+                plain
               >
                 Cambia
-              </button>
+              </Button>
             </div>
-            <button
+            <Button
               type="button"
               onClick={handleConfirm}
               disabled={pending}
-              className="w-full py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
+              label={pending ? "..." : "Conferma voto"}
+              className="w-full justify-center py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
               style={{ background: "var(--primary)" }}
-            >
-              {pending ? "..." : "Conferma voto"}
-            </button>
+            />
           </>
         ) : votedName ? (
           /* Already voted state */
@@ -110,23 +112,23 @@ export default function VoteForm({
         ) : (
           /* Default state */
           <>
-            <button
+            <Button
               type="button"
               onClick={() => setSelectOpen(true)}
               disabled={pending}
+              icon="pi pi-plus"
               className="w-12 h-12 rounded-full flex items-center justify-center disabled:opacity-40"
               style={{ border: "1.5px solid rgba(9,20,76,0.15)" }}
-            >
-              <i className="pi pi-plus" style={{ color: "var(--primary)", fontSize: 18 }} />
-            </button>
-            <button
+            />
+            <Button
               type="button"
               onClick={() => setSelectOpen(true)}
               disabled={pending}
+              label="Seleziona giocatore"
               className="text-sm font-semibold text-(--text-primary) disabled:opacity-40"
-            >
-              Seleziona giocatore
-            </button>
+              text
+              plain
+            />
           </>
         )}
 
@@ -152,16 +154,22 @@ export default function VoteForm({
           {/* Close + title */}
           <div className="flex items-start justify-between px-6 pt-6 pb-4">
             <p className="text-base text-(--text-primary) flex-1 text-center">Chi sarà il Player of the Match?</p>
-            <button type="button" onClick={() => setSelectOpen(false)} className="shrink-0 ml-2">
-              <i className="pi pi-times" style={{ fontSize: 14, color: "rgba(9,20,76,0.4)" }} />
-            </button>
+            <Button
+              type="button"
+              onClick={() => setSelectOpen(false)}
+              icon="pi pi-times"
+              className="shrink-0 ml-2"
+              style={{ color: "rgba(9,20,76,0.4)" }}
+              text
+              plain
+            />
           </div>
 
           {/* Team filter pills */}
           {(homeTeam || awayTeam) && (
             <div className="flex gap-3 px-6 pb-5 justify-center flex-wrap">
               {homeTeam && (
-                <button
+                <Button
                   type="button"
                   onClick={() => setTeamFilter(teamFilter === homeTeam.id ? null : homeTeam.id)}
                   className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
@@ -173,10 +181,10 @@ export default function VoteForm({
                 >
                   <TeamLogo team={homeTeam} size={20} />
                   {homeTeam.name}
-                </button>
+                </Button>
               )}
               {awayTeam && (
-                <button
+                <Button
                   type="button"
                   onClick={() => setTeamFilter(teamFilter === awayTeam.id ? null : awayTeam.id)}
                   className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
@@ -188,7 +196,7 @@ export default function VoteForm({
                 >
                   <TeamLogo team={awayTeam} size={20} />
                   {awayTeam.name}
-                </button>
+                </Button>
               )}
             </div>
           )}
@@ -199,7 +207,7 @@ export default function VoteForm({
               <p className="text-sm font-semibold text-(--text-primary) mb-4">Giocatori di movimento</p>
               <div className="grid grid-cols-3 gap-x-4 gap-y-6">
                 {outfield.map((p) => (
-                  <button
+                  <Button
                     key={p.id}
                     type="button"
                     onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
@@ -214,7 +222,7 @@ export default function VoteForm({
                     <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
                       {p.name}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -226,7 +234,7 @@ export default function VoteForm({
               <p className="text-sm font-semibold text-(--text-primary) mb-4">Portieri</p>
               <div className="grid grid-cols-3 gap-x-4 gap-y-6">
                 {goalkeepers.map((p) => (
-                  <button
+                  <Button
                     key={p.id}
                     type="button"
                     onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
@@ -241,7 +249,7 @@ export default function VoteForm({
                     <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
                       {p.name}
                     </span>
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

@@ -54,13 +54,14 @@
 * i voti dei singoli utenti sono privati
 * durante la finestra di voto si puo mostrare un favorito provvisorio
 * dopo la chiusura si mostra l'MVP finale della partita
+* se due o piu giocatori sono pari a fine finestra, l'MVP resta non assegnato finche un admin non lo sceglie manualmente
 * il voto MVP ha sia funzione di engagement sia impatto sul punteggio fantasy
 
 ### Punteggio e classifica
 
 * il punteggio fantasy deriva da bonus e malus assegnati dagli admin
 * ogni gol segnato (non autogol) vale 1 punto fantasy per il marcatore
-* il punteggio fantasy riceve anche un contributo dal risultato MVP
+* il giocatore MVP ufficiale riceve 5 punti fantasy
 * il punteggio di una squadra e la somma dei punteggi dei 5 giocatori della rosa
 * il raddoppio del capitano si applica al punteggio del singolo giocatore capitano
 * la classifica principale e cumulata totale
@@ -138,7 +139,6 @@
 
 Le aree rimaste aperte sono poche e puntuali:
 
-* valore esatto del bonus punti derivante dall'MVP
 * regole custom di spareggio in classifica
 * meccanismo concreto anti spam su registrazione e voto
 * durata tecnica della sessione persistente

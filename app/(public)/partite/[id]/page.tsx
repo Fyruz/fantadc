@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
+import { resolveMvp } from "@/lib/domain/mvp";
 import { getCurrentUser } from "@/lib/session";
 
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,6 +33,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
         },
         orderBy: { player: { name: "asc" } },
       },
+      votes: { select: { playerId: true } },
     },
   });
   if (!match) notFound();
@@ -56,17 +58,19 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   let mvpPlayer: { name: string; footballTeamId: number } | null = null;
   let mvpTeam: { name: string; countryCode: string | null; logoUrl: string | null } | null = null;
+  let mvpPendingAdminDecision = false;
   if (!windowOpen && match.status === "CONCLUDED") {
-    const topVote = await db.vote.groupBy({
-      by: ["playerId"],
-      where: { matchId: match.id },
-      _count: { playerId: true },
-      orderBy: { _count: { playerId: "desc" } },
-      take: 1,
+    const resolution = resolveMvp({
+      concludedAt: match.concludedAt,
+      votes: match.votes,
+      mvpOverridePlayerId: match.mvpOverridePlayerId,
+      eligiblePlayerIds: match.players.map((p) => p.playerId),
     });
-    if (topVote[0]) {
-      const mp = match.players.find((p) => p.playerId === topVote[0].playerId);
+    if (resolution.status === "resolved") {
+      const mp = match.players.find((p) => p.playerId === resolution.playerId);
       if (mp) mvpPlayer = mp.player;
+    } else if (resolution.status === "tied") {
+      mvpPendingAdminDecision = true;
     }
   }
 
@@ -215,6 +219,16 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               <p className="text-base font-semibold text-(--text-primary)">{mvpPlayer.name}</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {mvpPendingAdminDecision && (
+        <div
+          className="bg-white rounded-3xl p-6"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+        >
+          <p className="text-xs text-black/40 mb-1">MVP della partita</p>
+          <p className="text-sm font-semibold text-(--text-primary)">In attesa di conferma admin per pari voti.</p>
         </div>
       )}
 
