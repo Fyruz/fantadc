@@ -93,38 +93,38 @@ export async function GET(
             }}
           />
 
-          {/* Header */}
+          {/* Header — logo centrato e prominente */}
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               alignItems: "center",
-              padding: "44px 56px",
-              gap: 24,
+              padding: "52px 56px 40px",
+              gap: 20,
               borderBottom: "1px solid rgba(255,255,255,0.07)",
             }}
           >
             <div
               style={{
-                width: 76,
-                height: 76,
-                borderRadius: 20,
-                backgroundColor: "rgba(255,255,255,0.12)",
-                border: "1px solid rgba(255,255,255,0.18)",
+                width: 140,
+                height: 140,
+                borderRadius: 32,
+                backgroundColor: "rgba(255,255,255,0.14)",
+                border: "2px solid rgba(255,255,255,0.28)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 overflow: "hidden",
               }}
             >
-              <img src={logoSrc} width={76} height={76} />
+              <img src={logoSrc} width={140} height={140} />
             </div>
             <span
               style={{
-                fontSize: 36,
+                fontSize: 44,
                 fontWeight: 500,
-                color: "rgba(255,255,255,0.90)",
-                letterSpacing: 8,
+                color: "rgba(255,255,255,0.95)",
+                letterSpacing: 10,
                 fontFamily: "Tallica",
               }}
             >
@@ -279,14 +279,18 @@ export async function GET(
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
+                backgroundColor: "rgba(232,160,0,0.10)",
+                border: "1px solid rgba(232,160,0,0.28)",
+                borderRadius: 28,
+                padding: "28px 80px",
+                gap: 12,
               }}
             >
               <div
                 style={{
-                  fontSize: 20,
-                  color: "rgba(255,255,255,0.40)",
+                  fontSize: 28,
+                  color: "rgba(255,255,255,0.65)",
                   letterSpacing: 8,
-                  marginBottom: 8,
                   fontFamily: "Tallica",
                 }}
               >
@@ -294,7 +298,7 @@ export async function GET(
               </div>
               <div
                 style={{
-                  fontSize: 144,
+                  fontSize: 120,
                   fontWeight: 500,
                   color: "#E8A000",
                   lineHeight: 1,
