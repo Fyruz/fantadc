@@ -159,7 +159,7 @@ export async function GET(
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "42px 56px 56px",
+              padding: "48px 56px 56px",
               flex: 1,
             }}
           >
@@ -170,7 +170,8 @@ export async function GET(
                 fontWeight: 700,
                 color: "rgba(255,255,255,0.40)",
                 letterSpacing: 6,
-                marginBottom: 12,
+                lineHeight: 1,
+                marginBottom: 26,
                 fontFamily: "Tallica",
               }}
             >
@@ -183,8 +184,8 @@ export async function GET(
                 fontSize: teamNameFontSize,
                 fontWeight: 500,
                 color: "#ffffff",
-                lineHeight: 1,
-                marginBottom: 12,
+                lineHeight: 1.12,
+                marginBottom: 18,
                 fontFamily: "Tallica",
                 letterSpacing: 2,
               }}
@@ -197,7 +198,8 @@ export async function GET(
               style={{
                 fontSize: 26,
                 color: "rgba(255,255,255,0.45)",
-                marginBottom: 48,
+                lineHeight: 1.25,
+                marginBottom: 38,
                 letterSpacing: 0.6,
               }}
             >
@@ -230,8 +232,8 @@ export async function GET(
                       flexDirection: "row",
                       alignItems: "center",
                       width: "100%",
-                      height: 96,
-                      padding: "18px 24px",
+                      minHeight: 108,
+                      padding: "22px 24px",
                       borderRadius: 24,
                       backgroundColor: isCaptain
                         ? "rgba(232,160,0,0.18)"
@@ -246,24 +248,6 @@ export async function GET(
                       gap: 18,
                     }}
                   >
-                    {/* Badge */}
-                    <div
-                      style={{
-                        fontSize: 20,
-                        fontWeight: 700,
-                        color: isCaptain
-                          ? "#E8A000"
-                          : isGk
-                          ? "rgba(255,255,255,0.80)"
-                          : "rgba(255,255,255,0.40)",
-                        width: 76,
-                        letterSpacing: 3,
-                        fontFamily: "Tallica",
-                      }}
-                    >
-                      {isCaptain ? "CAP" : isGk ? "POR" : "OUT"}
-                    </div>
-
                     {/* Flag */}
                     <div
                       style={{
@@ -306,8 +290,7 @@ export async function GET(
                         fontWeight: isCaptain ? 700 : 600,
                         color: isCaptain ? "#E8A000" : "#ffffff",
                         flex: 1,
-                        lineHeight: 1.05,
-                        overflow: "hidden",
+                        lineHeight: 1.28,
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -324,6 +307,7 @@ export async function GET(
                         textAlign: "right",
                         overflow: "hidden",
                         whiteSpace: "nowrap",
+                        lineHeight: 1.15,
                       }}
                     >
                       {displayTeam}
@@ -338,8 +322,8 @@ export async function GET(
               style={{
                 height: 1,
                 backgroundColor: "rgba(255,255,255,0.08)",
-                marginTop: 48,
-                marginBottom: 40,
+                marginTop: 36,
+                marginBottom: 32,
               }}
             />
 
