@@ -61,6 +61,15 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
   const hideOnMobile = isVota || isPartiteDetail;
   const isGV = pathname.startsWith("/greenvolley");
+
+  const getMobileTitle = (): string | null => {
+    if (isGV) return null; // GV keeps pills
+    if (pathname.startsWith("/partite")) return "Partite";
+    if (pathname.startsWith("/squadre-fanta")) return "Fanta";
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "Il mio";
+    return null;
+  };
+  const mobileTitle = getMobileTitle();
   const primary = isGV ? GV : "var(--primary)";
 
   const isActive = (href: string, exact = false) =>
@@ -106,25 +115,36 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     >
       <div className="max-w-6xl mx-auto px-4 py-6 flex items-center gap-2 sm:gap-3">
 
-        {/* ── Mobile switcher ────────────────────────────────────── */}
-        <div className="flex md:hidden items-center gap-3 flex-1 min-w-0">
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-3 py-2 rounded-full text-white shrink-0 transition-colors"
-            style={{ fontSize: 12, fontWeight: !isGV ? 600 : 500, background: !isGV ? "#09144C" : "rgba(0,0,0,0.25)" }}
+        {/* ── Mobile header ──────────────────────────────────────── */}
+        {mobileTitle ? (
+          /* Main nav pages: page title */
+          <span
+            className="md:hidden flex-1 uppercase font-medium"
+            style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
           >
-            <img src="/icons/dcup.svg" width={23} height={24} alt="DCup" />
-            <span>DCup</span>
-          </Link>
-          <Link
-            href="/greenvolley"
-            className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-white shrink-0 transition-colors"
-            style={{ fontSize: 12, background: isGV ? GV : "rgba(0,0,0,0.25)" }}
-          >
-            <img src="/icons/green_volley.svg" width={27} height={24} alt="GreenVolley" />
-            <span>Green Volley</span>
-          </Link>
-        </div>
+            {mobileTitle}
+          </span>
+        ) : (
+          /* Other pages: DCup / GV switcher pills */
+          <div className="flex md:hidden items-center gap-3 flex-1 min-w-0">
+            <Link
+              href="/"
+              className="flex items-center gap-2 px-3 py-2 rounded-full text-white shrink-0 transition-colors"
+              style={{ fontSize: 12, fontWeight: !isGV ? 600 : 500, background: !isGV ? "#09144C" : "rgba(0,0,0,0.25)" }}
+            >
+              <img src="/icons/dcup.svg" width={23} height={24} alt="DCup" />
+              <span>DCup</span>
+            </Link>
+            <Link
+              href="/greenvolley"
+              className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-white shrink-0 transition-colors"
+              style={{ fontSize: 12, background: isGV ? GV : "rgba(0,0,0,0.25)" }}
+            >
+              <img src="/icons/green_volley.svg" width={27} height={24} alt="GreenVolley" />
+              <span>Green Volley</span>
+            </Link>
+          </div>
+        )}
 
         {/* ── Desktop logo + switcher ────────────────────────────── */}
         <Link href={isGV ? "/greenvolley" : "/"} className="hidden md:flex items-center gap-2 flex-shrink-0">
