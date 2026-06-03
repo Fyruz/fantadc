@@ -352,20 +352,10 @@ export async function GET(
                 backgroundColor: "rgba(232,160,0,0.10)",
                 border: "1px solid rgba(232,160,0,0.28)",
                 borderRadius: 28,
-                padding: "28px 80px",
-                gap: 12,
+                padding: "24px 80px 30px",
+                gap: 10,
               }}
             >
-              <div
-                style={{
-                  fontSize: 28,
-                  color: "rgba(255,255,255,0.65)",
-                  letterSpacing: 8,
-                  fontFamily: "Tallica",
-                }}
-              >
-                PUNTI TOTALI
-              </div>
               <div
                 style={{
                   fontSize: 120,
@@ -376,6 +366,16 @@ export async function GET(
                 }}
               >
                 {totalPoints.toFixed(1)}
+              </div>
+              <div
+                style={{
+                  fontSize: 28,
+                  color: "rgba(255,255,255,0.65)",
+                  letterSpacing: 8,
+                  fontFamily: "Tallica",
+                }}
+              >
+                PUNTI TOTALI
               </div>
             </div>
           </div>
