@@ -5,6 +5,8 @@ type RosterRow = {
   name: string;
   role: string;
   footballTeamName: string;
+  footballTeamShortName: string | null;
+  flagSrc: string | null;
   isCaptain: boolean;
   totalPoints?: number;
 };
@@ -31,12 +33,19 @@ export default function RosterTable({ rows }: { rows: RosterRow[] }) {
               {row.isCaptain && (
                 <span className="text-[11px] text-amber-500">★</span>
               )}
+              {row.flagSrc && (
+                <img
+                  src={row.flagSrc}
+                  alt={row.footballTeamName}
+                  className="h-4 w-4 shrink-0 rounded-sm object-contain"
+                />
+              )}
               <span className="truncate text-sm font-semibold text-[var(--text-primary)]">
                 {row.name}
               </span>
             </div>
             <span className="text-[11px] text-[var(--text-muted)]">
-              {row.footballTeamName}
+              {row.footballTeamShortName ?? row.footballTeamName}
             </span>
           </div>
           {row.totalPoints !== undefined && (

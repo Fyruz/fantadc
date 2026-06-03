@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 import { readFile } from "fs/promises";
 import path from "path";
 
@@ -9,6 +10,16 @@ export const runtime = "nodejs";
 
 const W = 1080;
 const H = 1920;
+
+function fitStoryText(value: string, maxLength: number) {
+  const normalized = value.trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
+}
+
+function teamFlagSrc(team: { countryCode: string | null; logoUrl: string | null }) {
+  return team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+}
 
 export async function GET(
   _req: NextRequest,
@@ -28,7 +39,14 @@ export async function GET(
             include: {
               player: {
                 include: {
-                  footballTeam: { select: { name: true, shortName: true } },
+                  footballTeam: {
+                    select: {
+                      name: true,
+                      shortName: true,
+                      countryCode: true,
+                      logoUrl: true,
+                    },
+                  },
                 },
               },
             },
@@ -54,6 +72,9 @@ export async function GET(
       : [...team.players.filter((p) => p.player.role === "P"), ...team.players.filter((p) => p.player.role === "A")];
 
     const ownerName = team.user.name ?? team.user.email.split("@")[0];
+    const displayTeamName = fitStoryText(team.name.toUpperCase(), 24);
+    const teamNameFontSize =
+      displayTeamName.length > 20 ? 64 : displayTeamName.length > 14 ? 74 : 88;
 
     return new ImageResponse(
       (
@@ -99,18 +120,19 @@ export async function GET(
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              padding: "52px 56px 40px",
-              gap: 20,
+              padding: "54px 56px 44px",
+              gap: 18,
               borderBottom: "1px solid rgba(255,255,255,0.07)",
             }}
           >
             <div
               style={{
-                width: 140,
-                height: 140,
-                borderRadius: 32,
-                backgroundColor: "rgba(255,255,255,0.14)",
-                border: "2px solid rgba(255,255,255,0.28)",
+                width: 196,
+                height: 196,
+                borderRadius: 42,
+                backgroundColor: "rgba(255,255,255,0.18)",
+                border: "3px solid rgba(255,255,255,0.34)",
+                boxShadow: "0 24px 60px rgba(0,0,0,0.22)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -121,7 +143,7 @@ export async function GET(
             </div>
             <span
               style={{
-                fontSize: 44,
+                fontSize: 48,
                 fontWeight: 500,
                 color: "rgba(255,255,255,0.95)",
                 letterSpacing: 10,
@@ -137,7 +159,7 @@ export async function GET(
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "56px 56px",
+              padding: "42px 56px 56px",
               flex: 1,
             }}
           >
@@ -158,7 +180,7 @@ export async function GET(
             {/* Team name */}
             <div
               style={{
-                fontSize: 84,
+                fontSize: teamNameFontSize,
                 fontWeight: 500,
                 color: "#ffffff",
                 lineHeight: 1,
@@ -167,7 +189,7 @@ export async function GET(
                 letterSpacing: 2,
               }}
             >
-              {team.name.toUpperCase()}
+              {displayTeamName}
             </div>
 
             {/* Owner */}
@@ -195,6 +217,10 @@ export async function GET(
                 const isCaptain = player.id === team.captainPlayerId;
                 const teamShort =
                   player.footballTeam.shortName ?? player.footballTeam.name;
+                const flagSrc = teamFlagSrc(player.footballTeam);
+                const displayName = fitStoryText(player.name, 22);
+                const displayTeam = fitStoryText(teamShort, 9).toUpperCase();
+                const playerFontSize = displayName.length > 18 ? 30 : 34;
 
                 return (
                   <div
@@ -203,7 +229,9 @@ export async function GET(
                       display: "flex",
                       flexDirection: "row",
                       alignItems: "center",
-                      padding: "24px 28px",
+                      width: "100%",
+                      height: 96,
+                      padding: "18px 24px",
                       borderRadius: 24,
                       backgroundColor: isCaptain
                         ? "rgba(232,160,0,0.18)"
@@ -215,7 +243,7 @@ export async function GET(
                         : isGk
                         ? "1px solid rgba(255,255,255,0.18)"
                         : "1px solid rgba(255,255,255,0.09)",
-                      gap: 24,
+                      gap: 18,
                     }}
                   >
                     {/* Badge */}
@@ -228,7 +256,7 @@ export async function GET(
                           : isGk
                           ? "rgba(255,255,255,0.80)"
                           : "rgba(255,255,255,0.40)",
-                        width: 72,
+                        width: 76,
                         letterSpacing: 3,
                         fontFamily: "Tallica",
                       }}
@@ -236,27 +264,69 @@ export async function GET(
                       {isCaptain ? "CAP" : isGk ? "POR" : "OUT"}
                     </div>
 
+                    {/* Flag */}
+                    <div
+                      style={{
+                        width: 54,
+                        height: 54,
+                        borderRadius: 14,
+                        backgroundColor: "rgba(255,255,255,0.14)",
+                        border: "1px solid rgba(255,255,255,0.18)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        overflow: "hidden",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {flagSrc ? (
+                        <img
+                          src={flagSrc}
+                          width={54}
+                          height={54}
+                          style={{ objectFit: "contain" }}
+                        />
+                      ) : (
+                        <span
+                          style={{
+                            fontSize: 17,
+                            color: "rgba(255,255,255,0.45)",
+                            fontWeight: 700,
+                          }}
+                        >
+                          {displayTeam.slice(0, 2)}
+                        </span>
+                      )}
+                    </div>
+
                     {/* Name */}
                     <div
                       style={{
-                        fontSize: 36,
+                        fontSize: playerFontSize,
                         fontWeight: isCaptain ? 700 : 600,
                         color: isCaptain ? "#E8A000" : "#ffffff",
                         flex: 1,
+                        lineHeight: 1.05,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {player.name}
+                      {displayName}
                     </div>
 
                     {/* Team */}
                     <div
                       style={{
-                        fontSize: 24,
+                        width: 128,
+                        fontSize: 22,
                         color: "rgba(255,255,255,0.45)",
                         letterSpacing: 1,
+                        textAlign: "right",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
                       }}
                     >
-                      {teamShort}
+                      {displayTeam}
                     </div>
                   </div>
                 );
