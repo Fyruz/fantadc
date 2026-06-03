@@ -334,7 +334,6 @@ export async function GET(
                 flexDirection: "column",
                 alignItems: "center",
                 backgroundColor: "rgba(232,160,0,0.10)",
-                border: "1px solid rgba(232,160,0,0.28)",
                 borderRadius: 28,
                 padding: "24px 80px 30px",
                 gap: 10,
