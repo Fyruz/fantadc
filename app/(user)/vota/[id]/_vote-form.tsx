@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { castVote } from "@/app/actions/user/vote";
 
@@ -157,14 +158,13 @@ export default function VoteForm({
   awayTeam: Team | null;
   players: Player[];
 }) {
-  const [state, action, pending] = useActionState(castVote, undefined);
+  const [state, setState] = useState<{ success: boolean; message?: string } | undefined>(undefined);
+  const [pending, startTransition] = useTransition();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [animIn, setAnimIn] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [teamFilter, setTeamFilter] = useState<number | null>(null);
-  const formRef = useRef<HTMLFormElement>(null);
-  const playerIdRef = useRef<HTMLInputElement>(null);
-
   const openSheet = () => {
     setMounted(true);
     requestAnimationFrame(() => requestAnimationFrame(() => setAnimIn(true)));
@@ -176,9 +176,15 @@ export default function VoteForm({
   };
 
   const handleConfirm = () => {
-    if (!selectedPlayer || !playerIdRef.current || !formRef.current) return;
-    playerIdRef.current.value = String(selectedPlayer.id);
-    formRef.current.requestSubmit();
+    if (!selectedPlayer) return;
+    const fd = new FormData();
+    fd.set("matchId", String(matchId));
+    fd.set("playerId", String(selectedPlayer.id));
+    startTransition(async () => {
+      const result = await castVote(undefined, fd);
+      setState(result);
+      if (result.success) router.push(`/partite/${matchId}`);
+    });
   };
 
   const handleSelect = (p: Player) => {
@@ -197,11 +203,6 @@ export default function VoteForm({
 
   return (
     <>
-      <form ref={formRef} action={action} style={{ display: "contents" }}>
-        <input type="hidden" name="matchId" value={matchId} />
-        <input type="hidden" name="playerId" ref={playerIdRef} />
-      </form>
-
       {/* Selection card */}
       <div
         className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 text-center"
@@ -222,12 +223,15 @@ export default function VoteForm({
                 Cambia
               </button>
             </div>
-            <Button
-              type="button" onClick={handleConfirm} disabled={pending}
-              label={pending ? "..." : "Conferma voto"}
-              className="w-full justify-center py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
-              style={{ background: "var(--primary)" }}
-            />
+            <button
+              type="button"
+              onClick={handleConfirm}
+              disabled={pending}
+              className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+              style={{ background: "var(--text-primary)" }}
+            >
+              {pending ? "..." : "Conferma voto"}
+            </button>
           </>
         ) : votedName ? (
           <div className="flex flex-col items-center gap-2">

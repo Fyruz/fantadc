@@ -58,6 +58,8 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   }, []);
 
   const isVota = pathname.startsWith("/vota");
+  const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
+  const hideOnMobile = isVota || isPartiteDetail;
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
 
@@ -94,7 +96,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   return (
     <header
-      className={`sticky top-0 z-30${isVota ? " hidden md:block" : ""}`}
+      className={`sticky top-0 z-30${hideOnMobile ? " hidden md:block" : ""}`}
       style={{
         background: scrolled ? "#fff" : "transparent",
         borderBottom: scrolled ? (isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)") : "none",
