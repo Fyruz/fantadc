@@ -6,6 +6,7 @@ import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
 import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
 import ScoreTable from "../squadra/_score-table";
+import { Button } from "primereact/button";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -131,12 +132,12 @@ export default async function DashboardPage() {
                   {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
                 </div>
                 <Link href={`/vota/${m.id}`} className="flex-shrink-0">
-                  <button
+                  <Button
+                    type="button"
+                    label="VOTA"
                     className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5 whitespace-nowrap"
                     style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
-                  >
-                    VOTA
-                  </button>
+                  />
                 </Link>
               </div>
             );

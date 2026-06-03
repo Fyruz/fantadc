@@ -12,6 +12,8 @@ Questo file non raccoglie piu le decisioni macro iniziali: ora elenca solo i pun
 * il coach e stato rimosso dal dominio
 * esiste un capitano che raddoppia il punteggio del proprio giocatore
 * voto MVP aperto per 2 ore dopo che l'admin conclude la partita
+* il giocatore MVP ufficiale riceve 5 punti fantasy
+* in caso di pari voti MVP, un admin sceglie manualmente il vincitore
 * i voti singoli sono privati, ma si puo mostrare un favorito provvisorio
 * il punteggio e cumulato totale, con storico per partita e senza giornate
 * l'area pubblica mostra calendario, partite, classifica e squadre fantasy
@@ -20,21 +22,14 @@ Questo file non raccoglie piu le decisioni macro iniziali: ora elenca solo i pun
 
 ## Punti ancora aperti
 
-### 1. Bonus punti MVP
-
-Da definire:
-
-* quanti punti fantasy assegna l'MVP della partita
-* se il bonus MVP viene assegnato come bonus separato oppure come regola di calcolo dedicata
-
-### 2. Spareggi di classifica
+### 1. Spareggi di classifica
 
 Da definire:
 
 * regole custom per ordinare squadre a pari punti
 * eventuale ordine dei criteri di spareggio
 
-### 3. Anti spam e anti abuso
+### 2. Anti spam e anti abuso
 
 Da definire:
 
@@ -43,7 +38,7 @@ Da definire:
 * se introdurre captcha semplice in registrazione
 * come tradurre l'idea di "massimo 3 per device" in una regola tecnica realistica
 
-### 4. Sessione persistente
+### 3. Sessione persistente
 
 Da definire:
 
@@ -51,7 +46,7 @@ Da definire:
 * durata pratica della sessione
 * eventuale strategia di rinnovo automatico
 
-### 5. Recupero accesso assistito
+### 4. Recupero accesso assistito
 
 Da definire:
 

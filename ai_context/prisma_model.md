@@ -68,6 +68,7 @@ model Player {
   votes                   Vote[]
   matchBonuses            PlayerMatchBonus[]
   matchAppearances        MatchPlayer[]
+  mvpOverrideMatches       Match[]              @relation("MatchMvpOverride")
   goals                   MatchGoal[]
 
   @@index([footballTeamId])
@@ -120,6 +121,7 @@ model Match {
   homeScore       Int?
   awayScore       Int?
   concludedAt     DateTime?
+  mvpOverridePlayerId Int?
   // Fase torneo
   groupId         Int?
   knockoutRoundId Int?
@@ -131,6 +133,7 @@ model Match {
 
   homeTeam        FootballTeam?      @relation("HomeTeamMatches", fields: [homeTeamId], references: [id], onDelete: Restrict)
   awayTeam        FootballTeam?      @relation("AwayTeamMatches", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  mvpOverridePlayer Player?          @relation("MatchMvpOverride", fields: [mvpOverridePlayerId], references: [id], onDelete: SetNull)
   group           Group?             @relation(fields: [groupId], references: [id], onDelete: SetNull)
   knockoutRound   KnockoutRound?     @relation(fields: [knockoutRoundId], references: [id], onDelete: SetNull)
   players         MatchPlayer[]
@@ -141,6 +144,7 @@ model Match {
 
   @@index([homeTeamId])
   @@index([awayTeamId])
+  @@index([mvpOverridePlayerId])
   @@index([status])
   @@index([startsAt])
   @@index([groupId])

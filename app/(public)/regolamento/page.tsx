@@ -59,7 +59,7 @@ export default function RegolamentoPage() {
           <ul className="list-disc list-inside space-y-1">
             <li>I punti derivano dai <strong>bonus e malus</strong> assegnati dagli admin dopo ogni partita</li>
             <li>Gol, assist, ammonizioni e altri eventi vengono premiati o penalizzati</li>
-            <li>Il giocatore eletto <strong>MVP della partita</strong> riceve punti extra</li>
+            <li>Il giocatore eletto <strong>MVP della partita</strong> riceve <strong>5 punti</strong></li>
             <li>
               Il punteggio della squadra è la <strong>somma dei 5 giocatori</strong> della rosa
             </li>
@@ -75,7 +75,7 @@ export default function RegolamentoPage() {
               Dopo ogni partita si apre una <strong>finestra di voto</strong> di 2 ore
             </li>
             <li>Ogni utente registrato può votare <strong>una sola volta</strong> per partita</li>
-            <li>Il giocatore più votato diventa il <strong>MVP della partita</strong> e guadagna punti bonus</li>
+            <li>Il giocatore più votato diventa il <strong>MVP della partita</strong> e guadagna <strong>5 punti</strong></li>
             <li>Durante la finestra di voto è visibile il favorito provvisorio</li>
             <li>Il voto non è modificabile dopo l&apos;invio</li>
           </ul>

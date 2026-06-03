@@ -131,6 +131,7 @@ Significato:
 * `User 1 -- N Vote`
 * `Match 1 -- N Vote`
 * `Player 1 -- N Vote`
+* `Match N -- 1 Player (mvpOverridePlayer, opzionale)`
 
 Struttura:
 
@@ -145,6 +146,8 @@ Vincolo critico:
 Significato:
 
 * un utente puo votare una sola volta per partita
+* se il conteggio finale e pari, `Match.mvpOverridePlayerId` puo indicare il vincitore scelto manualmente da admin
+* l'MVP ufficiale riceve 5 punti fantasy solo dopo la chiusura della finestra di voto
 
 ### Bonus
 
