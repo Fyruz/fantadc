@@ -91,16 +91,16 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
   };
 
   return (
-    <div className="max-w-lg mx-auto w-full px-4 py-10 flex flex-col gap-6">
+    <div className="max-w-lg mx-auto w-full flex flex-col gap-10">
 
       {/* Back + title */}
       <div className="flex items-center relative">
-        <Link href={`/partite/${matchId}`} className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-primary) absolute left-0">
-          <i className="pi pi-arrow-left" style={{ fontSize: 10 }} />
+        <Link href={`/partite/${matchId}`} className="absolute left-0 flex items-center justify-center w-6 h-6">
+          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
         </Link>
         <h1
-          className="uppercase text-base font-medium text-(--text-primary) mx-auto"
-          style={{ fontFamily: "var(--font-tallica)" }}
+          className="uppercase font-medium text-(--text-primary) mx-auto"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20 }}
         >
           MVP della giornata
         </h1>
@@ -111,25 +111,25 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
         className="bg-white rounded-3xl overflow-hidden"
         style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
       >
-        <div className="p-6 flex items-center gap-4">
+        <div className="p-6 flex items-center gap-3">
           <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
             <TeamLogo team={match.homeTeam} />
             <span className="text-sm text-black text-center leading-tight">
               {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
             </span>
           </div>
-          <div className="flex flex-col items-center gap-1 shrink-0">
-            {label && <span className="text-xs text-black/65 font-light">{label}</span>}
+          <div className="flex flex-col items-center gap-2 shrink-0 text-center overflow-hidden whitespace-nowrap">
+            {label && <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>{label}</span>}
             {scored ? (
-              <span className="font-bold text-(--text-primary) tabular-nums" style={{ fontSize: 24 }}>
+              <span className="font-bold text-black tabular-nums" style={{ fontSize: 24 }}>
                 {match.homeScore} - {match.awayScore}
               </span>
             ) : (
-              <span className="font-bold text-(--text-primary)" style={{ fontSize: 24 }}>
+              <span className="font-bold text-black" style={{ fontSize: 24 }}>
                 {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
               </span>
             )}
-            <span className="text-xs text-black/65">
+            <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>
               {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
             </span>
           </div>

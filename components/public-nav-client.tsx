@@ -57,6 +57,9 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const isVota = pathname.startsWith("/vota");
+  const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
+  const hideOnMobile = isVota || isPartiteDetail;
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
 
@@ -93,7 +96,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   return (
     <header
-      className="sticky top-0 z-30"
+      className={`sticky top-0 z-30${hideOnMobile ? " hidden md:block" : ""}`}
       style={{
         background: scrolled ? "#fff" : "transparent",
         borderBottom: scrolled ? (isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)") : "none",
@@ -101,7 +104,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         transition: "background 0.2s, box-shadow 0.2s",
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2 sm:gap-3">
+      <div className="max-w-6xl mx-auto px-4 py-6 flex items-center gap-2 sm:gap-3">
 
         {/* ── Mobile switcher ────────────────────────────────────── */}
         <div className="flex md:hidden items-center gap-3 flex-1 min-w-0">

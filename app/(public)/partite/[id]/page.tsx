@@ -19,17 +19,13 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       knockoutRound: { select: { name: true } },
       goals: {
         include: {
-          scorer: {
-            select: { id: true, name: true, footballTeamId: true },
-          },
+          scorer: { select: { id: true, name: true, footballTeamId: true } },
         },
         orderBy: { minute: "asc" },
       },
       players: {
         include: {
-          player: {
-            select: { id: true, name: true, role: true, footballTeamId: true },
-          },
+          player: { select: { id: true, name: true, role: true, footballTeamId: true } },
         },
         orderBy: { player: { name: "asc" } },
       },
@@ -81,9 +77,11 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
     mvpTeam = mvpPlayer.footballTeamId === homeId ? match.homeTeam : match.awayTeam;
   }
 
-  const homeGoals = match.goals.filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === homeId)
+  const homeGoals = match.goals
+    .filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === homeId)
     .concat(match.goals.filter((g) => g.isOwnGoal && g.scorer.footballTeamId === awayId));
-  const awayGoals = match.goals.filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === awayId)
+  const awayGoals = match.goals
+    .filter((g) => !g.isOwnGoal && g.scorer.footballTeamId === awayId)
     .concat(match.goals.filter((g) => g.isOwnGoal && g.scorer.footballTeamId === homeId));
 
   const homePlayers = match.players.filter((p) => p.player.footballTeamId === homeId);
@@ -91,10 +89,10 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const scored = match.homeScore !== null && match.awayScore !== null;
 
-  const TeamLogo = ({ team }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null }) => {
-    if (!team) return <div style={{ width: 64, height: 64 }} />;
+  const TeamLogo = ({ team, size = 64 }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null; size?: number }) => {
+    if (!team) return <div style={{ width: size, height: size }} />;
     return (
-      <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64, padding: 4 }}>
+      <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
         {team.logoUrl ? (
           <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
         ) : team.countryCode ? (
@@ -107,13 +105,20 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   };
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 max-w-lg mx-auto">
 
-      {/* Back */}
-      <Link href="/partite" className="inline-flex items-center gap-1.5 text-xs font-semibold text-(--text-primary)">
-        <i className="pi pi-arrow-left" style={{ fontSize: 10 }} />
-        Tutte le partite
-      </Link>
+      {/* ── Header ─────────────────────────────────────────────────── */}
+      <div className="flex items-center relative py-2">
+        <Link href="/partite" className="absolute left-0 flex items-center justify-center w-6 h-6">
+          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
+        </Link>
+        <h1
+          className="uppercase mx-auto font-medium"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+        >
+          Dettagli Partita
+        </h1>
+      </div>
 
       {/* ── Match card ─────────────────────────────────────────────── */}
       <div
@@ -122,7 +127,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       >
         <div className="p-6 flex flex-col gap-4">
           {/* Teams + score */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* Home */}
             <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
               <TeamLogo team={match.homeTeam} />
@@ -132,22 +137,22 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Center */}
-            <div className="flex flex-col items-center gap-1 shrink-0">
+            <div className="flex flex-col items-center gap-2 shrink-0 text-center overflow-hidden whitespace-nowrap">
               {(match.group ?? match.knockoutRound) && (
-                <span className="text-xs text-black/65 font-light">
+                <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>
                   {match.group?.name ?? match.knockoutRound?.name}
                 </span>
               )}
               {scored ? (
-                <span className="font-bold text-(--text-primary) tabular-nums" style={{ fontSize: 24 }}>
+                <span className="font-bold text-black tabular-nums" style={{ fontSize: 24 }}>
                   {match.homeScore} - {match.awayScore}
                 </span>
               ) : (
-                <span className="font-bold text-(--text-primary)" style={{ fontSize: 24 }}>
+                <span className="font-bold text-black" style={{ fontSize: 24 }}>
                   {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                 </span>
               )}
-              <span className="text-xs text-black/65">
+              <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>
                 {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
               </span>
             </div>
@@ -163,15 +168,14 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
           {/* Fischio finale */}
           {match.status === "CONCLUDED" && (
-            <div className="flex justify-center">
-              <span className="text-xs text-black/65">Fischio finale</span>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
             </div>
           )}
 
           {/* Scorers */}
           {match.goals.length > 0 && (
             <div className="flex gap-3 items-start">
-              {/* Home scorers */}
               <div className="flex-1 flex flex-col items-end gap-2">
                 {homeGoals.map((g, i) => (
                   <span key={i} className="text-xs text-black">
@@ -180,11 +184,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                   </span>
                 ))}
               </div>
-              {/* Ball icon */}
               <div className="shrink-0 flex items-start justify-center w-10">
                 <img src="/icons/ball.svg" alt="goal" className="w-3 h-3" />
               </div>
-              {/* Away scorers */}
               <div className="flex-1 flex flex-col items-start gap-2">
                 {awayGoals.map((g, i) => (
                   <span key={i} className="text-xs text-black">
@@ -196,10 +198,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
           )}
         </div>
-
       </div>
 
-      {/* ── MVP ────────────────────────────────────────────────────── */}
+      {/* ── MVP ufficiale ───────────────────────────────────────────── */}
       {mvpPlayer && (
         <div
           className="bg-white rounded-3xl p-6 flex items-center gap-4"
@@ -207,7 +208,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
         >
           <img src="/images/mvp.webp" alt="MVP" className="shrink-0" />
           <div>
-            <p className="text-xs text-black/40 mb-1">MVP della partita</p>
+            <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>MVP della partita</p>
             <div className="flex items-center gap-2">
               {mvpTeam && (
                 mvpTeam.logoUrl ? (
@@ -216,7 +217,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                   <img src={`https://flagcdn.com/w40/${mvpTeam.countryCode.toLowerCase()}.png`} alt={mvpTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
                 ) : null
               )}
-              <p className="text-base font-semibold text-(--text-primary)">{mvpPlayer.name}</p>
+              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{mvpPlayer.name}</p>
             </div>
           </div>
         </div>
@@ -227,8 +228,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           className="bg-white rounded-3xl p-6"
           style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
-          <p className="text-xs text-black/40 mb-1">MVP della partita</p>
-          <p className="text-sm font-semibold text-(--text-primary)">In attesa di conferma admin per pari voti.</p>
+          <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>MVP della partita</p>
+          <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>In attesa di conferma admin per pari voti.</p>
         </div>
       )}
 
@@ -241,35 +242,35 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           >
             <img src="/images/mvp.webp" alt="MVP" className="shrink-0" />
             <div>
-              <p className="text-xs text-black/40 mb-1">Il tuo MVP</p>
+              <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>Il tuo MVP</p>
               <div className="flex items-center gap-2">
                 {userVote.player.footballTeam.logoUrl ? (
                   <img src={userVote.player.footballTeam.logoUrl} alt={userVote.player.footballTeam.name} className="w-5 h-5 object-contain shrink-0" />
                 ) : userVote.player.footballTeam.countryCode ? (
                   <img src={`https://flagcdn.com/w40/${userVote.player.footballTeam.countryCode.toLowerCase()}.png`} alt={userVote.player.footballTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
                 ) : null}
-                <p className="text-base font-semibold text-(--text-primary)">{userVote.player.name}</p>
+                <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{userVote.player.name}</p>
               </div>
             </div>
           </div>
         ) : (
           <Link
-            href={user ? `/vota/${matchId}` : "/login"}
+            href={user ? `/vota/${matchId}` : "/profilo"}
             className="bg-white rounded-3xl p-6 flex items-center gap-4"
             style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
           >
             <img src="/images/mvp.webp" alt="MVP" className="shrink-0" />
             <div className="flex-1">
               <h2
-                className="uppercase text-base font-medium text-(--text-primary) mb-2"
-                style={{ fontFamily: "var(--font-tallica)" }}
+                className="uppercase text-base font-medium mb-2"
+                style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
               >
                 Vota l&apos;MVP della giornata
               </h2>
               <p className="text-sm text-black mb-2">
                 Scegli il migliore in campo e fai contare il tuo voto!
               </p>
-              <span className="text-sm font-semibold text-(--text-primary)">
+              <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                 {user ? "Vota" : "Accedi e vota"}
               </span>
             </div>
@@ -285,18 +286,17 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
         >
           <div className="px-6 pt-6 pb-4">
             <h2
-              className="uppercase text-base font-medium text-(--text-primary)"
-              style={{ fontFamily: "var(--font-tallica)" }}
+              className="uppercase font-medium text-base"
+              style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
             >
               Giocatori
             </h2>
           </div>
 
-          <div className="flex">
+          <div className="flex pb-6">
             {/* Home column */}
-            <div className="flex-1 min-w-0 px-6 pb-6">
-              {/* Team header */}
-              <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 min-w-0 px-6">
+              <div className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.homeTeam?.logoUrl ? (
                     <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-full h-full object-contain" />
@@ -310,8 +310,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               </div>
               <div className="flex flex-col gap-3">
                 {homePlayers.map(({ player }) => (
-                  <div key={player.id} className="flex items-center gap-3">
-                    <i className="pi pi-user shrink-0" style={{ fontSize: 12, color: "rgba(9,20,76,0.3)" }} />
+                  <div key={player.id} className="flex items-center gap-2">
+                    <img src="/icons/jersey.svg" width={14} height={14} alt="" style={{ color: "var(--text-primary)", opacity: 0.7 }} />
                     <span className="text-sm text-black truncate">{player.name}</span>
                   </div>
                 ))}
@@ -319,9 +319,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Away column */}
-            <div className="flex-1 min-w-0 px-6 pb-6">
-              {/* Team header */}
-              <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 min-w-0 px-6">
+              <div className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.awayTeam?.logoUrl ? (
                     <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-full h-full object-contain" />
@@ -335,8 +334,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               </div>
               <div className="flex flex-col gap-3">
                 {awayPlayers.map(({ player }) => (
-                  <div key={player.id} className="flex items-center gap-3">
-                    <i className="pi pi-user shrink-0" style={{ fontSize: 12, color: "rgba(9,20,76,0.3)" }} />
+                  <div key={player.id} className="flex items-center gap-2">
+                    <img src="/icons/jersey.svg" width={14} height={14} alt="" style={{ color: "var(--text-primary)", opacity: 0.7 }} />
                     <span className="text-sm text-black truncate">{player.name}</span>
                   </div>
                 ))}
