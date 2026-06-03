@@ -157,7 +157,7 @@ export default async function GironiPublicPage() {
                     key={c.key}
                     className="text-sm w-7 text-center shrink-0 tabular-nums"
                     style={{
-                      color: isPoints ? "var(--primary)" : "var(--text-primary)",
+                      color: "var(--text-primary)",
                       fontWeight: isPoints ? 700 : 400,
                     }}
                   >
