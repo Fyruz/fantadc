@@ -101,7 +101,13 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             className="flex items-center gap-2 px-3 py-2 rounded-full text-white shrink-0 transition-colors"
             style={{ fontSize: 12, fontWeight: !isGV ? 600 : 500, background: !isGV ? "#09144C" : "rgba(0,0,0,0.25)" }}
           >
-            <img src="/icons/dcup.svg" width={23} height={24} alt="DCup" />
+            <Image
+              src="/logo_dc.png"
+              width={24}
+              height={24}
+              alt="DCup"
+              className="rounded-md object-contain"
+            />
             <span>DCup</span>
           </Link>
           <Link
@@ -109,7 +115,13 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-white shrink-0 transition-colors"
             style={{ fontSize: 12, background: isGV ? GV : "rgba(0,0,0,0.25)" }}
           >
-            <img src="/icons/green_volley.svg" width={27} height={24} alt="GreenVolley" />
+            <Image
+              src="/logo_greenvolley.png"
+              width={24}
+              height={24}
+              alt="GreenVolley"
+              className="rounded-md object-contain"
+            />
             <span>Green Volley</span>
           </Link>
         </div>
@@ -259,7 +271,12 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                 aria-label="Menu utente"
                 aria-expanded={avatarOpen}
               >
-                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
+                <span
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-white"
+                  style={{ background: "var(--primary)" }}
+                >
+                  <i className="pi pi-user text-sm" aria-hidden="true" />
+                </span>
               </button>
               {avatarOpen && (
                 <div
@@ -326,7 +343,12 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                 className="md:hidden w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70"
                 aria-label="Accedi"
               >
-                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Accedi" />
+                <span
+                  className="flex h-10 w-10 items-center justify-center rounded-full text-white"
+                  style={{ background: "var(--primary)" }}
+                >
+                  <i className="pi pi-user text-sm" aria-hidden="true" />
+                </span>
               </Link>
               <Link
                 href="/login"

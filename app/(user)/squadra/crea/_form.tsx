@@ -655,7 +655,7 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
             ? {
                 root: { style: { borderRadius: "20px 20px 0 0", overflow: "hidden" } },
                 header: { className: "!px-4 !py-0" },
-                content: { className: "!px-4 !pt-0 !pb-8" },
+                content: { className: "!border-t !border-[var(--border-soft)] !px-4 !pt-3 !pb-8" },
               }
             : {
                 root: { style: { borderRadius: "22px", overflow: "hidden" } },
