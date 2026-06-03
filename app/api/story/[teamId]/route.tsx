@@ -7,8 +7,8 @@ import path from "path";
 
 export const runtime = "nodejs";
 
-const W = 540;
-const H = 960;
+const W = 1080;
+const H = 1920;
 
 export async function GET(
   _req: NextRequest,
@@ -47,14 +47,11 @@ export async function GET(
 
     const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
 
-    const gk = team.players.find((p) => p.player.role === "P");
-    const outfield = team.players.filter((p) => p.player.role === "A");
-    // Captain first, then GK, then outfield
     const captain = team.players.find((p) => p.player.id === team.captainPlayerId);
     const others = team.players.filter((p) => p.player.id !== team.captainPlayerId);
     const sortedPlayers = captain
       ? [captain, ...others.filter((p) => p.player.role === "P"), ...others.filter((p) => p.player.role === "A")]
-      : [...(gk ? [gk] : []), ...outfield];
+      : [...team.players.filter((p) => p.player.role === "P"), ...team.players.filter((p) => p.player.role === "A")];
 
     const ownerName = team.user.name ?? team.user.email.split("@")[0];
 
@@ -70,15 +67,15 @@ export async function GET(
             position: "relative",
           }}
         >
-          {/* Decorative circles (depth effect) */}
+          {/* Decorative circles */}
           <div
             style={{
               position: "absolute",
-              top: -60,
-              right: -60,
-              width: 220,
-              height: 220,
-              borderRadius: 110,
+              top: -120,
+              right: -120,
+              width: 440,
+              height: 440,
+              borderRadius: 220,
               border: "1px solid rgba(255,255,255,0.04)",
               display: "flex",
             }}
@@ -86,11 +83,11 @@ export async function GET(
           <div
             style={{
               position: "absolute",
-              bottom: 80,
-              left: -80,
-              width: 280,
-              height: 280,
-              borderRadius: 140,
+              bottom: 160,
+              left: -160,
+              width: 560,
+              height: 560,
+              borderRadius: 280,
               border: "1px solid rgba(255,255,255,0.03)",
               display: "flex",
             }}
@@ -102,16 +99,16 @@ export async function GET(
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              padding: "22px 28px",
-              gap: 12,
+              padding: "44px 56px",
+              gap: 24,
               borderBottom: "1px solid rgba(255,255,255,0.07)",
             }}
           >
             <div
               style={{
-                width: 38,
-                height: 38,
-                borderRadius: 10,
+                width: 76,
+                height: 76,
+                borderRadius: 20,
                 backgroundColor: "rgba(255,255,255,0.12)",
                 border: "1px solid rgba(255,255,255,0.18)",
                 display: "flex",
@@ -120,14 +117,14 @@ export async function GET(
                 overflow: "hidden",
               }}
             >
-              <img src={logoSrc} width={38} height={38} />
+              <img src={logoSrc} width={76} height={76} />
             </div>
             <span
               style={{
-                fontSize: 18,
+                fontSize: 36,
                 fontWeight: 500,
                 color: "rgba(255,255,255,0.90)",
-                letterSpacing: 4,
+                letterSpacing: 8,
                 fontFamily: "Tallica",
               }}
             >
@@ -140,18 +137,18 @@ export async function GET(
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "28px 28px 28px",
+              padding: "56px 56px",
               flex: 1,
             }}
           >
             {/* Over-label */}
             <div
               style={{
-                fontSize: 10,
+                fontSize: 20,
                 fontWeight: 700,
                 color: "rgba(255,255,255,0.40)",
-                letterSpacing: 3,
-                marginBottom: 6,
+                letterSpacing: 6,
+                marginBottom: 12,
                 fontFamily: "Tallica",
               }}
             >
@@ -161,13 +158,13 @@ export async function GET(
             {/* Team name */}
             <div
               style={{
-                fontSize: 42,
+                fontSize: 84,
                 fontWeight: 500,
                 color: "#ffffff",
                 lineHeight: 1,
-                marginBottom: 6,
+                marginBottom: 12,
                 fontFamily: "Tallica",
-                letterSpacing: 1,
+                letterSpacing: 2,
               }}
             >
               {team.name.toUpperCase()}
@@ -176,10 +173,10 @@ export async function GET(
             {/* Owner */}
             <div
               style={{
-                fontSize: 13,
+                fontSize: 26,
                 color: "rgba(255,255,255,0.45)",
-                marginBottom: 24,
-                letterSpacing: 0.3,
+                marginBottom: 48,
+                letterSpacing: 0.6,
               }}
             >
               {`di ${ownerName}`}
@@ -190,7 +187,7 @@ export async function GET(
               style={{
                 display: "flex",
                 flexDirection: "column",
-                gap: 8,
+                gap: 16,
               }}
             >
               {sortedPlayers.map(({ player }) => {
@@ -206,8 +203,8 @@ export async function GET(
                       display: "flex",
                       flexDirection: "row",
                       alignItems: "center",
-                      padding: "12px 14px",
-                      borderRadius: 12,
+                      padding: "24px 28px",
+                      borderRadius: 24,
                       backgroundColor: isCaptain
                         ? "rgba(232,160,0,0.18)"
                         : isGk
@@ -218,21 +215,21 @@ export async function GET(
                         : isGk
                         ? "1px solid rgba(255,255,255,0.18)"
                         : "1px solid rgba(255,255,255,0.09)",
-                      gap: 12,
+                      gap: 24,
                     }}
                   >
                     {/* Badge */}
                     <div
                       style={{
-                        fontSize: 10,
+                        fontSize: 20,
                         fontWeight: 700,
                         color: isCaptain
                           ? "#E8A000"
                           : isGk
                           ? "rgba(255,255,255,0.80)"
                           : "rgba(255,255,255,0.40)",
-                        width: 36,
-                        letterSpacing: 1.5,
+                        width: 72,
+                        letterSpacing: 3,
                         fontFamily: "Tallica",
                       }}
                     >
@@ -242,7 +239,7 @@ export async function GET(
                     {/* Name */}
                     <div
                       style={{
-                        fontSize: 18,
+                        fontSize: 36,
                         fontWeight: isCaptain ? 700 : 600,
                         color: isCaptain ? "#E8A000" : "#ffffff",
                         flex: 1,
@@ -251,12 +248,12 @@ export async function GET(
                       {player.name}
                     </div>
 
-                    {/* Team short */}
+                    {/* Team */}
                     <div
                       style={{
-                        fontSize: 12,
+                        fontSize: 24,
                         color: "rgba(255,255,255,0.45)",
-                        letterSpacing: 0.5,
+                        letterSpacing: 1,
                       }}
                     >
                       {teamShort}
@@ -271,8 +268,8 @@ export async function GET(
               style={{
                 height: 1,
                 backgroundColor: "rgba(255,255,255,0.08)",
-                marginTop: 24,
-                marginBottom: 20,
+                marginTop: 48,
+                marginBottom: 40,
               }}
             />
 
@@ -286,10 +283,10 @@ export async function GET(
             >
               <div
                 style={{
-                  fontSize: 10,
+                  fontSize: 20,
                   color: "rgba(255,255,255,0.40)",
-                  letterSpacing: 4,
-                  marginBottom: 4,
+                  letterSpacing: 8,
+                  marginBottom: 8,
                   fontFamily: "Tallica",
                 }}
               >
@@ -297,7 +294,7 @@ export async function GET(
               </div>
               <div
                 style={{
-                  fontSize: 72,
+                  fontSize: 144,
                   fontWeight: 500,
                   color: "#E8A000",
                   lineHeight: 1,
