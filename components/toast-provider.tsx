@@ -10,11 +10,11 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-type Severity = "error" | "success";
+type Severity = "error" | "success" | "info";
 
-type ToastCtx = { error: (msg: string) => void; success: (msg: string) => void };
+type ToastCtx = { error: (msg: string) => void; success: (msg: string) => void; info: (msg: string) => void };
 
-const Ctx = createContext<ToastCtx>({ error: () => {}, success: () => {} });
+const Ctx = createContext<ToastCtx>({ error: () => {}, success: () => {}, info: () => {} });
 
 interface ToastItem {
   id: number;
@@ -26,6 +26,7 @@ interface ToastItem {
 const CONFIG: Record<Severity, { icon: string; label: string; accent: string; iconBg: string; iconColor: string; life: number }> = {
   error:   { icon: "pi-times-circle", label: "Errore",      accent: "#DC2626", iconBg: "#FEF2F2", iconColor: "#DC2626", life: 6000 },
   success: { icon: "pi-check-circle", label: "Completato",  accent: "#059669", iconBg: "#ECFDF5", iconColor: "#059669", life: 3500 },
+  info:    { icon: "pi-spin pi-spinner", label: "Un momento", accent: "#0107A3", iconBg: "rgba(1,7,163,0.08)", iconColor: "#0107A3", life: 12000 },
 };
 
 let uid = 0;
@@ -86,7 +87,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [dismiss]);
 
   return (
-    <Ctx.Provider value={{ error: (msg) => show("error", msg), success: (msg) => show("success", msg) }}>
+    <Ctx.Provider value={{ error: (msg) => show("error", msg), success: (msg) => show("success", msg), info: (msg) => show("info", msg) }}>
       {children}
       {mounted && createPortal(
         <div
