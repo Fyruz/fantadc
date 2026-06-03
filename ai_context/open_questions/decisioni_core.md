@@ -132,7 +132,7 @@ Risposta:
 
 * `2.1.1`: si
 * `2.1.2`: il MVP
-* `2.1.3`: influsce sul voto di un valore da definire
+* `2.1.3`: influisce sul voto con un bonus di 5 punti all'MVP ufficiale
 
 ### 2.2 Tipi di bonus e malus
 
@@ -291,7 +291,7 @@ Domande:
 Risposta:
 
 * `3.5.1`: entrambi
-* `3.5.2`: punti fantasy, decideremo quanto dopo
+* `3.5.2`: punti fantasy, 5 punti all'MVP ufficiale
 * `3.5.3`: a partita
 
 ### 3.6 Anti abuso e correttezza

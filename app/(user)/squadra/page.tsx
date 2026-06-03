@@ -3,8 +3,10 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 import RosterTable from "./_roster-table";
 import ScoreTable from "./_score-table";
+import ShareStoryButton from "./_share-story-button";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -16,7 +18,16 @@ export default async function SquadraPage() {
       players: {
         include: {
           player: {
-            include: { footballTeam: { select: { name: true, shortName: true } } },
+            include: {
+              footballTeam: {
+                select: {
+                  name: true,
+                  shortName: true,
+                  countryCode: true,
+                  logoUrl: true,
+                },
+              },
+            },
           },
         },
       },
@@ -86,6 +97,8 @@ export default async function SquadraPage() {
                 key={player.id}
                 name={player.name}
                 team={player.footballTeam.shortName ?? player.footballTeam.name}
+                flagSrc={player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode)}
+                flagAlt={player.footballTeam.name}
                 isCaptain={player.id === fantasyTeam.captainPlayerId}
               />
             ))}
@@ -96,6 +109,8 @@ export default async function SquadraPage() {
               <PlayerChip
                 name={gk.player.name}
                 team={gk.player.footballTeam.shortName ?? gk.player.footballTeam.name}
+                flagSrc={gk.player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(gk.player.footballTeam.countryCode)}
+                flagAlt={gk.player.footballTeam.name}
                 isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
                 isGk
               />
@@ -103,6 +118,9 @@ export default async function SquadraPage() {
           )}
         </div>
       </div>
+
+      {/* Condividi su Instagram */}
+      <ShareStoryButton teamId={fantasyTeam.id} />
 
       {/* Rosa */}
       <div>
@@ -113,6 +131,8 @@ export default async function SquadraPage() {
             name: player.name,
             role: player.role,
             footballTeamName: player.footballTeam.name,
+            footballTeamShortName: player.footballTeam.shortName,
+            flagSrc: player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode),
             isCaptain: player.id === fantasyTeam.captainPlayerId,
             totalPoints: playerTotals.get(player.id) ?? 0,
           }))}
@@ -129,11 +149,15 @@ export default async function SquadraPage() {
 function PlayerChip({
   name,
   team,
+  flagSrc,
+  flagAlt,
   isCaptain,
   isGk = false,
 }: {
   name: string;
   team: string;
+  flagSrc: string | null;
+  flagAlt: string;
   isCaptain: boolean;
   isGk?: boolean;
 }) {
@@ -155,7 +179,16 @@ function PlayerChip({
         </span>
       )}
       <span className="font-display text-[11px] font-black uppercase leading-tight text-white">
-        {name}
+        <span className="inline-flex items-center justify-center gap-1.5">
+          {flagSrc && (
+            <img
+              src={flagSrc}
+              alt={flagAlt}
+              className="h-3.5 w-3.5 shrink-0 rounded-sm object-contain"
+            />
+          )}
+          <span>{name}</span>
+        </span>
       </span>
       <span className="mt-0.5 text-[9px]" style={{ color: "rgba(255,255,255,0.5)" }}>
         {team}

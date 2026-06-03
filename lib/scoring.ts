@@ -1,5 +1,6 @@
 import { db } from "./db";
 import { MatchStatus } from "@prisma/client";
+import { getOfficialMvpPlayerId } from "./domain/mvp";
 
 export type PlayerMatchScore = {
   playerId: number;
@@ -46,11 +47,13 @@ export function computeMvpWinnerId(votes: Array<{ playerId: number }>): number |
     counts.set(vote.playerId, (counts.get(vote.playerId) ?? 0) + 1);
   }
 
-  const topEntry = [...counts.entries()].sort(
-    (a, b) => b[1] - a[1] || (a[0] < b[0] ? -1 : 1)
-  )[0];
+  const sortedEntries = [...counts.entries()].sort(
+    (a, b) => b[1] - a[1] || a[0] - b[0]
+  );
+  const topEntry = sortedEntries[0];
+  const tied = sortedEntries[1] && sortedEntries[1][1] === topEntry[1];
 
-  return topEntry ? topEntry[0] : null;
+  return tied ? null : topEntry[0];
 }
 
 export function accumulatePlayerTotals(
@@ -61,13 +64,21 @@ export function accumulatePlayerTotals(
     }>;
     goals: Array<{ scorerId: number; isOwnGoal: boolean }>;
     votes: Array<{ playerId: number }>;
+    concludedAt: Date | null;
+    mvpOverridePlayerId?: number | null;
+    players?: Array<{ playerId: number }>;
   }>,
   mvpBonus: number
 ): Map<number, number> {
   const totals = new Map<number, number>();
 
   for (const match of matches) {
-    const mvpId = computeMvpWinnerId(match.votes);
+    const mvpId = getOfficialMvpPlayerId({
+      concludedAt: match.concludedAt,
+      votes: match.votes,
+      mvpOverridePlayerId: match.mvpOverridePlayerId,
+      eligiblePlayerIds: match.players?.map((player) => player.playerId),
+    });
 
     for (const bonus of match.bonuses) {
       totals.set(
@@ -97,6 +108,9 @@ export async function computeRankings(): Promise<RankEntry[]> {
       where: { status: MatchStatus.CONCLUDED },
       select: {
         id: true,
+        concludedAt: true,
+        mvpOverridePlayerId: true,
+        players: { select: { playerId: true } },
         bonuses: { select: { playerId: true, points: true } },
         goals: { select: { scorerId: true, isOwnGoal: true } },
         votes: { select: { playerId: true } },
@@ -172,6 +186,8 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         homeTeam: { select: { name: true } },
         awayTeam: { select: { name: true } },
         players: { select: { playerId: true } },
+        concludedAt: true,
+        mvpOverridePlayerId: true,
         bonuses: {
           select: {
             playerId: true,
@@ -194,10 +210,22 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
 
   return matches.map((match) => {
     const playerPoints = accumulatePlayerTotals(
-      [{ bonuses: match.bonuses, goals: match.goals, votes: match.votes }],
+      [{
+        bonuses: match.bonuses,
+        goals: match.goals,
+        votes: match.votes,
+        concludedAt: match.concludedAt,
+        mvpOverridePlayerId: match.mvpOverridePlayerId,
+        players: match.players,
+      }],
       mvpBonus
     );
-    const mvpId = computeMvpWinnerId(match.votes);
+    const mvpId = getOfficialMvpPlayerId({
+      concludedAt: match.concludedAt,
+      votes: match.votes,
+      mvpOverridePlayerId: match.mvpOverridePlayerId,
+      eligiblePlayerIds: match.players.map((p) => p.playerId),
+    });
     const playedPlayerIds = new Set(match.players.map((p) => p.playerId));
 
     const playerScores: PlayerMatchScore[] = ft.players.map(({ player }) => {

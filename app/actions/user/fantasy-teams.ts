@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { PlayerRole } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -9,7 +8,7 @@ import { requireAuth } from "@/lib/session";
 import { validateRoster } from "@/lib/domain/roster";
 
 export type CreateTeamResult =
-  | { success: true }
+  | { success: true; teamId: number }
   | { success: false; errors?: Record<string, string[]>; message?: string };
 
 const Schema = z.object({
@@ -78,7 +77,7 @@ export async function createFantasyTeam(
     return { success: false, message: messages[rosterError] ?? rosterError };
   }
 
-  await db.$transaction([
+  const [newTeam] = await db.$transaction([
     db.fantasyTeam.create({
       data: {
         name,
@@ -93,5 +92,5 @@ export async function createFantasyTeam(
 
   revalidatePath("/dashboard");
   revalidatePath("/squadra");
-  redirect("/squadra");
+  return { success: true, teamId: newTeam.id };
 }

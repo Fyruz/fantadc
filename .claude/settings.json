@@ -28,10 +28,13 @@
       "Skill(superpowers:executing-plans:*)",
       "Bash(Get-ChildItem -Recurse -Filter \"page.tsx\" \"e:\\\\Developing\\\\fantadc\\\\app\\\\\\(admin\\)\")",
       "Bash(Select-Object -ExpandProperty FullName)",
-      "Bash(Sort-Object)"
+      "Bash(Sort-Object)",
+      "Bash(mv \"e:/Developing/fantadc/app/api/story/[teamId]/route.ts\" \"e:/Developing/fantadc/app/api/story/[teamId]/route.tsx\")",
+      "Bash(git stash *)"
     ],
     "additionalDirectories": [
-      "e:\\Developing\\fantadc\\docs\\superpowers\\specs"
+      "e:\\Developing\\fantadc\\docs\\superpowers\\specs",
+      "e:\\Developing\\fantadc\\app\\api\\story\\[teamId]"
     ]
   }
 }

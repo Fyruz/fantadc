@@ -191,11 +191,11 @@ async function seedBonusTypes() {
     { code: "YELLOW_CARD",    name: "Cartellino giallo",      points: -0.5 },
     { code: "RED_CARD",       name: "Cartellino rosso",       points: -2.0 },
     { code: "CLEAN_SHEET_GK", name: "Clean sheet (portiere)", points:  1.0 },
-    { code: "MVP",            name: "MVP Partita",            points:  3.0 },
+    { code: "MVP",            name: "MVP Partita",            points:  5.0 },
   ];
 
   for (const bt of bonusTypes) {
-    await db.bonusType.upsert({ where: { code: bt.code }, update: {}, create: bt });
+    await db.bonusType.upsert({ where: { code: bt.code }, update: { points: bt.points }, create: bt });
   }
 
   console.log(`✓ Bonus type verificati: ${bonusTypes.map((b) => b.code).join(", ")}`);

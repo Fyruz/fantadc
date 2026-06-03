@@ -58,7 +58,8 @@ Flusso base:
 6. l'utente seleziona un solo giocatore come MVP
 7. il sistema registra il voto e blocca ulteriori modifiche lato utente
 8. dopo il voto, l'utente vede conferma e favorito provvisorio
-9. alla chiusura della finestra, il sistema mostra l'MVP finale della partita
+9. alla chiusura della finestra, il sistema mostra l'MVP finale della partita se c'e un vincitore unico
+10. se c'e pari voti, un admin sceglie manualmente l'MVP ufficiale
 
 ## 5. Gestione admin del torneo
 
@@ -87,16 +88,16 @@ Flusso logico:
 1. gli admin definiscono i giocatori presenti in partita
 2. gli admin assegnano bonus e malus per partita ai giocatori
 3. il sistema determina l'MVP della partita
-4. il sistema calcola il punteggio di ciascun giocatore
-5. se il giocatore e capitano, il suo punteggio viene raddoppiato
-6. il sistema somma i punteggi dei 5 giocatori della squadra fantasy
-7. aggiorna la classifica cumulata totale
-8. conserva il dettaglio storico per partita
+4. il giocatore MVP ufficiale riceve 5 punti
+5. il sistema calcola il punteggio di ciascun giocatore
+6. se il giocatore e capitano, il suo punteggio viene raddoppiato
+7. il sistema somma i punteggi dei 5 giocatori della squadra fantasy
+8. aggiorna la classifica cumulata totale
+9. conserva il dettaglio storico per partita
 
 ## 7. Punti ancora aperti
 
 Restano da definire nel dettaglio:
 
-* valore esatto dei punti assegnati dall'MVP
 * regole di spareggio in classifica
 * meccanismo tecnico anti spam su registrazione e voto

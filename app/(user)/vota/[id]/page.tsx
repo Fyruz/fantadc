@@ -3,6 +3,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
+import { resolveMvp } from "@/lib/domain/mvp";
 import VoteForm from "./_vote-form";
 
 export default async function VotaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -32,6 +33,7 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
         },
         orderBy: { player: { name: "asc" } },
       },
+      votes: { select: { playerId: true } },
     },
   });
   if (!match) notFound();
@@ -39,7 +41,14 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
   const windowOpen = isMvpWindowOpen(match.concludedAt);
   const userVote = await db.vote.findUnique({
     where: { userId_matchId: { userId, matchId } },
-    include: { player: { select: { name: true } } },
+    include: {
+      player: {
+        select: {
+          name: true,
+          footballTeam: { select: { countryCode: true, logoUrl: true, name: true } },
+        },
+      },
+    },
   });
 
   if (match.status === "DRAFT" || match.status === "SCHEDULED") {
@@ -56,6 +65,15 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
 
   const scored = match.homeScore !== null && match.awayScore !== null;
   const label = match.group?.name ?? match.knockoutRound?.name ?? null;
+  const mvpResolution = resolveMvp({
+    concludedAt: match.concludedAt,
+    votes: match.votes,
+    mvpOverridePlayerId: match.mvpOverridePlayerId,
+    eligiblePlayerIds: match.players.map((mp) => mp.playerId),
+  });
+  const mvpPlayer = mvpResolution.status === "resolved"
+    ? match.players.find((mp) => mp.playerId === mvpResolution.playerId)?.player
+    : null;
 
   const TeamLogo = ({ team }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null }) => {
     if (!team) return <div style={{ width: 64, height: 64 }} />;
@@ -128,7 +146,10 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
       {windowOpen ? (
         <VoteForm
           matchId={matchId}
-          userVote={userVote ? { playerName: userVote.player.name } : null}
+          userVote={userVote ? {
+            playerName: userVote.player.name,
+            team: userVote.player.footballTeam,
+          } : null}
           homeTeam={match.homeTeam ? {
             id: match.homeTeam.id,
             name: match.homeTeam.shortName ?? match.homeTeam.name,
@@ -160,6 +181,15 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
           style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
           <p className="text-sm text-black/60">La finestra di voto è chiusa.</p>
+          {mvpPlayer ? (
+            <p className="mt-2 text-base font-semibold text-(--text-primary)">
+              MVP ufficiale: {mvpPlayer.name}
+            </p>
+          ) : mvpResolution.status === "tied" ? (
+            <p className="mt-2 text-xs text-black/50">Pari voti: l'MVP sarà confermato da un admin.</p>
+          ) : (
+            <p className="mt-2 text-xs text-black/50">Nessun MVP assegnato per questa partita.</p>
+          )}
         </div>
       )}
     </div>

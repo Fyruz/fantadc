@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/session";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 
@@ -41,11 +40,7 @@ export default async function HomePage({
   const params = await searchParams;
   const accountDeleted = params.deleted === "1";
 
-  const [user, teamCount, playerCount, fantasyCount, upcomingMatches, groups, topScorers] = await Promise.all([
-    getCurrentUser(),
-    db.footballTeam.count(),
-    db.player.count(),
-    db.fantasyTeam.count(),
+  const [upcomingMatches, groups, topScorers] = await Promise.all([
     // Prossime partite programmate
     db.match.findMany({
       where: { status: "SCHEDULED" },
@@ -135,14 +130,13 @@ export default async function HomePage({
         )}
 
         {/* ══ HERO ══════════════════════════════════════════════════ */}
-        <section
+        {/* <section
           className="relative overflow-hidden flex flex-col items-center justify-center text-center"
           style={{
             minHeight: "86svh",
             background: "linear-gradient(170deg, #000228 0%, #0107A3 45%, #0A0FC4 100%)",
           }}
         >
-          {/* Campo da calcio — linee SVG */}
           <svg
             className="absolute inset-0 w-full h-full pointer-events-none"
             viewBox="0 0 400 600"
@@ -150,26 +144,16 @@ export default async function HomePage({
             xmlns="http://www.w3.org/2000/svg"
           >
             <g stroke="rgba(255,255,255,0.18)" strokeWidth="1.2" fill="none">
-              {/* Bordo campo */}
               <rect x="40" y="60" width="320" height="480" />
-              {/* Centrocampo */}
               <line x1="40" y1="300" x2="360" y2="300" />
-              {/* Cerchio centrocampo */}
               <circle cx="200" cy="300" r="55" />
               <circle cx="200" cy="300" r="3" fill="rgba(255,255,255,0.07)" stroke="none" />
-              {/* Area grande alto */}
               <rect x="110" y="60" width="180" height="80" />
-              {/* Area piccola alto */}
               <rect x="155" y="60" width="90" height="35" />
-              {/* Area grande basso */}
               <rect x="110" y="460" width="180" height="80" />
-              {/* Area piccola basso */}
               <rect x="155" y="505" width="90" height="35" />
-              {/* Archi area alto */}
               <path d="M 130,140 Q 200,175 270,140" />
-              {/* Archi area basso */}
               <path d="M 130,460 Q 200,425 270,460" />
-              {/* Angoli */}
               <path d="M 40,60 Q 50,60 50,70" />
               <path d="M 360,60 Q 350,60 350,70" />
               <path d="M 40,540 Q 50,540 50,530" />
@@ -177,7 +161,6 @@ export default async function HomePage({
             </g>
           </svg>
 
-          {/* Glow gold */}
           <div
             className="absolute pointer-events-none"
             style={{
@@ -196,24 +179,18 @@ export default async function HomePage({
           />
 
           <div className="relative z-10 px-5 py-20 max-w-lg mx-auto flex flex-col items-center gap-6">
-
-            {/* Wordmark */}
             <h1
               className="font-display font-black text-white uppercase leading-[0.88] tracking-tight"
               style={{ fontSize: "clamp(4rem, 20vw, 7.5rem)" }}
             >
               DCUP <span style={{ color: "#E8A000" }}>26</span>
             </h1>
-
-            {/* Tagline */}
             <p
               className="text-sm md:text-base leading-relaxed max-w-xs"
               style={{ color: "rgba(255,255,255,0.55)" }}
             >
               Scegli i tuoi 5 campioni, vota l&apos;MVP e scala la classifica.
             </p>
-
-            {/* CTA */}
             {user ? (
               <Link
                 href="/dashboard"
@@ -255,7 +232,6 @@ export default async function HomePage({
             )}
           </div>
 
-          {/* Scroll hint — mobile only */}
           <div className="absolute bottom-20 left-0 right-0 flex flex-col items-center gap-1.5 md:hidden pointer-events-none">
             <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.40)" }}>
               Scorri in basso
@@ -263,13 +239,12 @@ export default async function HomePage({
             <i className="pi pi-chevron-down animate-bounce" style={{ color: "rgba(255,255,255,0.40)", fontSize: 13 }} />
           </div>
 
-          {/* Bottom wave */}
           <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{ lineHeight: 0 }}>
             <svg viewBox="0 0 1440 56" preserveAspectRatio="none" style={{ display: "block", width: "100%", height: 56 }}>
               <path d="M0,56 L0,28 Q360,0 720,28 Q1080,56 1440,28 L1440,56 Z" fill="#F5F6FF" />
             </svg>
           </div>
-        </section>
+        </section> */}
 
         {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
         {upcomingMatches.length > 0 && (
@@ -385,7 +360,7 @@ export default async function HomePage({
             <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
               <img
                 src="/images/fantasy-football-shirt.png"
-                alt="Fantasy Football"
+                alt="Fanta"
                 className="h-full object-contain"
               />
             </div>
@@ -394,12 +369,12 @@ export default async function HomePage({
                 className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
-                Fantasy Football
+                Fanta
               </p>
               <p className="text-sm text-black font-normal max-w-48">
                 Gestisci il tuo dream team in Danimarca&apos;s Cup!
               </p>
-              <p className="text-sm font-semibold text-black">Gioca al FantaDC</p>
+              <p className="text-sm font-semibold text-black">Gioca al Fanta</p>
             </div>
           </Link>
         </section>
@@ -420,12 +395,15 @@ export default async function HomePage({
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
+            <div
+              className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-3 md:grid md:grid-cols-1 md:overflow-visible md:mx-0 md:px-0"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+            >
               {groupStandings.map((g) => (
                 <Link
                   key={g.id}
                   href="/gironi"
-                  className="block rounded-3xl bg-white overflow-hidden pb-3"
+                  className="block rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
                   style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                 >
                   {/* Card header */}
@@ -576,7 +554,7 @@ export default async function HomePage({
         className="hidden md:block py-5 text-center text-[11px]"
         style={{ borderTop: "1px solid var(--border-soft)", color: "var(--text-disabled)" }}
       >
-        <span>Fantadc</span>
+        <span>Fanta</span>
         <span className="px-2">·</span>
         <Link href="/supporto" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
           Supporto app

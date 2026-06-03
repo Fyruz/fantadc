@@ -7,8 +7,10 @@ import AddMatchPlayerForm from "./_add-player-form";
 import PlayerBonusCard from "./_player-bonus-card";
 import StatusActions from "./_status-actions";
 import GoalsForm from "./_goals-form";
+import MvpOverrideForm from "./_mvp-override-form";
 import StatusBadge from "@/components/status-badge";
 import { Button } from "primereact/button";
+import { resolveMvp } from "@/lib/domain/mvp";
 
 export default async function PartitaDetailPage({
   params,
@@ -30,6 +32,7 @@ export default async function PartitaDetailPage({
         players: {
           include: { player: { include: { footballTeam: { select: { name: true } } } } },
         },
+        votes: { select: { playerId: true } },
       },
     }),
     db.footballTeam.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
@@ -66,6 +69,34 @@ export default async function PartitaDetailPage({
   }
 
   const hasScore = match.homeScore !== null && match.awayScore !== null;
+  const mvpResolution = resolveMvp({
+    concludedAt: match.concludedAt,
+    votes: match.votes,
+    mvpOverridePlayerId: match.mvpOverridePlayerId,
+    eligiblePlayerIds: match.players.map((mp) => mp.playerId),
+  });
+  const playerById = new Map(match.players.map((mp) => [mp.playerId, mp.player]));
+  const voteRows = mvpResolution.voteCounts
+    .map((voteCount) => {
+      const player = playerById.get(voteCount.playerId);
+      return player
+        ? {
+            id: player.id,
+            name: player.name,
+            footballTeamName: player.footballTeam.name,
+            votes: voteCount.votes,
+          }
+        : null;
+    })
+    .filter((row): row is { id: number; name: string; footballTeamName: string; votes: number } => row !== null);
+  const mvpStatusLabel =
+    mvpResolution.status === "open"
+      ? "Finestra di voto aperta: l'MVP non assegna ancora punti."
+      : mvpResolution.status === "resolved"
+        ? `MVP ufficiale: ${playerById.get(mvpResolution.playerId)?.name ?? "giocatore selezionato"} (${mvpResolution.source === "admin" ? "scelto da admin" : "automatico"}).`
+        : mvpResolution.status === "tied"
+          ? "Pari voti: scegli manualmente l'MVP per assegnare i 5 punti."
+          : "Finestra chiusa senza voti: nessun MVP assegnato.";
 
   return (
     <div className="flex flex-col gap-5">
@@ -173,6 +204,20 @@ export default async function PartitaDetailPage({
         <div className="over-label mb-3">Avanzamento stato</div>
         <StatusActions matchId={matchId} status={match.status} playerCount={match.players.length} />
       </div>
+
+      {match.status === "CONCLUDED" && (
+        <MvpOverrideForm
+          matchId={matchId}
+          currentPlayerId={match.mvpOverridePlayerId}
+          statusLabel={mvpStatusLabel}
+          voteRows={voteRows}
+          players={match.players.map(({ player }) => ({
+            id: player.id,
+            name: player.name,
+            footballTeamName: player.footballTeam.name,
+          }))}
+        />
+      )}
 
       {/* ── Edit form (collapsible) ───────────────────────────────── */}
       <details className="card overflow-hidden group">

@@ -73,7 +73,7 @@ Fuori scope per ora:
 * il nome squadra non deve essere unico, ma puo essere filtrato per parole non ammesse
 * il coach non fa piu parte del dominio
 * il capitano raddoppia il punteggio del proprio giocatore
-* il voto MVP incide anche sul punteggio fantasy, ma il valore esatto e ancora da definire
+* il voto MVP incide anche sul punteggio fantasy: l'MVP ufficiale riceve 5 punti
 * i contenuti non admin del torneo sono pubblici
 
 ## Macro aree applicative
