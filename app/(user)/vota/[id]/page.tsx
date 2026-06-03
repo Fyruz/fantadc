@@ -41,7 +41,14 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
   const windowOpen = isMvpWindowOpen(match.concludedAt);
   const userVote = await db.vote.findUnique({
     where: { userId_matchId: { userId, matchId } },
-    include: { player: { select: { name: true } } },
+    include: {
+      player: {
+        select: {
+          name: true,
+          footballTeam: { select: { countryCode: true, logoUrl: true, name: true } },
+        },
+      },
+    },
   });
 
   if (match.status === "DRAFT" || match.status === "SCHEDULED") {
@@ -139,7 +146,10 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
       {windowOpen ? (
         <VoteForm
           matchId={matchId}
-          userVote={userVote ? { playerName: userVote.player.name } : null}
+          userVote={userVote ? {
+            playerName: userVote.player.name,
+            team: userVote.player.footballTeam,
+          } : null}
           homeTeam={match.homeTeam ? {
             id: match.homeTeam.id,
             name: match.homeTeam.shortName ?? match.homeTeam.name,
