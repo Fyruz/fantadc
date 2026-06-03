@@ -1,0 +1,78 @@
+"use client";
+
+import Link from "next/link";
+import { useTransition } from "react";
+import { logout } from "@/app/actions/auth";
+
+export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-between py-6" style={{ background: "#fff" }}>
+      <div className="w-full max-w-lg px-4 flex flex-col gap-10">
+
+        {/* Header */}
+        <div className="flex flex-col gap-4">
+          <Link href="/" className="inline-flex items-center justify-center w-6 h-6">
+            <i className="pi pi-chevron-left" style={{ fontSize: 12, color: "var(--text-primary)" }} />
+          </Link>
+          <h1
+            className="uppercase"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", fontSize: 20, fontWeight: 500 }}
+          >
+            Ciao, {name}
+          </h1>
+        </div>
+
+        {/* Impostazioni account */}
+        <div className="flex flex-col">
+          <Link
+            href="/account"
+            className="flex items-center justify-between py-1 hover:opacity-70 transition-opacity"
+          >
+            <div className="flex items-center gap-3">
+              <i className="pi pi-shield" style={{ fontSize: 18, color: "var(--text-primary)" }} />
+              <span className="text-sm text-black">Impostazioni account</span>
+            </div>
+            <i className="pi pi-chevron-right" style={{ fontSize: 10, color: "var(--text-primary)" }} />
+          </Link>
+          {isAdmin && (
+            <Link
+              href="/admin"
+              className="flex items-center justify-between py-1 hover:opacity-70 transition-opacity"
+            >
+              <div className="flex items-center gap-3">
+                <i className="pi pi-cog" style={{ fontSize: 18, color: "var(--text-primary)" }} />
+                <span className="text-sm text-black">Admin</span>
+              </div>
+              <i className="pi pi-chevron-right" style={{ fontSize: 10, color: "var(--text-primary)" }} />
+            </Link>
+          )}
+        </div>
+
+        {/* Link list */}
+        <div className="flex flex-col gap-4">
+          <Link href="/privacy" className="text-sm text-black hover:opacity-70 transition-opacity">Norme sulla privacy</Link>
+          <Link href="/supporto" className="text-sm text-black hover:opacity-70 transition-opacity">Supporto app</Link>
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => startTransition(() => logout())}
+            className="text-left text-sm text-black hover:opacity-70 transition-opacity disabled:opacity-40"
+          >
+            {pending ? "Uscita in corso..." : "Esci"}
+          </button>
+        </div>
+
+      </div>
+
+      {/* Footer */}
+      <div className="flex flex-col items-center gap-2">
+        <p className="text-[10px] text-black text-center">Abbiamo a cuore il calcio</p>
+        <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
+          Copyright @ 2026 Danimarca&apos;s Cup - Versione app 1.0.0
+        </p>
+      </div>
+    </div>
+  );
+}

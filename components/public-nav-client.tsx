@@ -48,6 +48,14 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const navRef = useRef<HTMLElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
   const [logoutPending, startTransition] = useTransition();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 0);
+    handler();
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
@@ -87,9 +95,10 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     <header
       className="sticky top-0 z-30"
       style={{
-        background: "#fff",
-        borderBottom: isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)",
-        boxShadow: "0 1px 8px rgba(1,7,163,0.06)",
+        background: scrolled ? "#fff" : "transparent",
+        borderBottom: scrolled ? (isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)") : "none",
+        boxShadow: scrolled ? "0 1px 8px rgba(1,7,163,0.06)" : "none",
+        transition: "background 0.2s, box-shadow 0.2s",
       }}
     >
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-2 sm:gap-3">
@@ -101,13 +110,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             className="flex items-center gap-2 px-3 py-2 rounded-full text-white shrink-0 transition-colors"
             style={{ fontSize: 12, fontWeight: !isGV ? 600 : 500, background: !isGV ? "#09144C" : "rgba(0,0,0,0.25)" }}
           >
-            <Image
-              src="/logo_dc.png"
-              width={24}
-              height={24}
-              alt="DCup"
-              className="rounded-md object-contain"
-            />
+            <img src="/icons/dcup.svg" width={23} height={24} alt="DCup" />
             <span>DCup</span>
           </Link>
           <Link
@@ -115,13 +118,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             className="flex items-center gap-2 px-3 py-2 rounded-full font-semibold text-white shrink-0 transition-colors"
             style={{ fontSize: 12, background: isGV ? GV : "rgba(0,0,0,0.25)" }}
           >
-            <Image
-              src="/logo_greenvolley.png"
-              width={24}
-              height={24}
-              alt="GreenVolley"
-              className="rounded-md object-contain"
-            />
+            <img src="/icons/green_volley.svg" width={27} height={24} alt="GreenVolley" />
             <span>Green Volley</span>
           </Link>
         </div>
@@ -264,19 +261,19 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
           {user ? (
             <div ref={avatarRef} className="relative">
+              {/* Mobile: link to /profilo */}
+              <Link href="/profilo" className="md:hidden w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70" aria-label="Profilo">
+                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
+              </Link>
+              {/* Desktop: dropdown */}
               <button
                 type="button"
                 onClick={() => setAvatarOpen((v) => !v)}
-                className="w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70"
+                className="hidden md:flex w-10 h-10 items-center justify-center transition-opacity hover:opacity-70"
                 aria-label="Menu utente"
                 aria-expanded={avatarOpen}
               >
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-white"
-                  style={{ background: "var(--primary)" }}
-                >
-                  <i className="pi pi-user text-sm" aria-hidden="true" />
-                </span>
+                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
               </button>
               {avatarOpen && (
                 <div
@@ -339,16 +336,11 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
           ) : (
             <>
               <Link
-                href="/login"
+                href="/profilo"
                 className="md:hidden w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70"
-                aria-label="Accedi"
+                aria-label="Profilo"
               >
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-white"
-                  style={{ background: "var(--primary)" }}
-                >
-                  <i className="pi pi-user text-sm" aria-hidden="true" />
-                </span>
+                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
               </Link>
               <Link
                 href="/login"
