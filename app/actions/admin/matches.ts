@@ -49,6 +49,16 @@ async function notifyVoteWindowOpened(matchId: number, nextStatus: MatchStatus |
   }
 }
 
+function startsAtFromForm(date: string | undefined, time: string | undefined) {
+  if (date && time) {
+    return new Date(`${date}T${time}:00`);
+  }
+
+  const startsAt = new Date();
+  startsAt.setSeconds(0, 0);
+  return startsAt;
+}
+
 export async function createMatch(_prev: ActionResult | undefined, formData: FormData): Promise<ActionResult> {
   const admin = await requireAdmin();
   const parsed = CreateSchema.safeParse({
@@ -65,14 +75,11 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
     return { errors: { awayTeamId: ["La squadra ospite deve essere diversa dalla squadra di casa."] } };
   }
 
-  const needsDateTime = parsed.data.status !== MatchStatus.DRAFT;
-  if (needsDateTime && (!parsed.data.date || !parsed.data.time)) {
-    return { errors: { date: ["Data e ora obbligatorie per questo stato."] } };
+  if ((parsed.data.date && !parsed.data.time) || (!parsed.data.date && parsed.data.time)) {
+    return { errors: { date: ["Inserisci sia data sia ora."] } };
   }
 
-  const startsAt = parsed.data.date && parsed.data.time
-    ? new Date(`${parsed.data.date}T${parsed.data.time}:00`)
-    : new Date(0);
+  const startsAt = startsAtFromForm(parsed.data.date, parsed.data.time);
 
   const match = await db.match.create({
     data: {

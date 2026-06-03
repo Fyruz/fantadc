@@ -23,6 +23,18 @@ const PHASE_OPTIONS = [
   { label: "Eliminazione diretta", value: "knockout" },
 ];
 
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function roundedCurrentTime() {
+  const date = new Date();
+  date.setMinutes(Math.ceil(date.getMinutes() / 5) * 5, 0, 0);
+  return date;
+}
+
 export default function NuovaPartitaForm({
   teams,
   groups,
@@ -40,8 +52,8 @@ export default function NuovaPartitaForm({
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
   const [status, setStatus]         = useState<string>("DRAFT");
-  const [date, setDate]             = useState<Date | null>(null);
-  const [time, setTime]             = useState<Date | null>(null);
+  const [date, setDate]             = useState<Date | null>(() => startOfToday());
+  const [time, setTime]             = useState<Date | null>(() => roundedCurrentTime());
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(max-width: 768px)").matches;
@@ -64,8 +76,7 @@ export default function NuovaPartitaForm({
   const allTeamOptions = teams.map((t) => ({ label: t.name, value: String(t.id) }));
   const homeOptions    = allTeamOptions.filter((t) => t.value !== awayTeamId);
   const awayOptions    = allTeamOptions.filter((t) => t.value !== homeTeamId);
-
-  const needsDateTime = status !== "DRAFT";
+  const minDate = startOfToday();
 
   const formattedDate = date
     ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
@@ -182,50 +193,49 @@ export default function NuovaPartitaForm({
         />
       </div>
 
-      {/* Data e ora — solo se non bozza */}
-      {needsDateTime && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Data *
-            </label>
-            <input type="hidden" name="date" value={formattedDate} />
-            <Calendar
-              value={date}
-              onChange={(e) => setDate(e.value as Date | null)}
-              dateFormat="dd/mm/yy"
-              showIcon
-              className="w-full"
-              inputClassName="w-full"
-              showButtonBar
-            />
-            {state?.errors?.date && (
-              <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.date[0]}</p>
-            )}
-          </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
-              Ora *
-            </label>
-            <input type="hidden" name="time" value={formattedTime} />
-            <Calendar
-              value={time}
-              onChange={(e) => setTime(e.value as Date | null)}
-              timeOnly
-              showIcon
-              className="w-full"
-              inputClassName="w-full"
-              hourFormat="24"
-              stepMinute={5}
-              touchUI={isMobile}
-              readOnlyInput={isMobile}
-            />
-            {state?.errors?.time && (
-              <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.time[0]}</p>
-            )}
-          </div>
+      {/* Data e ora */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Data *
+          </label>
+          <input type="hidden" name="date" value={formattedDate} />
+          <Calendar
+            value={date}
+            onChange={(e) => setDate(e.value as Date | null)}
+            dateFormat="dd/mm/yy"
+            minDate={minDate}
+            showIcon
+            className="w-full"
+            inputClassName="w-full"
+            showButtonBar
+          />
+          {state?.errors?.date && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.date[0]}</p>
+          )}
         </div>
-      )}
+        <div>
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Ora *
+          </label>
+          <input type="hidden" name="time" value={formattedTime} />
+          <Calendar
+            value={time}
+            onChange={(e) => setTime(e.value as Date | null)}
+            timeOnly
+            showIcon
+            className="w-full"
+            inputClassName="w-full"
+            hourFormat="24"
+            stepMinute={5}
+            touchUI={isMobile}
+            readOnlyInput={isMobile}
+          />
+          {state?.errors?.time && (
+            <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.time[0]}</p>
+          )}
+        </div>
+      </div>
 
       {state?.message && (
         <p className="text-xs" style={{ color: "#991B1B" }}>{state.message}</p>

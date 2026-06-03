@@ -1,6 +1,8 @@
 "use client";
-import { PrimeReactProvider } from "primereact/api";
+import { PrimeReactProvider, updateLocaleOption } from "primereact/api";
 import { ToastProvider } from "./toast-provider";
+
+updateLocaleOption("firstDayOfWeek", 1, "en");
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (

@@ -33,6 +33,16 @@ const PHASE_OPTIONS = [
   { label: "Eliminazione diretta", value: "knockout" },
 ];
 
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function safeInitialStartsAt(startsAt: Date) {
+  return startsAt.getTime() <= 0 ? startOfToday() : startsAt;
+}
+
 export default function EditMatchForm({
   match,
   teams,
@@ -46,7 +56,8 @@ export default function EditMatchForm({
 }) {
   const [state, action, pending] = useActionState(updateMatch, undefined);
 
-  const startsAtLocal = new Date(match.startsAt.getTime() - match.startsAt.getTimezoneOffset() * 60000);
+  const initialStartsAt = safeInitialStartsAt(match.startsAt);
+  const startsAtLocal = new Date(initialStartsAt.getTime() - initialStartsAt.getTimezoneOffset() * 60000);
   const defaultDate = startsAtLocal.toISOString().slice(0, 10);
   const defaultTime = startsAtLocal.toISOString().slice(11, 16);
 
