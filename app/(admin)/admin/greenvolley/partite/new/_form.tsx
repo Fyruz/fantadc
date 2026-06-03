@@ -8,6 +8,18 @@ import { createVolleyMatch } from "@/app/actions/admin/volley";
 
 type SelectItem = { id: number; name: string };
 
+function startOfToday() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
+
+function roundedCurrentTime() {
+  const date = new Date();
+  date.setMinutes(Math.ceil(date.getMinutes() / 5) * 5, 0, 0);
+  return date;
+}
+
 export default function NewVolleyMatchForm({
   teams,
   groups,
@@ -22,7 +34,8 @@ export default function NewVolleyMatchForm({
   const [awayTeamId, setAwayTeamId] = useState<number | null>(null);
   const [groupId, setGroupId] = useState<number | null>(null);
   const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(null);
-  const [date, setDate] = useState<Date | null>(null);
+  const [date, setDate] = useState<Date | null>(() => roundedCurrentTime());
+  const minDate = startOfToday();
   const [isMobile, setIsMobile] = useState(() => {
     if (typeof window === "undefined") return false;
     return window.matchMedia("(max-width: 768px)").matches;
@@ -81,9 +94,10 @@ export default function NewVolleyMatchForm({
           stepMinute={5}
           touchUI={isMobile}
           readOnlyInput={isMobile}
+          minDate={minDate}
           dateFormat="dd/mm/yy"
           className="w-full"
-          placeholder="Opzionale"
+          placeholder="Seleziona data e ora"
         />
         <input
           type="hidden"
