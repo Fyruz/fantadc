@@ -65,8 +65,11 @@ export default function PublicBottomNav() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [classificaOpen, setClassificaOpen] = useState(false);
 
+  const isVota = pathname.startsWith("/vota");
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
+
+  if (isVota) return null;
 
   const isActive = (href: string, matchers?: readonly string[]) => {
     if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));

@@ -2,17 +2,10 @@
 
 import { useActionState, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { castVote } from "@/app/actions/user/vote";
 
 type Team = { id: number; name: string; countryCode: string | null; logoUrl: string | null };
-type Player = {
-  id: number;
-  name: string;
-  role: string;
-  footballTeamId: number;
-  footballTeam: Team;
-};
+type Player = { id: number; name: string; role: string; footballTeamId: number; footballTeam: Team };
 
 function TeamLogo({ team, size = 24 }: { team: Team; size?: number }) {
   if (team.logoUrl)
@@ -22,12 +15,141 @@ function TeamLogo({ team, size = 24 }: { team: Team; size?: number }) {
   return null;
 }
 
+function displayName(player: Player, allPlayers: Player[]) {
+  const last = player.name.split(" ").at(-1)!;
+  const hasDuplicate = allPlayers.some((p) => p.id !== player.id && p.name.split(" ").at(-1) === last);
+  if (!hasDuplicate) return last;
+  const initial = player.name[0];
+  return `${initial}. ${last}`;
+}
+
+function SheetContent({
+  homeTeam, awayTeam, outfield, goalkeepers,
+  teamFilter, setTeamFilter, selectedPlayer, onSelect, onClose,
+}: {
+  homeTeam: Team | null; awayTeam: Team | null;
+  outfield: Player[]; goalkeepers: Player[];
+  teamFilter: number | null; setTeamFilter: (v: number | null) => void;
+  selectedPlayer: Player | null; onSelect: (p: Player) => void; onClose: () => void;
+}) {
+  const allPlayers = [...outfield, ...goalkeepers];
+  return (
+    <>
+      {/* Header */}
+      <div className="flex items-center px-4 pt-6 pb-4 shrink-0">
+        <p className="flex-1 text-center text-black" style={{ fontSize: 16, lineHeight: "26px" }}>
+          Chi sarà il Player of the Match?
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-6 h-6 flex items-center justify-center shrink-0"
+          style={{ color: "rgba(9,20,76,0.4)" }}
+        >
+          <i className="pi pi-times text-sm" />
+        </button>
+      </div>
+
+      {/* Team filter pills */}
+      {(homeTeam || awayTeam) && (
+        <div className="flex gap-3 px-4 pb-10 justify-center flex-wrap shrink-0">
+          {homeTeam && (
+            <button
+              type="button"
+              onClick={() => setTeamFilter(teamFilter === homeTeam.id ? null : homeTeam.id)}
+              className="flex items-center gap-2 px-3 rounded-full h-10 text-sm font-medium transition-colors"
+              style={{
+                border: `1.5px solid ${teamFilter === homeTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
+                color: teamFilter === homeTeam.id ? "var(--primary)" : "var(--text-primary)",
+                background: teamFilter === homeTeam.id ? "rgba(9,20,76,0.04)" : "transparent",
+              }}
+            >
+              <span className="flex items-center justify-center w-8 h-8">
+                <TeamLogo team={homeTeam} size={24} />
+              </span>
+              {homeTeam.name}
+            </button>
+          )}
+          {awayTeam && (
+            <button
+              type="button"
+              onClick={() => setTeamFilter(teamFilter === awayTeam.id ? null : awayTeam.id)}
+              className="flex items-center gap-2 px-3 rounded-full h-10 text-sm font-medium transition-colors"
+              style={{
+                border: `1.5px solid ${teamFilter === awayTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
+                color: teamFilter === awayTeam.id ? "var(--primary)" : "var(--text-primary)",
+                background: teamFilter === awayTeam.id ? "rgba(9,20,76,0.04)" : "transparent",
+              }}
+            >
+              <span className="flex items-center justify-center w-8 h-8">
+                <TeamLogo team={awayTeam} size={24} />
+              </span>
+              {awayTeam.name}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Scrollable players */}
+      <div className="overflow-y-auto flex-1 px-4 pb-10">
+        {outfield.length > 0 && (
+          <div className="mb-10">
+            <p className="text-black mb-6" style={{ fontSize: 16, lineHeight: "26px" }}>Giocatori di movimento</p>
+            <div className="grid grid-cols-3 gap-6">
+              {outfield.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelect(p)}
+                  className="flex flex-col items-center gap-3"
+                >
+                  <div className="relative flex items-center justify-center" style={{ width: 56, height: 56 }}>
+                    <TeamLogo team={p.footballTeam} size={48} />
+                    {selectedPlayer?.id === p.id && (
+                      <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
+                    )}
+                  </div>
+                  <span className="text-center leading-tight" style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: selectedPlayer?.id === p.id ? 700 : 400 }}>
+                    {displayName(p, allPlayers)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {goalkeepers.length > 0 && (
+          <div>
+            <p className="text-black mb-6" style={{ fontSize: 16, lineHeight: "26px" }}>Portieri</p>
+            <div className="grid grid-cols-3 gap-6">
+              {goalkeepers.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelect(p)}
+                  className="flex flex-col items-center gap-3"
+                >
+                  <div className="relative flex items-center justify-center" style={{ width: 56, height: 56 }}>
+                    <TeamLogo team={p.footballTeam} size={48} />
+                    {selectedPlayer?.id === p.id && (
+                      <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
+                    )}
+                  </div>
+                  <span className="text-center leading-tight" style={{ fontSize: 14, color: "var(--text-primary)", fontWeight: selectedPlayer?.id === p.id ? 700 : 400 }}>
+                    {displayName(p, allPlayers)}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
 export default function VoteForm({
-  matchId,
-  userVote,
-  homeTeam,
-  awayTeam,
-  players,
+  matchId, userVote, homeTeam, awayTeam, players,
 }: {
   matchId: number;
   userVote: { playerName: string; team: { id?: number; countryCode: string | null; logoUrl: string | null; name: string } } | null;
@@ -36,11 +158,22 @@ export default function VoteForm({
   players: Player[];
 }) {
   const [state, action, pending] = useActionState(castVote, undefined);
-  const [selectOpen, setSelectOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [animIn, setAnimIn] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [teamFilter, setTeamFilter] = useState<number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const playerIdRef = useRef<HTMLInputElement>(null);
+
+  const openSheet = () => {
+    setMounted(true);
+    requestAnimationFrame(() => requestAnimationFrame(() => setAnimIn(true)));
+  };
+
+  const closeSheet = () => {
+    setAnimIn(false);
+    setTimeout(() => setMounted(false), 300);
+  };
 
   const handleConfirm = () => {
     if (!selectedPlayer || !playerIdRef.current || !formRef.current) return;
@@ -48,15 +181,19 @@ export default function VoteForm({
     formRef.current.requestSubmit();
   };
 
-  const filteredPlayers = teamFilter
-    ? players.filter((p) => p.footballTeamId === teamFilter)
-    : players;
+  const handleSelect = (p: Player) => {
+    setSelectedPlayer(p);
+    closeSheet();
+  };
 
+  const filteredPlayers = teamFilter ? players.filter((p) => p.footballTeamId === teamFilter) : players;
   const outfield = filteredPlayers.filter((p) => p.role !== "P");
   const goalkeepers = filteredPlayers.filter((p) => p.role === "P");
 
   const votedName = state?.success ? selectedPlayer?.name : userVote?.playerName;
   const votedTeam = state?.success ? selectedPlayer?.footballTeam : userVote?.team;
+
+  const sheetProps = { homeTeam, awayTeam, outfield, goalkeepers, teamFilter, setTeamFilter, selectedPlayer, onSelect: handleSelect, onClose: closeSheet };
 
   return (
     <>
@@ -70,192 +207,92 @@ export default function VoteForm({
         className="bg-white rounded-3xl p-6 flex flex-col items-center gap-4 text-center"
         style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
       >
-        <p className="text-base text-(--text-primary)">Chi sarà il Player of the Match?</p>
+        <p className="w-full text-center text-black" style={{ fontSize: 16, lineHeight: "26px" }}>
+          Chi sarà il Player of the Match?
+        </p>
 
         {selectedPlayer ? (
-          /* Selected state */
           <>
             <div className="flex flex-col items-center gap-2">
-              <div className="flex items-center justify-center" style={{ width: 48, height: 48 }}>
-                <TeamLogo team={selectedPlayer.footballTeam} size={40} />
+              <div className="flex items-center justify-center" style={{ width: 56, height: 56 }}>
+                <TeamLogo team={selectedPlayer.footballTeam} size={48} />
               </div>
               <span className="text-sm font-semibold text-(--text-primary)">{selectedPlayer.name}</span>
-              <Button
-                type="button"
-                onClick={() => setSelectOpen(true)}
-                className="text-xs text-black/40 underline-offset-2 underline"
-                text
-                plain
-              >
+              <button type="button" onClick={() => openSheet()} className="text-xs underline underline-offset-2" style={{ color: "rgba(0,0,0,0.4)" }}>
                 Cambia
-              </Button>
+              </button>
             </div>
             <Button
-              type="button"
-              onClick={handleConfirm}
-              disabled={pending}
+              type="button" onClick={handleConfirm} disabled={pending}
               label={pending ? "..." : "Conferma voto"}
               className="w-full justify-center py-3 rounded-2xl text-sm font-semibold text-white disabled:opacity-50"
               style={{ background: "var(--primary)" }}
             />
           </>
         ) : votedName ? (
-          /* Already voted state */
           <div className="flex flex-col items-center gap-2">
             {votedTeam && (
-              <div className="flex items-center justify-center" style={{ width: 48, height: 48 }}>
-                <TeamLogo team={{ id: votedTeam.id ?? 0, ...votedTeam }} size={40} />
+              <div className="flex items-center justify-center" style={{ width: 56, height: 56 }}>
+                <TeamLogo team={{ id: votedTeam.id ?? 0, ...votedTeam }} size={48} />
               </div>
             )}
             <span className="text-sm font-semibold text-(--text-primary)">{votedName}</span>
           </div>
         ) : (
-          /* Default state */
-          <>
-            <Button
-              type="button"
-              onClick={() => setSelectOpen(true)}
-              disabled={pending}
-              icon="pi pi-plus"
-              className="w-12 h-12 rounded-full flex items-center justify-center disabled:opacity-40"
-              style={{ border: "1.5px solid rgba(9,20,76,0.15)" }}
-            />
-            <Button
-              type="button"
-              onClick={() => setSelectOpen(true)}
-              disabled={pending}
-              label="Seleziona giocatore"
-              className="text-sm font-semibold text-(--text-primary) disabled:opacity-40"
-              text
-              plain
-            />
-          </>
+          <button type="button" onClick={() => openSheet()} disabled={pending} className="flex flex-col items-center gap-2 disabled:opacity-40">
+            <img src="/icons/add_circle.svg" width={48} height={48} alt="Aggiungi" />
+            <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>Seleziona giocatore</span>
+          </button>
         )}
 
-        {state?.success === false && (
-          <p className="text-xs text-red-500">{state.message}</p>
-        )}
+        {state?.success === false && <p className="text-xs text-red-500">{state.message}</p>}
       </div>
 
-      {/* Player selection modal */}
-      <Dialog
-        visible={selectOpen}
-        onHide={() => setSelectOpen(false)}
-        header={null}
-        closable={false}
-        modal
-        draggable={false}
-        resizable={false}
-        style={{ width: "min(500px, 96vw)", maxHeight: "90vh" }}
-        contentStyle={{ padding: 0, overflowY: "auto" }}
-        pt={{ root: { style: { borderRadius: "24px", overflow: "hidden" } } }}
-      >
-        <div className="flex flex-col">
-          {/* Close + title */}
-          <div className="flex items-start justify-between px-6 pt-6 pb-4">
-            <p className="text-base text-(--text-primary) flex-1 text-center">Chi sarà il Player of the Match?</p>
-            <Button
-              type="button"
-              onClick={() => setSelectOpen(false)}
-              icon="pi pi-times"
-              className="shrink-0 ml-2"
-              style={{ color: "rgba(9,20,76,0.4)" }}
-              text
-              plain
-            />
+      {/* ── Overlay (mobile: bottom sheet, desktop: centered modal) ── */}
+      {mounted && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-40"
+            style={{ background: "rgba(6,7,61,0.3)", opacity: animIn ? 1 : 0, transition: "opacity 0.3s ease" }}
+            onClick={closeSheet}
+          />
+          {/* Mobile: bottom sheet */}
+          <div
+            className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
+            style={{
+              borderRadius: "24px 24px 0 0",
+              maxHeight: "90svh",
+              transform: animIn ? "translateY(0)" : "translateY(100%)",
+              transition: "transform 0.3s cubic-bezier(0.32,0.72,0,1)",
+            }}
+          >
+            <div className="flex justify-center py-3 shrink-0">
+              <div className="w-10 h-1 rounded-full" style={{ background: "rgba(0,0,0,0.15)" }} />
+            </div>
+            <SheetContent {...sheetProps} />
           </div>
-
-          {/* Team filter pills */}
-          {(homeTeam || awayTeam) && (
-            <div className="flex gap-3 px-6 pb-5 justify-center flex-wrap">
-              {homeTeam && (
-                <Button
-                  type="button"
-                  onClick={() => setTeamFilter(teamFilter === homeTeam.id ? null : homeTeam.id)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                  style={{
-                    border: `1.5px solid ${teamFilter === homeTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
-                    color: teamFilter === homeTeam.id ? "var(--primary)" : "var(--text-primary)",
-                    background: teamFilter === homeTeam.id ? "rgba(9,20,76,0.04)" : "white",
-                  }}
-                >
-                  <TeamLogo team={homeTeam} size={20} />
-                  {homeTeam.name}
-                </Button>
-              )}
-              {awayTeam && (
-                <Button
-                  type="button"
-                  onClick={() => setTeamFilter(teamFilter === awayTeam.id ? null : awayTeam.id)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-                  style={{
-                    border: `1.5px solid ${teamFilter === awayTeam.id ? "var(--primary)" : "rgba(9,20,76,0.12)"}`,
-                    color: teamFilter === awayTeam.id ? "var(--primary)" : "var(--text-primary)",
-                    background: teamFilter === awayTeam.id ? "rgba(9,20,76,0.04)" : "white",
-                  }}
-                >
-                  <TeamLogo team={awayTeam} size={20} />
-                  {awayTeam.name}
-                </Button>
-              )}
+          {/* Desktop: centered modal */}
+          <div
+            className="hidden md:flex fixed inset-0 z-50 items-center justify-center p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) closeSheet(); }}
+          >
+            <div
+              className="bg-white flex flex-col"
+              style={{
+                borderRadius: 24,
+                width: "min(500px, 96vw)",
+                maxHeight: "90vh",
+                opacity: animIn ? 1 : 0,
+                transform: animIn ? "scale(1)" : "scale(0.95)",
+                transition: "opacity 0.25s ease, transform 0.25s ease",
+              }}
+            >
+              <SheetContent {...sheetProps} />
             </div>
-          )}
-
-          {/* Outfield players */}
-          {outfield.length > 0 && (
-            <div className="px-6 pb-4">
-              <p className="text-sm font-semibold text-(--text-primary) mb-4">Giocatori di movimento</p>
-              <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-                {outfield.map((p) => (
-                  <Button
-                    key={p.id}
-                    type="button"
-                    onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
-                    className="flex flex-col items-center gap-2 text-center"
-                  >
-                    <div className="relative flex items-center justify-center" style={{ width: 48, height: 48 }}>
-                      <TeamLogo team={p.footballTeam} size={40} />
-                      {selectedPlayer?.id === p.id && (
-                        <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
-                      )}
-                    </div>
-                    <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
-                      {p.name}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Goalkeepers */}
-          {goalkeepers.length > 0 && (
-            <div className="px-6 pb-6">
-              <p className="text-sm font-semibold text-(--text-primary) mb-4">Portieri</p>
-              <div className="grid grid-cols-3 gap-x-4 gap-y-6">
-                {goalkeepers.map((p) => (
-                  <Button
-                    key={p.id}
-                    type="button"
-                    onClick={() => { setSelectedPlayer(p); setSelectOpen(false); }}
-                    className="flex flex-col items-center gap-2 text-center"
-                  >
-                    <div className="relative flex items-center justify-center" style={{ width: 48, height: 48 }}>
-                      <TeamLogo team={p.footballTeam} size={40} />
-                      {selectedPlayer?.id === p.id && (
-                        <i className="pi pi-star-fill absolute -top-1 -right-1" style={{ fontSize: 12, color: "#E8A000" }} />
-                      )}
-                    </div>
-                    <span className={`text-xs leading-tight ${selectedPlayer?.id === p.id ? "font-bold text-(--text-primary)" : "text-(--text-primary)"}`}>
-                      {p.name}
-                    </span>
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </Dialog>
+          </div>
+        </>
+      )}
     </>
   );
 }

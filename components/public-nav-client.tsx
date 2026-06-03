@@ -57,6 +57,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
+  const isVota = pathname.startsWith("/vota");
   const isGV = pathname.startsWith("/greenvolley");
   const primary = isGV ? GV : "var(--primary)";
 
@@ -93,7 +94,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   return (
     <header
-      className="sticky top-0 z-30"
+      className={`sticky top-0 z-30${isVota ? " hidden md:block" : ""}`}
       style={{
         background: scrolled ? "#fff" : "transparent",
         borderBottom: scrolled ? (isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)") : "none",

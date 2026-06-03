@@ -31,14 +31,14 @@ export default async function ProfiloPage() {
           <div className="flex gap-4">
             <Link
               href="/login"
-              className="flex-1 flex items-center justify-center py-2 rounded-lg text-xs transition-opacity hover:opacity-80"
+              className="flex-1 flex items-center justify-center py-2 rounded-lg text-xs font-semibold"
               style={{ border: "1px solid var(--text-primary)", color: "var(--text-primary)" }}
             >
               Accedi
             </Link>
             <Link
               href="/register"
-              className="flex-1 flex items-center justify-center py-2 rounded-lg text-xs text-white transition-opacity hover:opacity-80"
+              className="flex-1 flex items-center justify-center py-2 rounded-lg text-xs text-white font-semibold"
               style={{ background: "var(--text-primary)" }}
             >
               Crea account
