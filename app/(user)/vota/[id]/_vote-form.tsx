@@ -29,7 +29,7 @@ export default function VoteForm({
   players,
 }: {
   matchId: number;
-  userVote: { playerName: string } | null;
+  userVote: { playerName: string; team: { id?: number; countryCode: string | null; logoUrl: string | null; name: string } } | null;
   homeTeam: Team | null;
   awayTeam: Team | null;
   players: Player[];
@@ -54,19 +54,8 @@ export default function VoteForm({
   const outfield = filteredPlayers.filter((p) => p.role !== "P");
   const goalkeepers = filteredPlayers.filter((p) => p.role === "P");
 
-  if (state?.success) {
-    return (
-      <div
-        className="bg-white rounded-3xl p-8 text-center"
-        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-      >
-        <p className="text-sm font-semibold text-(--text-primary)">✓ Voto registrato!</p>
-        <p className="text-xs text-black/50 mt-1">Il risultato sarà visibile alla chiusura della finestra di voto.</p>
-      </div>
-    );
-  }
-
-  const votedName = userVote?.playerName;
+  const votedName = state?.success ? selectedPlayer?.name : userVote?.playerName;
+  const votedTeam = state?.success ? selectedPlayer?.footballTeam : userVote?.team;
 
   return (
     <>
@@ -110,8 +99,12 @@ export default function VoteForm({
           </>
         ) : votedName ? (
           /* Already voted state */
-          <div className="flex flex-col items-center gap-1">
-            <i className="pi pi-check-circle text-2xl" style={{ color: "var(--primary)" }} />
+          <div className="flex flex-col items-center gap-2">
+            {votedTeam && (
+              <div className="flex items-center justify-center" style={{ width: 48, height: 48 }}>
+                <TeamLogo team={{ id: votedTeam.id ?? 0, ...votedTeam }} size={40} />
+              </div>
+            )}
             <span className="text-sm font-semibold text-(--text-primary)">{votedName}</span>
           </div>
         ) : (

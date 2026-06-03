@@ -385,7 +385,7 @@ export default async function HomePage({
             <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
               <img
                 src="/images/fantasy-football-shirt.png"
-                alt="Fantasy Football"
+                alt="Fanta"
                 className="h-full object-contain"
               />
             </div>
@@ -394,12 +394,12 @@ export default async function HomePage({
                 className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
                 style={{ fontFamily: "var(--font-tallica)" }}
               >
-                Fantasy Football
+                Fanta
               </p>
               <p className="text-sm text-black font-normal max-w-48">
                 Gestisci il tuo dream team in Danimarca&apos;s Cup!
               </p>
-              <p className="text-sm font-semibold text-black">Gioca al FantaDC</p>
+              <p className="text-sm font-semibold text-black">Gioca al Fanta</p>
             </div>
           </Link>
         </section>
@@ -576,7 +576,7 @@ export default async function HomePage({
         className="hidden md:block py-5 text-center text-[11px]"
         style={{ borderTop: "1px solid var(--border-soft)", color: "var(--text-disabled)" }}
       >
-        <span>Fantadc</span>
+        <span>Fanta</span>
         <span className="px-2">·</span>
         <Link href="/supporto" className="underline underline-offset-2 hover:opacity-70 transition-opacity">
           Supporto app
