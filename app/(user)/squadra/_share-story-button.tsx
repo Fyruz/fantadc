@@ -21,10 +21,11 @@ export default function ShareStoryButton({ teamId }: { teamId: number }) {
 
   async function handleShare() {
     setLoading(true);
-    showInfo("Stiamo generando l'immagine da condividere...");
+    const dismissInfo = showInfo("Stiamo generando l'immagine da condividere...");
 
     try {
       const res = await fetch(`/api/story/${teamId}`);
+      dismissInfo();
       if (!res.ok) {
         const body = await res.text().catch(() => "");
         throw new Error(body || `HTTP ${res.status}`);
@@ -46,6 +47,7 @@ export default function ShareStoryButton({ teamId }: { teamId: number }) {
       triggerDownload(blob);
       showSuccess("Immagine scaricata! Aprila dalla galleria e condividila nelle Storie.");
     } catch (err) {
+      dismissInfo();
       const msg = err instanceof Error ? err.message : "Errore sconosciuto";
       showError(`Impossibile generare l'immagine: ${msg}`);
     } finally {

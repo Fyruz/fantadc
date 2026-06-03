@@ -12,9 +12,13 @@ import { createPortal } from "react-dom";
 
 type Severity = "error" | "success" | "info";
 
-type ToastCtx = { error: (msg: string) => void; success: (msg: string) => void; info: (msg: string) => void };
+type ToastCtx = {
+  error: (msg: string) => void;
+  success: (msg: string) => void;
+  info: (msg: string) => () => void;
+};
 
-const Ctx = createContext<ToastCtx>({ error: () => {}, success: () => {}, info: () => {} });
+const Ctx = createContext<ToastCtx>({ error: () => {}, success: () => {}, info: () => () => {} });
 
 interface ToastItem {
   id: number;
@@ -83,7 +87,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback((severity: Severity, msg: string) => {
     const id = uid++;
     setToasts((prev) => [...prev, { id, msg, severity, exiting: false }]);
-    setTimeout(() => dismiss(id), CONFIG[severity].life);
+    const timer = setTimeout(() => dismiss(id), CONFIG[severity].life);
+    return () => { clearTimeout(timer); dismiss(id); };
   }, [dismiss]);
 
   return (
