@@ -74,7 +74,7 @@ export default async function ClassificaMarcatoriPage() {
 
                 {/* Logo + name */}
                 <div className="flex flex-1 gap-3 items-center min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center p-1 overflow-hidden shrink-0">
+                  <div className="w-9 h-9 flex items-center justify-center p-1 overflow-hidden shrink-0">
                     {flagSrc ? (
                       <img src={flagSrc} alt={p.footballTeam.name} className="w-full h-full object-contain" />
                     ) : (

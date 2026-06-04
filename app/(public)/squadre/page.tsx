@@ -37,7 +37,7 @@ export default async function SquadrePublicPage() {
             const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
             return (
               <div key={team.id} className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center p-1 overflow-hidden shrink-0">
+                <div className="w-16 h-16 flex items-center justify-center p-1 overflow-hidden shrink-0">
                   {flagSrc ? (
                     <img src={flagSrc} alt={team.name} className="w-full h-full object-contain" />
                   ) : (
