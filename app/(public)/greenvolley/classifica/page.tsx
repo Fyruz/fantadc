@@ -14,16 +14,16 @@ export default async function VolleyClassificaPage() {
   });
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1
-        className="font-display font-black text-2xl uppercase"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Classifica
-      </h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <div className="over-label mb-1">GreenVolley</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          CLASSIFICA
+        </h1>
+      </div>
 
       {groups.length === 0 && (
-        <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>
+        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Nessun girone disponibile.
         </div>
       )}
@@ -39,64 +39,62 @@ export default async function VolleyClassificaPage() {
         const standings = computeVolleyStandings(teamList, matches);
 
         return (
-          <div key={group.id}>
-            <div
-              className="text-[10px] font-black uppercase tracking-widest mb-3"
-              style={{ color: "#3DD907", wordSpacing: "0.3em" }}
-            >
-              {group.name}
-            </div>
-            <div
-              className="rounded-xl overflow-hidden"
-              style={{ border: "1px solid var(--border-soft)" }}
-            >
-              {/* Header */}
-              <div
-                className="grid grid-cols-[1fr_36px_36px_36px_36px_44px] px-3 py-2 text-xs font-black uppercase tracking-wide gap-1"
-                style={{
-                  background: "var(--surface-1)",
-                  color: "var(--text-muted)",
-                  borderBottom: "1px solid var(--border-soft)",
-                }}
+          <div
+            key={group.id}
+            className="bg-white rounded-3xl overflow-hidden pb-3"
+            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+          >
+            {/* Card header */}
+            <div className="px-6 pt-6 pb-3">
+              <h2
+                className="uppercase text-base font-medium"
+                style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", wordSpacing: "0.3em" }}
               >
-                <span>Squadra</span>
-                <span className="text-center">G</span>
-                <span className="text-center">SV</span>
-                <span className="text-center">SP</span>
-                <span className="text-center">QS</span>
-                <span className="text-center" style={{ color: "#3DD907" }}>Pt</span>
-              </div>
-
-              {standings.map((row, i) => (
-                <div
-                  key={row.teamId}
-                  className="grid grid-cols-[1fr_36px_36px_36px_36px_44px] px-3 py-2.5 text-sm gap-1 items-center"
-                  style={{
-                    borderBottom:
-                      i < standings.length - 1
-                        ? "1px solid var(--border-soft)"
-                        : "none",
-                  }}
-                >
-                  <span className="font-semibold text-xs truncate">{row.teamName}</span>
-                  <span className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-                    {row.played}
-                  </span>
-                  <span className="text-center text-xs">{row.setsWon}</span>
-                  <span className="text-center text-xs">{row.setsLost}</span>
-                  <span className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-                    {row.setRatio === 0 ? "0" : row.setRatio.toFixed(2)}
-                  </span>
-                  <span
-                    className="text-center font-black text-sm"
-                    style={{ color: "#3DD907" }}
-                  >
-                    {row.setsWon}
-                  </span>
-                </div>
-              ))}
+                {group.name}
+              </h2>
             </div>
-            <div className="text-[10px] mt-1 px-1" style={{ color: "var(--text-muted)" }}>
+
+            {/* Table header */}
+            <div
+              className="grid grid-cols-[1fr_28px_28px_28px_40px_36px] px-6 pb-3 text-xs font-semibold uppercase gap-1"
+              style={{ color: "rgba(0,0,0,0.40)" }}
+            >
+              <span>Squadra</span>
+              <span className="text-center">G</span>
+              <span className="text-center">SV</span>
+              <span className="text-center">SP</span>
+              <span className="text-center">QS</span>
+              <span className="text-center" style={{ color: "var(--primary)" }}>Pt</span>
+            </div>
+
+            {standings.map((row, i) => (
+              <div
+                key={row.teamId}
+                className="grid grid-cols-[1fr_28px_28px_28px_40px_36px] px-6 py-3 text-sm gap-1 items-center"
+                style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
+              >
+                <span className="font-normal text-sm truncate" style={{ color: "var(--text-primary)" }}>
+                  {i + 1}. {row.teamName}
+                </span>
+                <span className="text-center text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
+                  {row.played}
+                </span>
+                <span className="text-center text-xs tabular-nums" style={{ color: "var(--text-primary)" }}>
+                  {row.setsWon}
+                </span>
+                <span className="text-center text-xs tabular-nums" style={{ color: "var(--text-primary)" }}>
+                  {row.setsLost}
+                </span>
+                <span className="text-center text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
+                  {row.setRatio === 0 ? "0" : row.setRatio.toFixed(2)}
+                </span>
+                <span className="text-center text-sm font-bold tabular-nums" style={{ color: "var(--primary)" }}>
+                  {row.setsWon}
+                </span>
+              </div>
+            ))}
+
+            <div className="text-[10px] mt-2 px-6" style={{ color: "rgba(0,0,0,0.40)" }}>
               G=Giocate · SV=Set Vinti · SP=Set Persi · QS=Quoziente Set · Pt=Punti (set vinti)
             </div>
           </div>
