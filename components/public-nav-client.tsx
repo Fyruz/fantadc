@@ -67,6 +67,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Fanta";
     if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "Il mio";
+    if (pathname.startsWith("/altro")) return "Altro";
     return null;
   };
   const mobileTitle = getMobileTitle();
@@ -113,7 +114,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         transition: "background 0.2s, box-shadow 0.2s",
       }}
     >
-      <div className="max-w-6xl mx-auto px-4 py-6 flex items-center gap-2 sm:gap-3">
+      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center gap-2 sm:gap-3">
 
         {/* ── Mobile header ──────────────────────────────────────── */}
         {mobileTitle ? (
@@ -285,8 +286,8 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
           {user ? (
             <div ref={avatarRef} className="relative">
               {/* Mobile: link to /profilo */}
-              <Link href="/profilo" className="md:hidden w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70" aria-label="Profilo">
-                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
+              <Link href="/profilo" className="md:hidden w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-70" aria-label="Profilo">
+                <img src="/icons/profile_circle.svg" width={36} height={36} alt="Profilo" />
               </Link>
               {/* Desktop: dropdown */}
               <button
@@ -360,10 +361,10 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
             <>
               <Link
                 href="/profilo"
-                className="md:hidden w-10 h-10 flex items-center justify-center transition-opacity hover:opacity-70"
+                className="md:hidden w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-70"
                 aria-label="Profilo"
               >
-                <img src="/icons/profile_circle.svg" width={40} height={40} alt="Profilo" />
+                <img src="/icons/profile_circle.svg" width={36} height={36} alt="Profilo" />
               </Link>
               <Link
                 href="/login"
