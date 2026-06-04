@@ -68,30 +68,32 @@ export default function ContattiPage() {
           >
             Sviluppatori
           </h2>
-          <ul className="text-base leading-relaxed space-y-2 mb-5" style={{ color: "#000" }}>
-            <li>Gianmarco Ferruzzi, Qursor</li>
-            <li>
-              Instagram:{" "}
+          <div className="flex flex-col gap-5 mb-5">
+            <div className="flex flex-col gap-1 text-base" style={{ color: "#000" }}>
+              <span className="font-medium">Gianmarco Ferruzzi</span>
               <a href="https://www.instagram.com/gianmarcoferruzzi/" target="_blank" rel="noreferrer"
                 className="underline underline-offset-2 hover:opacity-70 transition-opacity">
                 instagram.com/gianmarcoferruzzi
               </a>
-            </li>
-            <li>
-              Sito web:{" "}
+            </div>
+            <div className="flex flex-col gap-1 text-base" style={{ color: "#000" }}>
+              <span className="font-medium">Bryan Brucculeri</span>
+              <a href="https://www.instagram.com/bryanbrucculeri_" target="_blank" rel="noreferrer"
+                className="underline underline-offset-2 hover:opacity-70 transition-opacity">
+                instagram.com/bryanbrucculeri_
+              </a>
+            </div>
+            <div className="flex flex-col gap-1 text-base" style={{ color: "#000" }}>
               <a href="https://qursor.it/" target="_blank" rel="noreferrer"
                 className="underline underline-offset-2 hover:opacity-70 transition-opacity">
                 qursor.it
               </a>
-            </li>
-            <li>
-              Email:{" "}
               <a href="mailto:info@qursor.it"
                 className="underline underline-offset-2 hover:opacity-70 transition-opacity">
                 info@qursor.it
               </a>
-            </li>
-          </ul>
+            </div>
+          </div>
 
           <div
             className="rounded-2xl overflow-hidden"

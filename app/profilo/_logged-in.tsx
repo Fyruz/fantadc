@@ -58,7 +58,8 @@ export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdm
             type="button"
             disabled={pending}
             onClick={() => startTransition(() => logout())}
-            className="text-left text-base text-black disabled:opacity-40"
+            className="text-left text-base disabled:opacity-40"
+            style={{ color: "#DC2626" }}
           >
             {pending ? "Uscita in corso..." : "Esci"}
           </button>
