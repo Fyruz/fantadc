@@ -46,7 +46,7 @@ export default async function AltroPage() {
 
       {/* Seguici */}
       <Section label="Seguici">
-        <Item icon={<img src="/icons/instagram.svg" width={18} height={18} alt="" />} label="Instagram" href="https://www.instagram.com/danimarcas_cup?igsh=MW14OG5oc2pwOWZxaQ==" external />
+        <Item icon={<img src="/icons/instagram.svg" width={18} height={18} alt="" />} label="Instagram" href="https://www.instagram.com/danimarcas_cup/" external />
         <Item icon={<img src="/icons/facebook.svg" width={18} height={18} alt="" />} label="Facebook" href="https://www.facebook.com/share/18fzTTpgJ3/?mibextid=wwXIfr" external />
       </Section>
 
