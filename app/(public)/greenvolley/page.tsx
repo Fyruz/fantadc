@@ -98,7 +98,7 @@ export default async function GreenVolleyHomePage() {
             <div className="flex items-center justify-between mb-2">
               <div
                 className="text-[10px] font-black uppercase tracking-widest"
-                style={{ color: "#3DD907" }}
+                style={{ color: "#3DD907", wordSpacing: "0.3em" }}
               >
                 {group.name}
               </div>

@@ -410,7 +410,7 @@ export default async function HomePage({
                   <div className="px-6 pt-6 pb-3">
                     <p
                       className="uppercase text-base font-medium text-(--text-primary)"
-                      style={{ fontFamily: "var(--font-tallica)" }}
+                      style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}
                     >
                       {g.name}
                     </p>

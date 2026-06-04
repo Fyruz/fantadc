@@ -23,8 +23,8 @@ type MatchRow = {
 type Tab = "all" | "group" | "knockout" | "none";
 
 function formatMatchDate(date: Date) {
-  const day = date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
-  const time = date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const day = date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+  const time = date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
   return { day, time };
 }
 

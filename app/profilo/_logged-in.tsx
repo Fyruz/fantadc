@@ -52,13 +52,13 @@ export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdm
 
         {/* Link list */}
         <div className="flex flex-col gap-4">
-          <Link href="/privacy" className="text-sm text-black hover:opacity-70 transition-opacity">Norme sulla privacy</Link>
-          <Link href="/supporto" className="text-sm text-black hover:opacity-70 transition-opacity">Supporto app</Link>
+          <Link href="/privacy" className="text-base text-black">Norme sulla privacy</Link>
+          <Link href="/supporto" className="text-base text-black">Supporto app</Link>
           <button
             type="button"
             disabled={pending}
             onClick={() => startTransition(() => logout())}
-            className="text-left text-sm text-black hover:opacity-70 transition-opacity disabled:opacity-40"
+            className="text-left text-base text-black disabled:opacity-40"
           >
             {pending ? "Uscita in corso..." : "Esci"}
           </button>

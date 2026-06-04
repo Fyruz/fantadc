@@ -24,7 +24,7 @@ function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
 
 function MatchCard({ m }: { m: Match }) {
   const scored = m.homeScore !== null && m.awayScore !== null;
-  const time = m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const time = m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
   const label = m.group?.name ?? m.knockoutRound?.name ?? null;
 
   return (
@@ -175,7 +175,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                 style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
               >
                 <div className="px-6 pt-6 pb-3">
-                  <p className="uppercase text-base font-medium text-(--text-primary)" style={{ fontFamily: "var(--font-tallica)" }}>
+                  <p className="uppercase text-base font-medium text-(--text-primary)" style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}>
                     {g.name}
                   </p>
                 </div>

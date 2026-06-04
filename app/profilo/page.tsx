@@ -47,8 +47,8 @@ export default async function ProfiloPage() {
         </div>
 
         <div className="flex flex-col gap-4">
-          <Link href="/privacy" className="text-sm text-black hover:opacity-70 transition-opacity">Norme sulla privacy</Link>
-          <Link href="/supporto" className="text-sm text-black hover:opacity-70 transition-opacity">Supporto app</Link>
+          <Link href="/privacy" className="text-base text-black">Norme sulla privacy</Link>
+          <Link href="/supporto" className="text-base text-black">Supporto app</Link>
         </div>
 
       </div>
