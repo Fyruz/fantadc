@@ -1,23 +1,12 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { Tag } from "primereact/tag";
-
-const STATUS_LABEL: Record<string, string> = {
-  DRAFT: "Bozza",
-  SCHEDULED: "Programmata",
-  CONCLUDED: "Conclusa",
-};
-const STATUS_SEVERITY: Record<string, "secondary" | "info" | "success"> = {
-  DRAFT: "secondary",
-  SCHEDULED: "info",
-  CONCLUDED: "success",
-};
 
 export default async function VolleyEliminazionePublicPage() {
   const rounds = await db.volleyKnockoutRound.findMany({
     orderBy: { order: "asc" },
     include: {
       matches: {
+        where: { status: { not: "DRAFT" } },
         include: {
           homeTeam: { select: { id: true, name: true } },
           awayTeam: { select: { id: true, name: true } },
@@ -28,85 +17,119 @@ export default async function VolleyEliminazionePublicPage() {
     },
   });
 
-  const renderMatch = (m: (typeof rounds)[number]["matches"][number]) => {
-    const homeSets = m.sets.filter((s) => s.homePoints > s.awayPoints).length;
-    const awaySets = m.sets.filter((s) => s.awayPoints > s.homePoints).length;
-
+  if (rounds.length === 0 || rounds.every((r) => r.matches.length === 0)) {
     return (
-      <Link
-        key={m.id}
-        href={`/greenvolley/partite/${m.id}`}
-        className="flex items-center justify-between px-4 py-3 rounded-lg transition-colors hover:bg-[var(--surface-1)]"
-        style={{ border: "1px solid var(--border-soft)" }}
-      >
-        <div className="flex flex-col gap-0.5 flex-1">
-          <span className="font-black text-sm">{m.homeTeam.name}</span>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {m.awayTeam.name}
-          </span>
+      <div className="flex flex-col gap-6">
+        <div>
+          <div className="over-label mb-1">GreenVolley</div>
+          <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+            ELIMINAZIONE
+          </h1>
         </div>
-        <div className="text-center px-4">
-          {m.status === "CONCLUDED" ? (
-            <span className="font-black text-lg" style={{ color: "#3DD907" }}>
-              {homeSets} – {awaySets}
-            </span>
-          ) : (
-            <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>
-              {m.date
-                ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short" })
-                : "—"}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <Tag
-            value={STATUS_LABEL[m.status]}
-            severity={STATUS_SEVERITY[m.status]}
-          />
-        </div>
-      </Link>
+        <div className="card p-10 text-center over-label">Fase ad eliminazione non ancora iniziata.</div>
+      </div>
     );
-  };
+  }
+
+  const activeRounds = rounds.filter((r) => r.matches.length > 0);
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1
-        className="font-display font-black text-2xl uppercase"
-        style={{ color: "var(--text-primary)" }}
-      >
-        Eliminazione
-      </h1>
+    <div className="flex flex-col gap-6">
+      <div>
+        <div className="over-label mb-1">GreenVolley</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          ELIMINAZIONE
+        </h1>
+      </div>
 
-      {rounds.length === 0 && (
-        <div className="text-center py-12 text-sm" style={{ color: "var(--text-muted)" }}>
-          Nessun turno disponibile.
-        </div>
-      )}
+      {/* Bracket — scroll orizzontale su mobile */}
+      <div className="overflow-x-auto pb-4">
+        <div className="flex gap-4" style={{ minWidth: `${activeRounds.length * 220}px` }}>
+          {activeRounds.map((round) => (
+            <div key={round.id} className="flex flex-col gap-3" style={{ width: 200, flexShrink: 0 }}>
+              {/* Round header */}
+              <div
+                className="text-center text-[11px] font-black uppercase tracking-wide py-1.5 rounded-lg"
+                style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
+              >
+                {round.name}
+              </div>
 
-      {rounds.map((round) => (
-        <div key={round.id}>
-          <div
-            className="text-[10px] font-black uppercase tracking-widest mb-3"
-            style={{ color: "#3DD907" }}
-          >
-            {round.name}
-          </div>
+              {/* Matches */}
+              <div className="flex flex-col gap-2.5">
+                {round.matches.map((m) => {
+                  const homeSets = m.sets.filter((s) => s.homePoints > s.awayPoints).length;
+                  const awaySets = m.sets.filter((s) => s.awayPoints > s.homePoints).length;
+                  const scored = m.status === "CONCLUDED" && m.sets.length > 0;
+                  const homeWon = scored && homeSets > awaySets;
+                  const awayWon = scored && awaySets > homeSets;
 
-          {round.matches.length === 0 ? (
-            <div
-              className="text-center py-6 text-sm rounded-lg"
-              style={{
-                background: "var(--surface-1)",
-                color: "var(--text-muted)",
-              }}
-            >
-              Nessuna partita in questo turno.
+                  return (
+                    <Link
+                      key={m.id}
+                      href={`/greenvolley/partite/${m.id}`}
+                      className="block transition-opacity hover:opacity-80"
+                    >
+                      <div
+                        className="rounded-xl overflow-hidden"
+                        style={{
+                          border: "1.5px solid var(--border-medium)",
+                          background: "#fff",
+                          boxShadow: "0 2px 8px rgba(21,128,61,0.06)",
+                        }}
+                      >
+                        {/* Home */}
+                        <div
+                          className="flex items-center justify-between px-3 py-2 gap-2"
+                          style={{
+                            borderBottom: "1px solid var(--border-soft)",
+                            background: homeWon ? "var(--primary-light)" : undefined,
+                          }}
+                        >
+                          <span
+                            className="font-display font-black text-xs uppercase truncate flex-1"
+                            style={{ color: homeWon ? "var(--primary)" : "var(--text-primary)" }}
+                          >
+                            {m.homeTeam.name}
+                          </span>
+                          {scored && (
+                            <span
+                              className="font-display font-black text-sm flex-shrink-0 tabular-nums"
+                              style={{ color: homeWon ? "var(--primary)" : "var(--text-muted)" }}
+                            >
+                              {homeSets}
+                            </span>
+                          )}
+                        </div>
+                        {/* Away */}
+                        <div
+                          className="flex items-center justify-between px-3 py-2 gap-2"
+                          style={{ background: awayWon ? "var(--primary-light)" : undefined }}
+                        >
+                          <span
+                            className="font-display font-black text-xs uppercase truncate flex-1"
+                            style={{ color: awayWon ? "var(--primary)" : "var(--text-primary)" }}
+                          >
+                            {m.awayTeam.name}
+                          </span>
+                          {scored && (
+                            <span
+                              className="font-display font-black text-sm flex-shrink-0 tabular-nums"
+                              style={{ color: awayWon ? "var(--primary)" : "var(--text-muted)" }}
+                            >
+                              {awaySets}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-col gap-2">{round.matches.map(renderMatch)}</div>
-          )}
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }
