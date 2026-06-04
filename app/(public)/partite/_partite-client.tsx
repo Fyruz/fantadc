@@ -175,7 +175,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                 style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
               >
                 <div className="px-6 pt-6 pb-3">
-                  <p className="uppercase text-base font-medium text-(--text-primary)" style={{ fontFamily: "var(--font-tallica)" }}>
+                  <p className="uppercase text-base font-medium text-(--text-primary)" style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}>
                     {g.name}
                   </p>
                 </div>

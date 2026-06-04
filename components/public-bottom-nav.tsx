@@ -60,7 +60,7 @@ export default function PublicBottomNav() {
 
   const isGV = pathname.startsWith("/greenvolley");
 
-  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname)) return null;
+  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname) || pathname.startsWith("/squadre") || pathname.startsWith("/gironi")) return null;
 
   const isActive = (href: string, matchers?: readonly string[]) => {
     if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));

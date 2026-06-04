@@ -59,7 +59,9 @@ export default async function AltroPage() {
       {/* Qursor */}
       <div className="flex flex-col gap-3 items-center pb-4">
         <span className="text-xs text-center" style={{ color: "rgba(0,0,0,0.65)" }}>App ufficiale presentata da</span>
-        <img src="/images/qursor.svg" height={12} alt="Qursor" style={{ height: 12, width: "auto" }} />
+        <a href="https://qursor.it/" target="_blank" rel="noopener noreferrer">
+          <img src="/images/qursor.svg" height={12} alt="Qursor" style={{ height: 12, width: "auto" }} />
+        </a>
       </div>
     </div>
   );

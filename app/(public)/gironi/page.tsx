@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 
 export default async function GironiPublicPage() {
@@ -92,7 +93,24 @@ export default async function GironiPublicPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col">
+      {/* Header mobile */}
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <Link href="/altro" className="flex items-center justify-center w-6 h-6">
+            <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
+          </Link>
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
+        >
+          Gironi
+        </span>
+        <div className="flex-1" />
+      </div>
+
+      <div className="flex flex-col gap-6 mt-10 md:mt-0">
       {groupStandings.map((g) => (
         <div
           key={g.id}
@@ -103,7 +121,7 @@ export default async function GironiPublicPage() {
           <div className="px-6 pt-6 pb-3">
             <h2
               className="uppercase text-base font-medium text-(--text-primary)"
-              style={{ fontFamily: "var(--font-tallica)" }}
+              style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}
             >
               {g.name}
             </h2>
@@ -169,6 +187,7 @@ export default async function GironiPublicPage() {
           ))}
         </div>
       ))}
+      </div>
     </div>
   );
 }

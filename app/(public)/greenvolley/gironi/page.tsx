@@ -41,7 +41,7 @@ export default async function VolleyGironiPage() {
             >
               <h2
                 className="text-sm font-black uppercase tracking-wide"
-                style={{ color: "#3DD907" }}
+                style={{ color: "#3DD907", wordSpacing: "0.3em" }}
               >
                 {group.name}
               </h2>

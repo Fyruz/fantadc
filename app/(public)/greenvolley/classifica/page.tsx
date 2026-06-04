@@ -42,7 +42,7 @@ export default async function VolleyClassificaPage() {
           <div key={group.id}>
             <div
               className="text-[10px] font-black uppercase tracking-widest mb-3"
-              style={{ color: "#3DD907" }}
+              style={{ color: "#3DD907", wordSpacing: "0.3em" }}
             >
               {group.name}
             </div>
