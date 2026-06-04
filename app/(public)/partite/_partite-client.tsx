@@ -115,10 +115,10 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
       </div>
 
       {tab === "calendario" ? (
-        <div className="flex flex-col gap-10 pt-6">
+        <div className="flex flex-col gap-10 pt-6 pb-10">
           {/* Day filter pills */}
           {days.length > 1 && (
-            <div className="flex gap-4 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+            <div className="-mx-4 px-4 flex gap-4 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
               {days.map((d) => {
                 const isActive = activeDay === d.date;
                 return (
@@ -158,7 +158,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 pt-10">
+        <div className="flex flex-col gap-6 py-10">
           {groups.map((g) => {
             const cols = [
               { key: "played" as const, label: "PG" },

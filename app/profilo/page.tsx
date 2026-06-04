@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/session";
 import ProfiloLoggedIn from "./_logged-in";
+import pkg from "@/package.json";
 
 export default async function ProfiloPage() {
   const user = await getCurrentUser();
@@ -56,7 +57,7 @@ export default async function ProfiloPage() {
       <div className="flex flex-col items-center gap-2">
         <p className="text-[10px] text-black text-center">Abbiamo a cuore il calcio</p>
         <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
-          Copyright @ 2026 Danimarca&apos;s Cup - Versione app 1.0.0
+          Copyright © {new Date().getFullYear()} Danimarca&apos;s Cup - Versione app {pkg.version}
         </p>
       </div>
     </div>

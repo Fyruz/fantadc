@@ -46,7 +46,7 @@ export default async function SquadrePublicPage() {
                     </span>
                   )}
                 </div>
-                <span className="text-[14px] text-center leading-none text-black w-full line-clamp-2">
+                <span className="text-sm text-center text-black w-full line-clamp-2">
                   {team.name}
                 </span>
               </div>

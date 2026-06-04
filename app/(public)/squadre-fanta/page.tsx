@@ -8,12 +8,6 @@ export default async function SquadreFantasyPublicPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
-        <div className="over-label mb-1">Stagione 2026</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          SQUADRE FANTA
-        </h1>
-      </div>
       {rankings.length === 0 && (
         <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
           Nessuna squadra fanta registrata.

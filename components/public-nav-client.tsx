@@ -59,7 +59,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
 
   const isVota = pathname.startsWith("/vota");
   const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
-  const isSquadre = pathname.startsWith("/squadre");
+  const isSquadre = pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta");
   const isGironi = pathname.startsWith("/gironi");
   const hideOnMobile = isVota || isPartiteDetail || isSquadre || isGironi;
   const isGV = pathname.startsWith("/greenvolley");
