@@ -24,7 +24,7 @@ function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
 
 function MatchCard({ m }: { m: Match }) {
   const scored = m.homeScore !== null && m.awayScore !== null;
-  const time = m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  const time = m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
   const label = m.group?.name ?? m.knockoutRound?.name ?? null;
 
   return (
