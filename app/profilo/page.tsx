@@ -55,7 +55,7 @@ export default async function ProfiloPage() {
       </div>
 
       <div className="flex flex-col items-center gap-2">
-        <p className="text-[10px] text-black text-center">Abbiamo a cuore il calcio</p>
+        <p className="text-[10px] text-black text-center">Dove il calcio incontra la fantasia</p>
         <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
           Copyright © {new Date().getFullYear()} Danimarca&apos;s Cup - Versione app {pkg.version}
         </p>

@@ -25,25 +25,25 @@ export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdm
         </div>
 
         {/* Impostazioni account */}
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-4">
           <Link
             href="/account"
-            className="flex items-center justify-between py-1 hover:opacity-70 transition-opacity"
+            className="flex items-center justify-between hover:opacity-70 transition-opacity"
           >
             <div className="flex items-center gap-3">
               <i className="pi pi-shield" style={{ fontSize: 18, color: "var(--text-primary)" }} />
-              <span className="text-sm text-black">Impostazioni account</span>
+              <span className="text-base text-black">Impostazioni account</span>
             </div>
             <i className="pi pi-chevron-right" style={{ fontSize: 10, color: "var(--text-primary)" }} />
           </Link>
           {isAdmin && (
             <Link
               href="/admin"
-              className="flex items-center justify-between py-1 hover:opacity-70 transition-opacity"
+              className="flex items-center justify-between hover:opacity-70 transition-opacity"
             >
               <div className="flex items-center gap-3">
                 <i className="pi pi-cog" style={{ fontSize: 18, color: "var(--text-primary)" }} />
-                <span className="text-sm text-black">Admin</span>
+                <span className="text-base text-black">Admin</span>
               </div>
               <i className="pi pi-chevron-right" style={{ fontSize: 10, color: "var(--text-primary)" }} />
             </Link>
@@ -68,7 +68,7 @@ export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdm
 
       {/* Footer */}
       <div className="flex flex-col items-center gap-2">
-        <p className="text-[10px] text-black text-center">Abbiamo a cuore il calcio</p>
+        <p className="text-[10px] text-black text-center">Dove il calcio incontra la fantasia</p>
         <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
           Copyright @ 2026 Danimarca&apos;s Cup - Versione app 1.0.0
         </p>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "primereact/button";
 import DeleteAccountDialog from "@/components/delete-account-dialog";
 import { deleteOwnAccount } from "@/app/actions/account";
 
@@ -23,13 +22,14 @@ export default function DeleteAccountForm() {
         onConfirm={handleConfirm}
         description="Questa azione è permanente e irreversibile. La tua squadra fanta e tutti i tuoi dati verranno eliminati."
       />
-      <Button
-        label="Elimina account"
-        icon="pi pi-trash"
-        severity="danger"
-        outlined
+      <button
+        type="button"
         onClick={() => setVisible(true)}
-      />
+        className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white"
+        style={{ background: "#DC2626" }}
+      >
+        Elimina account
+      </button>
     </>
   );
 }

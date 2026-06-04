@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { Password } from "primereact/password";
-import { Button } from "primereact/button";
 import { changePassword } from "@/app/actions/account";
 
 export default function ChangePasswordForm() {
@@ -113,14 +112,14 @@ export default function ChangePasswordForm() {
         </p>
       )}
 
-      <div>
-        <Button
-          type="submit"
-          label={pending ? "Salvataggio..." : "Aggiorna password"}
-          icon="pi pi-lock"
-          disabled={pending}
-        />
-      </div>
+      <button
+        type="submit"
+        disabled={pending}
+        className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+        style={{ background: "var(--text-primary)" }}
+      >
+        {pending ? "Salvataggio..." : "Aggiorna password"}
+      </button>
     </form>
   );
 }

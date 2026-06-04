@@ -503,7 +503,7 @@ export default async function HomePage({
                 </div>
               ))}
               <div className="p-6" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
-                <Link href="/marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+                <Link href="/classifica-marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
                   Vedi classifica completa
                   <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
                 </Link>
