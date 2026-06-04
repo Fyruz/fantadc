@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
-export const metadata = { title: "Classifica Marcatori" };
+export const metadata = { title: "Capocannoniere" };
 
 export default async function ClassificaMarcatoriPage() {
   const [players, goals] = await Promise.all([
@@ -8,8 +10,14 @@ export default async function ClassificaMarcatoriPage() {
       select: {
         id: true,
         name: true,
-        role: true,
-        footballTeam: { select: { name: true, shortName: true } },
+        footballTeam: {
+          select: {
+            name: true,
+            shortName: true,
+            countryCode: true,
+            logoUrl: true,
+          },
+        },
       },
     }),
     db.matchGoal.findMany({
@@ -18,95 +26,68 @@ export default async function ClassificaMarcatoriPage() {
   ]);
 
   const goalMap = new Map<number, number>();
-  const ownGoalMap = new Map<number, number>();
   for (const g of goals) {
-    if (g.isOwnGoal) {
-      ownGoalMap.set(g.scorerId, (ownGoalMap.get(g.scorerId) ?? 0) + 1);
-    } else {
+    if (!g.isOwnGoal) {
       goalMap.set(g.scorerId, (goalMap.get(g.scorerId) ?? 0) + 1);
     }
   }
 
   const ranked = players
-    .map((p) => ({
-      ...p,
-      goals: goalMap.get(p.id) ?? 0,
-      ownGoals: ownGoalMap.get(p.id) ?? 0,
-    }))
+    .map((p) => ({ ...p, goals: goalMap.get(p.id) ?? 0 }))
     .filter((p) => p.goals > 0)
     .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name, "it"));
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <div className="over-label mb-1">DCUP 26</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          Marcatori
-        </h1>
+    <div className="flex flex-col gap-10 pb-10">
+      {/* Header mobile */}
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <Link href="/altro" className="flex items-center justify-center w-6 h-6">
+            <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
+          </Link>
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
+        >
+          Capocannoniere
+        </span>
+        <div className="flex-1" />
       </div>
 
       {ranked.length === 0 ? (
-        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
           Nessun gol segnato.
-        </div>
+        </p>
       ) : (
-        <div className="card overflow-hidden">
+        <div className="flex flex-col">
           {ranked.map((p, idx) => {
-            const prev = ranked[idx - 1];
-            const rank = prev && prev.goals === p.goals ? null : idx + 1;
-            const isFirst = p.goals === ranked[0].goals;
+            const flagSrc = p.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(p.footballTeam.countryCode);
             return (
               <div
                 key={p.id}
-                className="flex items-center gap-3 px-4 py-3"
-                style={{ borderBottom: idx < ranked.length - 1 ? "1px solid var(--border-soft)" : undefined }}
+                className={`flex gap-4 items-center pb-3${idx === 0 ? "" : " pt-3"}`}
+                style={idx < ranked.length - 1 ? { borderBottom: "1px solid rgba(0,0,0,0.05)" } : undefined}
               >
                 {/* Rank */}
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center font-display font-black text-sm flex-shrink-0"
-                  style={
-                    isFirst
-                      ? { background: "linear-gradient(135deg,#E8A000,#C87800)", color: "#fff" }
-                      : { background: "var(--surface-1)", color: "var(--text-muted)" }
-                  }
-                >
-                  {rank ?? "–"}
-                </div>
+                <span className="text-xs text-black shrink-0">{idx + 1}</span>
 
-                {/* Role badge */}
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-black flex-shrink-0"
-                  style={
-                    p.role === "P"
-                      ? { background: "rgba(232,160,0,0.12)", color: "#C87800" }
-                      : { background: "rgba(1,7,163,0.08)", color: "var(--primary)" }
-                  }
-                >
-                  {p.role}
-                </div>
-
-                {/* Name + team */}
-                <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                    {p.name}
+                {/* Logo + name */}
+                <div className="flex flex-1 gap-3 items-center min-w-0">
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center p-1 overflow-hidden shrink-0">
+                    {flagSrc ? (
+                      <img src={flagSrc} alt={p.footballTeam.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-[10px] font-black uppercase" style={{ color: "var(--primary)" }}>
+                        {(p.footballTeam.shortName ?? p.footballTeam.name).slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>
-                    {p.footballTeam.shortName ?? p.footballTeam.name}
-                  </div>
+                  <span className="text-[14px] text-black truncate">{p.name}</span>
                 </div>
 
                 {/* Goals */}
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <span className="text-base">⚽</span>
-                  <span className="font-display font-black text-xl tabular-nums" style={{ color: "var(--text-primary)" }}>
-                    {p.goals}
-                  </span>
-                  {p.ownGoals > 0 && (
-                    <span className="text-[10px] font-semibold ml-0.5" style={{ color: "var(--text-disabled)" }}>
-                      (+{p.ownGoals} AG)
-                    </span>
-                  )}
-                </div>
+                <span className="text-[14px] font-semibold text-black shrink-0">{p.goals}</span>
               </div>
             );
           })}
