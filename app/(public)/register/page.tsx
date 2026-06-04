@@ -29,7 +29,7 @@ export default function RegisterPage() {
         <div
           className="rounded-3xl px-7 py-8"
           style={{
-            background: "#fff",
+            background: '#F5F6FF',
             border: "1.5px solid var(--border-medium)",
             boxShadow: "0 4px 32px rgba(1,7,163,0.10)",
           }}

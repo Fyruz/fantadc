@@ -62,8 +62,9 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isSquadre = pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta");
   const isGironi = pathname.startsWith("/gironi");
   const isMarcatori = pathname.startsWith("/classifica-marcatori");
+  const isGiocatori = pathname.startsWith("/giocatori");
   const isAltroPage = pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account");
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isGironi || isMarcatori || isAltroPage;
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isGironi || isMarcatori || isGiocatori || isAltroPage;
   const isGV = pathname.startsWith("/greenvolley");
 
   const getMobileTitle = (): string | null => {

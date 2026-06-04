@@ -33,7 +33,7 @@
   --gold-shadow: rgba(232,160,0,0.40);
 
   /* ── Backgrounds ────────────────────────── */
-  --bg-base: #FFFFFF;
+  --bg-base: #F5F6FF;
   --bg-secondary: #F5F6FF;
   --surface-1: #F0F2FF;
   --surface-2: #E4E7FF;
@@ -74,14 +74,14 @@
 
 body {
   min-height: 100vh;
-  background: var(--bg-base);
+  background: #F5F6FF !important;
   color: var(--text-primary);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overscroll-behavior-y: contain;
 }
 
 html {
-  background: var(--bg-base);
+  background: #F5F6FF !important;
 }
 
 /* ─── No text selection on touch devices (not inputs) ────── */

@@ -22,7 +22,7 @@ type Player = {
   id: number;
   name: string;
   role: string;
-  footballTeam: { name: string; shortName: string | null };
+  footballTeam: { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null };
   totalGoals: number;
   totalOwnGoals: number;
   totalBonusPoints: number;
@@ -221,76 +221,48 @@ export default function PlayersGrid({ groups }: { groups: Group[] }) {
         <PlayerDialog player={selected} onHide={() => setSelected(null)} />
       )}
 
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-6">
         {groups.map(({ teamName, players }) => (
-          <div key={teamName} className="card overflow-hidden">
-            {/* Team header */}
-            <div
-              className="px-4 py-2.5"
-              style={{ borderBottom: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
-            >
-              <span
-                className="text-xs font-black uppercase tracking-widest"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {teamName}
-              </span>
-            </div>
+          <div
+            key={teamName}
+            className="bg-white rounded-3xl overflow-hidden"
+            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+          >
+            <div className="p-6 flex flex-col gap-5">
+              {/* Team header */}
+              <div className="flex items-center gap-3">
+                {(() => {
+                  const t = players[0]?.footballTeam;
+                  if (!t) return null;
+                  const src = t.logoUrl ?? (t.countryCode ? `https://flagcdn.com/w40/${t.countryCode.toLowerCase()}.png` : null);
+                  if (!src) return null;
+                  return (
+                    <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
+                      <img src={src} alt={teamName} className="w-full h-full object-contain" />
+                    </div>
+                  );
+                })()}
+                <span className="text-base font-normal" style={{ color: "var(--text-primary)" }}>
+                  {teamName}
+                </span>
+              </div>
 
-            {/* Player grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3">
-              {players.map((p, idx) => {
-                const col = players.length <= 2 ? 2 : 3;
-                const lastRowStart = players.length - (players.length % col || col);
-                const isInLastRow = idx >= lastRowStart;
-
-                return (
+              {/* Player list */}
+              <div className="flex flex-col gap-3">
+                {players.map((p) => (
                   <button
                     key={p.id}
                     type="button"
-                    className="flex items-center gap-2.5 px-4 py-3 text-left w-full transition-colors hover:bg-[var(--surface-1)] active:bg-[var(--surface-2)]"
-                    style={{
-                      borderBottom: !isInLastRow ? "1px solid var(--border-soft)" : undefined,
-                      borderRight:
-                        (idx + 1) % 2 !== 0 && idx !== players.length - 1
-                          ? "1px solid var(--border-soft)"
-                          : undefined,
-                    }}
+                    className="flex items-center gap-3 text-left w-full"
                     onClick={() => setSelected(p)}
                   >
                     <RoleBadge role={p.role} />
-                    <div className="min-w-0">
-                      <div
-                        className="text-sm font-semibold truncate"
-                        style={{ color: "var(--text-primary)" }}
-                      >
-                        {p.name}
-                      </div>
-                      {(p.totalGoals > 0 || p.totalBonusPoints !== 0) && (
-                        <div className="flex items-center gap-2 mt-0.5">
-                          {p.totalGoals > 0 && (
-                            <span className="text-[10px] font-semibold" style={{ color: "var(--text-muted)" }}>
-                              ⚽ {p.totalGoals}
-                            </span>
-                          )}
-                          {p.totalBonusPoints !== 0 && (
-                            <span
-                              className="text-[10px] font-semibold"
-                              style={{ color: p.totalBonusPoints > 0 ? "#065F46" : "#991B1B" }}
-                            >
-                              {p.totalBonusPoints > 0 ? "+" : ""}
-                              {p.totalBonusPoints % 1 === 0
-                                ? p.totalBonusPoints
-                                : p.totalBonusPoints.toFixed(1)}
-                              pt
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                    <span className="text-sm flex-1 truncate" style={{ color: "var(--text-primary)" }}>
+                      {p.name}
+                    </span>
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
           </div>
         ))}

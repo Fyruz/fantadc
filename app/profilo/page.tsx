@@ -11,7 +11,7 @@ export default async function ProfiloPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-6" style={{ background: "#fff" }}>
+    <div className="min-h-screen flex flex-col items-center justify-between py-6" style={{ background: '#F5F6FF' }}>
       <div className="w-full max-w-lg px-4 flex flex-col gap-10">
 
         <Link href="/" className="inline-flex items-center justify-center w-6 h-6">

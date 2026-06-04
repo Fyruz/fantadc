@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { db } from "@/lib/db";
 import PlayersGrid from "./_players-grid";
 
@@ -5,7 +6,7 @@ export default async function GiocatoriPublicPage() {
   const [players, appearances, goals, bonuses] = await Promise.all([
     db.player.findMany({
       orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
-      include: { footballTeam: { select: { id: true, name: true, shortName: true } } },
+      include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
     }),
     db.matchPlayer.findMany({
       include: {
@@ -135,15 +136,21 @@ export default async function GiocatoriPublicPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <div className="over-label mb-1">Stagione 2026</div>
-        <h1
-          className="font-display font-black text-3xl uppercase"
-          style={{ color: "var(--text-primary)" }}
+    <div className="flex flex-col gap-10">
+      {/* Header mobile */}
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <Link href="/altro" className="flex items-center justify-center w-6 h-6">
+            <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
+          </Link>
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
         >
-          GIOCATORI
-        </h1>
+          Giocatori
+        </span>
+        <div className="flex-1" />
       </div>
 
       {byTeam.size === 0 ? (
