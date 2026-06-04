@@ -6,7 +6,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
       <PublicNav />
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-10 pb-24 md:pb-8">{children}</main>
+      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-6 pb-24 md:pb-8">{children}</main>
       <footer className="hidden md:block py-4 text-center text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid var(--border-soft)" }}>
         <span>Fanta</span>
         <span className="px-2">·</span>
