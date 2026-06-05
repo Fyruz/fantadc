@@ -59,19 +59,28 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   }, []);
 
   const isVota = pathname.startsWith("/vota");
-  const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
+  const isPartiteDetail = /^\/partite\/\d+/.test(pathname) || /^\/greenvolley\/partite\/\d+/.test(pathname);
   const isSquadre = pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta");
   const isSquadreFantaDetail = pathname.startsWith("/squadre-fanta/");
   const isGironi = pathname.startsWith("/gironi");
   const isMarcatori = pathname.startsWith("/classifica-marcatori");
   const isGiocatori = pathname.startsWith("/giocatori");
   const isAltroPage = pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account");
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage;
   const isGV = pathname.startsWith("/greenvolley");
+  const isGVGironi = pathname.startsWith("/greenvolley/gironi");
+  const isGVEliminazione = pathname.startsWith("/greenvolley/eliminazione");
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione;
 
   const getMobileTitle = (): string | null => {
     if (pathname.startsWith("/greenvolley/altro")) return null;
-    if (isGV) return null; // GV keeps pills
+    if (isGV) {
+      if (pathname.startsWith("/greenvolley/classifica")) return "Classifica";
+      if (pathname.startsWith("/greenvolley/gironi")) return null;
+      if (pathname.startsWith("/greenvolley/partite")) return "Partite";
+      if (pathname.startsWith("/greenvolley/squadre")) return "Squadre";
+      if (pathname.startsWith("/greenvolley/eliminazione")) return null;
+      return null; // home e altro: pills switcher
+    }
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Fanta";
     if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "La mia squadra";
@@ -127,12 +136,12 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
         {/* ── Mobile header ──────────────────────────────────────── */}
         {mobileTitle ? (
           /* Main nav pages: page title */
-          <span
-            className="md:hidden flex-1 uppercase font-medium"
-            style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+          <h1
+            className="md:hidden flex-1 uppercase font-medium text-xl"
+            style={{ fontFamily: "var(--font-tallica)", color: isGV ? GV_PRIMARY : "var(--text-primary)" }}
           >
             {mobileTitle}
-          </span>
+          </h1>
         ) : (
           /* Other pages: DCup / GV switcher pills */
           <div className="flex md:hidden items-center gap-3 flex-1 min-w-0">
@@ -294,7 +303,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
           {user ? (
             <div ref={avatarRef} className="relative">
               {/* Mobile: link to /profilo */}
-              <Link href="/profilo" className="md:hidden w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-70" aria-label="Profilo">
+              <Link href={isGV ? "/profilo?from=greenvolley" : "/profilo"} className="md:hidden w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-70" aria-label="Profilo">
                 <img src="/icons/profile_circle.svg" width={36} height={36} alt="Profilo" />
               </Link>
               {/* Desktop: dropdown */}
@@ -375,14 +384,14 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                 <img src="/icons/profile_circle.svg" width={36} height={36} alt="Profilo" />
               </Link>
               <Link
-                href="/login"
+                href={isGV ? "/login?from=greenvolley" : "/login"}
                 className="hidden md:inline text-sm font-semibold transition-colors px-2 hover:opacity-70"
                 style={{ color: "var(--text-muted)" }}
               >
                 Accedi
               </Link>
               <Link
-                href="/register"
+                href={isGV ? "/register?from=greenvolley" : "/register"}
                 className="hidden md:inline-flex text-xs px-4 py-2 rounded-full font-black uppercase tracking-wide transition-colors hover:opacity-90"
                 style={{ background: primary, color: "#fff" }}
               >
