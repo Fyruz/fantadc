@@ -1,16 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Button } from "primereact/button";
 
 export default function BackButton() {
   const router = useRouter();
   return (
-    <button
+    <Button
+      type="button"
       onClick={() => router.back()}
-      className="flex items-center justify-center w-6 h-6"
+      icon="pi pi-chevron-left"
+      text
+      rounded
+      className="flex h-8 w-8 items-center justify-center p-0"
       aria-label="Indietro"
-    >
-      <img src="/icons/chevron_left.svg" width={24} height={24} alt="" />
-    </button>
+      style={{ color: "var(--text-primary)" }}
+    />
   );
 }

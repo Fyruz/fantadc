@@ -7,6 +7,7 @@ import { getFlagUrlFromCountryCode } from "@/lib/flags";
 import RosterTable from "./_roster-table";
 import ScoreTable from "./_score-table";
 import ShareStoryButton from "./_share-story-button";
+import BackButton from "@/components/back-button";
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -52,6 +53,19 @@ export default async function SquadraPage() {
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <BackButton />
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
+        >
+          Squadra
+        </span>
+        <div className="flex-1" />
+      </div>
+
       {/* Header */}
       <div>
         <div className="over-label mb-0.5">La mia squadra</div>

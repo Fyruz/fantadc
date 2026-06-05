@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
 import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 import ScoreTable from "../squadra/_score-table";
 import { Button } from "primereact/button";
 
@@ -15,7 +16,25 @@ export default async function DashboardPage() {
   const fantasyTeam = await db.fantasyTeam.findUnique({
     where: { userId },
     include: {
-      players: { include: { player: { select: { id: true, name: true, role: true } } } },
+      players: {
+        include: {
+          player: {
+            select: {
+              id: true,
+              name: true,
+              role: true,
+              footballTeam: {
+                select: {
+                  name: true,
+                  shortName: true,
+                  countryCode: true,
+                  logoUrl: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -89,21 +108,50 @@ export default async function DashboardPage() {
               VEDI →
             </Link>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="grid grid-cols-1 gap-2">
             {fantasyTeam.players.map(({ player }) => {
               const isCaptain = player.id === fantasyTeam.captainPlayerId;
+              const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
               return (
-                <span
-                  key={player.name}
-                  className="inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+                <div
+                  key={player.id}
+                  className="flex items-center gap-2 rounded-2xl px-3 py-2"
                   style={isCaptain
                     ? { background: "rgba(232,160,0,0.15)", border: "1px solid #E8A000", color: "#E8A000" }
                     : { background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }
                   }
                 >
-                  {isCaptain && <span style={{ fontSize: "9px" }}>★</span>}
-                  {player.name}
-                </span>
+                  <div
+                    className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10"
+                    style={{ border: "1px solid rgba(255,255,255,0.16)" }}
+                  >
+                    {flagSrc ? (
+                      <img
+                        src={flagSrc}
+                        alt={player.footballTeam.name}
+                        className="h-5 w-5 rounded-sm object-contain"
+                      />
+                    ) : (
+                      <span className="text-[9px] font-black text-white/70">
+                        {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      {isCaptain && <span className="text-[10px]">★</span>}
+                      <span className="truncate text-xs font-black uppercase leading-tight">
+                        {player.name}
+                      </span>
+                    </div>
+                    <div className="truncate text-[10px] font-medium" style={{ color: isCaptain ? "rgba(232,160,0,0.75)" : "rgba(255,255,255,0.55)" }}>
+                      {player.footballTeam.shortName ?? player.footballTeam.name}
+                    </div>
+                  </div>
+                  <span className="shrink-0 rounded-full px-2 py-1 text-[9px] font-black uppercase" style={{ background: "rgba(255,255,255,0.10)" }}>
+                    {player.role === "P" ? "POR" : "ATT"}
+                  </span>
+                </div>
               );
             })}
           </div>
