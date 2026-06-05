@@ -37,7 +37,11 @@ export default async function SquadrePublicPage() {
           {teams.map((team) => {
             const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
             return (
-              <div key={team.id} className="flex flex-col items-center gap-3">
+              <Link
+                key={team.id}
+                href={`/squadre/${team.id}`}
+                className="flex flex-col items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-[var(--surface-1)]"
+              >
                 <div className="w-16 h-16 flex items-center justify-center p-1 overflow-hidden shrink-0">
                   {flagSrc ? (
                     <img src={flagSrc} alt={team.name} className="w-full h-full object-contain" />
@@ -50,7 +54,7 @@ export default async function SquadrePublicPage() {
                 <span className="text-sm text-center text-black w-full line-clamp-2">
                   {team.name}
                 </span>
-              </div>
+              </Link>
             );
           })}
         </div>

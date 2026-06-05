@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import RoleBadge from "@/components/role-badge";
+import BackButton from "@/components/back-button";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
 export const revalidate = 60;
 
@@ -31,7 +33,7 @@ export default async function SquadraFantasyPublicPage({
               id: true,
               name: true,
               role: true,
-              footballTeam: { select: { name: true, shortName: true } },
+              footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
             },
           },
         },
@@ -46,6 +48,19 @@ export default async function SquadraFantasyPublicPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <BackButton />
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
+        >
+          Rosa fanta
+        </span>
+        <div className="flex-1" />
+      </div>
+
       {/* Header */}
       <div>
         <div className="over-label mb-1">Squadra Fanta</div>
@@ -71,6 +86,7 @@ export default async function SquadraFantasyPublicPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {team.players.map(({ player }) => {
             const isCaptain = player.id === team.captainPlayerId;
+            const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
             return (
               <div
                 key={player.id}
@@ -82,9 +98,18 @@ export default async function SquadraFantasyPublicPage({
               >
                 <RoleBadge role={player.role} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                    {player.name}
-                  </p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    {flagSrc && (
+                      <img
+                        src={flagSrc}
+                        alt={player.footballTeam.name}
+                        className="h-4 w-4 shrink-0 rounded-sm object-contain"
+                      />
+                    )}
+                    <p className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                      {player.name}
+                    </p>
+                  </div>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {player.footballTeam.shortName ?? player.footballTeam.name}
                   </p>
