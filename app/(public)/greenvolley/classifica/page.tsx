@@ -28,6 +28,12 @@ export default async function VolleyClassificaPage() {
         </div>
       )}
 
+      {groups.length > 0 && (
+        <p className="text-[10px]" style={{ color: "rgba(0,0,0,0.40)" }}>
+          G=Giocate · SV=Set Vinti · SP=Set Persi · Pt=Punti (set vinti)
+        </p>
+      )}
+
       {groups.map((group) => {
         const teamList = group.teams.map((gt) => gt.team);
         const matches = group.matches.map((m) => ({
@@ -55,44 +61,30 @@ export default async function VolleyClassificaPage() {
             </div>
 
             {/* Table header */}
-            <div
-              className="grid grid-cols-[1fr_32px_32px_32px_44px] px-6 pb-3 text-xs font-semibold uppercase gap-1"
-              style={{ color: "rgba(0,0,0,0.40)" }}
-            >
-              <span>Squadra</span>
-              <span className="text-center">G</span>
-              <span className="text-center">SV</span>
-              <span className="text-center">SP</span>
-              <span className="text-center" style={{ color: "var(--primary)" }}>Pt</span>
+            <div className="flex items-center gap-4 px-6 pb-3">
+              <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
+              <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
+              <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">G</span>
+              <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">SV</span>
+              <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">SP</span>
+              <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
             </div>
 
+            {/* Rows */}
             {standings.map((row, i) => (
               <div
                 key={row.teamId}
-                className="grid grid-cols-[1fr_32px_32px_32px_44px] px-6 py-3 text-sm gap-1 items-center"
-                style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
+                className="flex items-center gap-4 px-6"
+                style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
               >
-                <span className="font-normal text-sm truncate" style={{ color: "var(--text-primary)" }}>
-                  {i + 1}. {row.teamName}
-                </span>
-                <span className="text-center text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
-                  {row.played}
-                </span>
-                <span className="text-center text-xs tabular-nums" style={{ color: "var(--text-primary)" }}>
-                  {row.setsWon}
-                </span>
-                <span className="text-center text-xs tabular-nums" style={{ color: "var(--text-primary)" }}>
-                  {row.setsLost}
-                </span>
-                <span className="text-center text-sm font-bold tabular-nums" style={{ color: "var(--primary)" }}>
-                  {row.setsWon}
-                </span>
+                <span className="text-xs text-black w-5 shrink-0 tabular-nums">{i + 1}</span>
+                <span className="text-sm font-normal text-(--text-primary) flex-1 truncate">{row.teamName}</span>
+                <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
+                <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.setsWon}</span>
+                <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.setsLost}</span>
+                <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
               </div>
             ))}
-
-            <div className="text-[10px] mt-2 px-6" style={{ color: "rgba(0,0,0,0.40)" }}>
-              G=Giocate · SV=Set Vinti · SP=Set Persi · Pt=Punti (set vinti)
-            </div>
           </div>
         );
       })}
