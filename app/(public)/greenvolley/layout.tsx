@@ -12,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function GreenVolleyLayout({ children }: { children: ReactNode }) {
-  return <>{children}</>;
+  return <div className="gv-theme">{children}</div>;
 }

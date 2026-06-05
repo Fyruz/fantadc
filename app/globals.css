@@ -63,6 +63,19 @@
   --foreground: var(--text-primary);
 }
 
+/* ── Tema Volley (greenvolley) ───────────────────────────
+   Ridefinisce il primario in verde profondo dentro lo scope .gv-theme.
+   Lime #3DD907 resta come accento brillante (usato esplicitamente).
+   Surface/border/text neutri restano condivisi col calcio. */
+.gv-theme {
+  --primary: #15803D;
+  --primary-hover: #1A9A48;
+  --primary-dark: #0B5C2A;
+  --primary-light: rgba(21,128,61,0.08);
+  --primary-glow: rgba(21,128,61,0.20);
+  --border-active: #15803D;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -220,6 +233,13 @@ html {
 
   /* ── Bottom nav safe area ────────────────── */
   .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+}
+
+/* ─── Volley: badge "Programmata" in verde (unlayered → vince sul layer) ─ */
+.gv-theme .badge-scheduled {
+  background: rgba(21,128,61,0.10);
+  color: #15803D;
+  border-color: rgba(21,128,61,0.25);
 }
 
 /* ─── PrimeReact DataTable overrides (light) ────────────── */

@@ -8,8 +8,9 @@ import { Button } from "primereact/button";
 import { logout } from "@/app/actions/auth";
 import type { SessionUser } from "@/lib/session";
 
-const GV = "#3DD907";
-const GV_LIGHT = "#f0fde7";
+const GV = "#3DD907";                          // accento brand lime (switcher + logo)
+const GV_PRIMARY = "#15803D";                  // verde profondo: stati attivi nav volley
+const GV_PRIMARY_LIGHT = "rgba(21,128,61,0.08)";
 
 const DCUP_GROUPS = [
   {
@@ -68,6 +69,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isGV = pathname.startsWith("/greenvolley");
 
   const getMobileTitle = (): string | null => {
+    if (pathname.startsWith("/greenvolley/altro")) return "Altro"; // come il calcio: titolo, non pills
     if (isGV) return null; // GV keeps pills
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Fanta";
@@ -76,7 +78,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     return null;
   };
   const mobileTitle = getMobileTitle();
-  const primary = isGV ? GV : "var(--primary)";
+  const primary = isGV ? GV_PRIMARY : "var(--primary)";
 
   const isActive = (href: string, exact = false) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + "/");
@@ -114,7 +116,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
       className={`sticky top-0 z-30${hideOnMobile ? " hidden md:block" : ""}`}
       style={{
         background: scrolled ? "#fff" : "transparent",
-        borderBottom: scrolled ? (isGV ? `2px solid ${GV}` : "1px solid var(--border-soft)") : "none",
+        borderBottom: scrolled ? (isGV ? `2px solid ${GV_PRIMARY}` : "1px solid var(--border-soft)") : "none",
         boxShadow: scrolled ? "0 1px 8px rgba(1,7,163,0.06)" : "none",
         transition: "background 0.2s, box-shadow 0.2s",
       }}
@@ -202,7 +204,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                   key={link.href}
                   href={link.href}
                   className="px-3 py-1.5 rounded-full text-sm font-semibold transition-colors whitespace-nowrap"
-                  style={active ? { background: GV_LIGHT, color: GV } : { color: "var(--text-muted)" }}
+                  style={active ? { background: GV_PRIMARY_LIGHT, color: GV_PRIMARY } : { color: "var(--text-muted)" }}
                 >
                   {link.label}
                 </Link>

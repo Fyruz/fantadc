@@ -30,7 +30,13 @@
       "Bash(Select-Object -ExpandProperty FullName)",
       "Bash(Sort-Object)",
       "Bash(mv \"e:/Developing/fantadc/app/api/story/[teamId]/route.ts\" \"e:/Developing/fantadc/app/api/story/[teamId]/route.tsx\")",
-      "Bash(git stash *)"
+      "Bash(git stash *)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit -m '@ *)",
+      "Bash(git commit *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(git rm *)"
     ],
     "additionalDirectories": [
       "e:\\Developing\\fantadc\\docs\\superpowers\\specs",

@@ -2,9 +2,6 @@
 
 import { useState } from "react";
 
-const GV = "#3DD907";
-const GV_LIGHT = "#f0fde7";
-
 type Player = { id: number; name: string };
 type Team = { id: number; name: string; players: Player[] };
 
@@ -17,9 +14,9 @@ function TeamCard({ team }: { team: Team }) {
       style={{
         background: "var(--surface-card, #fff)",
         border: "1.5px solid var(--border-soft)",
-        borderLeft: `4px solid ${GV}`,
+        borderLeft: "4px solid var(--primary)",
         boxShadow: open
-          ? "0 6px 24px rgba(61,217,7,0.10)"
+          ? "0 6px 24px rgba(21,128,61,0.10)"
           : "0 1px 4px rgba(0,0,0,0.04)",
       }}
     >
@@ -31,7 +28,7 @@ function TeamCard({ team }: { team: Team }) {
       >
         <div
           className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-display font-black text-sm flex-shrink-0"
-          style={{ background: GV }}
+          style={{ background: "var(--primary)" }}
         >
           {team.name.slice(0, 2).toUpperCase()}
         </div>
@@ -79,7 +76,7 @@ function TeamCard({ team }: { team: Team }) {
                   >
                     <span
                       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ background: GV }}
+                      style={{ background: "var(--primary)" }}
                     />
                     <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
                       {p.name}
