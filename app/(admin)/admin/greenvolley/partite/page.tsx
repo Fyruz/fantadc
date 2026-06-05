@@ -16,7 +16,7 @@ export default async function VolleyPartitePage() {
 
   return (
     <div>
-      <AdminPageHeader accentColor="#3DD907"
+      <AdminPageHeader accentColor="#0E3D2B"
         title="Partite GreenVolley"
         cta={{ href: "/admin/greenvolley/partite/new", label: "Nuova partita" }}
       />

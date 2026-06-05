@@ -311,7 +311,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
                     In modifica
                   </span>
                 ) : (
-                  <span style={{ color: "#3DD907", fontWeight: 700 }}>
+                  <span style={{ color: "#0E3D2B", fontWeight: 700 }}>
                     {s.homePoints > s.awayPoints
                       ? match.homeTeamName
                       : match.awayTeamName}
@@ -425,7 +425,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
               label="Aggiungi set"
               loading={addPending}
               className="w-full sm:w-auto sm:self-start"
-              style={{ background: "#3DD907", border: "none", color: "#fff" }}
+              style={{ background: "#0E3D2B", border: "none", color: "#fff" }}
             />
           </form>
         </div>
@@ -446,7 +446,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
             }
             loading={isPending}
             outlined
-            style={{ color: "#3DD907", borderColor: "#3DD907" }}
+            style={{ color: "#0E3D2B", borderColor: "#0E3D2B" }}
           />
         )}
         {match.status === "SCHEDULED" && match.sets.length > 0 && (
@@ -461,7 +461,7 @@ export default function SetSection({ match }: { match: MatchInfo }) {
               })
             }
             loading={isPending}
-            style={{ background: "#3DD907", border: "none", color: "#fff" }}
+            style={{ background: "#0E3D2B", border: "none", color: "#fff" }}
           />
         )}
         {match.status === "CONCLUDED" && (

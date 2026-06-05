@@ -65,15 +65,16 @@
 
 /* ── Tema Volley (greenvolley) ───────────────────────────
    Ridefinisce il primario in verde profondo dentro lo scope .gv-theme.
-   Lime #3DD907 resta come accento brillante (usato esplicitamente).
+   Lime #0E3D2B resta come accento brillante (usato esplicitamente).
    Surface/border/text neutri restano condivisi col calcio. */
 .gv-theme {
-  --primary: #15803D;
-  --primary-hover: #1A9A48;
-  --primary-dark: #0B5C2A;
-  --primary-light: rgba(21,128,61,0.08);
-  --primary-glow: rgba(21,128,61,0.20);
-  --border-active: #15803D;
+  --primary: #0E3D2B;
+  --primary-hover: #124D37;
+  --primary-dark: #091F16;
+  --primary-light: rgba(14,61,43,0.08);
+  --primary-glow: rgba(14,61,43,0.20);
+  --border-active: #0E3D2B;
+  --text-primary: #0E3D2B;
 }
 
 @theme inline {
@@ -238,7 +239,7 @@ html {
 /* ─── Volley: badge "Programmata" in verde (unlayered → vince sul layer) ─ */
 .gv-theme .badge-scheduled {
   background: rgba(21,128,61,0.10);
-  color: #15803D;
+  color: #0E3D2B;
   border-color: rgba(21,128,61,0.25);
 }
 

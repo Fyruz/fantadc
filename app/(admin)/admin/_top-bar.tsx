@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
 import { logout } from "@/app/actions/auth";
 
-const GV = "#3DD907";
+const GV = "#0E3D2B";
 
 const DCUP_GROUPS = [
   { label: null, items: [{ href: "/admin", label: "Dashboard" }] },

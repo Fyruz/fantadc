@@ -23,7 +23,7 @@ type Row = {
 type Tab = "all" | "group" | "knockout" | "none";
 
 const PAGE_SIZE = 15;
-const GV = "#15803D";
+const GV = "#0E3D2B";
 const GV_LIGHT = "rgba(21,128,61,0.08)";
 
 const STATUS_LABEL: Record<string, string> = {

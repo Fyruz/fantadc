@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "primereact/button";
 
-const GV = "#3DD907";
+const GV = "#0E3D2B";
 
 const DCUP_MAIN = [
   { href: "/admin",           label: "DASHBOARD", icon: "pi-home"     },

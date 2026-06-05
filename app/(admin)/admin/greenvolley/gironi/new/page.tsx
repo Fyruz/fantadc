@@ -12,7 +12,7 @@ export default function NuovoVolleyGironePage() {
 
   return (
     <div>
-      <AdminPageHeader accentColor="#3DD907" title="Nuovo girone" backHref="/admin/greenvolley/gironi" />
+      <AdminPageHeader accentColor="#0E3D2B" title="Nuovo girone" backHref="/admin/greenvolley/gironi" />
       <div className="admin-card p-5 max-w-lg">
         <form action={formAction} className="flex flex-col gap-4">
           {state?.error && (
@@ -33,7 +33,7 @@ export default function NuovoVolleyGironePage() {
             type="submit"
             label="Crea girone"
             loading={pending}
-            style={{ background: "#3DD907", border: "none", color: "#fff" }}
+            style={{ background: "#0E3D2B", border: "none", color: "#fff" }}
           />
         </form>
       </div>

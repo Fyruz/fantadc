@@ -11,7 +11,7 @@ const STATUS_LABEL: Record<string, string> = {
 };
 const STATUS_STYLE: Record<string, { bg: string; color: string }> = {
   DRAFT:     { bg: "rgba(0,0,0,0.08)",           color: "var(--text-muted)" },
-  SCHEDULED: { bg: "rgba(61,217,7,0.15)",        color: "#3DD907" },
+  SCHEDULED: { bg: "rgba(14,61,43,0.15)",        color: "#0E3D2B" },
   CONCLUDED: { bg: "rgba(61,217,7,0.25)",        color: "#166534" },
 };
 
@@ -43,7 +43,7 @@ export default async function VolleyMatchDetailPage({
 
   return (
     <div className="flex flex-col gap-4 sm:gap-5">
-      <AdminPageHeader accentColor="#3DD907"
+      <AdminPageHeader accentColor="#0E3D2B"
         title="Gestione partita"
         backHref="/admin/greenvolley/partite"
       />
@@ -69,7 +69,7 @@ export default async function VolleyMatchDetailPage({
             {match.group && (
               <span
                 className="rounded-full px-2 py-0.5 text-[9px] font-black sm:text-[10px]"
-                style={{ background: "rgba(61,217,7,0.2)", color: "#3DD907" }}
+                style={{ background: "rgba(14,61,43,0.20)", color: "#0E3D2B" }}
               >
                 {match.group.name}
               </span>
@@ -77,7 +77,7 @@ export default async function VolleyMatchDetailPage({
             {match.knockoutRound && (
               <span
                 className="rounded-full px-2 py-0.5 text-[9px] font-black sm:text-[10px]"
-                style={{ background: "rgba(61,217,7,0.2)", color: "#3DD907" }}
+                style={{ background: "rgba(14,61,43,0.20)", color: "#0E3D2B" }}
               >
                 {match.knockoutRound.name}
               </span>
@@ -100,7 +100,7 @@ export default async function VolleyMatchDetailPage({
             {match.homeTeam.name}
           </span>
           <div className="min-w-[64px] text-center sm:min-w-[90px]">
-            <div className="whitespace-nowrap text-3xl font-black leading-none sm:text-4xl" style={{ color: "#3DD907" }}>
+            <div className="whitespace-nowrap text-3xl font-black leading-none sm:text-4xl" style={{ color: "#0E3D2B" }}>
               {match.sets.length > 0 ? `${homeSets} - ${awaySets}` : "vs"}
             </div>
             {match.sets.length > 0 && (

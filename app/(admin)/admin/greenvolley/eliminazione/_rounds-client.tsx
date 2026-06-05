@@ -132,7 +132,7 @@ export default function KnockoutRoundsClient({ rounds }: { rounds: Round[] }) {
             type="submit"
             label="Crea turno"
             loading={pending}
-            style={{ background: "#3DD907", border: "none", color: "#fff" }}
+            style={{ background: "#0E3D2B", border: "none", color: "#fff" }}
           />
         </form>
       </div>

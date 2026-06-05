@@ -159,7 +159,7 @@ export default function GroupCard({
             type="submit"
             icon="pi pi-plus"
             loading={addPending}
-            style={{ background: "#3DD907", border: "none", color: "#fff" }}
+            style={{ background: "#0E3D2B", border: "none", color: "#fff" }}
             aria-label="Aggiungi"
           />
         </form>

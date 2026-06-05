@@ -18,7 +18,7 @@ export default async function EditVolleySquadraPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <AdminPageHeader accentColor="#3DD907"
+      <AdminPageHeader accentColor="#0E3D2B"
         title="Modifica squadra"
         backHref="/admin/greenvolley/squadre"
       />
@@ -29,7 +29,7 @@ export default async function EditVolleySquadraPage({
       <div>
         <div
           className="text-[10px] font-black uppercase tracking-widest mb-3"
-          style={{ color: "#3DD907" }}
+          style={{ color: "#0E3D2B" }}
         >
           Giocatori ({team.players.length})
         </div>

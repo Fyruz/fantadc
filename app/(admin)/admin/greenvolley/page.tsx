@@ -2,7 +2,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 
-const GV = "#3DD907";
+const GV = "#0E3D2B";
 
 export default async function GreenVolleyDashboard() {
   const [teamCount, playerCount, matchCount, concludedCount, nextMatch, recentMatches, groups] = await Promise.all([

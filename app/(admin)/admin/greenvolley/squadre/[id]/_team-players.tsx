@@ -11,7 +11,7 @@ import { createVolleyPlayerForTeam, removeVolleyPlayerById } from "@/app/actions
 
 type Player = { id: number; name: string };
 
-const GV = "#3DD907";
+const GV = "#0E3D2B";
 
 export default function TeamPlayersSection({
   teamId,
