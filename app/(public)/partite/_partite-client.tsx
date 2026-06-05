@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 type Team = { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
 type Match = {
@@ -67,7 +68,10 @@ function MatchCard({ m }: { m: Match }) {
 }
 
 export default function PartiteClient({ matches, groups }: { matches: Match[]; groups: Group[] }) {
-  const [tab, setTab] = useState<"calendario" | "classifica">("calendario");
+  const searchParams = useSearchParams();
+  const [tab, setTab] = useState<"calendario" | "classifica">(
+    searchParams.get("tab") === "classifica" ? "classifica" : "calendario"
+  );
 
   // Unique days for pills
   const days = [...new Map(

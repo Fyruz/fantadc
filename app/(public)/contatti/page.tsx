@@ -1,3 +1,4 @@
+import BackButton from "@/components/back-button";
 import Link from "next/link";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -12,9 +13,7 @@ export default function ContattiPage() {
     <div className="flex flex-col gap-10 max-w-2xl">
       <div className="md:hidden flex items-center justify-between h-12">
         <div className="flex-1 flex items-center">
-          <Link href="/altro" className="flex items-center justify-center w-6 h-6">
-            <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
-          </Link>
+          <BackButton />
         </div>
         <span className="flex-1 text-center uppercase" style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}>
           Contatti

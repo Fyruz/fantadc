@@ -5,7 +5,6 @@ import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
-import { Button } from "primereact/button";
 import { login } from "@/app/actions/auth";
 
 export default function LoginForm() {
@@ -65,12 +64,14 @@ export default function LoginForm() {
           <p className="text-sm" style={{ color: "#DC2626" }}>{state.message}</p>
         )}
 
-        <Button
+        <button
           type="submit"
-          label={pending ? "Accesso in corso..." : "Accedi"}
           disabled={pending}
-          className="w-full"
-        />
+          className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50"
+          style={{ background: "var(--text-primary)" }}
+        >
+          {pending ? "Accesso in corso..." : "Accedi"}
+        </button>
       </form>
     </>
   );

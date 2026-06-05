@@ -391,7 +391,7 @@ export default async function HomePage({
               >
                 CLASSIFICA
               </h2>
-              <Link href="/gironi" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+              <Link href="/partite?tab=classifica" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
                 Vedi tutto
                 <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
               </Link>
@@ -404,7 +404,7 @@ export default async function HomePage({
               {groupStandings.map((g) => (
                 <Link
                   key={g.id}
-                  href="/gironi"
+                  href="/partite?tab=classifica"
                   className="block rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
                   style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                 >
