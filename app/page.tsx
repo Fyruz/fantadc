@@ -441,7 +441,7 @@ export default async function HomePage({
                         ) : row.countryCode ? (
                           <img src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
                         ) : null}
-                        <span className="text-sm font-normal text-(--text-primary) truncate">
+                        <span className="text-sm font-normal text-black truncate">
                           {row.shortName ?? row.name}
                         </span>
                       </div>
@@ -449,7 +449,7 @@ export default async function HomePage({
                       <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
                         {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
                       </span>
-                      <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.points}</span>
+                      <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
                     </div>
                   ))}
                 </Link>

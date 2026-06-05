@@ -61,7 +61,7 @@ export default async function SquadraFantasyPublicPage({
           <BackButton />
         </div>
         <div className="flex flex-col items-center flex-1 px-2 min-w-0" style={{ gap: 4 }}>
-          <span className="text-base font-semibold truncate w-full text-center" style={{ color: "#09144C" }}>
+          <span className="text-base font-semibold truncate w-full text-center" style={{ color: "var(--text-primary)" }}>
             {team.name}
           </span>
           <span className="text-xs truncate w-full text-center text-black">

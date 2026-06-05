@@ -49,7 +49,7 @@ export default async function SquadraPublicDetailPage({
         </div>
         <span
           className="flex-1 text-center uppercase"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
         >
           Squadra
         </span>
