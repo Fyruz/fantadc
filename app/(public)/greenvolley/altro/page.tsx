@@ -35,7 +35,8 @@ export default function VolleyAltroPage() {
 
       {/* Esplora */}
       <Section label="Esplora">
-        <Item icon={<img src="/icons/envelope-closed.svg" width={18} height={18} alt="" />} label="Contatti" href="/contatti" />
+        <Item icon={<img src="/icons/envelope-closed.svg" width={18} height={18} alt="" />} label="Contatti" href="/contatti?from=greenvolley" />
+        <Item icon={<img src="/icons/info.svg" width={18} height={18} alt="" />} label="Supporto" href="/supporto?from=greenvolley" />
       </Section>
 
       {/* Seguici */}

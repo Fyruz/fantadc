@@ -1,7 +1,12 @@
+import BackChevron from "@/components/back-chevron";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import StatusBadge from "@/components/status-badge";
+
+const CARD: React.CSSProperties = {
+  border: "1px solid rgba(9,20,76,0.05)",
+  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
+};
 
 export default async function VolleyMatchPublicPage({
   params,
@@ -12,8 +17,8 @@ export default async function VolleyMatchPublicPage({
   const match = await db.volleyMatch.findUnique({
     where: { id: Number(id) },
     include: {
-      homeTeam: { select: { id: true, name: true } },
-      awayTeam: { select: { id: true, name: true } },
+      homeTeam: { select: { id: true, name: true, players: { orderBy: { name: "asc" }, select: { id: true, name: true } } } },
+      awayTeam: { select: { id: true, name: true, players: { orderBy: { name: "asc" }, select: { id: true, name: true } } } },
       sets: { orderBy: { setNumber: "asc" } },
       group: { select: { name: true } },
       knockoutRound: { select: { name: true } },
@@ -26,16 +31,15 @@ export default async function VolleyMatchPublicPage({
   const scored = match.status === "CONCLUDED" && match.sets.length > 0;
   const phaseName = match.group?.name ?? match.knockoutRound?.name ?? null;
   const matchDateLabel = match.date
-    ? match.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long" })
+    ? match.date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })
     : null;
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
-      {/* ── Header ─────────────────────────────────────────────────── */}
+
+      {/* Header */}
       <div className="flex items-center relative py-2">
-        <Link href="/greenvolley/partite" className="absolute left-0 flex items-center justify-center w-6 h-6">
-          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
-        </Link>
+        <BackChevron />
         <h1
           className="uppercase mx-auto font-medium"
           style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
@@ -44,137 +48,158 @@ export default async function VolleyMatchPublicPage({
         </h1>
       </div>
 
-      {/* ── Match card ─────────────────────────────────────────────── */}
-      <div
-        className="bg-white rounded-3xl overflow-hidden"
-        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-      >
-        {/* Top bar */}
+      {/* Risultato */}
+      <div className="bg-white rounded-3xl overflow-hidden" style={CARD}>
+        {/* Fase + data */}
         <div
-          className="flex items-center justify-between px-4 py-2.5 gap-2"
-          style={{ borderBottom: "1px solid var(--border-soft)" }}
+          className="flex items-center justify-between px-6 pt-5 pb-4"
+          style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}
         >
-          <div className="flex items-center gap-1.5 min-w-0">
-            <StatusBadge status={match.status} />
+          <div className="flex items-center gap-2">
             {phaseName && (
-              <span
-                className="text-[10px] font-black px-1.5 py-0.5 rounded-full flex-shrink-0 truncate"
-                style={{ background: "var(--primary-light)", color: "var(--primary)" }}
-              >
+              <span className="text-xs font-semibold" style={{ color: "var(--primary)" }}>
                 {phaseName}
               </span>
             )}
           </div>
           {matchDateLabel && (
-            <span className="text-[11px] font-semibold capitalize flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+            <span className="text-xs capitalize" style={{ color: "var(--text-muted)" }}>
               {matchDateLabel}
             </span>
           )}
         </div>
 
-        {/* Body */}
-        <div className="px-4 py-6 flex items-center gap-2">
-          {/* Home */}
-          <div className="flex-1 flex flex-col items-center gap-1 min-w-0 text-center">
-            <span className="text-base font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
-              {match.homeTeam.name}
-            </span>
-          </div>
-
-          {/* Center */}
-          <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
-            {scored ? (
-              <div className="text-4xl font-bold leading-none tabular-nums" style={{ color: "var(--primary)" }}>
+        {/* Squadre + punteggi */}
+        <div className="px-6 py-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-base font-medium text-black flex-1">{match.homeTeam.name}</span>
+            {scored && (
+              <span
+                className="text-2xl font-bold tabular-nums shrink-0"
+                style={{ color: homeSets > awaySets ? "#000" : "rgba(0,0,0,0.25)" }}
+              >
                 {homeSets}
-                <span style={{ color: "var(--text-disabled)" }}> — </span>
-                {awaySets}
-              </div>
-            ) : (
-              <div className="text-2xl font-bold leading-none" style={{ color: "var(--primary)" }}>
-                VS
-              </div>
+              </span>
             )}
-            <span className="text-[10px] uppercase tracking-wide font-semibold" style={{ color: "var(--text-disabled)" }}>
-              {scored ? "set vinti" : "set"}
-            </span>
           </div>
-
-          {/* Away */}
-          <div className="flex-1 flex flex-col items-center gap-1 min-w-0 text-center">
-            <span className="text-base font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
-              {match.awayTeam.name}
-            </span>
+          <div className="flex items-center justify-between gap-4">
+            <span className="text-base font-medium text-black flex-1">{match.awayTeam.name}</span>
+            {scored && (
+              <span
+                className="text-2xl font-bold tabular-nums shrink-0"
+                style={{ color: awaySets > homeSets ? "#000" : "rgba(0,0,0,0.25)" }}
+              >
+                {awaySets}
+              </span>
+            )}
           </div>
+          {!scored && (
+            <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
+              {match.date
+                ? match.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })
+                : "Orario da definire"}
+            </p>
+          )}
         </div>
       </div>
 
-      {/* ── Set dettaglio ──────────────────────────────────────────── */}
+      {/* Set dettaglio */}
       {match.sets.length > 0 && (
-        <div
-          className="bg-white rounded-3xl overflow-hidden"
-          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-        >
-          <div className="px-6 pt-6 pb-4">
+        <div className="bg-white rounded-3xl overflow-hidden" style={CARD}>
+          <div className="px-6 pt-6 pb-3">
             <h2
-              className="uppercase font-medium text-base"
+              className="text-base font-medium uppercase"
               style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
             >
               Set
             </h2>
           </div>
 
-          {/* Intestazione tabella */}
-          <div
-            className="grid grid-cols-4 px-6 py-2 text-xs font-black uppercase tracking-wide"
-            style={{
-              background: "var(--surface-1)",
-              color: "var(--text-muted)",
-              borderTop: "1px solid var(--border-soft)",
-              borderBottom: "1px solid var(--border-soft)",
-            }}
-          >
-            <span>Set</span>
-            <span className="text-center truncate">{match.homeTeam.name}</span>
-            <span className="text-center truncate">{match.awayTeam.name}</span>
-            <span className="text-center">Vince</span>
+          {/* Intestazioni */}
+          <div className="flex items-center gap-4 px-6 pb-3">
+            <span className="text-xs font-semibold uppercase text-black/65 w-8 shrink-0">N.</span>
+            <span className="text-xs font-semibold uppercase text-black/65 flex-1 truncate">
+              {match.homeTeam.name}
+            </span>
+            <span className="text-xs font-semibold uppercase text-black/65 flex-1 text-right truncate">
+              {match.awayTeam.name}
+            </span>
           </div>
 
-          {match.sets.map((s, i) => {
+          {match.sets.map((s) => {
             const homeWins = s.homePoints > s.awayPoints;
             return (
               <div
                 key={s.id}
-                className="grid grid-cols-4 px-6 py-3 text-sm items-center"
-                style={{
-                  borderBottom: i < match.sets.length - 1 ? "1px solid var(--border-soft)" : "none",
-                }}
+                className="flex items-center gap-4 px-6"
+                style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
               >
-                <span className="font-semibold" style={{ color: "var(--text-muted)" }}>
+                <span className="text-xs w-8 shrink-0 tabular-nums" style={{ color: "rgba(0,0,0,0.35)" }}>
                   {s.setNumber}
                 </span>
                 <span
-                  className={`text-center ${homeWins ? "font-black" : "font-normal"}`}
-                  style={homeWins ? { color: "var(--primary)" } : { color: "var(--text-primary)" }}
+                  className="text-sm flex-1 tabular-nums"
+                  style={{ fontWeight: homeWins ? 700 : 400, color: homeWins ? "#000" : "rgba(0,0,0,0.35)" }}
                 >
                   {s.homePoints}
                 </span>
                 <span
-                  className={`text-center ${!homeWins ? "font-black" : "font-normal"}`}
-                  style={!homeWins ? { color: "var(--primary)" } : { color: "var(--text-primary)" }}
+                  className="text-sm flex-1 text-right tabular-nums"
+                  style={{ fontWeight: !homeWins ? 700 : 400, color: !homeWins ? "#000" : "rgba(0,0,0,0.35)" }}
                 >
                   {s.awayPoints}
-                </span>
-                <span
-                  className="text-center text-xs font-bold truncate"
-                  style={{ color: "var(--primary)" }}
-                >
-                  {homeWins ? match.homeTeam.name : match.awayTeam.name}
                 </span>
               </div>
             );
           })}
         </div>
       )}
+
+      {/* Giocatori */}
+      {(match.homeTeam.players.length > 0 || match.awayTeam.players.length > 0) && (
+        <div className="bg-white rounded-3xl overflow-hidden" style={CARD}>
+          <div className="px-6 pt-6 pb-4" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
+            <h2
+              className="text-base font-medium uppercase"
+              style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+            >
+              Giocatori
+            </h2>
+          </div>
+
+          <div className="flex pb-6">
+            {/* Home */}
+            <div className="flex-1 min-w-0 px-6 pt-4">
+              <p className="text-sm font-medium text-black truncate mb-4">{match.homeTeam.name}</p>
+              <div className="flex flex-col gap-3">
+                {match.homeTeam.players.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2">
+                    <img src="/icons/jersey.svg" width={14} height={14} alt="" style={{ opacity: 0.7 }} />
+                    <span className="text-sm text-black truncate">{p.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Divisore verticale */}
+            <div className="w-px" style={{ background: "rgba(9,20,76,0.05)" }} />
+
+            {/* Away */}
+            <div className="flex-1 min-w-0 px-6 pt-4">
+              <p className="text-sm font-medium text-black truncate mb-4">{match.awayTeam.name}</p>
+              <div className="flex flex-col gap-3">
+                {match.awayTeam.players.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2">
+                    <img src="/icons/jersey.svg" width={14} height={14} alt="" style={{ opacity: 0.7 }} />
+                    <span className="text-sm text-black truncate">{p.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

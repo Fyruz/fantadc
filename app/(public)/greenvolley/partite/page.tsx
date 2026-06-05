@@ -62,12 +62,6 @@ export default async function VolleyPartitePublicPage() {
 
   return (
     <div className="flex flex-col gap-4 max-w-lg mx-auto w-full">
-      <div>
-        <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
-          PARTITE
-        </h1>
-      </div>
 
       <VolleyPartiteClient matches={matches} groups={groups} />
     </div>

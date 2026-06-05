@@ -15,12 +15,6 @@ export default async function VolleyClassificaPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
-          CLASSIFICA
-        </h1>
-      </div>
 
       {groups.length === 0 && (
         <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
@@ -78,11 +72,11 @@ export default async function VolleyClassificaPage() {
                 style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
               >
                 <span className="text-xs text-black w-5 shrink-0 tabular-nums">{i + 1}</span>
-                <span className="text-sm font-normal text-(--text-primary) flex-1 truncate">{row.teamName}</span>
+                <span className="text-sm font-normal text-black flex-1 truncate">{row.teamName}</span>
                 <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
                 <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.setsWon}</span>
                 <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.setsLost}</span>
-                <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
+                <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
               </div>
             ))}
           </div>

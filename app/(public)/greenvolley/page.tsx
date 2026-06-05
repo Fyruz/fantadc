@@ -154,9 +154,9 @@ export default async function GreenVolleyHomePage() {
                       style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
                     >
                       <span className="text-xs text-black w-5 shrink-0 tabular-nums">{i + 1}</span>
-                      <span className="text-sm font-normal text-(--text-primary) flex-1 truncate">{row.teamName}</span>
+                      <span className="text-sm font-normal text-black flex-1 truncate">{row.teamName}</span>
                       <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-                      <span className="text-sm font-bold text-(--text-primary) w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
+                      <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
                     </div>
                   ))}
                 </div>
