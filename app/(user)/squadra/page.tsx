@@ -4,10 +4,15 @@ import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
-import RosterTable from "./_roster-table";
-import ScoreTable from "./_score-table";
 import ShareStoryButton from "./_share-story-button";
-import BackButton from "@/components/back-button";
+
+const CARD: React.CSSProperties = {
+  background: "#fff",
+  border: "1px solid rgba(9,20,76,0.05)",
+  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
+};
+
+const ROW_BORDER: React.CSSProperties = { borderTop: "1px solid rgba(9,20,76,0.05)" };
 
 export default async function SquadraPage() {
   const user = await requireAuth();
@@ -21,12 +26,7 @@ export default async function SquadraPage() {
           player: {
             include: {
               footballTeam: {
-                select: {
-                  name: true,
-                  shortName: true,
-                  countryCode: true,
-                  logoUrl: true,
-                },
+                select: { name: true, shortName: true, countryCode: true, logoUrl: true },
               },
             },
           },
@@ -52,40 +52,22 @@ export default async function SquadraPage() {
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
   return (
-    <div className="flex flex-col gap-5">
-      <div className="md:hidden flex items-center justify-between h-12">
-        <div className="flex-1 flex items-center">
-          <BackButton />
-        </div>
-        <span
-          className="flex-1 text-center uppercase"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
-        >
-          Squadra
-        </span>
-        <div className="flex-1" />
-      </div>
+    <div className="flex flex-col gap-6">
 
-      {/* Header */}
+      {/* Team name + points */}
       <div>
-        <div className="over-label mb-0.5">La mia squadra</div>
         <h1
-          className="font-display text-3xl font-black uppercase"
-          style={{ color: "var(--text-primary)" }}
+          className="text-xl font-medium uppercase"
+          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
         >
-          {fantasyTeam.name.toUpperCase()}
+          {fantasyTeam.name}
         </h1>
         {history.length > 0 && (
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span
-              className="font-display text-2xl font-black"
-              style={{ color: "var(--primary)" }}
-            >
+            <span className="text-2xl font-semibold" style={{ color: "var(--primary)" }}>
               {totalPoints.toFixed(1)}
             </span>
-            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
-              punti totali
-            </span>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>punti totali</span>
           </div>
         )}
       </div>
@@ -101,10 +83,8 @@ export default async function SquadraPage() {
         <div className="pointer-events-none absolute -bottom-5 -right-5 h-32 w-32 rounded-full border border-white/5" />
         <div className="relative">
           <div className="mb-4 text-[9px] font-bold uppercase tracking-widest text-white/50">
-            Capitano:{" "}
-            <span style={{ color: "#E8A000" }}>★ {fantasyTeam.captain.name}</span>
+            Capitano: <span style={{ color: "#E8A000" }}>★ {fantasyTeam.captain.name}</span>
           </div>
-          {/* Outfield row */}
           <div className="mb-2 flex flex-wrap justify-center gap-2">
             {outfield.map(({ player }) => (
               <PlayerChip
@@ -117,7 +97,6 @@ export default async function SquadraPage() {
               />
             ))}
           </div>
-          {/* Goalkeeper */}
           {gk && (
             <div className="flex justify-center">
               <PlayerChip
@@ -133,25 +112,56 @@ export default async function SquadraPage() {
         </div>
       </div>
 
-      {/* Condividi su Instagram */}
       <ShareStoryButton teamId={fantasyTeam.id} />
 
       {/* Rosa */}
-      <div>
-        <div className="over-label mb-3">Rosa</div>
-        <RosterTable
-          rows={fantasyTeam.players.map(({ player }) => ({
-            id: player.id,
-            name: player.name,
-            role: player.role,
-            footballTeamName: player.footballTeam.name,
-            footballTeamShortName: player.footballTeam.shortName,
-            flagSrc: player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode),
-            isCaptain: player.id === fantasyTeam.captainPlayerId,
-            totalPoints: playerTotals.get(player.id) ?? 0,
-          }))}
-        />
-        <p className="mt-2.5 text-[10px]" style={{ color: "var(--text-disabled)" }}>
+      <div className="rounded-3xl overflow-hidden" style={CARD}>
+        <div className="px-6 pt-6 pb-3">
+          <h2
+            className="text-base font-medium uppercase"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+          >
+            Rosa
+          </h2>
+        </div>
+
+        {fantasyTeam.players.map(({ player }) => {
+          const isCaptain = player.id === fantasyTeam.captainPlayerId;
+          const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
+          const pts = playerTotals.get(player.id) ?? 0;
+          return (
+            <div key={player.id} className="flex items-center gap-3 px-6 py-3" style={ROW_BORDER}>
+              <div className="w-9 h-9 shrink-0 flex items-center justify-center p-1">
+                {flagSrc ? (
+                  <img src={flagSrc} alt={player.footballTeam.name} className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-[10px] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+                    {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2)}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-black truncate">{player.name}</p>
+                <p className="text-xs truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  {player.footballTeam.shortName ?? player.footballTeam.name}
+                </p>
+              </div>
+              {isCaptain && (
+                <span className="text-xs font-semibold shrink-0" style={{ color: "#C48A00" }}>CAP</span>
+              )}
+              {history.length > 0 && (
+                <span
+                  className="text-sm font-semibold shrink-0 tabular-nums"
+                  style={{ color: pts > 0 ? "var(--primary)" : "rgba(0,0,0,0.35)" }}
+                >
+                  {pts.toFixed(1)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+
+        <p className="px-6 py-3 text-[10px]" style={{ color: "var(--text-disabled)", ...ROW_BORDER }}>
           La rosa è bloccata. Solo un admin può modificarla.
         </p>
       </div>
@@ -161,19 +171,9 @@ export default async function SquadraPage() {
 }
 
 function PlayerChip({
-  name,
-  team,
-  flagSrc,
-  flagAlt,
-  isCaptain,
-  isGk = false,
+  name, team, flagSrc, flagAlt, isCaptain, isGk = false,
 }: {
-  name: string;
-  team: string;
-  flagSrc: string | null;
-  flagAlt: string;
-  isCaptain: boolean;
-  isGk?: boolean;
+  name: string; team: string; flagSrc: string | null; flagAlt: string; isCaptain: boolean; isGk?: boolean;
 }) {
   return (
     <div
@@ -185,28 +185,19 @@ function PlayerChip({
       }
     >
       {isCaptain && (
-        <span
-          className="mb-0.5 text-[9px] font-black uppercase tracking-wide"
-          style={{ color: "#E8A000" }}
-        >
+        <span className="mb-0.5 text-[9px] font-black uppercase tracking-wide" style={{ color: "#E8A000" }}>
           ★ CAP
         </span>
       )}
-      <span className="font-display text-[11px] font-black uppercase leading-tight text-white">
+      <span className="text-[11px] font-semibold uppercase leading-tight text-white">
         <span className="inline-flex items-center justify-center gap-1.5">
           {flagSrc && (
-            <img
-              src={flagSrc}
-              alt={flagAlt}
-              className="h-3.5 w-3.5 shrink-0 rounded-sm object-contain"
-            />
+            <img src={flagSrc} alt={flagAlt} className="h-3.5 w-3.5 shrink-0 rounded-sm object-contain" />
           )}
           <span>{name}</span>
         </span>
       </span>
-      <span className="mt-0.5 text-[9px]" style={{ color: "rgba(255,255,255,0.5)" }}>
-        {team}
-      </span>
+      <span className="mt-0.5 text-[9px]" style={{ color: "rgba(255,255,255,0.5)" }}>{team}</span>
     </div>
   );
 }
