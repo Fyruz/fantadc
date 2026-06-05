@@ -1,55 +1,59 @@
-import { computeRankings } from "@/lib/scoring";
 import Link from "next/link";
+import { computeRankings } from "@/lib/scoring";
+import { getCurrentUser } from "@/lib/session";
 
 export const revalidate = 60;
 
 export default async function SquadreFantasyPublicPage() {
-  const rankings = await computeRankings();
+  const [rankings, user] = await Promise.all([computeRankings(), getCurrentUser()]);
+
+  if (rankings.length === 0) {
+    return (
+      <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>
+        Nessuna squadra fanta registrata.
+      </p>
+    );
+  }
 
   return (
-    <div className="flex flex-col gap-4">
-      {rankings.length === 0 && (
-        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-          Nessuna squadra fanta registrata.
-        </div>
-      )}
-      {rankings.length > 0 && (
-        <div className="flex flex-col gap-2">
-          {rankings.map((r) => (
+    <div className="flex flex-col gap-3">
+      {/* Column headers */}
+      <div
+        className="flex items-center justify-between pb-3"
+        style={{ borderBottom: "1px solid rgba(9,20,76,0.1)" }}
+      >
+        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>Rank</span>
+        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>P.ti totali</span>
+      </div>
+
+      {/* Rows */}
+      <div className="flex flex-col">
+        {rankings.map((r, idx) => {
+          const isMe = user?.email === r.userEmail;
+          return (
             <Link
               key={r.fantasyTeamId}
               href={`/squadre-fanta/${r.fantasyTeamId}`}
-              className="card px-5 py-4 flex items-center justify-between hover:bg-[var(--surface-1)] transition-colors"
+              className="flex gap-4 items-center py-3 rounded-xl px-2 -mx-2"
+              style={{
+                borderBottom: idx < rankings.length - 1 ? "1px solid rgba(0,0,0,0.05)" : undefined,
+                background: isMe ? "var(--primary-light)" : undefined,
+              }}
             >
-              <div className="flex items-center gap-3">
-                <span
-                  className="text-xs font-mono font-bold px-2 py-0.5 rounded-full text-white flex-shrink-0"
-                  style={{ background: "var(--primary)" }}
-                >
-                  #{r.rank}
+              <span className="text-xs shrink-0 w-5" style={{ color: isMe ? "var(--primary)" : "#000" }}>{r.rank}</span>
+              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                <span className="text-sm truncate font-medium" style={{ color: isMe ? "var(--primary)" : "#000" }}>{r.fantasyTeamName}</span>
+                <span className="text-xs truncate" style={{ color: isMe ? "var(--primary)" : "rgba(0,0,0,0.65)" }}>
+                  {r.userName ?? r.userEmail}
                 </span>
-                <div>
-                  <div className="font-display font-black text-[14px] uppercase" style={{ color: "var(--text-primary)" }}>
-                    {r.fantasyTeamName}
-                  </div>
-                  <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
-                    {r.userName ?? r.userEmail}
-                  </div>
-                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="font-display font-black text-lg" style={{ color: "var(--text-primary)" }}>
-                    {r.totalPoints.toFixed(1)}
-                  </div>
-                  <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>punti</div>
-                </div>
-                <i className="pi pi-chevron-right text-xs" style={{ color: "var(--text-disabled)" }} />
-              </div>
+              <span className="text-sm font-semibold shrink-0" style={{ color: isMe ? "var(--primary)" : "#000" }}>
+                {Number.isInteger(r.totalPoints) ? r.totalPoints : r.totalPoints.toFixed(1)}
+              </span>
             </Link>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }
