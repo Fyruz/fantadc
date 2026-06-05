@@ -1,6 +1,5 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import StatusBadge from "@/components/status-badge";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 
 export default async function GreenVolleyHomePage() {
@@ -30,7 +29,7 @@ export default async function GreenVolleyHomePage() {
       {/* Header */}
       <div>
         <div className="over-label mb-1">Campionato</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
           GREEN<span style={{ color: "var(--primary)" }}>VOLLEY</span>
         </h1>
       </div>
@@ -41,48 +40,22 @@ export default async function GreenVolleyHomePage() {
         {nextMatch ? (
           <Link
             href={`/greenvolley/partite/${nextMatch.id}`}
-            className="block rounded-[20px] overflow-hidden transition-all duration-200 hover:-translate-y-0.5"
-            style={{
-              background: "#fff",
-              border: "1.5px solid var(--border-medium)",
-              boxShadow: "0 2px 12px rgba(21,128,61,0.07)",
-            }}
+            className="bg-white rounded-3xl p-6 flex gap-6 items-center block"
+            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
           >
-            {/* Top bar */}
-            <div
-              className="flex items-center justify-between px-4 py-2.5 gap-2"
-              style={{ borderBottom: "1px solid var(--border-soft)" }}
-            >
-              <StatusBadge status={nextMatch.status} />
+            <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
+              <span className="text-sm text-black truncate">{nextMatch.homeTeam.name}</span>
+              <span className="text-sm text-black truncate">{nextMatch.awayTeam.name}</span>
+            </div>
+            <div className="flex flex-col items-center justify-center gap-2 shrink-0 text-center">
               {nextMatch.date && (
-                <span className="text-[11px] font-semibold capitalize flex-shrink-0" style={{ color: "var(--text-muted)" }}>
+                <span className="text-xs text-black capitalize">
                   {nextMatch.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}
+                  {" · "}
+                  {nextMatch.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
                 </span>
               )}
-            </div>
-
-            {/* Body */}
-            <div className="px-4 py-5 flex items-center gap-2">
-              <div className="flex-1 flex flex-col items-center min-w-0 text-center">
-                <span className="font-display font-black text-2xl uppercase leading-none tracking-tight" style={{ color: "var(--text-primary)" }}>
-                  {nextMatch.homeTeam.name}
-                </span>
-              </div>
-              <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
-                <span className="font-display font-black text-xl leading-none" style={{ color: "var(--primary)" }}>
-                  VS
-                </span>
-                {nextMatch.date && (
-                  <span className="text-[11px] font-bold tabular-nums" style={{ color: "var(--text-muted)" }}>
-                    {nextMatch.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
-                  </span>
-                )}
-              </div>
-              <div className="flex-1 flex flex-col items-center min-w-0 text-center">
-                <span className="font-display font-black text-2xl uppercase leading-none tracking-tight" style={{ color: "var(--text-primary)" }}>
-                  {nextMatch.awayTeam.name}
-                </span>
-              </div>
+              <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>Vedi i dettagli</span>
             </div>
           </Link>
         ) : (

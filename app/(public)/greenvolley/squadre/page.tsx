@@ -13,7 +13,7 @@ export default async function VolleySquadrePublicPage() {
     <div className="flex flex-col gap-4">
       <div>
         <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
           SQUADRE
         </h1>
       </div>

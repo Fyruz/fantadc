@@ -73,10 +73,7 @@ export default async function VolleyMatchPublicPage({
         <div className="px-4 py-6 flex items-center gap-2">
           {/* Home */}
           <div className="flex-1 flex flex-col items-center gap-1 min-w-0 text-center">
-            <span
-              className="font-display font-black text-2xl uppercase leading-tight tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="text-base font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
               {match.homeTeam.name}
             </span>
           </div>
@@ -84,13 +81,13 @@ export default async function VolleyMatchPublicPage({
           {/* Center */}
           <div className="flex-shrink-0 flex flex-col items-center gap-1 px-2">
             {scored ? (
-              <div className="font-display font-black text-4xl leading-none" style={{ color: "var(--primary)" }}>
+              <div className="text-4xl font-bold leading-none tabular-nums" style={{ color: "var(--primary)" }}>
                 {homeSets}
                 <span style={{ color: "var(--text-disabled)" }}> — </span>
                 {awaySets}
               </div>
             ) : (
-              <div className="font-display font-black text-2xl leading-none" style={{ color: "var(--primary)" }}>
+              <div className="text-2xl font-bold leading-none" style={{ color: "var(--primary)" }}>
                 VS
               </div>
             )}
@@ -101,10 +98,7 @@ export default async function VolleyMatchPublicPage({
 
           {/* Away */}
           <div className="flex-1 flex flex-col items-center gap-1 min-w-0 text-center">
-            <span
-              className="font-display font-black text-2xl uppercase leading-tight tracking-tight"
-              style={{ color: "var(--text-primary)" }}
-            >
+            <span className="text-base font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
               {match.awayTeam.name}
             </span>
           </div>

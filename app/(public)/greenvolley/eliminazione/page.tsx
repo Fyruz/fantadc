@@ -22,7 +22,7 @@ export default async function VolleyEliminazionePublicPage() {
       <div className="flex flex-col gap-6">
         <div>
           <div className="over-label mb-1">GreenVolley</div>
-          <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
             ELIMINAZIONE
           </h1>
         </div>
@@ -37,7 +37,7 @@ export default async function VolleyEliminazionePublicPage() {
     <div className="flex flex-col gap-6">
       <div>
         <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
           ELIMINAZIONE
         </h1>
       </div>

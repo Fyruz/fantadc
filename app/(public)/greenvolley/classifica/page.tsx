@@ -17,7 +17,7 @@ export default async function VolleyClassificaPage() {
     <div className="flex flex-col gap-6">
       <div>
         <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
           CLASSIFICA
         </h1>
       </div>
@@ -56,21 +56,20 @@ export default async function VolleyClassificaPage() {
 
             {/* Table header */}
             <div
-              className="grid grid-cols-[1fr_28px_28px_28px_40px_36px] px-6 pb-3 text-xs font-semibold uppercase gap-1"
+              className="grid grid-cols-[1fr_32px_32px_32px_44px] px-6 pb-3 text-xs font-semibold uppercase gap-1"
               style={{ color: "rgba(0,0,0,0.40)" }}
             >
               <span>Squadra</span>
               <span className="text-center">G</span>
               <span className="text-center">SV</span>
               <span className="text-center">SP</span>
-              <span className="text-center">QS</span>
               <span className="text-center" style={{ color: "var(--primary)" }}>Pt</span>
             </div>
 
             {standings.map((row, i) => (
               <div
                 key={row.teamId}
-                className="grid grid-cols-[1fr_28px_28px_28px_40px_36px] px-6 py-3 text-sm gap-1 items-center"
+                className="grid grid-cols-[1fr_32px_32px_32px_44px] px-6 py-3 text-sm gap-1 items-center"
                 style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
               >
                 <span className="font-normal text-sm truncate" style={{ color: "var(--text-primary)" }}>
@@ -85,9 +84,6 @@ export default async function VolleyClassificaPage() {
                 <span className="text-center text-xs tabular-nums" style={{ color: "var(--text-primary)" }}>
                   {row.setsLost}
                 </span>
-                <span className="text-center text-xs tabular-nums" style={{ color: "rgba(0,0,0,0.40)" }}>
-                  {row.setRatio === 0 ? "0" : row.setRatio.toFixed(2)}
-                </span>
                 <span className="text-center text-sm font-bold tabular-nums" style={{ color: "var(--primary)" }}>
                   {row.setsWon}
                 </span>
@@ -95,7 +91,7 @@ export default async function VolleyClassificaPage() {
             ))}
 
             <div className="text-[10px] mt-2 px-6" style={{ color: "rgba(0,0,0,0.40)" }}>
-              G=Giocate · SV=Set Vinti · SP=Set Persi · QS=Quoziente Set · Pt=Punti (set vinti)
+              G=Giocate · SV=Set Vinti · SP=Set Persi · Pt=Punti (set vinti)
             </div>
           </div>
         );
