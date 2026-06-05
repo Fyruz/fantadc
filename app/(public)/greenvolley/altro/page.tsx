@@ -26,13 +26,6 @@ function Item({ icon, label, href, external }: { icon: React.ReactNode; label: s
 export default function VolleyAltroPage() {
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto">
-      <div>
-        <div className="over-label mb-1">GreenVolley</div>
-        <h1 className="text-3xl uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>
-          ALTRO
-        </h1>
-      </div>
-
       {/* Competizione */}
       <Section label="Competizione">
         <Item icon={<img src="/icons/shield-star.svg" width={18} height={18} alt="" />} label="Squadre" href="/greenvolley/squadre" />

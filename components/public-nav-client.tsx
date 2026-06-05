@@ -69,6 +69,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isGV = pathname.startsWith("/greenvolley");
 
   const getMobileTitle = (): string | null => {
+    if (pathname.startsWith("/greenvolley/altro")) return "Altro"; // come il calcio: titolo, non pills
     if (isGV) return null; // GV keeps pills
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Fanta";
