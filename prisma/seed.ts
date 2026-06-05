@@ -155,10 +155,10 @@ const DEV_GROUPS: {
       { home: "Polisportiva Ovest",  away: "Racing Club Torre",   date: "2026-06-07T18:00:00.000Z", status: MatchStatus.CONCLUDED, homeScore: 3, awayScore: 0, concludedAt: "2026-06-07T19:45:00.000Z" },
       // Giornata 2
       { home: "Stella Rossa 1987",   away: "Polisportiva Ovest",  date: "2026-06-14T16:00:00.000Z", status: MatchStatus.CONCLUDED, homeScore: 0, awayScore: 1, concludedAt: "2026-06-14T17:45:00.000Z" },
-      { home: "Virtus Porto",        away: "Racing Club Torre",   date: "2026-06-14T18:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
+      { home: "Virtus Porto",        away: "Racing Club Torre",   date: "2026-06-07T14:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
       // Giornata 3
-      { home: "Racing Club Torre",   away: "Stella Rossa 1987",   date: "2026-06-21T16:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
-      { home: "Virtus Porto",        away: "Polisportiva Ovest",  date: "2026-06-21T18:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
+      { home: "Racing Club Torre",   away: "Stella Rossa 1987",   date: "2026-06-08T16:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
+      { home: "Virtus Porto",        away: "Polisportiva Ovest",  date: "2026-06-08T18:00:00.000Z", status: MatchStatus.SCHEDULED, homeScore: null, awayScore: null, concludedAt: null },
     ],
   },
 ];
@@ -338,11 +338,54 @@ async function seedDevTournamentData() {
   );
 }
 
+// ─── Fase a eliminazione ──────────────────────────────────────────────────
+async function seedKnockoutRounds() {
+  if (process.env.NODE_ENV === "production") return;
+
+  const rounds = [
+    { name: "Semifinali",     order: 1 },
+    { name: "Finale 3°/4°",  order: 2 },
+    { name: "Finale",         order: 3 },
+  ];
+
+  const savedRounds = new Map<string, number>();
+  for (const r of rounds) {
+    const existing = await db.knockoutRound.findFirst({ where: { order: r.order } });
+    const saved = existing ?? await db.knockoutRound.create({ data: r });
+    savedRounds.set(r.name, saved.id);
+  }
+
+  // Semifinali: 1°A vs 2°B, 1°B vs 2°A (squadre Girone B ancora TBD)
+  const sfId = savedRounds.get("Semifinali")!;
+  const sf1Exists = await db.match.findFirst({ where: { knockoutRoundId: sfId, bracketPosition: 1 } });
+  if (!sf1Exists) {
+    await db.match.create({ data: { knockoutRoundId: sfId, status: MatchStatus.SCHEDULED, startsAt: new Date("2026-06-13T16:00:00.000Z"), homeSeed: "1A", awaySeed: "2B", bracketPosition: 1 } });
+    await db.match.create({ data: { knockoutRoundId: sfId, status: MatchStatus.SCHEDULED, startsAt: new Date("2026-06-13T18:00:00.000Z"), homeSeed: "1B", awaySeed: "2A", bracketPosition: 2 } });
+  }
+
+  // Finale 3°/4°
+  const f3Id = savedRounds.get("Finale 3°/4°")!;
+  const f3Exists = await db.match.findFirst({ where: { knockoutRoundId: f3Id } });
+  if (!f3Exists) {
+    await db.match.create({ data: { knockoutRoundId: f3Id, status: MatchStatus.SCHEDULED, startsAt: new Date("2026-06-20T15:00:00.000Z"), homeSeed: "Perd. SF1", awaySeed: "Perd. SF2", bracketPosition: 1 } });
+  }
+
+  // Finale
+  const finId = savedRounds.get("Finale")!;
+  const finExists = await db.match.findFirst({ where: { knockoutRoundId: finId } });
+  if (!finExists) {
+    await db.match.create({ data: { knockoutRoundId: finId, status: MatchStatus.SCHEDULED, startsAt: new Date("2026-06-20T17:00:00.000Z"), homeSeed: "Vince SF1", awaySeed: "Vince SF2", bracketPosition: 1 } });
+  }
+
+  console.log("✓ Turni eliminazione: Semifinali (13/06), Finale 3°/4° + Finale (20/06)");
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────
 async function main() {
   await seedAdmin();
   await seedBonusTypes();
   await seedDevTournamentData();
+  await seedKnockoutRounds();
 }
 
 main()
