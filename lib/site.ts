@@ -33,6 +33,16 @@ export const siteConfig = {
   ],
 } as const;
 
+export const appStoreConfig: {
+  appName: string;
+  appleAppStoreUrl: string | null;
+  googlePlayStoreUrl: string | null;
+} = {
+  appName: "Danimarca's Cup",
+  appleAppStoreUrl: null,
+  googlePlayStoreUrl: null,
+};
+
 function resolveAppUrl(value: string | undefined) {
   if (!value) {
     if (process.env.NODE_ENV === "production") {
