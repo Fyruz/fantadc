@@ -9,6 +9,8 @@ export default async function VolleyPartitePage() {
       homeTeam: { select: { id: true, name: true } },
       awayTeam: { select: { id: true, name: true } },
       sets: true,
+      group: { select: { name: true } },
+      knockoutRound: { select: { name: true } },
     },
   });
 
@@ -27,8 +29,13 @@ export default async function VolleyPartitePage() {
             homeTeamName: m.homeTeam.name,
             awayTeamName: m.awayTeam.name,
             status: m.status,
-            date: m.date?.toLocaleDateString("it-IT") ?? "—",
+            date: m.date,
             result: m.sets.length > 0 ? `${homeSets}-${awaySets}` : "—",
+            groupId: m.groupId,
+            knockoutRoundId: m.knockoutRoundId,
+            groupName: m.group?.name ?? null,
+            knockoutRoundName: m.knockoutRound?.name ?? null,
+            setCount: m.sets.length,
           };
         })}
       />
