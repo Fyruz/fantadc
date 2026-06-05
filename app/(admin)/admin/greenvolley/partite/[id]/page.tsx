@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import AdminPageHeader from "@/components/admin-page-header";
 import SetSection from "./_sets-section";
+import EditVolleyMatchForm from "./_match-form";
 
 const STATUS_LABEL: Record<string, string> = {
   DRAFT: "Bozza",
@@ -20,16 +21,21 @@ export default async function VolleyMatchDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const match = await db.volleyMatch.findUnique({
-    where: { id: Number(id) },
-    include: {
-      homeTeam: { select: { id: true, name: true } },
-      awayTeam: { select: { id: true, name: true } },
-      sets: { orderBy: { setNumber: "asc" } },
-      group: { select: { id: true, name: true } },
-      knockoutRound: { select: { id: true, name: true } },
-    },
-  });
+  const [match, teams, groups, rounds] = await Promise.all([
+    db.volleyMatch.findUnique({
+      where: { id: Number(id) },
+      include: {
+        homeTeam: { select: { id: true, name: true } },
+        awayTeam: { select: { id: true, name: true } },
+        sets: { orderBy: { setNumber: "asc" } },
+        group: { select: { id: true, name: true } },
+        knockoutRound: { select: { id: true, name: true } },
+      },
+    }),
+    db.volleyTeam.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    db.volleyGroup.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+    db.volleyKnockoutRound.findMany({ orderBy: { order: "asc" }, select: { id: true, name: true } }),
+  ]);
   if (!match) notFound();
 
   const homeSets = match.sets.filter((s) => s.homePoints > s.awayPoints).length;
@@ -105,6 +111,23 @@ export default async function VolleyMatchDetailPage({
             {match.awayTeam.name}
           </span>
         </div>
+      </div>
+
+      <div className="admin-card p-4 sm:p-5">
+        <div className="over-label mb-4">Dati partita</div>
+        <EditVolleyMatchForm
+          match={{
+            id: match.id,
+            homeTeamId: match.homeTeamId,
+            awayTeamId: match.awayTeamId,
+            date: match.date ? match.date.toISOString() : null,
+            groupId: match.groupId,
+            knockoutRoundId: match.knockoutRoundId,
+          }}
+          teams={teams}
+          groups={groups}
+          rounds={rounds}
+        />
       </div>
 
       {/* Sezione set */}

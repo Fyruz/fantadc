@@ -1,0 +1,142 @@
+"use client";
+
+import { useActionState, useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
+import { updateVolleyMatch } from "@/app/actions/admin/volley";
+
+type SelectItem = { id: number; name: string };
+
+type MatchFormValue = {
+  id: number;
+  homeTeamId: number;
+  awayTeamId: number;
+  date: string | null;
+  groupId: number | null;
+  knockoutRoundId: number | null;
+};
+
+export default function EditVolleyMatchForm({
+  match,
+  teams,
+  groups,
+  rounds,
+}: {
+  match: MatchFormValue;
+  teams: SelectItem[];
+  groups: SelectItem[];
+  rounds: SelectItem[];
+}) {
+  const action = updateVolleyMatch.bind(null, match.id);
+  const [state, formAction, pending] = useActionState(action, undefined);
+  const [homeTeamId, setHomeTeamId] = useState<number | null>(match.homeTeamId);
+  const [awayTeamId, setAwayTeamId] = useState<number | null>(match.awayTeamId);
+  const [groupId, setGroupId] = useState<number | null>(match.groupId);
+  const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(match.knockoutRoundId);
+  const [date, setDate] = useState<Date | null>(() => match.date ? new Date(match.date) : null);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 768px)").matches;
+  });
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 768px)");
+    const handler = (event: MediaQueryListEvent) => setIsMobile(event.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  return (
+    <form action={formAction} className="flex flex-col gap-4">
+      {state?.error && (
+        <p className="text-sm font-semibold" style={{ color: "var(--error, #dc2626)" }}>
+          {state.error}
+        </p>
+      )}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Squadra casa *</label>
+          <Dropdown
+            options={teams}
+            optionLabel="name"
+            optionValue="id"
+            value={homeTeamId}
+            onChange={(event) => setHomeTeamId(event.value)}
+            placeholder="Seleziona"
+            className="w-full"
+          />
+          <input type="hidden" name="homeTeamId" value={homeTeamId ?? ""} />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Squadra ospite *</label>
+          <Dropdown
+            options={teams}
+            optionLabel="name"
+            optionValue="id"
+            value={awayTeamId}
+            onChange={(event) => setAwayTeamId(event.value)}
+            placeholder="Seleziona"
+            className="w-full"
+          />
+          <input type="hidden" name="awayTeamId" value={awayTeamId ?? ""} />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label className="text-sm font-semibold">Data</label>
+        <Calendar
+          value={date}
+          onChange={(event) => setDate(event.value as Date | null)}
+          showTime
+          hourFormat="24"
+          stepMinute={5}
+          touchUI={isMobile}
+          readOnlyInput={isMobile}
+          dateFormat="dd/mm/yy"
+          className="w-full"
+          placeholder="Seleziona data e ora"
+        />
+        <input type="hidden" name="date" value={date ? date.toISOString() : ""} />
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Girone</label>
+          <Dropdown
+            options={[{ id: 0, name: "Nessuno" }, ...groups]}
+            optionLabel="name"
+            optionValue="id"
+            value={groupId ?? 0}
+            onChange={(event) => setGroupId(event.value || null)}
+            className="w-full"
+          />
+          <input type="hidden" name="groupId" value={groupId ?? ""} />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">Turno eliminazione</label>
+          <Dropdown
+            options={[{ id: 0, name: "Nessuno" }, ...rounds]}
+            optionLabel="name"
+            optionValue="id"
+            value={knockoutRoundId ?? 0}
+            onChange={(event) => setKnockoutRoundId(event.value || null)}
+            className="w-full"
+          />
+          <input type="hidden" name="knockoutRoundId" value={knockoutRoundId ?? ""} />
+        </div>
+      </div>
+
+      <Button
+        type="submit"
+        label="Salva dati partita"
+        loading={pending}
+        className="w-full md:w-auto md:self-start"
+        style={{ background: "#3DD907", border: "none", color: "#fff" }}
+      />
+    </form>
+  );
+}
