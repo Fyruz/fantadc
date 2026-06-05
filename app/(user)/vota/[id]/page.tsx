@@ -1,3 +1,4 @@
+import BackChevron from "@/components/back-chevron";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -95,9 +96,7 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
 
       {/* Back + title */}
       <div className="flex items-center relative">
-        <Link href={`/partite/${matchId}`} className="absolute left-0 flex items-center justify-center w-6 h-6">
-          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
-        </Link>
+        <BackChevron />
         <h1
           className="uppercase font-medium text-(--text-primary) mx-auto"
           style={{ fontFamily: "var(--font-tallica)", fontSize: 20 }}

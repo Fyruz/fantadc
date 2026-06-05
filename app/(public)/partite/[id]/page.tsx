@@ -1,3 +1,4 @@
+import BackChevron from "@/components/back-chevron";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -109,9 +110,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
       {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="flex items-center relative py-2">
-        <Link href="/partite" className="absolute left-0 flex items-center justify-center w-6 h-6">
-          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
-        </Link>
+        <BackChevron />
         <h1
           className="uppercase mx-auto font-medium"
           style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
