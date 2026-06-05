@@ -16,11 +16,21 @@ type Match = {
 type StandingRow = { teamId: number; teamName: string; played: number; setsWon: number; setsLost: number };
 type Group = { id: number; name: string; rows: StandingRow[] };
 
+function formatMatchTime(date: Date) {
+  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatDayPill(date: Date) {
+  return date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function formatDayHeading(date: Date) {
+  return date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+}
+
 function MatchCard({ m }: { m: Match }) {
   const scored = m.homeSets !== null && m.awaySets !== null;
-  const time = m.date
-    ? m.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })
-    : "—";
+  const time = m.date ? formatMatchTime(m.date) : "—";
 
   return (
     <Link
@@ -63,7 +73,7 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
     matches
       .filter((m) => m.date)
       .map((m) => {
-        const key = m.date!.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+        const key = formatDayPill(m.date!);
         return [key, { key, date: m.date!.toDateString() }];
       })
   ).values()];
@@ -77,7 +87,7 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
   const byDay = new Map<string, Match[]>();
   for (const m of filteredMatches) {
     const key = m.date
-      ? m.date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
+      ? formatDayHeading(m.date)
       : "Data da definire";
     if (!byDay.has(key)) byDay.set(key, []);
     byDay.get(key)!.push(m);

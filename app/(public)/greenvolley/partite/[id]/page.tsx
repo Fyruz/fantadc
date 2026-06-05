@@ -25,6 +25,9 @@ export default async function VolleyMatchPublicPage({
   const awaySets = match.sets.filter((s) => s.awayPoints > s.homePoints).length;
   const scored = match.status === "CONCLUDED" && match.sets.length > 0;
   const phaseName = match.group?.name ?? match.knockoutRound?.name ?? null;
+  const matchDateLabel = match.date
+    ? match.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long" })
+    : null;
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
@@ -62,9 +65,9 @@ export default async function VolleyMatchPublicPage({
               </span>
             )}
           </div>
-          {match.date && (
+          {matchDateLabel && (
             <span className="text-[11px] font-semibold capitalize flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-              {match.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" })}
+              {matchDateLabel}
             </span>
           )}
         </div>

@@ -23,6 +23,12 @@ export default async function GreenVolleyHomePage() {
       },
     }),
   ]);
+  const nextMatchDateLabel = nextMatch?.date
+    ? nextMatch.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })
+    : null;
+  const nextMatchTimeLabel = nextMatch?.date
+    ? nextMatch.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })
+    : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,11 +54,11 @@ export default async function GreenVolleyHomePage() {
               <span className="text-sm text-black truncate">{nextMatch.awayTeam.name}</span>
             </div>
             <div className="flex flex-col items-center justify-center gap-2 shrink-0 text-center">
-              {nextMatch.date && (
+              {nextMatchDateLabel && nextMatchTimeLabel && (
                 <span className="text-xs text-black capitalize">
-                  {nextMatch.date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}
+                  {nextMatchDateLabel}
                   {" · "}
-                  {nextMatch.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
+                  {nextMatchTimeLabel}
                 </span>
               )}
               <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>Vedi i dettagli</span>
