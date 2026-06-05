@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const GV = "#15803D"; // verde profondo: stati attivi nav volley
+const GV = "#0E3D2B"; // verde profondo: stati attivi nav volley
 const PRIMARY = "var(--text-primary)";
 
 const DCUP_MORE = [
@@ -73,7 +73,7 @@ export default function PublicBottomNav() {
 
   const isGV = pathname.startsWith("/greenvolley");
 
-  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname) || (pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta")) || pathname.startsWith("/gironi") || pathname.startsWith("/classifica-marcatori") || pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account") || pathname.startsWith("/giocatori")) return null;
+  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname) || (pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta")) || /^\/squadre-fanta\/.+/.test(pathname) || pathname.startsWith("/gironi") || pathname.startsWith("/classifica-marcatori") || pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account") || pathname.startsWith("/giocatori")) return null;
 
   const isActive = (href: string, matchers?: readonly string[]) => {
     if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));
@@ -124,7 +124,7 @@ export default function PublicBottomNav() {
     { href: "/",             label: "Home",   icon: "home",     matchers: undefined          },
     { href: "/partite",      label: "Partite",icon: "football_field", matchers: undefined    },
     { href: "/squadre-fanta",label: "Fanta",  icon: "shirt",    matchers: undefined          },
-    { href: "/dashboard",    label: "Il mio", icon: "account",  matchers: ["/dashboard", "/squadra"] },
+    { href: "/dashboard",    label: "La mia squadra", icon: "account",  matchers: ["/dashboard", "/squadra"] },
   ] as const;
 
   return (

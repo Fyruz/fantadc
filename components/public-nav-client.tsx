@@ -8,9 +8,9 @@ import { Button } from "primereact/button";
 import { logout } from "@/app/actions/auth";
 import type { SessionUser } from "@/lib/session";
 
-const GV = "#3DD907";                          // accento brand lime (switcher + logo)
-const GV_PRIMARY = "#15803D";                  // verde profondo: stati attivi nav volley
-const GV_PRIMARY_LIGHT = "rgba(21,128,61,0.08)";
+const GV = "#0E3D2B";                          // accento brand lime (switcher + logo)
+const GV_PRIMARY = "#0E3D2B";                  // verde profondo: stati attivi nav volley
+const GV_PRIMARY_LIGHT = "rgba(14,61,43,0.08)";
 
 const DCUP_GROUPS = [
   {
@@ -61,11 +61,12 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
   const isVota = pathname.startsWith("/vota");
   const isPartiteDetail = /^\/partite\/\d+/.test(pathname);
   const isSquadre = pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta");
+  const isSquadreFantaDetail = pathname.startsWith("/squadre-fanta/");
   const isGironi = pathname.startsWith("/gironi");
   const isMarcatori = pathname.startsWith("/classifica-marcatori");
   const isGiocatori = pathname.startsWith("/giocatori");
   const isAltroPage = pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account");
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isGironi || isMarcatori || isGiocatori || isAltroPage;
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage;
   const isGV = pathname.startsWith("/greenvolley");
 
   const getMobileTitle = (): string | null => {
@@ -73,7 +74,7 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
     if (isGV) return null; // GV keeps pills
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Fanta";
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "Il mio";
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "La mia squadra";
     if (pathname.startsWith("/altro")) return null;
     return null;
   };
@@ -116,8 +117,8 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
       className={`sticky top-0 z-30${hideOnMobile ? " hidden md:block" : ""}`}
       style={{
         background: scrolled ? "#fff" : "transparent",
-        borderBottom: scrolled ? (isGV ? `2px solid ${GV_PRIMARY}` : "1px solid var(--border-soft)") : "none",
-        boxShadow: scrolled ? "0 1px 8px rgba(1,7,163,0.06)" : "none",
+        borderBottom: scrolled ? "1px solid var(--border-soft)" : "none",
+        boxShadow: scrolled ? (isGV ? "0 1px 8px rgba(14,61,43,0.08)" : "0 1px 8px rgba(1,7,163,0.06)") : "none",
         transition: "background 0.2s, box-shadow 0.2s",
       }}
     >
