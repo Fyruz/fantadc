@@ -1,3 +1,4 @@
+import GVThemeWrapper from "@/components/gv-theme-wrapper";
 import BackButton from "@/components/back-button";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -7,14 +8,16 @@ export const metadata: Metadata = {
   description: "Pagina di supporto ufficiale di Fantadc per utenti web e App Store.",
 };
 
-export default function SupportPage() {
+export default async function SupportPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const { from } = await searchParams;
   return (
+    <GVThemeWrapper active={from === "greenvolley"}>
     <div className="flex flex-col gap-10 max-w-2xl">
       <div className="md:hidden flex items-center justify-between h-12">
         <div className="flex-1 flex items-center">
           <BackButton />
         </div>
-        <span className="flex-1 text-center uppercase" style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}>
+        <span className="flex-1 text-center uppercase" style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}>
           Supporto
         </span>
         <div className="flex-1" />
@@ -77,5 +80,6 @@ export default function SupportPage() {
         ))}
       </div>
     </div>
+    </GVThemeWrapper>
   );
 }

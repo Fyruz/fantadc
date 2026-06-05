@@ -3,9 +3,10 @@ import { Suspense } from "react";
 import BackButton from "../_back-button";
 import LoginForm from "./_form";
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const { from } = await searchParams;
   return (
-    <div className="flex-1 flex flex-col px-4 py-6">
+    <div className={`flex-1 flex flex-col px-4 py-6${from === "greenvolley" ? " gv-theme" : ""}`}>
       <BackButton />
 
       <div className="flex-1 flex items-center justify-center py-8">

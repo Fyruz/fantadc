@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useActionState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { InputText } from "primereact/inputtext";
 import { Password } from "primereact/password";
@@ -10,12 +11,14 @@ import BackButton from "../_back-button";
 
 export default function RegisterPage() {
   const [state, action, pending] = useActionState(register, undefined);
+  const searchParams = useSearchParams();
+  const isGV = searchParams.get("from") === "greenvolley";
   const [name, setName]         = useState("");
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
 
   return (
-    <div className="flex-1 flex flex-col px-4 py-6">
+    <div className={`flex-1 flex flex-col px-4 py-6${isGV ? " gv-theme" : ""}`}>
       <BackButton />
 
       <div className="flex-1 flex items-center justify-center py-8">

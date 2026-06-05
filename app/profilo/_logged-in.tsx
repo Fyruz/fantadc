@@ -4,16 +4,16 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { logout } from "@/app/actions/auth";
 
-export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdmin: boolean }) {
+export default function ProfiloLoggedIn({ name, isAdmin, isGV }: { name: string; isAdmin: boolean; isGV?: boolean }) {
   const [pending, startTransition] = useTransition();
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-between py-6" style={{ background: '#F5F6FF' }}>
+    <div className={`min-h-screen flex flex-col items-center justify-between py-6${isGV ? " gv-theme" : ""}`} style={{ background: '#F5F6FF' }}>
       <div className="w-full max-w-lg px-4 flex flex-col gap-10">
 
         {/* Header */}
         <div className="flex flex-col gap-4">
-          <Link href="/" className="inline-flex items-center justify-center w-6 h-6">
+          <Link href={isGV ? "/greenvolley" : "/"} className="inline-flex items-center justify-center w-6 h-6">
             <i className="pi pi-chevron-left" style={{ fontSize: 12, color: "var(--text-primary)" }} />
           </Link>
           <h1
@@ -69,9 +69,11 @@ export default function ProfiloLoggedIn({ name, isAdmin }: { name: string; isAdm
 
       {/* Footer */}
       <div className="flex flex-col items-center gap-2">
-        <p className="text-[10px] text-black text-center">Dove il calcio incontra la fantasia</p>
+        <p className="text-[10px] text-black text-center">
+          {isGV ? "GreenVolley — il campionato" : "Dove il calcio incontra la fantasia"}
+        </p>
         <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
-          Copyright @ 2026 Danimarca&apos;s Cup - Versione app 1.0.0
+          Copyright © {new Date().getFullYear()} — Danimarca&apos;s Cup
         </p>
       </div>
     </div>
