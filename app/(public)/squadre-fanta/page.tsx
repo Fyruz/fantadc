@@ -36,28 +36,23 @@ export default async function SquadreFantasyPublicPage() {
             <Link
               key={r.fantasyTeamId}
               href={`/squadre-fanta/${r.fantasyTeamId}`}
-              className="flex gap-4 items-center py-3 rounded-xl px-2 -mx-2 transition-colors hover:bg-[var(--surface-1)]"
+              className="flex gap-4 items-center py-3 transition-colors hover:bg-(--surface-1)"
               style={{
                 borderBottom: idx < rankings.length - 1 ? "1px solid rgba(0,0,0,0.05)" : undefined,
-                background: isMe ? "var(--primary-light)" : undefined,
+                paddingLeft: isMe ? 6 : 8,
+                borderLeft: isMe ? "2px solid var(--text-primary)" : "2px solid transparent",
               }}
             >
-              <span className="text-xs shrink-0 w-5" style={{ color: isMe ? "var(--primary)" : "#000" }}>{r.rank}</span>
+              <span className="text-xs shrink-0 w-5 text-black">{r.rank}</span>
               <div className="flex flex-col gap-1 flex-1 min-w-0">
-                <span className="text-sm truncate font-medium" style={{ color: isMe ? "var(--primary)" : "#000" }}>{r.fantasyTeamName}</span>
-                <span className="text-xs truncate" style={{ color: isMe ? "var(--primary)" : "rgba(0,0,0,0.65)" }}>
+                <span className="text-sm truncate font-medium text-black">{r.fantasyTeamName}</span>
+                <span className="text-xs truncate" style={{ color: "rgba(0,0,0,0.65)" }}>
                   {r.userName ?? r.userEmail}
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: isMe ? "var(--primary)" : "var(--text-muted)" }}>
-                  Vedi rosa
-                </span>
               </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="text-sm font-semibold" style={{ color: isMe ? "var(--primary)" : "#000" }}>
-                  {Number.isInteger(r.totalPoints) ? r.totalPoints : r.totalPoints.toFixed(1)}
-                </span>
-                <i className="pi pi-chevron-right text-[10px]" style={{ color: isMe ? "var(--primary)" : "var(--text-disabled)" }} />
-              </div>
+              <span className="text-sm font-semibold shrink-0 text-black">
+                {Number.isInteger(r.totalPoints) ? r.totalPoints : r.totalPoints.toFixed(1)}
+              </span>
             </Link>
           );
         })}

@@ -1,15 +1,20 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
-import RoleBadge from "@/components/role-badge";
 import BackButton from "@/components/back-button";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
 export const revalidate = 60;
 
-function formatPoints(points: number) {
-  return `${points > 0 ? "+" : ""}${points.toFixed(1)}`;
-}
+const CARD: React.CSSProperties = {
+  background: "#fff",
+  border: "1px solid rgba(9,20,76,0.05)",
+  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
+};
+
+const ROW_BORDER: React.CSSProperties = {
+  borderTop: "1px solid rgba(9,20,76,0.05)",
+};
 
 export default async function SquadraFantasyPublicPage({
   params,
@@ -45,179 +50,168 @@ export default async function SquadraFantasyPublicPage({
 
   const history = await computeTeamHistory(teamId);
   const totalPoints = history.reduce((s, m) => s + m.total, 0);
+  const ownerLabel = team.user.name ?? team.user.email;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10 max-w-lg mx-auto">
+
+      {/* Header mobile */}
       <div className="md:hidden flex items-center justify-between h-12">
         <div className="flex-1 flex items-center">
           <BackButton />
         </div>
-        <span
-          className="flex-1 text-center uppercase"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "#09144C" }}
-        >
-          Rosa fanta
-        </span>
+        <div className="flex flex-col items-center flex-1 px-2 min-w-0" style={{ gap: 4 }}>
+          <span className="text-base font-semibold truncate w-full text-center" style={{ color: "#09144C" }}>
+            {team.name}
+          </span>
+          <span className="text-xs truncate w-full text-center text-black">
+            {ownerLabel}
+          </span>
+        </div>
         <div className="flex-1" />
       </div>
 
-      {/* Header */}
-      <div>
-        <div className="over-label mb-1">Squadra Fanta</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          {team.name}
-        </h1>
-        <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-          Proprietario: {team.user.name ?? team.user.email}
-        </p>
-        {history.length > 0 && (
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-display font-black text-3xl" style={{ color: "var(--primary)" }}>
-              {totalPoints.toFixed(1)}
-            </span>
-            <span className="text-sm font-semibold" style={{ color: "var(--text-muted)" }}>punti totali</span>
-          </div>
-        )}
-      </div>
-
       {/* Rosa */}
-      <div>
-        <div className="over-label mb-3">Rosa</div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {team.players.map(({ player }) => {
-            const isCaptain = player.id === team.captainPlayerId;
-            const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
-            return (
-              <div
-                key={player.id}
-                className="card p-3 flex items-center gap-3"
-                style={{
-                  borderLeft: `3px solid ${player.role === "P" ? "#10B981" : "#3B82F6"}`,
-                  ...(isCaptain ? { background: "rgba(245,197,24,0.07)", borderColor: "#F5C518" } : {}),
-                }}
-              >
-                <RoleBadge role={player.role} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    {flagSrc && (
-                      <img
-                        src={flagSrc}
-                        alt={player.footballTeam.name}
-                        className="h-4 w-4 shrink-0 rounded-sm object-contain"
-                      />
-                    )}
-                    <p className="font-display font-black text-sm uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                      {player.name}
-                    </p>
-                  </div>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                    {player.footballTeam.shortName ?? player.footballTeam.name}
-                  </p>
-                </div>
-                {isCaptain && (
-                  <span className="text-[11px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>
-                    ★ CAP
+      <div className="rounded-3xl overflow-hidden" style={CARD}>
+        {/* Card header */}
+        <div className="flex items-center justify-between px-6 pt-6 pb-3">
+          <h2
+            className="text-base font-medium uppercase"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+          >
+            Rosa
+          </h2>
+          {history.length > 0 && (
+            <div className="flex items-baseline gap-1">
+              <span className="text-base font-semibold" style={{ color: "var(--primary)" }}>
+                {totalPoints.toFixed(1)}
+              </span>
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>pt</span>
+            </div>
+          )}
+        </div>
+
+        {/* Player rows */}
+        {team.players.map(({ player }) => {
+          const isCaptain = player.id === team.captainPlayerId;
+          const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
+          return (
+            <div
+              key={player.id}
+              className="flex items-center gap-3 px-6 py-3"
+              style={ROW_BORDER}
+            >
+              {/* Logo / flag */}
+              <div className="w-9 h-9 shrink-0 flex items-center justify-center p-1">
+                {flagSrc ? (
+                  <img src={flagSrc} alt={player.footballTeam.name} className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-[10px] font-semibold uppercase" style={{ color: "var(--text-muted)" }}>
+                    {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2)}
                   </span>
                 )}
               </div>
-            );
-          })}
-        </div>
+
+              {/* Name + team */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-black truncate">{player.name}</p>
+                <p className="text-xs truncate" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  {player.footballTeam.shortName ?? player.footballTeam.name}
+                </p>
+              </div>
+
+              {/* Captain badge */}
+              {isCaptain && (
+                <span className="text-xs font-semibold shrink-0" style={{ color: "#C48A00" }}>
+                  CAP
+                </span>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {/* Storico partite */}
       {history.length > 0 && (
-        <div>
-          <div className="over-label mb-3">Storico partite</div>
-          <div className="flex flex-col gap-3">
-            {history.map((match) => (
-              <details key={match.matchId} className="card overflow-hidden group">
-                <summary className="px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-[var(--surface-1)] transition-colors list-none">
-                  <div>
-                    <p className="font-display font-black text-sm uppercase" style={{ color: "var(--text-primary)" }}>
-                      {match.label}
-                    </p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-                      {match.startsAt.toLocaleDateString("it-IT", {
-                        day: "2-digit",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-display font-black text-xl" style={{ color: "var(--text-primary)" }}>
-                      {match.total.toFixed(1)}
-                    </span>
-                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>pt</span>
-                    <i className="pi pi-chevron-down text-xs transition-transform group-open:rotate-180" style={{ color: "var(--text-muted)" }} />
-                  </div>
-                </summary>
-                <div className="px-4 pb-3 border-t" style={{ borderColor: "var(--border-soft)", background: "var(--surface-1)" }}>
-                  <div className="flex flex-col gap-1 mt-2">
-                    {match.playerScores.map((ps) => (
-                      <div
-                        key={ps.playerId}
-                        className="flex items-center justify-between py-1.5 border-b last:border-0"
-                        style={{ borderColor: "var(--border-soft)" }}
-                      >
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 min-w-0">
-                            {ps.isCaptain && <span className="text-[10px] font-black flex-shrink-0" style={{ color: "#C48A00" }}>★ C</span>}
-                            {ps.isMvp && <span className="text-[10px] flex-shrink-0" style={{ color: "#E8A000" }}>MVP</span>}
-                            <span className="font-display font-black text-xs uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                              {ps.playerName}
-                            </span>
-                            <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                              ({ps.footballTeamName})
-                            </span>
-                          </div>
-                          {ps.bonusDetails.length > 0 && (
-                            <div className="mt-1 flex flex-wrap gap-1">
-                              {ps.bonusDetails.map((bonus) => (
-                                <span
-                                  key={`${ps.playerId}-${bonus.code}`}
-                                  className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
-                                  style={{
-                                    borderColor: "var(--border-soft)",
-                                    color: "var(--text-muted)",
-                                  }}
-                                  title={bonus.name}
-                                >
-                                  {bonus.code}
-                                  {bonus.quantity > 1 ? ` ×${bonus.quantity}` : ""}
-                                  <span className="ml-1">{formatPoints(bonus.points)}</span>
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {ps.isCaptain && ps.basePoints > 0 && (
-                            <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>×2</span>
-                          )}
-                          <span
-                            className="font-display font-black text-sm"
-                            style={{ color: ps.finalPoints > 0 ? "#16A34A" : ps.finalPoints < 0 ? "#DC2626" : "var(--text-muted)" }}
-                          >
-                            {ps.finalPoints > 0 ? "+" : ""}{ps.finalPoints.toFixed(1)}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </details>
-            ))}
+        <div className="rounded-3xl overflow-hidden" style={CARD}>
+          {/* Card header */}
+          <div className="px-6 pt-6 pb-3">
+            <h2
+              className="text-base font-medium uppercase"
+              style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+            >
+              Storico partite
+            </h2>
           </div>
+
+          {/* Match rows */}
+          {history.map((match) => (
+            <details key={match.matchId} className="group" style={ROW_BORDER}>
+              <summary className="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-black truncate">{match.label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                    {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0 ml-4">
+                  <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                    {match.total.toFixed(1)} pt
+                  </span>
+                  <i
+                    className="pi pi-chevron-down text-[10px] transition-transform group-open:rotate-180"
+                    style={{ color: "rgba(0,0,0,0.35)" }}
+                  />
+                </div>
+              </summary>
+
+              {/* Expanded: player scores */}
+              <div className="px-6 pb-4" style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12 }}>
+                <div className="flex flex-col gap-0">
+                  {match.playerScores.map((ps) => (
+                    <div
+                      key={ps.playerId}
+                      className="flex items-center justify-between py-2"
+                      style={{ borderBottom: "1px solid rgba(9,20,76,0.04)" }}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        {ps.isCaptain && (
+                          <span className="text-[10px] font-semibold shrink-0" style={{ color: "#C48A00" }}>CAP</span>
+                        )}
+                        {ps.isMvp && (
+                          <span className="text-[10px] font-semibold shrink-0" style={{ color: "#E8A000" }}>MVP</span>
+                        )}
+                        <span className="text-sm text-black truncate">{ps.playerName}</span>
+                        <span className="text-xs shrink-0" style={{ color: "rgba(0,0,0,0.45)" }}>
+                          {ps.footballTeamName}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                        {ps.isCaptain && ps.basePoints > 0 && (
+                          <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>×2</span>
+                        )}
+                        <span
+                          className="text-sm font-semibold"
+                          style={{ color: ps.finalPoints > 0 ? "#16A34A" : ps.finalPoints < 0 ? "#DC2626" : "rgba(0,0,0,0.45)" }}
+                        >
+                          {ps.finalPoints > 0 ? "+" : ""}{ps.finalPoints.toFixed(1)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
         </div>
       )}
 
       {history.length === 0 && (
-        <div className="card p-8 text-center text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm text-center py-8" style={{ color: "var(--text-muted)" }}>
           Nessuna partita pubblicata ancora.
-        </div>
+        </p>
       )}
+
     </div>
   );
 }
