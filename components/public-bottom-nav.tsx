@@ -30,7 +30,30 @@ const GV_MORE = [
 // CSS filter che converte black → var(--text-primary) #09144C
 const FILTER_PRIMARY = "invert(9%) sepia(50%) saturate(1800%) hue-rotate(210deg) brightness(55%) contrast(110%)";
 
-function NavIcon({ src, active, color = "primary" }: { src: string; active: boolean; color?: "primary" | "gv" }) {
+function NavIcon({ src, active, tint }: { src: string; active: boolean; tint?: string }) {
+  // Volley (tint): ricolora via mask → colore esatto su qualsiasi SVG (base black o navy)
+  if (tint) {
+    return (
+      <span
+        aria-hidden
+        style={{
+          display: "inline-block",
+          width: 24,
+          height: 24,
+          backgroundColor: active ? tint : "rgba(0,0,0,0.45)",
+          WebkitMaskImage: `url(${src})`,
+          maskImage: `url(${src})`,
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+        }}
+      />
+    );
+  }
+  // Calcio: ricolora black → navy via filtro
   return (
     <img
       src={src}
@@ -38,7 +61,7 @@ function NavIcon({ src, active, color = "primary" }: { src: string; active: bool
       height={24}
       alt=""
       style={{
-        filter: active ? (color === "gv" ? "invert(48%) sepia(95%) saturate(500%) hue-rotate(76deg) brightness(105%)" : FILTER_PRIMARY) : "none",
+        filter: active ? FILTER_PRIMARY : "none",
         opacity: active ? 1 : 0.45,
       }}
     />
@@ -76,10 +99,10 @@ export default function PublicBottomNav() {
   // ─── GreenVolley ────────────────────────────────────────────────────────────
   if (isGV) {
     const GV_MAIN = [
-      { href: "/greenvolley",            label: "Home",      icon: "pi-home"     },
-      { href: "/greenvolley/partite",    label: "Partite",   icon: "pi-calendar" },
-      { href: "/greenvolley/classifica", label: "Classifica",icon: "pi-list"     },
-      { href: "/greenvolley/squadre",    label: "Squadre",   icon: "pi-shield"   },
+      { href: "/greenvolley",            label: "Home",      icon: "home"           },
+      { href: "/greenvolley/partite",    label: "Partite",   icon: "football_field" },
+      { href: "/greenvolley/classifica", label: "Classifica",icon: "table"          },
+      { href: "/greenvolley/squadre",    label: "Squadre",   icon: "shield-star"    },
     ] as const;
     const moreIsActive = GV_MORE.some((item) => isActive(item.href));
 
@@ -89,7 +112,7 @@ export default function PublicBottomNav() {
           <div className="fixed inset-0 z-40 md:hidden" style={{ background: "rgba(6,7,61,0.3)" }} onClick={() => setMoreOpen(false)} />
         )}
         {moreOpen && (
-          <div className="fixed bottom-16 left-0 right-0 z-50 rounded-t-2xl md:hidden" style={{ background: "#fff", borderTop: `2px solid ${GV}`, boxShadow: "0 -4px 24px rgba(0,0,0,0.12)" }}>
+          <div className="fixed bottom-16 left-0 right-0 z-50 rounded-t-2xl md:hidden" style={{ background: "#fff", borderTop: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 -4px 24px rgba(0,0,0,0.12)" }}>
             <div className="flex items-center justify-between px-4 pt-3 pb-1">
               <span className="text-xs font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>ALTRO</span>
               <Button icon="pi pi-times" text type="button" onClick={() => setMoreOpen(false)} className="p-1!" style={{ color: "var(--text-muted)" }} aria-label="Chiudi" />
@@ -109,19 +132,19 @@ export default function PublicBottomNav() {
             </div>
           </div>
         )}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ ...NAV_STYLE, borderTop: `2px solid ${GV}` }}>
-          <div className="flex h-16 px-1">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={NAV_STYLE}>
+          <div className="flex px-1 py-2.5">
             {GV_MAIN.map((item) => {
               const active = isActive(item.href);
               return (
                 <Link key={item.href} href={item.href} className="flex flex-1 flex-col items-center justify-center gap-1.5 px-2 py-1">
-                  <i className={`pi ${item.icon} text-2xl`} style={navItemStyle(active, GV)} />
+                  <NavIcon src={`/icons/${item.icon}.svg`} active={active} tint={GV} />
                   <span className="text-[10px] text-center" style={navItemStyle(active, GV)}>{item.label}</span>
                 </Link>
               );
             })}
             <Button unstyled type="button" onClick={() => setMoreOpen((v) => !v)} className="flex flex-1 flex-col items-center justify-center gap-1.5 px-2 py-1">
-              <i className="pi pi-ellipsis-h text-2xl" style={navItemStyle(moreIsActive || moreOpen, GV)} />
+              <NavIcon src="/icons/more.svg" active={moreIsActive || moreOpen} tint={GV} />
               <span className="text-[10px]" style={navItemStyle(moreIsActive || moreOpen, GV)}>Altro</span>
             </Button>
           </div>
