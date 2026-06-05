@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "primereact/button";
 
-const GV = "#3DD907";
-const GV_LIGHT = "#f0fde7";
+const GV = "#15803D";                    // verde profondo: stati attivi nav volley
+const GV_LIGHT = "rgba(21,128,61,0.10)"; // tint verde per sfondo link attivo
 const PRIMARY = "var(--text-primary)";
 
 const DCUP_MORE = [
