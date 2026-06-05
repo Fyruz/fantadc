@@ -29,28 +29,6 @@ export default async function AltroPage() {
 
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto">
-      <div
-        className="flex items-center gap-2 rounded-full p-1"
-        style={{ background: "var(--surface-1)" }}
-      >
-        <Link
-          href="/"
-          className="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold text-white"
-          style={{ background: "#09144C" }}
-        >
-          <img src="/icons/dcup.svg" width={23} height={24} alt="" />
-          <span>DCup</span>
-        </Link>
-        <Link
-          href="/greenvolley"
-          className="flex flex-1 items-center justify-center gap-2 rounded-full px-3 py-2 text-xs font-semibold"
-          style={{ color: "var(--text-muted)" }}
-        >
-          <img src="/icons/green_volley.svg" width={27} height={24} alt="" />
-          <span>Green Volley</span>
-        </Link>
-      </div>
-
       {/* Competizione */}
       <Section label="Competizione">
         <Item icon={<img src="/icons/shield-star.svg" width={18} height={18} alt="" />} label="Squadre" href="/squadre" />
