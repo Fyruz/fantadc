@@ -10,9 +10,16 @@ interface Props {
   onHide: () => void;
   onConfirm: (password: string) => Promise<{ error?: string }>;
   description: string;
+  requirePassword?: boolean;
 }
 
-export default function DeleteAccountDialog({ visible, onHide, onConfirm, description }: Props) {
+export default function DeleteAccountDialog({
+  visible,
+  onHide,
+  onConfirm,
+  description,
+  requirePassword = true,
+}: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -25,7 +32,7 @@ export default function DeleteAccountDialog({ visible, onHide, onConfirm, descri
   };
 
   const handleConfirm = async () => {
-    if (!password) { setError("Inserisci la password."); return; }
+    if (requirePassword && !password) { setError("Inserisci la password."); return; }
     setPending(true);
     setError(null);
     const result = await onConfirm(password);
@@ -71,31 +78,36 @@ export default function DeleteAccountDialog({ visible, onHide, onConfirm, descri
           </div>
         </div>
 
-        {/* Password field */}
-        <div>
-          <label
-            className="block text-xs font-bold uppercase tracking-wide mb-1.5"
-            style={{ color: "var(--text-muted)" }}
-          >
-            Conferma con la tua password
-          </label>
-          <Password
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            feedback={false}
-            toggleMask
-            className="w-full"
-            inputClassName="w-full"
-            placeholder="••••••••"
-            autoComplete="current-password"
-            disabled={pending}
-          />
-          {error && (
-            <p className="text-xs mt-1.5" style={{ color: "#DC2626" }}>
-              {error}
-            </p>
-          )}
-        </div>
+        {requirePassword ? (
+          <div>
+            <label
+              className="block text-xs font-bold uppercase tracking-wide mb-1.5"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Conferma con la tua password
+            </label>
+            <Password
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              feedback={false}
+              toggleMask
+              className="w-full"
+              inputClassName="w-full"
+              placeholder="••••••••"
+              autoComplete="current-password"
+              disabled={pending}
+            />
+            {error && (
+              <p className="text-xs mt-1.5" style={{ color: "#DC2626" }}>
+                {error}
+              </p>
+            )}
+          </div>
+        ) : error ? (
+          <p className="text-xs text-center" style={{ color: "#DC2626" }}>
+            {error}
+          </p>
+        ) : null}
 
         {/* Actions */}
         <div className="flex gap-3">

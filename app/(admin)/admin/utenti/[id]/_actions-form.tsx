@@ -33,10 +33,9 @@ export default function UserActionsForm({
 
   const hide = () => setDialog((d) => ({ ...d, visible: false }));
 
-  const handleDeleteConfirm = async (password: string) => {
+  const handleDeleteConfirm = async () => {
     const fd = new FormData();
     fd.append("userId", String(userId));
-    fd.append("password", password);
     const result = await adminDeleteUser(undefined, fd);
     if (result.error) return { error: result.error };
     router.push("/admin/utenti");
@@ -58,7 +57,8 @@ export default function UserActionsForm({
         visible={deleteVisible}
         onHide={() => setDeleteVisible(false)}
         onConfirm={handleDeleteConfirm}
-        description={`Eliminare definitivamente l'account di ${userEmail}? Inserisci la tua password admin per confermare. Questa azione è irreversibile.`}
+        description={`Eliminare definitivamente l'account di ${userEmail}? Questa azione è irreversibile.`}
+        requirePassword={false}
       />
 
       {/* Promozione / Retrocessione ruolo */}
