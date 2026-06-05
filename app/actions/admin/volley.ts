@@ -6,6 +6,16 @@ import { redirect } from "next/navigation";
 
 type ActionResult = { error?: string } | undefined;
 
+function parseVolleyMatchDate(value: string | null) {
+  if (!value) return null;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+
+  date.setHours(date.getHours() + 2);
+  return date;
+}
+
 // ─── SQUADRE ──────────────────────────────────────────────────────────────────
 
 export async function createVolleyTeam(
@@ -89,7 +99,7 @@ export async function createVolleyMatch(
     data: {
       homeTeamId,
       awayTeamId,
-      date: dateRaw ? new Date(dateRaw) : null,
+      date: parseVolleyMatchDate(dateRaw),
       groupId,
       knockoutRoundId,
     },
@@ -117,7 +127,7 @@ export async function updateVolleyMatch(
     data: {
       homeTeamId,
       awayTeamId,
-      date: dateRaw ? new Date(dateRaw) : null,
+      date: parseVolleyMatchDate(dateRaw),
       groupId,
       knockoutRoundId,
     },
