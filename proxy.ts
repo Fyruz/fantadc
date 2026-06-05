@@ -3,23 +3,6 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { UserRole } from "@prisma/client";
 
-const DESKTOP_UNAVAILABLE_PATH = "/desktop-unavailable";
-
-function isLikelyDesktopRequest(req: NextRequest) {
-  if (req.method !== "GET" && req.method !== "HEAD") {
-    return false;
-  }
-
-  const userAgent = req.headers.get("user-agent") ?? "";
-  const mobileHint = req.headers.get("sec-ch-ua-mobile");
-
-  if (mobileHint === "?1") {
-    return false;
-  }
-
-  return !/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(userAgent);
-}
-
 export const proxy = auth(
   (
     req: NextRequest & {
@@ -30,14 +13,6 @@ export const proxy = auth(
     const session = req.auth;
     const isAuthenticated = !!session?.user?.id;
     const isAdmin = session?.user?.role === UserRole.ADMIN;
-
-    if (
-      pathname !== DESKTOP_UNAVAILABLE_PATH &&
-      !pathname.startsWith("/admin") &&
-      isLikelyDesktopRequest(req)
-    ) {
-      return NextResponse.rewrite(new URL(DESKTOP_UNAVAILABLE_PATH, req.url));
-    }
 
     // Protezione area admin
     if (pathname.startsWith("/admin")) {
@@ -72,7 +47,6 @@ export const proxy = auth(
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|.*\\..*).*)",
     "/admin/:path*",
     "/dashboard/:path*",
     "/squadra/:path*",
