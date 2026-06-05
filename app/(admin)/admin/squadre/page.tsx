@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import SquadreTable from "./_table";
 import AdminPageHeader from "@/components/admin-page-header";
+export const dynamic = 'force-dynamic'
+
 
 export default async function SquadrePage() {
   const teams = await db.footballTeam.findMany({

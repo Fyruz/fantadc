@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import AdminPageHeader from "@/components/admin-page-header";
 import AuditTable from "./_table";
+export const dynamic = 'force-dynamic'
+
 
 export default async function AuditPage() {
   const logs = await db.adminAuditLog.findMany({

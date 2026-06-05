@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import PartiteClient from "./_partite-client";
+export const dynamic = 'force-dynamic'
+
 
 export default async function PartitePublicPage() {
   const [matches, groups] = await Promise.all([

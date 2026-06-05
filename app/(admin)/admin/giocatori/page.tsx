@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import GiocatoriTable from "./_table";
 import AdminPageHeader from "@/components/admin-page-header";
+export const dynamic = 'force-dynamic'
+
 
 export default async function GiocatoriPage() {
   const players = await db.player.findMany({

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import PlayersGrid from "./_players-grid";
+export const dynamic = 'force-dynamic'
+
 
 export default async function GiocatoriPublicPage() {
   const [players, appearances, goals, bonuses] = await Promise.all([

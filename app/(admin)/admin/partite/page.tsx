@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import PartiteTable from "./_table";
 import AdminPageHeader from "@/components/admin-page-header";
+export const dynamic = 'force-dynamic'
+
 
 export default async function PartitePage() {
   const matches = await db.match.findMany({

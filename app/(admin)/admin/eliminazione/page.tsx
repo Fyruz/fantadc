@@ -2,6 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import AdminPageHeader from "@/components/admin-page-header";
 import { InitBracketForm, DeleteBracketForm, AssignTeamsForm } from "./_actions";
+export const dynamic = 'force-dynamic'
+
 
 export default async function EliminazioneAdminPage() {
   const [rounds, qualifiedTeams] = await Promise.all([

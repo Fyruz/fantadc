@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
+export const dynamic = 'force-dynamic'
+
 
 export default async function SquadrePublicPage() {
   const teams = await db.footballTeam.findMany({

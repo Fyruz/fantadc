@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { computeRankings } from "@/lib/scoring";
 import { getCurrentUser } from "@/lib/session";
+export const dynamic = 'force-dynamic'
+
 
 export const revalidate = 60;
 

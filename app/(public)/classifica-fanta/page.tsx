@@ -1,5 +1,7 @@
 import { computeRankings } from "@/lib/scoring";
 import ClassificaTable from "@/app/(public)/classifica/_table";
+export const dynamic = 'force-dynamic'
+
 
 export const revalidate = 60;
 
