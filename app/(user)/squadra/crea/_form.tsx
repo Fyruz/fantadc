@@ -470,9 +470,9 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         onHide={() => setConfirmVisible(false)}
         closable={false}
         dismissableMask
-        style={{ width: "300px" }}
+        style={{ width: "min(26rem, 94vw)" }}
         pt={{
-          root: { style: { borderRadius: "16px", overflow: "hidden" } },
+          root: { style: { borderRadius: "24px", overflow: "hidden" } },
           header: { className: "!hidden" },
           content: { className: "!p-0" },
         }}
@@ -480,38 +480,100 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
         draggable={false}
         resizable={false}
       >
-        <div className="p-5">
-          <div className="mb-3 flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50">
-              <i className="pi pi-exclamation-triangle text-lg text-amber-600" />
-            </div>
-            <div className="text-base font-bold text-[var(--text-primary)]">
-              Conferma squadra
+        <div>
+          <div
+            className="relative overflow-hidden px-5 pb-5 pt-6 text-white"
+            style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)" }}
+          >
+            <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full border border-white/10" />
+            <div className="pointer-events-none absolute -bottom-10 right-8 h-24 w-24 rounded-full border border-white/5" />
+            <div className="relative flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl" style={{ background: "rgba(232,160,0,0.18)", border: "1px solid rgba(232,160,0,0.45)" }}>
+                <i className="pi pi-lock text-lg" style={{ color: "#E8A000" }} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-[10px] font-black uppercase tracking-[2px] text-white/55">
+                  Conferma definitiva
+                </div>
+                <h2 className="mt-1 font-display text-2xl font-black uppercase leading-none">
+                  {teamName.trim() || "La tua squadra"}
+                </h2>
+                <p className="mt-2 text-xs leading-relaxed text-white/65">
+                  Dopo la conferma la rosa sarà bloccata e potrà essere modificata solo da un admin.
+                </p>
+              </div>
             </div>
           </div>
-          <p className="mb-5 text-sm leading-relaxed text-[var(--text-secondary)]">
-            Una volta confermata, la tua squadra{" "}
-            <strong className="text-[var(--text-primary)]">
-              non potrà più essere modificata
-            </strong>
-            . Vuoi procedere?
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              label="Annulla"
-              outlined
-              className="flex-1"
-              disabled={pending}
-              onClick={() => setConfirmVisible(false)}
-            />
-            <Button
-              type="button"
-              label={pending ? "Salvo..." : "Sì, conferma"}
-              className="flex-1"
-              disabled={pending}
-              onClick={handleConfirm}
-            />
+
+          <div className="space-y-4 p-5">
+            <div className="rounded-2xl border border-[var(--border-soft)] bg-[var(--surface-1)] px-4 py-3">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <span className="text-[10px] font-black uppercase tracking-[1.5px]" style={{ color: "var(--text-muted)" }}>
+                  Rosa selezionata
+                </span>
+                <span className="shrink-0 rounded-full px-2 py-1 text-[10px] font-black" style={{ background: "rgba(1,7,163,0.08)", color: "var(--primary)" }}>
+                  {selectedPlayers.length}/5
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                {selectedPlayers.map((player) => {
+                  const isCaptain = player.id === captainId;
+                  return (
+                    <div key={player.id} className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[9px] font-black"
+                        style={{
+                          background: player.role === "P" ? "rgba(232,160,0,0.16)" : "rgba(1,7,163,0.08)",
+                          color: player.role === "P" ? "#B77900" : "var(--primary)",
+                        }}
+                      >
+                        {player.role === "P" ? "P" : "A"}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex min-w-0 items-center gap-1.5">
+                          {isCaptain && <span className="shrink-0 text-[10px]" style={{ color: "#E8A000" }}>★</span>}
+                          <span className="truncate text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+                            {player.name}
+                          </span>
+                        </div>
+                        <div className="truncate text-[11px]" style={{ color: "var(--text-muted)" }}>
+                          {player.footballTeam.shortName ?? player.footballTeam.name}
+                        </div>
+                      </div>
+                      {isCaptain && (
+                        <span className="shrink-0 rounded-full px-2 py-1 text-[9px] font-black uppercase" style={{ background: "rgba(232,160,0,0.14)", color: "#B77900" }}>
+                          Capitano
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed" style={{ background: "rgba(232,160,0,0.10)", color: "var(--text-secondary)" }}>
+              Controlla bene nomi, squadre e capitano. Questa scelta diventa definitiva appena premi conferma.
+            </div>
+
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <Button
+                type="button"
+                label="Annulla"
+                outlined
+                className="w-full sm:flex-1"
+                disabled={pending}
+                onClick={() => setConfirmVisible(false)}
+              />
+              <Button
+                type="button"
+                label={pending ? "Salvo..." : "Conferma squadra"}
+                icon={pending ? "pi pi-spin pi-spinner" : "pi pi-check"}
+                className="w-full sm:flex-1"
+                disabled={pending}
+                onClick={handleConfirm}
+                style={{ background: "#E8A000", borderColor: "#E8A000", color: "#06073D" }}
+              />
+            </div>
           </div>
         </div>
       </Dialog>
