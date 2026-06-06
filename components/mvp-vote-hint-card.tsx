@@ -69,7 +69,12 @@ export default function MvpVoteHintCard() {
           Dopo ogni partita hai <strong>2 ore</strong> per votare il tuo giocatore preferito della
           partita: l&apos;MVP riceve un bonus di punti fanta!
         </p>
-        <Button label="Ho capito" onClick={dismiss} className="self-start" />
+        <Button
+          label="Ho capito"
+          onClick={dismiss}
+          className="self-start rounded-full font-black text-xs uppercase tracking-wide px-4 py-2"
+          style={{ background: "var(--primary)", color: "#fff" }}
+        />
       </div>
     </section>
   );
