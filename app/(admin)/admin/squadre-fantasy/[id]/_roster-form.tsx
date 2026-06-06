@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { adminUpdateFantasyRoster } from "@/app/actions/admin/fantasy-teams";
 import RoleBadge from "@/components/role-badge";
@@ -11,11 +12,13 @@ type Player = { id: number; name: string; role: string; footballTeam: { name: st
 
 export default function RosterForm({
   fantasyTeamId,
+  name,
   currentPlayerIds,
   captainPlayerId,
   allPlayers,
 }: {
   fantasyTeamId: number;
+  name: string;
   currentPlayerIds: number[];
   captainPlayerId: number;
   allPlayers: Player[];
@@ -31,6 +34,14 @@ export default function RosterForm({
   return (
     <form action={action} className="flex flex-col gap-6">
       <input type="hidden" name="fantasyTeamId" value={fantasyTeamId} />
+
+      <div>
+        <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">Nome squadra *</label>
+        <InputText name="name" defaultValue={name} maxLength={40} className="w-full max-w-sm" />
+        {state?.errors?.name && (
+          <p className="text-red-500 text-xs mt-1">{state.errors.name[0]}</p>
+        )}
+      </div>
 
       <div>
         <label className="block text-xs font-medium text-[var(--text-secondary)] mb-2">

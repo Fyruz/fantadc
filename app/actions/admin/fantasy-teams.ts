@@ -6,11 +6,13 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import { validateRoster } from "@/lib/domain/roster";
+import { fantasyTeamNameSchema } from "@/lib/domain/fantasy-team";
 import type { ActionResult } from "./football-teams";
 import { PlayerRole } from "@prisma/client";
 
 const UpdateRosterSchema = z.object({
   fantasyTeamId: z.coerce.number().int().positive(),
+  name: fantasyTeamNameSchema,
   captainPlayerId: z.coerce.number().int().positive("Capitano obbligatorio"),
   playerIds: z.array(z.coerce.number().int().positive()).length(5, "Servono esattamente 5 giocatori"),
 });
@@ -21,12 +23,13 @@ export async function adminUpdateFantasyRoster(_prev: ActionResult | undefined, 
   const rawPlayerIds = formData.getAll("playerIds").map(Number);
   const parsed = UpdateRosterSchema.safeParse({
     fantasyTeamId: formData.get("fantasyTeamId"),
+    name: formData.get("name"),
     captainPlayerId: formData.get("captainPlayerId"),
     playerIds: rawPlayerIds,
   });
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
 
-  const { fantasyTeamId, captainPlayerId, playerIds } = parsed.data;
+  const { fantasyTeamId, name, captainPlayerId, playerIds } = parsed.data;
 
   // Carica i player per validazione
   const players = await db.player.findMany({
@@ -50,10 +53,10 @@ export async function adminUpdateFantasyRoster(_prev: ActionResult | undefined, 
   await db.$transaction([
     db.fantasyTeamPlayer.deleteMany({ where: { fantasyTeamId } }),
     db.fantasyTeamPlayer.createMany({ data: playerIds.map((playerId) => ({ fantasyTeamId, playerId })) }),
-    db.fantasyTeam.update({ where: { id: fantasyTeamId }, data: { captainPlayerId } }),
+    db.fantasyTeam.update({ where: { id: fantasyTeamId }, data: { name, captainPlayerId } }),
   ]);
 
-  await logAdminAction(Number(admin.id), "UPDATE_ROSTER", "FantasyTeam", fantasyTeamId, before, { captainPlayerId, playerIds });
+  await logAdminAction(Number(admin.id), "UPDATE_ROSTER", "FantasyTeam", fantasyTeamId, before, { name, captainPlayerId, playerIds });
 
   revalidatePath(`/admin/squadre-fantasy/${fantasyTeamId}`);
   return { message: "Rosa aggiornata." };

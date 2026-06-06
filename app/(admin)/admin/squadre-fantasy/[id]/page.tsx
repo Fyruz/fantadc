@@ -43,6 +43,7 @@ export default async function SquadraFantasyDetailPage({ params }: { params: Pro
 
       <RosterForm
         fantasyTeamId={fantasyTeamId}
+        name={fantasyTeam.name}
         currentPlayerIds={currentPlayerIds}
         captainPlayerId={fantasyTeam.captainPlayerId}
         allPlayers={allPlayers}

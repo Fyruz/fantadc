@@ -6,20 +6,14 @@ import { PlayerRole } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { validateRoster } from "@/lib/domain/roster";
+import { fantasyTeamNameSchema } from "@/lib/domain/fantasy-team";
 
 export type CreateTeamResult =
   | { success: true; teamId: number }
   | { success: false; errors?: Record<string, string[]>; message?: string };
 
 const Schema = z.object({
-  name: z
-    .string()
-    .min(1, "Nome obbligatorio")
-    .max(40, "Max 40 caratteri")
-    .trim()
-    .refine((n) => !/\b(merda|cazzo|vaffanculo|stronzo|puttana)\b/i.test(n), {
-      message: "Il nome contiene parole non consentite.",
-    }),
+  name: fantasyTeamNameSchema,
   captainPlayerId: z.coerce.number().int().positive("Capitano obbligatorio"),
   playerIds: z
     .array(z.coerce.number().int().positive())
