@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button } from "primereact/button";
 
 const VISITS_KEY = "fdc:mvpHint:visits";
 const DISMISSED_KEY = "fdc:mvpHint:dismissed";
@@ -66,15 +65,17 @@ export default function MvpVoteHintCard() {
           </p>
         </div>
         <p className="text-sm text-black font-normal">
-          Dopo ogni partita hai <strong>2 ore</strong> per votare il tuo giocatore preferito della
+          Dopo ogni partita hai <strong>2 ore </strong> per votare il tuo giocatore preferito della
           partita: l&apos;MVP riceve un bonus di punti fanta!
         </p>
-        <Button
-          label="Ho capito"
+        <button
+          type="button"
           onClick={dismiss}
-          className="self-start rounded-full font-black text-xs uppercase tracking-wide px-4 py-2"
-          style={{ background: "var(--primary)", color: "#fff" }}
-        />
+          className="flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white"
+          style={{ background: "var(--text-primary)" }}
+        >
+          Ho capito
+        </button>
       </div>
     </section>
   );
