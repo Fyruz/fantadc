@@ -66,7 +66,7 @@ export default function ShareStoryButton({
       <Button
         type="button"
         icon={loading ? "pi pi-spin pi-spinner" : "pi pi-instagram"}
-        label={loading ? "Genero la story..." : "Condividi story"}
+        label={loading ? "Genero la story..." : "Condividi su Instagram"}
         disabled={loading}
         onClick={handleShare}
         className="w-full justify-center rounded-2xl text-xs font-black uppercase tracking-wide"
