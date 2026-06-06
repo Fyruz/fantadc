@@ -21,9 +21,8 @@ function RegisterForm() {
   const [state, action, pending] = useActionState(register, undefined);
   const searchParams = useSearchParams();
   const isGV = searchParams.get("from") === "greenvolley";
-  const [name, setName]         = useState("");
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
+  const [name, setName]   = useState("");
+  const [email, setEmail] = useState("");
 
   return (
     <div className={`flex-1 flex flex-col px-4 py-6${isGV ? " gv-theme" : ""}`}>
@@ -93,16 +92,14 @@ function RegisterForm() {
                   Password{" "}
                   <span className="font-normal normal-case tracking-normal" style={{ color: "var(--text-disabled)" }}>(min. 8 caratteri)</span>
                 </label>
-                <input type="hidden" name="password" value={password} />
                 <Password
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
+                  autoComplete="new-password"
                   feedback={false}
                   toggleMask
                   className="w-full"
                   inputClassName="w-full"
                   placeholder="••••••••"
-                  autoComplete="new-password"
                 />
                 {state?.errors?.password && (
                   <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{state.errors.password[0]}</p>

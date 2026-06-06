@@ -12,8 +12,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const next = searchParams.get("next") ?? "";
   const registered = searchParams.get("registered") === "1";
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
 
   return (
     <>
@@ -44,19 +43,18 @@ export default function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="password">
+          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="login-password">
             Password
           </label>
-          <input type="hidden" name="password" value={password} />
           <Password
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            inputId="login-password"
+            name="password"
+            autoComplete="current-password"
             feedback={false}
             toggleMask
             className="w-full"
             inputClassName="w-full"
             placeholder="••••••••"
-            autoComplete="current-password"
           />
         </div>
 
@@ -72,6 +70,19 @@ export default function LoginForm() {
         >
           {pending ? "Accesso in corso..." : "Accedi"}
         </button>
+
+        <p className="text-xs text-center leading-5" style={{ color: "var(--text-disabled)" }}>
+          Password dimenticata? Per cambiarla scrivi agli amministratori sulla{" "}
+          <a
+            href="https://www.instagram.com/danimarcas_cup/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline"
+          >
+            pagina Instagram ufficiale
+          </a>{" "}
+          di Danimarcas Cup.
+        </p>
       </form>
     </>
   );
