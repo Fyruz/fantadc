@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import MobileOnlyGate from "@/components/mobile-only-gate";
+import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 
@@ -247,6 +248,9 @@ export default async function HomePage({
             </svg>
           </div>
         </section> */}
+
+        {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
+        <MvpVoteHintCard />
 
         {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
         {upcomingMatches.length > 0 && (
