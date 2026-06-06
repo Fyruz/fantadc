@@ -41,7 +41,7 @@ export default async function ClassificaMarcatoriPage() {
     .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name, "it"));
 
   return (
-    <div className="flex flex-col gap-10 pb-10">
+    <div className="flex flex-col gap-10">
       {/* Header mobile */}
       <div className="md:hidden flex items-center justify-between h-12">
         <div className="flex-1 flex items-center">

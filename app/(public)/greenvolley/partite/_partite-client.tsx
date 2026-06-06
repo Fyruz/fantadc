@@ -117,7 +117,7 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
       </div>
 
       {tab === "calendario" ? (
-        <div className="flex flex-col gap-10 pt-6 pb-10">
+        <div className="flex flex-col gap-10 pt-6">
           {/* Day filter pills */}
           {days.length > 1 && (
             <div className="-mx-4 px-4 flex gap-4 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
@@ -160,7 +160,7 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
           )}
         </div>
       ) : (
-        <div className="flex flex-col gap-6 py-10">
+        <div className="flex flex-col gap-6 pt-10">
           {groups.length === 0 && (
             <p className="text-sm text-center" style={{ color: "rgba(0,0,0,0.4)" }}>Nessun girone disponibile.</p>
           )}

@@ -40,7 +40,7 @@ export default async function SquadrePublicPage() {
               <Link
                 key={team.id}
                 href={`/squadre/${team.id}`}
-                className="flex flex-col items-center gap-3 rounded-2xl p-2 transition-colors hover:bg-[var(--surface-1)]"
+                className="flex flex-col items-center gap-3 transition-colors hover:bg-[var(--surface-1)]"
               >
                 <div className="w-16 h-16 flex items-center justify-center p-1 overflow-hidden shrink-0">
                   {flagSrc ? (

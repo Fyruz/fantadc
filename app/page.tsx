@@ -111,7 +111,7 @@ export default async function HomePage({
       <div className="min-h-screen flex flex-col" style={{ background: "#F5F6FF" }}>
         <PublicNav />
 
-        <main className="flex-1 pb-24 md:pb-0">
+        <main className="flex-1 pb-34 md:pb-0">
 
         {/* ══ TOAST ACCOUNT ELIMINATO ═══════════════════════════════ */}
         {accountDeleted && (
@@ -460,7 +460,7 @@ export default async function HomePage({
 
         {/* ══ MARCATORI ════════════════════════════════════════════ */}
         {topScorers.length > 0 && (
-          <section className="max-w-lg mx-auto px-4 pb-10">
+          <section className="max-w-lg mx-auto px-4">
             <div
               className="bg-white rounded-3xl overflow-hidden"
               style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}

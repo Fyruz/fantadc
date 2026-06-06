@@ -52,7 +52,7 @@ export default function VolleyAltroPage() {
       </div>
 
       {/* Qursor */}
-      <div className="flex flex-col gap-3 items-center pb-4">
+      <div className="flex flex-col gap-3 items-center">
         <span className="text-xs text-center" style={{ color: "rgba(0,0,0,0.65)" }}>App ufficiale presentata da</span>
         <a href="https://qursor.it/" target="_blank" rel="noopener noreferrer">
           <img src="/images/qursor.svg" height={12} alt="Qursor" style={{ height: 12, width: "auto" }} />

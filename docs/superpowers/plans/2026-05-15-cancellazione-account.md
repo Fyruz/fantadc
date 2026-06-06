@@ -348,7 +348,7 @@ export default async function HomePage({
   // ... rest of existing code
 ```
 
-- [ ] Aggiungere il banner subito dopo `<main className="flex-1 pb-24 md:pb-0">`, prima della sezione HERO:
+- [ ] Aggiungere il banner subito dopo `<main className="flex-1 pb-34 md:pb-0">`, prima della sezione HERO:
 
 ```tsx
 {accountDeleted && (
