@@ -20,12 +20,27 @@ function isMobileUserAgent(navigatorRef: NavigatorWithUserAgentData) {
   return /Macintosh/i.test(ua) && navigatorRef.maxTouchPoints > 1;
 }
 
+function isTouchPrimaryDevice() {
+  // Telefoni e tablet restano touch-primary anche con "sito desktop" attivo
+  // (puntatore grossolano / nessun hover); un PC ha pointer:fine e hover:hover.
+  return (
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.matchMedia("(hover: none)").matches
+  );
+}
+
 function shouldShowDesktopService() {
   if (typeof window === "undefined") return false;
 
   const navigatorRef = window.navigator as NavigatorWithUserAgentData;
+
+  // 1) User-agent riconosciuto come mobile → consenti l'app
   if (isMobileUserAgent(navigatorRef)) return false;
 
+  // 2) Dispositivo touch-primary (telefono/tablet, anche in modalita "sito desktop") → consenti
+  if (isTouchPrimaryDevice()) return false;
+
+  // 3) Altrimenti e desktop solo se il viewport e ampio
   return window.matchMedia("(min-width: 768px)").matches;
 }
 
