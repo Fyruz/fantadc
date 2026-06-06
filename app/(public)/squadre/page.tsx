@@ -33,7 +33,7 @@ export default async function SquadrePublicPage() {
           Nessuna squadra presente.
         </p>
       ) : (
-        <div className="grid grid-cols-4 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-4 gap-x-5 gap-y-10">
           {teams.map((team) => {
             const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
             return (
