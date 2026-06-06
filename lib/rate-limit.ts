@@ -1,19 +1,5 @@
 import { RateLimiterMemory } from "rate-limiter-flexible";
 
-// Registrazione: max 5 tentativi per IP all'ora
-export const registerLimiter = new RateLimiterMemory({
-  points: 5,
-  duration: 3600,
-  blockDuration: 3600,
-});
-
-// Login: max 10 tentativi per IP ogni 15 minuti
-export const loginLimiter = new RateLimiterMemory({
-  points: 10,
-  duration: 900,
-  blockDuration: 900,
-});
-
 // Voto MVP: max 5 tentativi per utente all'ora (la unicità reale è sul DB)
 export const voteLimiter = new RateLimiterMemory({
   points: 5,

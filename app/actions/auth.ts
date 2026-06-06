@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -12,11 +11,6 @@ import {
   resolvePostAuthRedirect,
   sanitizeNextPath,
 } from "@/lib/post-auth";
-import {
-  registerLimiter,
-  loginLimiter,
-  checkRateLimit,
-} from "@/lib/rate-limit";
 import { RegisterSchema, LoginSchema } from "@/lib/auth-schemas";
 
 export type AuthActionResult = {
@@ -30,16 +24,6 @@ export async function register(
   _prev: AuthActionResult | undefined,
   formData: FormData
 ): Promise<AuthActionResult> {
-  const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip") ?? "unknown";
-
-  const { limited, retryAfter } = await checkRateLimit(registerLimiter, ip);
-  if (limited) {
-    return {
-      message: `Troppi tentativi. Riprova tra ${retryAfter} secondi.`,
-    };
-  }
-
   const parsed = RegisterSchema.safeParse({
     name: formData.get("name") ?? "",
     email: formData.get("email") ?? "",
@@ -103,16 +87,6 @@ export async function login(
   _prev: AuthActionResult | undefined,
   formData: FormData
 ): Promise<AuthActionResult> {
-  const hdrs = await headers();
-  const ip = hdrs.get("x-forwarded-for") ?? hdrs.get("x-real-ip") ?? "unknown";
-
-  const { limited, retryAfter } = await checkRateLimit(loginLimiter, ip);
-  if (limited) {
-    return {
-      message: `Troppi tentativi. Riprova tra ${retryAfter} secondi.`,
-    };
-  }
-
   const parsed = LoginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
