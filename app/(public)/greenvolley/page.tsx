@@ -94,7 +94,7 @@ export default async function GreenVolleyHomePage() {
 
       {/* Classifiche rapide per girone */}
       {groups.length > 0 && (
-        <div className="my-10">
+        <div className="">
           <div className="flex items-center justify-between mb-6">
             <h2
               className="uppercase text-xl font-medium text-(--text-primary)"
@@ -112,7 +112,7 @@ export default async function GreenVolleyHomePage() {
           </div>
 
           <div
-            className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-3 md:grid md:grid-cols-2 md:overflow-visible md:mx-0 md:px-0"
+            className="flex gap-4 overflow-x-auto -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible md:mx-0 md:px-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
           >
             {groups.map((group) => {
