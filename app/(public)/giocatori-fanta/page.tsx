@@ -4,22 +4,6 @@ import { getFlagUrlFromCountryCode } from "@/lib/flags";
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-type PlayerPickRow = {
-  rank: number;
-  playerId: number;
-  playerName: string;
-  role: string;
-  footballTeamName: string;
-  footballTeamShortName: string | null;
-  flagSrc: string | null;
-  pickCount: number;
-  pickRate: number;
-};
-
-function formatPercent(value: number) {
-  return `${value.toFixed(0)}%`;
-}
-
 export default async function GiocatoriFantaPage() {
   const [players, totalFantasyTeams] = await Promise.all([
     db.player.findMany({
@@ -33,7 +17,7 @@ export default async function GiocatoriFantaPage() {
     db.fantasyTeam.count(),
   ]);
 
-  const rows: PlayerPickRow[] = players
+  const rows = players
     .map((player) => {
       const pickCount = player._count.fantasyTeams;
       return {
@@ -57,117 +41,70 @@ export default async function GiocatoriFantaPage() {
     )
     .map((row, index) => ({ ...row, rank: index + 1 }));
 
+  if (rows.length === 0) {
+    return (
+      <p className="text-sm text-center py-12" style={{ color: "var(--text-muted)" }}>
+        Nessuna squadra fanta registrata.
+      </p>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <div className="over-label mb-1">Stagione 2026</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          PIU PRESI AL FANTA
-        </h1>
+    <div className="flex flex-col gap-3">
+      {/* Column headers */}
+      <div
+        className="flex items-center justify-between pb-3"
+        style={{ borderBottom: "1px solid rgba(9,20,76,0.1)" }}
+      >
+        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>Rank</span>
+        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>Preso</span>
       </div>
 
-      {rows.length === 0 ? (
-        <div className="card p-10 text-center over-label">Nessuna squadra fanta registrata.</div>
-      ) : (
-        <div className="card overflow-hidden">
+      {/* Rows */}
+      <div className="flex flex-col">
+        {rows.map((row, idx) => (
           <div
-            className="flex items-center gap-2 px-4 py-2.5"
-            style={{ borderBottom: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
+            key={row.playerId}
+            className="flex gap-4 items-center py-3 transition-colors hover:bg-(--surface-1)"
+            style={{
+              borderBottom: idx < rows.length - 1 ? "1px solid rgba(0,0,0,0.05)" : undefined,
+              paddingLeft: 8,
+              borderLeft: "2px solid transparent",
+            }}
           >
-            <span className="w-7 flex-shrink-0" />
-            <span className="flex-1 text-[10px] font-black uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
-              Giocatore
-            </span>
-            <div
-              className="flex flex-shrink-0 items-center gap-3 text-right text-[10px] font-black uppercase tracking-widest"
-              style={{ color: "var(--text-muted)" }}
-            >
-              <span className="w-12 text-center">Preso</span>
-              <span className="w-9 text-center hidden sm:block">%</span>
+            <span className="text-xs shrink-0 w-5 text-black">{row.rank}</span>
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
+              {row.flagSrc ? (
+                <img
+                  src={row.flagSrc}
+                  alt={row.footballTeamName}
+                  className="h-full w-full object-contain p-1"
+                />
+              ) : (
+                <span className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.55)" }}>
+                  {(row.footballTeamShortName ?? row.footballTeamName).slice(0, 2)}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <span className="text-sm truncate font-medium text-black">{row.playerName}</span>
+              <span className="text-xs truncate" style={{ color: "rgba(0,0,0,0.65)" }}>
+                {row.footballTeamShortName ?? row.footballTeamName}
+                {" · "}
+                {row.role === "P" ? "Portiere" : "Giocatore"}
+              </span>
+            </div>
+            <div className="flex flex-col items-end gap-1 shrink-0">
+              <span className="text-sm font-semibold text-black">
+                {row.pickCount}
+              </span>
+              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
+                {row.pickRate.toFixed(0)}%
+              </span>
             </div>
           </div>
-
-          {rows.map((row, idx) => {
-            const isFirst = row.rank === 1;
-            return (
-              <div
-                key={row.playerId}
-                className="flex items-center gap-2 px-4 py-3 transition-colors"
-                style={{
-                  borderBottom: idx < rows.length - 1 ? "1px solid var(--border-soft)" : undefined,
-                  background: isFirst ? "rgba(232,160,0,0.05)" : undefined,
-                }}
-              >
-                <div className="flex w-7 flex-shrink-0 items-center justify-center">
-                  {isFirst ? (
-                    <div
-                      className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg font-display text-xs font-black text-white"
-                      style={{
-                        background: "linear-gradient(135deg, #E8A000, #C87800)",
-                        boxShadow: "0 2px 8px rgba(232,160,0,0.4)",
-                      }}
-                    >
-                      1
-                    </div>
-                  ) : (
-                    <span className="font-display text-sm font-black" style={{ color: "var(--text-muted)" }}>
-                      {row.rank}
-                    </span>
-                  )}
-                </div>
-
-                <div
-                  className="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg"
-                  style={{ background: "var(--surface-1)", border: "1px solid var(--border-soft)" }}
-                >
-                  {row.flagSrc ? (
-                    <img src={row.flagSrc} alt={row.footballTeamName} className="h-full w-full object-contain p-1" />
-                  ) : (
-                    <span className="text-[9px] font-black uppercase" style={{ color: "var(--text-muted)" }}>
-                      {(row.footballTeamShortName ?? row.footballTeamName).slice(0, 2)}
-                    </span>
-                  )}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate font-display text-sm font-black uppercase" style={{ color: "var(--text-primary)" }}>
-                      {row.playerName}
-                    </span>
-                    <span
-                      className="hidden flex-shrink-0 rounded px-1 py-0.5 text-[9px] font-bold sm:inline-flex"
-                      style={{ background: "var(--surface-2)", color: "var(--text-muted)" }}
-                    >
-                      {row.role === "P" ? "POR" : "ATT"}
-                    </span>
-                  </div>
-                  <div className="truncate text-[10px]" style={{ color: "var(--text-muted)" }}>
-                    {row.footballTeamShortName ?? row.footballTeamName}
-                  </div>
-                </div>
-
-                <div className="flex flex-shrink-0 items-center gap-3 text-right tabular-nums">
-                  <span className="w-12 text-center font-display text-base font-black" style={{ color: "var(--text-primary)" }}>
-                    {row.pickCount}
-                  </span>
-                  <span className="hidden w-9 text-center text-xs sm:block" style={{ color: "var(--text-muted)" }}>
-                    {formatPercent(row.pickRate)}
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-
-          <div
-            className="flex items-center justify-end gap-3 px-4 py-2 sm:hidden"
-            style={{ borderTop: "1px solid var(--border-soft)", background: "var(--surface-1)" }}
-          >
-            <span className="text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-disabled)" }}>
-              Preso = numero squadre fanta
-            </span>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
