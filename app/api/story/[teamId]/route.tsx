@@ -11,14 +11,33 @@ export const runtime = "nodejs";
 const W = 1080;
 const H = 1920;
 
+function assetSrc(buffer: Buffer, type: "png" | "jpeg" | "svg+xml" = "png") {
+  return `data:image/${type};base64,${buffer.toString("base64")}`;
+}
+
 function fitStoryText(value: string, maxLength: number) {
   const normalized = value.trim();
   if (normalized.length <= maxLength) return normalized;
   return `${normalized.slice(0, maxLength - 1).trimEnd()}...`;
 }
 
+function formatPoints(value: number, options?: { signed?: boolean }) {
+  const normalized = Object.is(value, -0) ? 0 : value;
+  const formatted = normalized.toFixed(1);
+  if (options?.signed && normalized > 0) return `+${formatted}`;
+  return formatted;
+}
+
 function teamFlagSrc(team: { countryCode: string | null; logoUrl: string | null }) {
   return team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+}
+
+function displayTeamCode(team: {
+  countryCode: string | null;
+  shortName: string | null;
+  name: string;
+}) {
+  return fitStoryText((team.countryCode ?? team.shortName ?? team.name).toUpperCase(), 8);
 }
 
 export async function GET(
@@ -30,7 +49,7 @@ export async function GET(
     const teamId = parseInt(teamIdStr, 10);
     if (isNaN(teamId)) return new Response("Invalid teamId", { status: 400 });
 
-    const [team, logoBuffer, tallicaBuffer] = await Promise.all([
+    const [team, logoBuffer, appStoreBuffer, playStoreBuffer] = await Promise.all([
       db.fantasyTeam.findUnique({
         where: { id: teamId },
         include: {
@@ -54,27 +73,47 @@ export async function GET(
           captain: { select: { id: true } },
         },
       }),
-      readFile(path.join(process.cwd(), "public", "logo_dc.png")),
-      readFile(path.join(process.cwd(), "public", "fonts", "Tallica", "Tallica-Medium.ttf")),
+      readFile(path.join(process.cwd(), "public", "images", "splash-logo.svg")),
+      readFile(path.join(process.cwd(), "public", "images", "app_store.png")),
+      readFile(path.join(process.cwd(), "public", "images", "play_store.png")),
     ]);
 
     if (!team) return new Response("Team not found", { status: 404 });
 
     const history = await computeTeamHistory(teamId);
     const totalPoints = history.reduce((s, m) => s + m.total, 0);
+    const playerTotals = new Map<number, number>();
 
-    const logoSrc = `data:image/png;base64,${logoBuffer.toString("base64")}`;
+    for (const match of history) {
+      for (const score of match.playerScores) {
+        playerTotals.set(
+          score.playerId,
+          (playerTotals.get(score.playerId) ?? 0) + score.finalPoints
+        );
+      }
+    }
+
+    const logoSrc = assetSrc(logoBuffer, "svg+xml");
+    const appStoreSrc = assetSrc(appStoreBuffer);
+    const playStoreSrc = assetSrc(playStoreBuffer);
 
     const captain = team.players.find((p) => p.player.id === team.captainPlayerId);
     const others = team.players.filter((p) => p.player.id !== team.captainPlayerId);
     const sortedPlayers = captain
-      ? [captain, ...others.filter((p) => p.player.role === "P"), ...others.filter((p) => p.player.role === "A")]
-      : [...team.players.filter((p) => p.player.role === "P"), ...team.players.filter((p) => p.player.role === "A")];
+      ? [
+          captain,
+          ...others.filter((p) => p.player.role === "P"),
+          ...others.filter((p) => p.player.role === "A"),
+        ]
+      : [
+          ...team.players.filter((p) => p.player.role === "P"),
+          ...team.players.filter((p) => p.player.role === "A"),
+        ];
 
-    const ownerName = team.user.name ?? team.user.email.split("@")[0];
-    const displayTeamName = fitStoryText(team.name.toUpperCase(), 24);
+    const ownerName = fitStoryText(team.user.name ?? team.user.email.split("@")[0], 28);
+    const displayTeamName = fitStoryText(team.name.toUpperCase(), 20);
     const teamNameFontSize =
-      displayTeamName.length > 20 ? 64 : displayTeamName.length > 14 ? 74 : 88;
+      displayTeamName.length > 18 ? 52 : displayTeamName.length > 14 ? 58 : 64;
 
     return new ImageResponse(
       (
@@ -84,282 +123,330 @@ export async function GET(
             height: H,
             display: "flex",
             flexDirection: "column",
-            background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)",
+            background: "linear-gradient(180deg, #000c9a 0%, #00033a 100%)",
+            color: "#ffffff",
+            fontFamily: "Arial, sans-serif",
             position: "relative",
+            overflow: "hidden",
           }}
         >
-          {/* Decorative circles */}
           <div
             style={{
               position: "absolute",
-              top: -120,
-              right: -120,
-              width: 440,
-              height: 440,
-              borderRadius: 220,
-              border: "1px solid rgba(255,255,255,0.04)",
+              left: 330,
+              top: 925,
+              width: 420,
+              height: 420,
+              borderRadius: 210,
+              border: "3px solid rgba(255,255,255,0.06)",
               display: "flex",
             }}
           />
           <div
             style={{
               position: "absolute",
-              bottom: 160,
-              left: -160,
-              width: 560,
-              height: 560,
-              borderRadius: 280,
-              border: "1px solid rgba(255,255,255,0.03)",
+              left: 72,
+              top: 455,
+              width: 3,
+              height: 1133,
+              backgroundColor: "rgba(255,255,255,0.08)",
+              display: "flex",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              right: 72,
+              top: 455,
+              width: 3,
+              height: 1133,
+              backgroundColor: "rgba(255,255,255,0.08)",
               display: "flex",
             }}
           />
 
-          {/* Header — logo centrato e prominente */}
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
+              flexDirection: "row",
               alignItems: "center",
-              padding: "54px 56px 44px",
-              gap: 18,
-              borderBottom: "1px solid rgba(255,255,255,0.07)",
+              position: "absolute",
+              left: 56,
+              top: 58,
+              gap: 20,
             }}
           >
-            <div
-              style={{
-                width: 196,
-                height: 196,
-                borderRadius: 42,
-                backgroundColor: "rgba(255,255,255,0.18)",
-                border: "3px solid rgba(255,255,255,0.34)",
-                boxShadow: "0 24px 60px rgba(0,0,0,0.22)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                overflow: "hidden",
-              }}
-            >
-              <img src={logoSrc} width={140} height={140} />
+            <img
+              src={logoSrc}
+              width={80}
+              height={80}
+              style={{ objectFit: "contain" }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
+                FANTA DCUP
+              </div>
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  color: "rgba(255,255,255,0.72)",
+                  lineHeight: 1,
+                }}
+              >
+                LA MIA SQUADRA
+              </div>
             </div>
-            <span
-              style={{
-                fontSize: 48,
-                fontWeight: 500,
-                color: "rgba(255,255,255,0.95)",
-                letterSpacing: 10,
-                fontFamily: "Tallica",
-              }}
-            >
-              FANTA DCUP
-            </span>
           </div>
 
-          {/* Content */}
           <div
             style={{
+              position: "absolute",
+              left: 72,
+              top: 252,
+              right: 470,
               display: "flex",
               flexDirection: "column",
-              padding: "48px 56px 56px",
-              flex: 1,
             }}
           >
-            {/* Over-label */}
-            <div
-              style={{
-                fontSize: 20,
-                fontWeight: 700,
-                color: "rgba(255,255,255,0.40)",
-                letterSpacing: 6,
-                lineHeight: 1,
-                marginBottom: 26,
-                fontFamily: "Tallica",
-              }}
-            >
-              LA MIA SQUADRA
-            </div>
-
-            {/* Team name */}
             <div
               style={{
                 fontSize: teamNameFontSize,
-                fontWeight: 500,
-                color: "#ffffff",
-                lineHeight: 1.12,
-                marginBottom: 18,
-                fontFamily: "Tallica",
-                letterSpacing: 2,
+                fontWeight: 800,
+                lineHeight: 1.08,
+                whiteSpace: "nowrap",
               }}
             >
               {displayTeamName}
             </div>
-
-            {/* Owner */}
             <div
               style={{
-                fontSize: 26,
-                color: "rgba(255,255,255,0.45)",
-                lineHeight: 1.25,
-                marginBottom: 38,
-                letterSpacing: 0.6,
+                marginTop: 18,
+                fontSize: 28,
+                color: "rgba(255,255,255,0.78)",
+                lineHeight: 1,
               }}
             >
               {`di ${ownerName}`}
             </div>
+          </div>
 
-            {/* Players */}
+          <div
+            style={{
+              position: "absolute",
+              right: 72,
+              top: 226,
+              width: 290,
+              height: 148,
+              borderRadius: 30,
+              backgroundColor: "rgba(255,255,255,0.11)",
+              border: "2px solid rgba(255,255,255,0.14)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 16,
+                fontSize: 22,
+                fontWeight: 800,
+                color: "rgba(255,255,255,0.78)",
+                lineHeight: 1,
+                marginBottom: 12,
               }}
             >
-              {sortedPlayers.map(({ player }) => {
-                const isGk = player.role === "P";
-                const isCaptain = player.id === team.captainPlayerId;
-                const teamShort =
-                  player.footballTeam.shortName ?? player.footballTeam.name;
-                const flagSrc = teamFlagSrc(player.footballTeam);
-                const displayName = fitStoryText(player.name, 22);
-                const displayTeam = fitStoryText(teamShort, 9).toUpperCase();
-                const playerFontSize = displayName.length > 18 ? 30 : 34;
+              TOTALE
+            </div>
+            <div
+              style={{
+                fontSize: 72,
+                fontWeight: 800,
+                color: "#FBBF24",
+                lineHeight: 0.95,
+              }}
+            >
+              {formatPoints(totalPoints)}
+            </div>
+          </div>
 
-                return (
+          <div
+            style={{
+              position: "absolute",
+              left: 72,
+              right: 72,
+              top: 480,
+              display: "flex",
+              flexDirection: "column",
+              gap: 51,
+            }}
+          >
+            {sortedPlayers.map(({ player }) => {
+              const isCaptain = player.id === team.captainPlayerId;
+              const flagSrc = teamFlagSrc(player.footballTeam);
+              const teamCode = displayTeamCode(player.footballTeam);
+              const displayName = fitStoryText(player.name, 24);
+              const playerPoints = playerTotals.get(player.id) ?? 0;
+              const playerNameFontSize = displayName.length > 20 ? 34 : 40;
+
+              return (
+                <div
+                  key={player.id}
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    height: 154,
+                    width: "100%",
+                    borderRadius: 30,
+                    padding: "0 52px 0 32px",
+                    backgroundColor: isCaptain
+                      ? "rgba(251,191,36,0.16)"
+                      : "rgba(255,255,255,0.11)",
+                    border: isCaptain
+                      ? "2px solid rgba(251,191,36,0.46)"
+                      : "2px solid rgba(255,255,255,0.12)",
+                    gap: 26,
+                  }}
+                >
                   <div
-                    key={player.id}
                     style={{
+                      width: 98,
+                      height: 66,
+                      borderRadius: 14,
+                      border: "2px solid rgba(255,255,255,0.30)",
+                      backgroundColor: "rgba(255,255,255,0.10)",
+                      overflow: "hidden",
                       display: "flex",
-                      flexDirection: "row",
                       alignItems: "center",
-                      width: "100%",
-                      minHeight: 108,
-                      padding: "22px 24px",
-                      borderRadius: 24,
-                      backgroundColor: isCaptain
-                        ? "rgba(232,160,0,0.18)"
-                        : isGk
-                        ? "rgba(255,255,255,0.10)"
-                        : "rgba(255,255,255,0.06)",
-                      border: isCaptain
-                        ? "1px solid rgba(232,160,0,0.38)"
-                        : isGk
-                        ? "1px solid rgba(255,255,255,0.18)"
-                        : "1px solid rgba(255,255,255,0.09)",
-                      gap: 18,
+                      justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    {/* Flag */}
-                    <div
-                      style={{
-                        width: 54,
-                        height: 54,
-                        borderRadius: 14,
-                        backgroundColor: "rgba(255,255,255,0.14)",
-                        border: "1px solid rgba(255,255,255,0.18)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        overflow: "hidden",
-                        flexShrink: 0,
-                      }}
-                    >
-                      {flagSrc ? (
-                        <img
-                          src={flagSrc}
-                          width={54}
-                          height={54}
-                          style={{ objectFit: "contain" }}
-                        />
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: 17,
-                            color: "rgba(255,255,255,0.45)",
-                            fontWeight: 700,
-                          }}
-                        >
-                          {displayTeam.slice(0, 2)}
-                        </span>
-                      )}
-                    </div>
+                    {flagSrc ? (
+                      <img
+                        src={flagSrc}
+                        width={98}
+                        height={66}
+                        style={{ objectFit: "cover" }}
+                      />
+                    ) : (
+                      <span
+                        style={{
+                          fontSize: 24,
+                          color: "rgba(255,255,255,0.70)",
+                          fontWeight: 800,
+                        }}
+                      >
+                        {teamCode.slice(0, 2)}
+                      </span>
+                    )}
+                  </div>
 
-                    {/* Name */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      flex: 1,
+                      minWidth: 0,
+                    }}
+                  >
                     <div
                       style={{
-                        fontSize: playerFontSize,
-                        fontWeight: isCaptain ? 700 : 600,
-                        color: isCaptain ? "#E8A000" : "#ffffff",
-                        flex: 1,
-                        lineHeight: 1.28,
+                        fontSize: playerNameFontSize,
+                        fontWeight: 800,
+                        color: "#ffffff",
+                        lineHeight: 1.1,
                         whiteSpace: "nowrap",
                       }}
                     >
                       {displayName}
                     </div>
-
-                    {/* Team */}
                     <div
                       style={{
-                        width: 128,
-                        fontSize: 22,
-                        color: "rgba(255,255,255,0.45)",
-                        letterSpacing: 1,
-                        textAlign: "right",
-                        overflow: "hidden",
-                        whiteSpace: "nowrap",
-                        lineHeight: 1.15,
+                        marginTop: 8,
+                        fontSize: 24,
+                        fontWeight: 800,
+                        color: "rgba(255,255,255,0.72)",
+                        lineHeight: 1,
+                        letterSpacing: 0.4,
                       }}
                     >
-                      {displayTeam}
+                      {teamCode}
                     </div>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Divider */}
+                  <div
+                    style={{
+                      width: 166,
+                      height: 82,
+                      borderRadius: 26,
+                      backgroundColor: isCaptain ? "#FBBF24" : "#F4F6FF",
+                      color: "#000546",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 54,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {formatPoints(playerPoints, { signed: true })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              left: 72,
+              right: 72,
+              bottom: 110,
+              height: 202,
+              borderRadius: 34,
+              backgroundColor: "rgba(255,255,255,0.09)",
+              border: "2px solid rgba(255,255,255,0.15)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              paddingTop: 34,
+            }}
+          >
             <div
               style={{
-                height: 1,
-                backgroundColor: "rgba(255,255,255,0.08)",
-                marginTop: 36,
-                marginBottom: 32,
-              }}
-            />
-
-            {/* Points */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                backgroundColor: "rgba(232,160,0,0.10)",
-                borderRadius: 28,
-                padding: "24px 80px 30px",
-                gap: 10,
+                fontSize: 24,
+                fontWeight: 800,
+                color: "rgba(255,255,255,0.92)",
+                lineHeight: 1,
               }}
             >
-              <div
-                style={{
-                  fontSize: 120,
-                  fontWeight: 500,
-                  color: "#E8A000",
-                  lineHeight: 1,
-                  fontFamily: "Tallica",
-                }}
-              >
-                {totalPoints.toFixed(1)}
-              </div>
-              <div
-                style={{
-                  fontSize: 28,
-                  color: "rgba(255,255,255,0.65)",
-                  letterSpacing: 8,
-                  fontFamily: "Tallica",
-                }}
-              >
-                PUNTI TOTALI
-              </div>
+              Scarica l&apos;app &quot;Danimarca&apos;s Cup&quot;
+            </div>
+            <div
+              style={{
+                marginTop: 16,
+                fontSize: 20,
+                fontWeight: 800,
+                color: "rgba(255,255,255,0.74)",
+                lineHeight: 1,
+              }}
+            >
+              dagli store
+            </div>
+            <div
+              style={{
+                marginTop: 20,
+                display: "flex",
+                flexDirection: "row",
+                gap: 80,
+                alignItems: "center",
+              }}
+            >
+              <img src={appStoreSrc} width={268} height={80} style={{ objectFit: "contain" }} />
+              <img src={playStoreSrc} width={268} height={80} style={{ objectFit: "contain" }} />
             </div>
           </div>
         </div>
@@ -367,14 +454,6 @@ export async function GET(
       {
         width: W,
         height: H,
-        fonts: [
-          {
-            name: "Tallica",
-            data: tallicaBuffer,
-            weight: 500,
-            style: "normal",
-          },
-        ],
       }
     );
   } catch (err) {
