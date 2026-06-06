@@ -112,7 +112,7 @@ export default async function GreenVolleyHomePage() {
           </div>
 
           <div
-            className="flex gap-4 overflow-x-auto -mx-4 px-4 md:grid md:grid-cols-2 md:overflow-visible md:mx-0 md:px-0"
+            className="flex gap-4 overflow-x-auto -mx-4 px-4 py-3 -my-3 md:grid md:grid-cols-2 md:overflow-visible md:mx-0 md:px-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
           >
             {groups.map((group) => {
