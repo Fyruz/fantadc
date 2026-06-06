@@ -5,6 +5,8 @@ import { computeStandings } from "@/lib/standings";
 import EditFootballTeamForm from "./_form";
 import AdminPageHeader from "@/components/admin-page-header";
 import RoleBadge from "@/components/role-badge";
+import ConfirmDeleteForm from "@/components/confirm-delete-form";
+import { removePlayerFromFootballTeam } from "@/app/actions/admin/players";
 
 export default async function EditSquadraPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -147,14 +149,23 @@ export default async function EditSquadraPage({ params }: { params: Promise<{ id
                 >
                   <RoleBadge role={p.role} />
                   <span className="text-sm font-semibold flex-1" style={{ color: "var(--text-primary)" }}>{p.name}</span>
-                  <Link
-                    href={`/admin/giocatori/${p.id}/edit`}
-                    className="text-[11px] font-semibold flex items-center gap-1"
-                    style={{ color: "var(--primary)" }}
-                  >
-                    Modifica
-                    <i className="pi pi-arrow-right text-[9px]" />
-                  </Link>
+                  <div className="flex items-center gap-2">
+                    <ConfirmDeleteForm
+                      action={removePlayerFromFootballTeam}
+                      hiddenInputs={{ playerId: p.id, footballTeamId: team.id }}
+                      confirmMessage={`Rimuovere ${p.name} dalla squadra?`}
+                      buttonLabel="Rimuovi"
+                      buttonClassName="!px-2"
+                    />
+                    <Link
+                      href={`/admin/giocatori/${p.id}/edit`}
+                      className="text-[11px] font-semibold flex items-center gap-1"
+                      style={{ color: "var(--primary)" }}
+                    >
+                      Modifica
+                      <i className="pi pi-arrow-right text-[9px]" />
+                    </Link>
+                  </div>
                 </div>
               ))
             )}

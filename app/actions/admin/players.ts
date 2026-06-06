@@ -68,3 +68,31 @@ export async function deletePlayer(_prev: ActionResult | undefined, formData: Fo
   revalidatePath("/admin/giocatori");
   redirect("/admin/giocatori");
 }
+
+export async function removePlayerFromFootballTeam(
+  _prev: ActionResult | undefined,
+  formData: FormData
+): Promise<ActionResult> {
+  const admin = await requireAdmin();
+  const playerId = Number(formData.get("playerId"));
+  const footballTeamId = Number(formData.get("footballTeamId"));
+
+  if (!playerId || !footballTeamId) return { message: "Dati mancanti." };
+
+  const before = await db.player.findFirst({
+    where: { id: playerId, footballTeamId },
+  });
+  if (!before) return { message: "Giocatore non trovato in questa squadra." };
+
+  try {
+    await db.player.delete({ where: { id: playerId } });
+    await logAdminAction(Number(admin.id), "DELETE", "Player", playerId, before, null);
+  } catch {
+    return { message: "Impossibile eliminare: il giocatore è presente in squadre fantasy o partite." };
+  }
+
+  revalidatePath("/admin/squadre");
+  revalidatePath(`/admin/squadre/${footballTeamId}/edit`);
+  revalidatePath("/admin/giocatori");
+  redirect(`/admin/squadre/${footballTeamId}/edit`);
+}
