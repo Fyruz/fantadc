@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import BackChevron from "@/components/back-chevron";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
@@ -158,7 +157,9 @@ export default async function SquadraPublicDetailPage({
     <div className="flex flex-col gap-10">
       {/* Back — mobile only (top nav is hidden on this route) */}
       <div className="md:hidden h-12 flex items-center">
-        <BackChevron />
+        <Link href="/squadre" className="flex items-center justify-center w-6 h-6">
+          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
+        </Link>
       </div>
 
       {/* Team identity */}
