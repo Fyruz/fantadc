@@ -39,7 +39,7 @@ export default async function AltroPage() {
 
       {/* Lega */}
       <Section label="Lega">
-        <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Scelti dai fantallenatori" href="/giocatori-fanta" />
+        <Item icon={<img src="/icons/football-player-sign.svg" width={18} height={18} alt="" />} label="Scelti dai fantallenatori" href="/giocatori-fanta" />
       </Section>
 
       {/* Esplora */}
