@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { appStoreConfig, siteConfig } from "@/lib/site";
 
@@ -22,6 +23,30 @@ const storeActions: StoreAction[] = [
     url: appStoreConfig.googlePlayStoreUrl,
   },
 ];
+
+type NavigatorWithUserAgentData = Navigator & {
+  userAgentData?: {
+    mobile?: boolean;
+  };
+};
+
+function isMobileUserAgent(navigatorRef: NavigatorWithUserAgentData) {
+  if (navigatorRef.userAgentData?.mobile) return true;
+
+  const ua = navigatorRef.userAgent;
+  if (/Android|iPhone|iPad|iPod|Mobile|Mobi/i.test(ua)) return true;
+
+  return /Macintosh/i.test(ua) && navigatorRef.maxTouchPoints > 1;
+}
+
+function shouldShowDesktopService() {
+  if (typeof window === "undefined") return false;
+
+  const navigatorRef = window.navigator as NavigatorWithUserAgentData;
+  if (isMobileUserAgent(navigatorRef)) return false;
+
+  return window.matchMedia("(min-width: 768px)").matches;
+}
 
 function StoreButton({ action }: { action: StoreAction }) {
   if (!action.url) {
@@ -100,12 +125,18 @@ export function DesktopServicePage() {
 }
 
 export default function MobileOnlyGate({ children }: { children: ReactNode }) {
-  return (
-    <>
-      <div className="md:hidden">{children}</div>
-      <div className="hidden md:block">
-        <DesktopServicePage />
-      </div>
-    </>
-  );
+  const [showDesktopService, setShowDesktopService] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
+    const updateGate = () => setShowDesktopService(shouldShowDesktopService());
+
+    updateGate();
+    mediaQuery.addEventListener("change", updateGate);
+    return () => mediaQuery.removeEventListener("change", updateGate);
+  }, []);
+
+  if (showDesktopService) return <DesktopServicePage />;
+
+  return <>{children}</>;
 }
