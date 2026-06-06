@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -10,6 +10,14 @@ import { register } from "@/app/actions/auth";
 import BackButton from "../_back-button";
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="flex-1" />}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
   const [state, action, pending] = useActionState(register, undefined);
   const searchParams = useSearchParams();
   const isGV = searchParams.get("from") === "greenvolley";
