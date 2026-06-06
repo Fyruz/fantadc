@@ -49,7 +49,7 @@ function RegisterForm() {
             <form action={action} className="flex flex-col gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="name">
-                  Nome
+                  Nome o soprannome
                 </label>
                 <InputText
                   id="name"
