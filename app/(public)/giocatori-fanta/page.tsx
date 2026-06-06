@@ -1,3 +1,4 @@
+import BackButton from "@/components/back-button";
 import { db } from "@/lib/db";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
@@ -50,7 +51,22 @@ export default async function GiocatoriFantaPage() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-10">
+      {/* Header mobile */}
+      <div className="md:hidden flex items-center justify-between h-12">
+        <div className="flex-1 flex items-center">
+          <BackButton />
+        </div>
+        <span
+          className="flex-1 text-center uppercase"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+        >
+          Scelti dai fantallenatori
+        </span>
+        <div className="flex-1" />
+      </div>
+
+      <div className="flex flex-col gap-3">
       {/* Column headers */}
       <div
         className="flex items-center justify-between pb-3"
@@ -104,6 +120,7 @@ export default async function GiocatoriFantaPage() {
             </div>
           </div>
         ))}
+      </div>
       </div>
     </div>
   );
