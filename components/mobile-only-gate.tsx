@@ -2,27 +2,8 @@
 
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Button } from "primereact/button";
+import Image from "next/image";
 import { appStoreConfig, siteConfig } from "@/lib/site";
-
-type StoreAction = {
-  icon: string;
-  label: string;
-  url: string | null;
-};
-
-const storeActions: StoreAction[] = [
-  {
-    icon: "pi-apple",
-    label: "App Store",
-    url: appStoreConfig.appleAppStoreUrl,
-  },
-  {
-    icon: "pi-android",
-    label: "Google Play",
-    url: appStoreConfig.googlePlayStoreUrl,
-  },
-];
 
 type NavigatorWithUserAgentData = Navigator & {
   userAgentData?: {
@@ -48,25 +29,41 @@ function shouldShowDesktopService() {
   return window.matchMedia("(min-width: 768px)").matches;
 }
 
-function StoreButton({ action }: { action: StoreAction }) {
-  if (!action.url) {
+function StoreBadge({
+  src,
+  alt,
+  url,
+}: {
+  src: string;
+  alt: string;
+  url: string | null;
+}) {
+  const img = (
+    <Image
+      src={src}
+      alt={alt}
+      width={160}
+      height={48}
+      className="h-12 w-auto object-contain"
+    />
+  );
+
+  if (!url) {
     return (
-      <Button
-        icon={`pi ${action.icon}`}
-        label={`${action.label}: link in arrivo`}
-        disabled
-        className="w-full justify-center"
-      />
+      <div className="cursor-not-allowed opacity-40 select-none" title="Link in arrivo">
+        {img}
+      </div>
     );
   }
 
   return (
-    <a href={action.url} className="block w-full" target="_blank" rel="noreferrer">
-      <Button
-        icon={`pi ${action.icon}`}
-        label={`Scarica da ${action.label}`}
-        className="w-full justify-center"
-      />
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="cursor-pointer transition-opacity duration-200 hover:opacity-75"
+    >
+      {img}
     </a>
   );
 }
@@ -74,52 +71,139 @@ function StoreButton({ action }: { action: StoreAction }) {
 export function DesktopServicePage() {
   return (
     <main
-      className="min-h-screen w-full px-6 py-10"
-      style={{ background: "linear-gradient(180deg, #F5F6FF 0%, #FFFFFF 100%)" }}
+      className="flex min-h-screen w-full flex-col"
+      style={{ background: "var(--bg-base, #F5F6FF)" }}
     >
-      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-lg flex-col justify-center gap-6">
-        <section
-          className="overflow-hidden rounded-[32px] border px-7 py-9 shadow-xl"
+      {/* ── Hero ── */}
+      <section
+        className="relative flex flex-col items-center justify-center px-6 py-20 text-center"
+        style={{
+          minHeight: "58vh",
+          background: "linear-gradient(160deg, #000228 0%, #0107A3 100%)",
+        }}
+      >
+        {/* Radial gold glow behind logo */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
           style={{
-            background: "linear-gradient(160deg, #000228 0%, #0107A3 100%)",
-            borderColor: "rgba(255,255,255,0.08)",
-            boxShadow: "0 16px 48px rgba(1,7,163,0.2)",
+            background:
+              "radial-gradient(ellipse 55% 45% at 50% 65%, rgba(232,160,0,0.13) 0%, transparent 70%)",
+          }}
+        />
+
+        {/* Logo */}
+        <div className="relative z-10 mb-7">
+          <div
+            aria-hidden="true"
+            className="absolute -inset-5 rounded-full blur-2xl"
+            style={{ background: "rgba(232,160,0,0.20)" }}
+          />
+          <div
+            className="relative flex h-24 w-24 items-center justify-center rounded-[28px]"
+            style={{
+              background: "rgba(255,255,255,0.09)",
+              border: "1.5px solid rgba(255,255,255,0.18)",
+              boxShadow: "0 8px 32px rgba(1,7,163,0.50)",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/icons/dcup.svg"
+              alt="Danimarca's Cup logo"
+              width={56}
+              height={58}
+            />
+          </div>
+        </div>
+
+        {/* App name */}
+        <h1
+          className="relative z-10 font-display text-6xl font-black uppercase leading-none text-white"
+          style={{ letterSpacing: "0.03em" }}
+        >
+          {siteConfig.name}
+        </h1>
+
+        {/* Subtitle */}
+        <p
+          className="relative z-10 mt-4 max-w-sm text-sm leading-relaxed"
+          style={{ color: "rgba(255,255,255,0.68)" }}
+        >
+          {siteConfig.description}
+        </p>
+
+        {/* "Solo su mobile" badge */}
+        <div
+          className="relative z-10 mt-7 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest"
+          style={{
+            background: "rgba(232,160,0,0.15)",
+            color: "#E8A000",
+            border: "1px solid rgba(232,160,0,0.32)",
           }}
         >
-          <div
-            className="inline-flex h-14 w-14 items-center justify-center rounded-[20px]"
-            style={{ background: "rgba(232,160,0,0.14)", color: "#E8A000" }}
+          <svg
+            aria-hidden="true"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="currentColor"
           >
-            <i className="pi pi-mobile text-xl" />
-          </div>
-          <h1 className="mt-5 font-display text-4xl font-black uppercase leading-none text-white">
-            Apri {siteConfig.name} da mobile
-          </h1>
-          <p className="mt-4 text-sm leading-6" style={{ color: "rgba(255,255,255,0.72)" }}>
-            Da desktop l&apos;app non è disponibile. Scaricala dagli store o apri il sito da smartphone.
-          </p>
-        </section>
+            <path d="M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" />
+          </svg>
+          Solo su mobile
+        </div>
+      </section>
 
-        <section
-          className="rounded-3xl border bg-white p-6"
-          style={{ borderColor: "var(--border-medium)", boxShadow: "0 12px 32px rgba(1,7,163,0.08)" }}
+      {/* ── Download section ── */}
+      <section className="flex flex-1 flex-col items-center justify-center px-6 py-12">
+        <div
+          className="w-full max-w-md rounded-3xl bg-white p-8"
+          style={{
+            border: "1px solid var(--border-medium, #DDE1F7)",
+            boxShadow:
+              "0 20px 60px rgba(1,7,163,0.10), 0 4px 16px rgba(1,7,163,0.06)",
+          }}
         >
-          <div className="over-label">Nome sugli store</div>
-          <p className="mt-3 text-xl font-black" style={{ color: "var(--text-primary)" }}>
-            {appStoreConfig.appName}
+          <div className="over-label mb-1">Disponibile su</div>
+
+          <p
+            className="mt-2 font-display text-2xl font-black uppercase leading-tight"
+            style={{ color: "var(--text-primary, #09144C)" }}
+          >
+            Scarica {appStoreConfig.appName}
           </p>
 
-          <div className="mt-5 flex flex-col gap-3">
-            {storeActions.map((action) => (
-              <StoreButton key={action.label} action={action} />
-            ))}
-          </div>
-        </section>
+          <p
+            className="mt-2 text-sm leading-relaxed"
+            style={{ color: "var(--text-muted, #6466A3)" }}
+          >
+            Da desktop l&apos;app non è disponibile. Aprila dal tuo smartphone
+            o scaricala dagli store.
+          </p>
 
-        <p className="text-center text-xs leading-5" style={{ color: "var(--text-muted)" }}>
+          {/* Store badges */}
+          <div className="mt-6 flex flex-row flex-wrap items-center gap-4">
+            <StoreBadge
+              src="/images/app_store.png"
+              alt="Scarica su App Store"
+              url={appStoreConfig.appleAppStoreUrl}
+            />
+            <StoreBadge
+              src="/images/play_store.png"
+              alt="Disponibile su Google Play"
+              url={appStoreConfig.googlePlayStoreUrl}
+            />
+          </div>
+        </div>
+
+        <p
+          className="mt-5 text-center text-xs leading-5"
+          style={{ color: "var(--text-muted, #6466A3)" }}
+        >
           Se hai già installato l&apos;app, aprila dal tuo smartphone.
         </p>
-      </div>
+      </section>
     </main>
   );
 }
