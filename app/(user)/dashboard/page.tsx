@@ -8,6 +8,7 @@ import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
 import ScoreTable from "../squadra/_score-table";
 import { Button } from "primereact/button";
+import ShareStoryButton from "../squadra/_share-story-button";
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -154,6 +155,9 @@ export default async function DashboardPage() {
                 </div>
               );
             })}
+          </div>
+          <div className="mt-3 border-t border-white/10 pt-3">
+            <ShareStoryButton teamId={fantasyTeam.id} variant="subtle" />
           </div>
         </div>
       </div>

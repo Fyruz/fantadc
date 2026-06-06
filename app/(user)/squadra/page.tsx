@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
-import ShareStoryButton from "./_share-story-button";
 
 const CARD: React.CSSProperties = {
   background: "#fff",
@@ -111,8 +110,6 @@ export default async function SquadraPage() {
           )}
         </div>
       </div>
-
-      <ShareStoryButton teamId={fantasyTeam.id} />
 
       {/* Rosa */}
       <div className="rounded-3xl overflow-hidden" style={CARD}>

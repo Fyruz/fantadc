@@ -4,7 +4,13 @@ import { useState } from "react";
 import { Button } from "primereact/button";
 import { useAppToast } from "@/components/toast-provider";
 
-export default function ShareStoryButton({ teamId }: { teamId: number }) {
+export default function ShareStoryButton({
+  teamId,
+  variant = "default",
+}: {
+  teamId: number;
+  variant?: "default" | "subtle";
+}) {
   const [loading, setLoading] = useState(false);
   const { error: showError, success: showSuccess, info: showInfo } = useAppToast();
 
@@ -53,6 +59,26 @@ export default function ShareStoryButton({ teamId }: { teamId: number }) {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (variant === "subtle") {
+    return (
+      <Button
+        type="button"
+        icon={loading ? "pi pi-spin pi-spinner" : "pi pi-instagram"}
+        label={loading ? "Genero la story..." : "Condividi story"}
+        disabled={loading}
+        onClick={handleShare}
+        className="w-full justify-center rounded-2xl text-xs font-black uppercase tracking-wide"
+        style={{
+          background: "rgba(255,255,255,0.12)",
+          border: "1px solid rgba(255,255,255,0.20)",
+          color: "#FFFFFF",
+          boxShadow: "none",
+          padding: "0.7rem 0.9rem",
+        }}
+      />
+    );
   }
 
   return (
