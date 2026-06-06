@@ -123,8 +123,8 @@ export default function PublicBottomNav() {
   const DCUP_MAIN = [
     { href: "/",             label: "Home",   icon: "home",     matchers: undefined          },
     { href: "/partite",      label: "Partite",icon: "football_field", matchers: undefined    },
-    { href: "/dashboard",    label: "Fanta",       icon: "shirt",   matchers: ["/dashboard", "/squadra"] },
-    { href: "/squadre-fanta",label: "Campionato", icon: "account", matchers: undefined          },
+    { href: "/dashboard",    label: "La mia rosa", icon: "shirt",   matchers: ["/dashboard", "/squadra"] },
+    { href: "/squadre-fanta",label: "Lega",       icon: "account", matchers: undefined          },
   ] as const;
 
   return (

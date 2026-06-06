@@ -35,7 +35,11 @@ export default async function AltroPage() {
         <Item icon={<img src="/icons/medal.svg" width={18} height={18} alt="" />} label="Capocannoniere" href="/classifica-marcatori" />
         <Item icon={<img src="/icons/table.svg" width={18} height={18} alt="" />} label="Gironi" href="/gironi" />
         <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Giocatori" href="/giocatori" />
-        <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Giocatori più presi al fanta" href="/giocatori-fanta" />
+      </Section>
+
+      {/* Lega */}
+      <Section label="Lega">
+        <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Scelti dai fantallenatori" href="/giocatori-fanta" />
       </Section>
 
       {/* Esplora */}

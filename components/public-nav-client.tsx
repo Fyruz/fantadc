@@ -26,9 +26,9 @@ const DCUP_GROUPS = [
     ],
   },
   {
-    label: "Fanta",
+    label: "Lega",
     items: [
-      { href: "/squadre-fanta", label: "Classifica Fanta" },
+      { href: "/squadre-fanta", label: "Classifica Lega" },
     ],
   },
 ];
@@ -82,8 +82,8 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
       return null; // home e altro: pills switcher
     }
     if (pathname.startsWith("/partite")) return "Partite";
-    if (pathname.startsWith("/squadre-fanta")) return "Campionato";
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "Fanta";
+    if (pathname.startsWith("/squadre-fanta")) return "Lega";
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "La mia rosa";
     if (pathname.startsWith("/altro")) return null;
     return null;
   };
