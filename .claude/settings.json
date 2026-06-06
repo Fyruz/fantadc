@@ -37,7 +37,8 @@
       "Bash(git commit *)",
       "Bash(echo \"exit: $?\")",
       "Bash(git rm *)",
-      "PowerShell(npm run build 2>&1)"
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(npm run build > $null 2>&1; if \\($LASTEXITCODE -eq 0\\) { Write-Output \"BUILD_OK\" } else { Write-Output \"BUILD_FAILED \\($LASTEXITCODE\\)\" })"
     ],
     "additionalDirectories": [
       "e:\\Developing\\fantadc\\docs\\superpowers\\specs",
