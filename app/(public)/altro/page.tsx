@@ -40,6 +40,7 @@ export default async function AltroPage() {
       {/* Esplora */}
       <Section label="Esplora">
         <Item icon={<img src="/icons/document_new.svg" width={18} height={18} alt="" />} label="Regolamento fanta" href="/regolamento" />
+        <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Giocatori più presi al fanta" href="/giocatori-fanta" />
         <Item icon={<img src="/icons/info.svg" width={18} height={18} alt="" />} label="Supporto" href="/supporto" />
         <Item icon={<img src="/icons/envelope-closed.svg" width={18} height={18} alt="" />} label="Contatti" href="/contatti" />
       </Section>
