@@ -23,6 +23,19 @@ function RegisterForm() {
   const isGV = searchParams.get("from") === "greenvolley";
   const [name, setName]   = useState("");
   const [email, setEmail] = useState("");
+  const [confirmError, setConfirmError] = useState<string | null>(null);
+
+  // Valida che le due password coincidano prima di chiamare la server action.
+  function handleSubmit(formData: FormData) {
+    const password = String(formData.get("password") ?? "");
+    const confirmPassword = String(formData.get("confirmPassword") ?? "");
+    if (password !== confirmPassword) {
+      setConfirmError("Le password non coincidono.");
+      return;
+    }
+    setConfirmError(null);
+    action(formData);
+  }
 
   return (
     <div className={`flex-1 flex flex-col px-4 py-6${isGV ? " gv-theme" : ""}`}>
@@ -46,7 +59,7 @@ function RegisterForm() {
               Registrati
             </h1>
 
-            <form action={action} className="flex flex-col gap-5">
+            <form action={handleSubmit} className="flex flex-col gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="name">
                   Nome o soprannome
@@ -103,6 +116,25 @@ function RegisterForm() {
                 />
                 {state?.errors?.password && (
                   <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{state.errors.password[0]}</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-muted)" }} htmlFor="confirmPassword">
+                  Ripeti password
+                </label>
+                <Password
+                  name="confirmPassword"
+                  autoComplete="new-password"
+                  feedback={false}
+                  toggleMask
+                  className="w-full"
+                  inputClassName="w-full"
+                  placeholder="••••••••"
+                  onInput={() => { if (confirmError) setConfirmError(null); }}
+                />
+                {confirmError && (
+                  <p className="text-xs mt-1" style={{ color: "#DC2626" }}>{confirmError}</p>
                 )}
               </div>
 
