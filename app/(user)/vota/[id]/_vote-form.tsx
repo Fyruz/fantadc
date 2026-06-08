@@ -4,16 +4,15 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { castVote } from "@/app/actions/user/vote";
+import { resolveTeamFlag } from "@/lib/flags";
 
 type Team = { id: number; name: string; countryCode: string | null; logoUrl: string | null };
 type Player = { id: number; name: string; role: string; footballTeamId: number; footballTeam: Team };
 
 function TeamLogo({ team, size = 24 }: { team: Team; size?: number }) {
-  if (team.logoUrl)
-    return <img src={team.logoUrl} alt={team.name} style={{ width: size, height: size, objectFit: "contain" }} />;
-  if (team.countryCode)
-    return <img src={`https://flagcdn.com/w40/${team.countryCode.toLowerCase()}.png`} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
-  return null;
+  const src = resolveTeamFlag(team);
+  if (!src) return null;
+  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
 }
 
 function displayName(player: Player, allPlayers: Player[]) {

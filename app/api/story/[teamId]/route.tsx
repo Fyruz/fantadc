@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 import { readFile } from "fs/promises";
 import path from "path";
 
@@ -28,8 +28,24 @@ function formatPoints(value: number, options?: { signed?: boolean }) {
   return formatted;
 }
 
-function teamFlagSrc(team: { countryCode: string | null; logoUrl: string | null }) {
-  return team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+// La bandiera è self-hosted (/flags/{cc}.png): Satori non carica path relativi,
+// quindi leggo il PNG da disco e lo inlino come data-URI. Un eventuale logo
+// custom esterno (URL assoluto) viene invece passato così com'è.
+async function resolveFlagAsset(team: {
+  countryCode: string | null;
+  logoUrl: string | null;
+}): Promise<string | null> {
+  const src = resolveTeamFlag(team);
+  if (!src) return null;
+  if (src.startsWith("/")) {
+    try {
+      const buffer = await readFile(path.join(process.cwd(), "public", src));
+      return assetSrc(buffer, "png");
+    } catch {
+      return null;
+    }
+  }
+  return src;
 }
 
 function displayTeamCode(team: {
@@ -109,6 +125,15 @@ export async function GET(
           ...team.players.filter((p) => p.player.role === "P"),
           ...team.players.filter((p) => p.player.role === "A"),
         ];
+
+    const flagByPlayer = new Map<number, string | null>(
+      await Promise.all(
+        sortedPlayers.map(
+          async ({ player }) =>
+            [player.id, await resolveFlagAsset(player.footballTeam)] as const
+        )
+      )
+    );
 
     const ownerName = fitStoryText(team.user.name ?? team.user.email.split("@")[0], 28);
     const displayTeamName = fitStoryText(team.name.toUpperCase(), 20);
@@ -283,7 +308,7 @@ export async function GET(
           >
             {sortedPlayers.map(({ player }) => {
               const isCaptain = player.id === team.captainPlayerId;
-              const flagSrc = teamFlagSrc(player.footballTeam);
+              const flagSrc = flagByPlayer.get(player.id) ?? null;
               const teamCode = displayTeamCode(player.footballTeam);
               const displayName = fitStoryText(player.name, 24);
               const playerPoints = playerTotals.get(player.id) ?? 0;

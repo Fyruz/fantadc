@@ -52,7 +52,7 @@ describe("buildFootballTeamPayload", () => {
     });
     const payload = buildFootballTeamPayload(parsed);
     expect(payload.countryCode).toBe("IT");
-    expect(payload.logoUrl).toBe("https://flagsapi.com/IT/flat/64.png");
+    expect(payload.logoUrl).toBe("/flags/it.png");
   });
 
   it("pulisce countryCode e logoUrl quando non presente", () => {

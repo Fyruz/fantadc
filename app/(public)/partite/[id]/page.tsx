@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
 import { resolveMvp } from "@/lib/domain/mvp";
 import { getCurrentUser } from "@/lib/session";
+import { resolveTeamFlag } from "@/lib/flags";
 
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -92,12 +93,11 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const TeamLogo = ({ team, size = 64 }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null; size?: number }) => {
     if (!team) return <div style={{ width: size, height: size }} />;
+    const src = resolveTeamFlag(team);
     return (
       <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
-        {team.logoUrl ? (
-          <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
-        ) : team.countryCode ? (
-          <img src={`https://flagcdn.com/w80/${team.countryCode.toLowerCase()}.png`} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
+        {src ? (
+          <img src={src} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
         ) : (
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
         )}
@@ -209,13 +209,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           <div>
             <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>MVP della partita</p>
             <div className="flex items-center gap-2">
-              {mvpTeam && (
-                mvpTeam.logoUrl ? (
-                  <img src={mvpTeam.logoUrl} alt={mvpTeam.name} className="w-5 h-5 object-contain shrink-0" />
-                ) : mvpTeam.countryCode ? (
-                  <img src={`https://flagcdn.com/w40/${mvpTeam.countryCode.toLowerCase()}.png`} alt={mvpTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
-                ) : null
-              )}
+              {mvpTeam && resolveTeamFlag(mvpTeam) ? (
+                <img src={resolveTeamFlag(mvpTeam)!} alt={mvpTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
+              ) : null}
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{mvpPlayer.name}</p>
             </div>
           </div>
@@ -243,10 +239,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div>
               <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>Il tuo MVP</p>
               <div className="flex items-center gap-2">
-                {userVote.player.footballTeam.logoUrl ? (
-                  <img src={userVote.player.footballTeam.logoUrl} alt={userVote.player.footballTeam.name} className="w-5 h-5 object-contain shrink-0" />
-                ) : userVote.player.footballTeam.countryCode ? (
-                  <img src={`https://flagcdn.com/w40/${userVote.player.footballTeam.countryCode.toLowerCase()}.png`} alt={userVote.player.footballTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
+                {resolveTeamFlag(userVote.player.footballTeam) ? (
+                  <img src={resolveTeamFlag(userVote.player.footballTeam)!} alt={userVote.player.footballTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
                 ) : null}
                 <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{userVote.player.name}</p>
               </div>
@@ -297,10 +291,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div className="flex-1 min-w-0 px-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.homeTeam?.logoUrl ? (
-                    <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-full h-full object-contain" />
-                  ) : match.homeTeam?.countryCode ? (
-                    <img src={`https://flagcdn.com/w40/${match.homeTeam.countryCode.toLowerCase()}.png`} alt={match.homeTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                  {match.homeTeam && resolveTeamFlag(match.homeTeam) ? (
+                    <img src={resolveTeamFlag(match.homeTeam)!} alt={match.homeTeam.name} className="w-full h-auto object-contain rounded-sm" />
                   ) : null}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
@@ -321,10 +313,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div className="flex-1 min-w-0 px-6">
               <div className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.awayTeam?.logoUrl ? (
-                    <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-full h-full object-contain" />
-                  ) : match.awayTeam?.countryCode ? (
-                    <img src={`https://flagcdn.com/w40/${match.awayTeam.countryCode.toLowerCase()}.png`} alt={match.awayTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                  {match.awayTeam && resolveTeamFlag(match.awayTeam) ? (
+                    <img src={resolveTeamFlag(match.awayTeam)!} alt={match.awayTeam.name} className="w-full h-auto object-contain rounded-sm" />
                   ) : null}
                 </div>
                 <span className="text-sm font-medium text-black truncate">

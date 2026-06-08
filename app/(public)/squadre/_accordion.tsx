@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import RoleBadge from "@/components/role-badge";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 type Player = { id: number; name: string; role: string };
 type Team = {
@@ -19,7 +19,7 @@ function TeamCard({ team }: { team: Team }) {
   const [imageBroken, setImageBroken] = useState(false);
 
   const gkCount = team.players.filter((p) => p.role === "GK").length;
-  const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+  const flagSrc = resolveTeamFlag(team);
 
   return (
     <div

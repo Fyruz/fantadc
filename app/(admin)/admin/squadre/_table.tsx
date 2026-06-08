@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { deleteFootballTeam } from "@/app/actions/admin/football-teams";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 type Row = {
   id: number;
@@ -120,7 +120,7 @@ export default function SquadreTable({ rows }: { rows: Row[] }) {
 function TeamFlagAvatar({ row }: { row: Row }) {
   const [broken, setBroken] = useState(false);
   const fallback = (row.shortName ?? row.name).slice(0, 2).toUpperCase();
-  const src = row.logoUrl ?? getFlagUrlFromCountryCode(row.countryCode);
+  const src = resolveTeamFlag(row);
 
   if (!src || broken) {
     return (

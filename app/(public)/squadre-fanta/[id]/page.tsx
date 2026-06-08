@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import BackButton from "@/components/back-button";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 export const revalidate = 60;
 
@@ -94,7 +94,7 @@ export default async function SquadraFantasyPublicPage({
         {/* Player rows */}
         {team.players.map(({ player }) => {
           const isCaptain = player.id === team.captainPlayerId;
-          const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
+          const flagSrc = resolveTeamFlag(player.footballTeam);
           return (
             <div
               key={player.id}

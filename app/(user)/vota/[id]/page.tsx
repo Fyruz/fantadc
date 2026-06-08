@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { requireAuth } from "@/lib/session";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
 import { resolveMvp } from "@/lib/domain/mvp";
+import { resolveTeamFlag } from "@/lib/flags";
 import VoteForm from "./_vote-form";
 
 export default async function VotaPage({ params }: { params: Promise<{ id: string }> }) {
@@ -78,12 +79,11 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
 
   const TeamLogo = ({ team }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null }) => {
     if (!team) return <div style={{ width: 64, height: 64 }} />;
+    const src = resolveTeamFlag(team);
     return (
       <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64, padding: 4 }}>
-        {team.logoUrl ? (
-          <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain" />
-        ) : team.countryCode ? (
-          <img src={`https://flagcdn.com/w80/${team.countryCode.toLowerCase()}.png`} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
+        {src ? (
+          <img src={src} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
         ) : (
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
         )}

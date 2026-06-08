@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { resolveTeamFlag } from "@/lib/flags";
 
 type Team = { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
 type Match = {
@@ -18,9 +19,9 @@ type Group = { id: number; name: string; rows: GroupRow[] };
 
 function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
   if (!team) return <div style={{ width: size, height: size }} />;
-  if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} style={{ width: size, height: size, objectFit: "contain" }} />;
-  if (team.countryCode) return <img src={`https://flagcdn.com/w40/${team.countryCode.toLowerCase()}.png`} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
-  return null;
+  const src = resolveTeamFlag(team);
+  if (!src) return null;
+  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
 }
 
 function MatchCard({ m }: { m: Match }) {
@@ -194,10 +195,8 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                   <div key={row.teamId} className="flex items-center gap-2 px-6 py-3" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
                     <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{idx + 1}</span>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {row.logoUrl ? (
-                        <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
-                      ) : row.countryCode ? (
-                        <img src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                      {resolveTeamFlag(row) ? (
+                        <img src={resolveTeamFlag(row)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
                       ) : null}
                       <span className="text-sm font-normal text-(--text-primary) truncate">{row.shortName ?? row.name}</span>
                       {row.qualified && <span className="text-[9px] font-bold shrink-0" style={{ color: "#10B981" }}>Q</span>}

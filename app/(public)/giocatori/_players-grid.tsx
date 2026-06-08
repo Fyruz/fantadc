@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import RoleBadge from "@/components/role-badge";
+import { resolveTeamFlag } from "@/lib/flags";
 
 type MatchStat = {
   matchId: number;
@@ -234,7 +235,7 @@ export default function PlayersGrid({ groups }: { groups: Group[] }) {
                 {(() => {
                   const t = players[0]?.footballTeam;
                   if (!t) return null;
-                  const src = t.logoUrl ?? (t.countryCode ? `https://flagcdn.com/w40/${t.countryCode.toLowerCase()}.png` : null);
+                  const src = resolveTeamFlag(t);
                   if (!src) return null;
                   return (
                     <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>

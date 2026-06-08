@@ -1,7 +1,7 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 export const dynamic = 'force-dynamic'
 
 
@@ -35,7 +35,7 @@ export default async function SquadrePublicPage() {
       ) : (
         <div className="grid grid-cols-4 gap-x-5 gap-y-10">
           {teams.map((team) => {
-            const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+            const flagSrc = resolveTeamFlag(team);
             return (
               <Link
                 key={team.id}

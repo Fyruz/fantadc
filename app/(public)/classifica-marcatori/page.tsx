@@ -1,7 +1,7 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 export const dynamic = 'force-dynamic'
 
 
@@ -63,7 +63,7 @@ export default async function ClassificaMarcatoriPage() {
       ) : (
         <div className="flex flex-col">
           {ranked.map((p, idx) => {
-            const flagSrc = p.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(p.footballTeam.countryCode);
+            const flagSrc = resolveTeamFlag(p.footballTeam);
             return (
               <div
                 key={p.id}

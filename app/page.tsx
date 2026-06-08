@@ -4,6 +4,7 @@ import MobileOnlyGate from "@/components/mobile-only-gate";
 import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
+import { resolveTeamFlag } from "@/lib/flags";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -15,17 +16,9 @@ function MatchTeamLogo({
 }) {
   const label = (shortName ?? name).slice(0, 2).toUpperCase();
   const wrapClass = "w-12 h-12 p-1 flex justify-center items-center aspect-square shrink-0";
-  if (logoUrl) {
-    return <img src={logoUrl} alt={name} className={`${wrapClass} object-contain`} />;
-  }
-  if (countryCode) {
-    return (
-      <img
-        src={`https://flagcdn.com/w80/${countryCode.toLowerCase()}.png`}
-        alt={name}
-        className={`${wrapClass} object-contain rounded`}
-      />
-    );
+  const src = resolveTeamFlag({ countryCode, logoUrl });
+  if (src) {
+    return <img src={src} alt={name} className={`${wrapClass} object-contain rounded`} />;
   }
   return (
     <div className={`${wrapClass} rounded-full font-black text-sm text-white bg-primary`}>
@@ -440,10 +433,8 @@ export default async function HomePage({
                     >
                       <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {row.logoUrl ? (
-                          <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
-                        ) : row.countryCode ? (
-                          <img src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                        {resolveTeamFlag(row) ? (
+                          <img src={resolveTeamFlag(row)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
                         ) : null}
                         <span className="text-sm font-normal text-black truncate">
                           {row.shortName ?? row.name}
@@ -495,10 +486,8 @@ export default async function HomePage({
                   <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
-                      {player.footballTeam.logoUrl ? (
-                        <img src={player.footballTeam.logoUrl} alt={player.footballTeam.name} className="w-full h-full object-contain" />
-                      ) : player.footballTeam.countryCode ? (
-                        <img src={`https://flagcdn.com/w40/${player.footballTeam.countryCode.toLowerCase()}.png`} alt={player.footballTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                      {resolveTeamFlag(player.footballTeam) ? (
+                        <img src={resolveTeamFlag(player.footballTeam)!} alt={player.footballTeam.name} className="w-full h-auto object-contain rounded-sm" />
                       ) : null}
                     </div>
                     <span className="text-sm font-normal text-black truncate">{player.name}</span>

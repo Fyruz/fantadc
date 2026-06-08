@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import BackButton from "@/components/back-button";
 import RoleBadge from "@/components/role-badge";
 import { db } from "@/lib/db";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 export const revalidate = 60;
 
@@ -37,7 +37,7 @@ export default async function SquadraPublicDetailPage({
 
   if (!team) notFound();
 
-  const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+  const flagSrc = resolveTeamFlag(team);
   const goalkeepers = team.players.filter((player) => player.role === "P");
   const outfield = team.players.filter((player) => player.role !== "P");
 

@@ -2,9 +2,6 @@ import countriesRaw from "@/lib/countries.json";
 
 type CountryRow = { name: string; code: string };
 
-export const FLAGS_API_STYLE = "flat";
-export const FLAGS_API_SIZE = 64;
-
 const rows = [...(countriesRaw as CountryRow[])].sort((a, b) =>
   a.name.localeCompare(b.name, "en")
 );
@@ -17,10 +14,14 @@ export type CountryOption = {
 
 const COUNTRY_CODES = new Set(rows.map((country) => country.code));
 
+// Host dei vecchi servizi esterni: usati solo per riconoscere e normalizzare
+// eventuali URL ancora salvati nel DB verso le bandiere locali.
+const EXTERNAL_FLAG_HOSTS = ["flagsapi.com", "flagcdn.com"];
+
 export const COUNTRY_OPTIONS: CountryOption[] = rows.map((country) => ({
   label: country.name,
   value: country.code,
-  flagUrl: buildFlagsApiUrl(country.code),
+  flagUrl: buildFlagUrl(country.code),
 }));
 
 export function normalizeCountryCode(value: unknown): string | undefined {
@@ -37,12 +38,29 @@ export function isSupportedCountryCode(value: unknown): boolean {
   return COUNTRY_CODES.has(normalized);
 }
 
-export function buildFlagsApiUrl(countryCode: string): string {
-  return `https://flagsapi.com/${countryCode}/${FLAGS_API_STYLE}/${FLAGS_API_SIZE}.png`;
+// Bandiere self-hosted in public/flags/{cc}.png (vedi scripts/download-flags.mjs).
+export function buildFlagUrl(countryCode: string): string {
+  return `/flags/${countryCode.toLowerCase()}.png`;
 }
 
 export function getFlagUrlFromCountryCode(value: unknown): string | null {
   const normalized = normalizeCountryCode(value);
   if (!normalized || !isSupportedCountryCode(normalized)) return null;
-  return buildFlagsApiUrl(normalized);
+  return buildFlagUrl(normalized);
+}
+
+export function isExternalFlagUrl(url: string): boolean {
+  return EXTERNAL_FLAG_HOSTS.some((host) => url.includes(host));
+}
+
+// Sorgente unica per la bandiera/logo di una squadra:
+// - usa logoUrl solo se è un logo "vero" (non un vecchio URL di servizio esterno),
+// - altrimenti ricava la bandiera locale dal countryCode.
+export function resolveTeamFlag(team: {
+  countryCode?: string | null;
+  logoUrl?: string | null;
+}): string | null {
+  const logo = team.logoUrl?.trim();
+  if (logo && !isExternalFlagUrl(logo)) return logo;
+  return getFlagUrlFromCountryCode(team.countryCode);
 }

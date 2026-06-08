@@ -1,6 +1,6 @@
 import { z } from "zod";
 import {
-  buildFlagsApiUrl,
+  buildFlagUrl,
   isSupportedCountryCode,
   normalizeCountryCode,
 } from "@/lib/flags";
@@ -42,6 +42,6 @@ export function buildFootballTeamPayload(
     name: input.name,
     shortName: input.shortName || null,
     countryCode: countryCode ?? null,
-    logoUrl: countryCode ? buildFlagsApiUrl(countryCode) : null,
+    logoUrl: countryCode ? buildFlagUrl(countryCode) : null,
   };
 }

@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildFlagsApiUrl,
+  buildFlagUrl,
   getFlagUrlFromCountryCode,
   isSupportedCountryCode,
   normalizeCountryCode,
+  resolveTeamFlag,
 } from "./flags";
 
 describe("flags helpers", () => {
@@ -29,13 +30,33 @@ describe("flags helpers", () => {
     expect(isSupportedCountryCode("1T")).toBe(false);
   });
 
-  it("genera URL FlagsAPI coerente", () => {
-    expect(buildFlagsApiUrl("IT")).toBe("https://flagsapi.com/IT/flat/64.png");
+  it("genera path bandiera locale coerente", () => {
+    expect(buildFlagUrl("IT")).toBe("/flags/it.png");
   });
 
-  it("restituisce URL solo per country code supportati", () => {
-    expect(getFlagUrlFromCountryCode("IT")).toBe("https://flagsapi.com/IT/flat/64.png");
+  it("restituisce path solo per country code supportati", () => {
+    expect(getFlagUrlFromCountryCode("IT")).toBe("/flags/it.png");
     expect(getFlagUrlFromCountryCode("ZZ")).toBeNull();
     expect(getFlagUrlFromCountryCode("ITA")).toBeNull();
+  });
+
+  it("resolveTeamFlag normalizza vecchi URL esterni verso la bandiera locale", () => {
+    expect(
+      resolveTeamFlag({ countryCode: "IT", logoUrl: "https://flagsapi.com/IT/flat/64.png" })
+    ).toBe("/flags/it.png");
+    expect(
+      resolveTeamFlag({ countryCode: "IT", logoUrl: "https://flagcdn.com/w40/it.png" })
+    ).toBe("/flags/it.png");
+  });
+
+  it("resolveTeamFlag preferisce un logo custom reale", () => {
+    expect(
+      resolveTeamFlag({ countryCode: "IT", logoUrl: "/uploads/logo.png" })
+    ).toBe("/uploads/logo.png");
+  });
+
+  it("resolveTeamFlag ricava la bandiera dal solo countryCode", () => {
+    expect(resolveTeamFlag({ countryCode: "FR", logoUrl: null })).toBe("/flags/fr.png");
+    expect(resolveTeamFlag({ countryCode: null, logoUrl: null })).toBeNull();
   });
 });

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { computeTeamHistory } from "@/lib/scoring";
 import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 import ScoreTable from "../squadra/_score-table";
 import { Button } from "primereact/button";
 import ShareStoryButton from "../squadra/_share-story-button";
@@ -112,7 +112,7 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 gap-2">
             {fantasyTeam.players.map(({ player }) => {
               const isCaptain = player.id === fantasyTeam.captainPlayerId;
-              const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
+              const flagSrc = resolveTeamFlag(player.footballTeam);
               return (
                 <div
                   key={player.id}

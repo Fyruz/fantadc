@@ -1,6 +1,6 @@
 import BackButton from "@/components/back-button";
 import { db } from "@/lib/db";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -28,7 +28,7 @@ export default async function GiocatoriFantaPage() {
         role: player.role,
         footballTeamName: player.footballTeam.name,
         footballTeamShortName: player.footballTeam.shortName,
-        flagSrc: player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode),
+        flagSrc: resolveTeamFlag(player.footballTeam),
         pickCount,
         pickRate: totalFantasyTeams > 0 ? (pickCount / totalFantasyTeams) * 100 : 0,
       };

@@ -1,6 +1,7 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { resolveTeamFlag } from "@/lib/flags";
 export const dynamic = 'force-dynamic'
 
 
@@ -151,11 +152,9 @@ export default async function GironiPublicPage() {
             >
               <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{idx + 1}</span>
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                {row.logoUrl ? (
-                  <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
-                ) : row.countryCode ? (
+                {resolveTeamFlag(row) ? (
                   <img
-                    src={`https://flagcdn.com/w40/${row.countryCode.toLowerCase()}.png`}
+                    src={resolveTeamFlag(row)!}
                     alt={row.name}
                     className="w-6 h-4 object-contain rounded-sm shrink-0"
                   />

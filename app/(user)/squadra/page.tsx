@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
 
 const CARD: React.CSSProperties = {
   background: "#fff",
@@ -90,7 +90,7 @@ export default async function SquadraPage() {
                 key={player.id}
                 name={player.name}
                 team={player.footballTeam.shortName ?? player.footballTeam.name}
-                flagSrc={player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode)}
+                flagSrc={resolveTeamFlag(player.footballTeam)}
                 flagAlt={player.footballTeam.name}
                 isCaptain={player.id === fantasyTeam.captainPlayerId}
               />
@@ -101,7 +101,7 @@ export default async function SquadraPage() {
               <PlayerChip
                 name={gk.player.name}
                 team={gk.player.footballTeam.shortName ?? gk.player.footballTeam.name}
-                flagSrc={gk.player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(gk.player.footballTeam.countryCode)}
+                flagSrc={resolveTeamFlag(gk.player.footballTeam)}
                 flagAlt={gk.player.footballTeam.name}
                 isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
                 isGk
@@ -124,7 +124,7 @@ export default async function SquadraPage() {
 
         {fantasyTeam.players.map(({ player }) => {
           const isCaptain = player.id === fantasyTeam.captainPlayerId;
-          const flagSrc = player.footballTeam.logoUrl ?? getFlagUrlFromCountryCode(player.footballTeam.countryCode);
+          const flagSrc = resolveTeamFlag(player.footballTeam);
           const pts = playerTotals.get(player.id) ?? 0;
           return (
             <div key={player.id} className="flex items-center gap-3 px-6 py-3" style={ROW_BORDER}>
