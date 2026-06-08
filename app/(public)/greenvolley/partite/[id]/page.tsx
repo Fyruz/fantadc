@@ -72,7 +72,7 @@ export default async function VolleyMatchPublicPage({
         {/* Squadre + punteggi */}
         <div className="px-6 py-5 flex flex-col gap-4">
           <div className="flex items-center justify-between gap-4">
-            <span className="text-base font-medium text-black flex-1">{match.homeTeam.name}</span>
+            <Link href={`/greenvolley/squadre/${match.homeTeam.id}`} className="text-base font-medium text-black flex-1 truncate">{match.homeTeam.name}</Link>
             {scored && (
               <span
                 className="text-2xl font-bold tabular-nums shrink-0"
@@ -83,7 +83,7 @@ export default async function VolleyMatchPublicPage({
             )}
           </div>
           <div className="flex items-center justify-between gap-4">
-            <span className="text-base font-medium text-black flex-1">{match.awayTeam.name}</span>
+            <Link href={`/greenvolley/squadre/${match.awayTeam.id}`} className="text-base font-medium text-black flex-1 truncate">{match.awayTeam.name}</Link>
             {scored && (
               <span
                 className="text-2xl font-bold tabular-nums shrink-0"
@@ -170,7 +170,7 @@ export default async function VolleyMatchPublicPage({
           <div className="flex pb-6">
             {/* Home */}
             <div className="flex-1 min-w-0 px-6 pt-4">
-              <p className="text-sm font-medium text-black truncate mb-4">{match.homeTeam.name}</p>
+              <Link href={`/greenvolley/squadre/${match.homeTeam.id}`} className="text-sm font-medium text-black truncate mb-4 block">{match.homeTeam.name}</Link>
               <div className="flex flex-col gap-3">
                 {match.homeTeam.players.map((p) => (
                   <div key={p.id} className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default async function VolleyMatchPublicPage({
 
             {/* Away */}
             <div className="flex-1 min-w-0 px-6 pt-4">
-              <p className="text-sm font-medium text-black truncate mb-4">{match.awayTeam.name}</p>
+              <Link href={`/greenvolley/squadre/${match.awayTeam.id}`} className="text-sm font-medium text-black truncate mb-4 block">{match.awayTeam.name}</Link>
               <div className="flex flex-col gap-3">
                 {match.awayTeam.players.map((p) => (
                   <div key={p.id} className="flex items-center gap-2">

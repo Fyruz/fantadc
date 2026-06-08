@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { BackButton } from "./BackButton";
 import { computeVolleyStandings } from "@/lib/volley/standings";
+import { BackButton } from "./BackButton";
 
 export const revalidate = 60;
 
@@ -147,7 +147,7 @@ export default async function VolleySquadraDetailPage({
         >
           {team.name.charAt(0).toUpperCase()}
         </div>
-        <h1 className="text-base font-semibold text-black">{team.name}</h1>
+        <h1 className="text-xl font-semibold text-black">{team.name}</h1>
       </div>
 
       {/* Tab bar */}
@@ -231,7 +231,7 @@ function SommarioTab({
           </div>
           <div className="flex gap-5 overflow-x-auto -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
             {players.slice(0, 6).map((p) => (
-              <div key={p.id} className="flex flex-col items-center gap-2 shrink-0 w-[72px]">
+              <div key={p.id} className="flex flex-col items-center gap-2 shrink-0 w-18">
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{ background: "#fff", border: "1px solid rgba(9,20,76,0.08)" }}

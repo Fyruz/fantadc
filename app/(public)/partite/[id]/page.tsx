@@ -128,12 +128,12 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           {/* Teams + score */}
           <div className="flex items-center gap-3">
             {/* Home */}
-            <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex flex-col items-center gap-3 flex-1 min-w-0">
               <TeamLogo team={match.homeTeam} />
               <span className="text-sm text-black text-center leading-tight">
                 {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
               </span>
-            </div>
+            </Link>
 
             {/* Center */}
             <div className="flex flex-col items-center gap-2 shrink-0 text-center overflow-hidden whitespace-nowrap">
@@ -157,12 +157,12 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Away */}
-            <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex flex-col items-center gap-3 flex-1 min-w-0">
               <TeamLogo team={match.awayTeam} />
               <span className="text-sm text-black text-center leading-tight">
                 {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
               </span>
-            </div>
+            </Link>
           </div>
 
           {/* Fischio finale */}
@@ -289,7 +289,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           <div className="flex pb-6">
             {/* Home column */}
             <div className="flex-1 min-w-0 px-6">
-              <div className="flex items-center gap-2 mb-4">
+              <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.homeTeam && resolveTeamFlag(match.homeTeam) ? (
                     <img src={resolveTeamFlag(match.homeTeam)!} alt={match.homeTeam.name} className="w-full h-auto object-contain rounded-sm" />
@@ -298,7 +298,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                 <span className="text-sm font-medium text-black truncate">
                   {match.homeTeam?.shortName ?? match.homeTeam?.name ?? "Casa"}
                 </span>
-              </div>
+              </Link>
               <div className="flex flex-col gap-3">
                 {homePlayers.map(({ player }) => (
                   <div key={player.id} className="flex items-center gap-2">
@@ -311,7 +311,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
             {/* Away column */}
             <div className="flex-1 min-w-0 px-6">
-              <div className="flex items-center gap-2 mb-4">
+              <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.awayTeam && resolveTeamFlag(match.awayTeam) ? (
                     <img src={resolveTeamFlag(match.awayTeam)!} alt={match.awayTeam.name} className="w-full h-auto object-contain rounded-sm" />
@@ -320,7 +320,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                 <span className="text-sm font-medium text-black truncate">
                   {match.awayTeam?.shortName ?? match.awayTeam?.name ?? "Ospiti"}
                 </span>
-              </div>
+              </Link>
               <div className="flex flex-col gap-3">
                 {awayPlayers.map(({ player }) => (
                   <div key={player.id} className="flex items-center gap-2">
