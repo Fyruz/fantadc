@@ -1,6 +1,7 @@
 import BackButton from "@/components/back-button";
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
+import PlayerPickRow from "./_player-row";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -12,7 +13,13 @@ export default async function GiocatoriFantaPage() {
         footballTeam: {
           select: { name: true, shortName: true, countryCode: true, logoUrl: true },
         },
-        _count: { select: { fantasyTeams: true } },
+        fantasyTeams: {
+          include: {
+            fantasyTeam: {
+              select: { id: true, name: true, user: { select: { name: true, email: true } } },
+            },
+          },
+        },
       },
     }),
     db.fantasyTeam.count(),
@@ -20,7 +27,14 @@ export default async function GiocatoriFantaPage() {
 
   const rows = players
     .map((player) => {
-      const pickCount = player._count.fantasyTeams;
+      const pickCount = player.fantasyTeams.length;
+      const fantasyTeamRows = player.fantasyTeams
+        .map(({ fantasyTeam }) => ({
+          id: fantasyTeam.id,
+          name: fantasyTeam.name,
+          ownerLabel: fantasyTeam.user.name ?? fantasyTeam.user.email,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name, "it"));
       return {
         rank: 0,
         playerId: player.id,
@@ -31,6 +45,7 @@ export default async function GiocatoriFantaPage() {
         flagSrc: resolveTeamFlag(player.footballTeam),
         pickCount,
         pickRate: totalFantasyTeams > 0 ? (pickCount / totalFantasyTeams) * 100 : 0,
+        fantasyTeams: fantasyTeamRows,
       };
     })
     .filter((row) => row.pickCount > 0)
@@ -79,46 +94,7 @@ export default async function GiocatoriFantaPage() {
       {/* Rows */}
       <div className="flex flex-col">
         {rows.map((row, idx) => (
-          <div
-            key={row.playerId}
-            className="flex gap-4 items-center py-3 transition-colors hover:bg-(--surface-1)"
-            style={{
-              borderBottom: idx < rows.length - 1 ? "1px solid rgba(0,0,0,0.05)" : undefined,
-              paddingLeft: 8,
-              borderLeft: "2px solid transparent",
-            }}
-          >
-            <span className="text-xs shrink-0 w-5 text-black">{row.rank}</span>
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
-              {row.flagSrc ? (
-                <img
-                  src={row.flagSrc}
-                  alt={row.footballTeamName}
-                  className="h-full w-full object-contain p-1"
-                />
-              ) : (
-                <span className="text-[10px] font-semibold uppercase" style={{ color: "rgba(0,0,0,0.55)" }}>
-                  {(row.footballTeamShortName ?? row.footballTeamName).slice(0, 2)}
-                </span>
-              )}
-            </div>
-            <div className="flex flex-col gap-1 flex-1 min-w-0">
-              <span className="text-sm truncate font-medium text-black">{row.playerName}</span>
-              <span className="text-xs truncate" style={{ color: "rgba(0,0,0,0.65)" }}>
-                {row.footballTeamShortName ?? row.footballTeamName}
-                {" · "}
-                {row.role === "P" ? "Portiere" : "Giocatore"}
-              </span>
-            </div>
-            <div className="flex flex-col items-end gap-1 shrink-0">
-              <span className="text-sm font-semibold text-black">
-                {row.pickCount}
-              </span>
-              <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>
-                {row.pickRate.toFixed(0)}%
-              </span>
-            </div>
-          </div>
+          <PlayerPickRow key={row.playerId} row={row} isLast={idx === rows.length - 1} />
         ))}
       </div>
       </div>
