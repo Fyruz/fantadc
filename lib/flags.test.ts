@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   buildFlagUrl,
+  COUNTRY_OPTIONS,
   getFlagUrlFromCountryCode,
   isSupportedCountryCode,
   normalizeCountryCode,
   resolveTeamFlag,
 } from "./flags";
+import { CUSTOM_COUNTRIES } from "./custom-countries";
 
 describe("flags helpers", () => {
   it("normalizza country code in uppercase", () => {
@@ -58,5 +60,27 @@ describe("flags helpers", () => {
   it("resolveTeamFlag ricava la bandiera dal solo countryCode", () => {
     expect(resolveTeamFlag({ countryCode: "FR", logoUrl: null })).toBe("/flags/fr.png");
     expect(resolveTeamFlag({ countryCode: null, logoUrl: null })).toBeNull();
+  });
+});
+
+describe("paesi custom", () => {
+  it("i Paesi Baschi sono supportati e selezionabili", () => {
+    expect(isSupportedCountryCode("EUS")).toBe(true);
+    expect(getFlagUrlFromCountryCode("eus")).toBe("/flags/paesi_baschi.svg");
+    expect(buildFlagUrl("EUS")).toBe("/flags/paesi_baschi.svg");
+    expect(COUNTRY_OPTIONS.some((o) => o.value === "EUS" && o.label === "Paesi Baschi")).toBe(true);
+  });
+
+  it("ogni paese custom è presente tra le opzioni con la sua bandiera", () => {
+    for (const custom of CUSTOM_COUNTRIES) {
+      expect(isSupportedCountryCode(custom.code)).toBe(true);
+      expect(getFlagUrlFromCountryCode(custom.code)).toBe(custom.flagUrl);
+      const option = COUNTRY_OPTIONS.find((o) => o.value === custom.code);
+      expect(option).toEqual({ label: custom.name, value: custom.code, flagUrl: custom.flagUrl });
+    }
+  });
+
+  it("resolveTeamFlag funziona per una squadra con codice custom", () => {
+    expect(resolveTeamFlag({ countryCode: "EUS", logoUrl: null })).toBe("/flags/paesi_baschi.svg");
   });
 });

@@ -1,10 +1,7 @@
 import countriesRaw from "@/lib/countries.json";
+import { CUSTOM_COUNTRIES } from "@/lib/custom-countries";
 
 type CountryRow = { name: string; code: string };
-
-const rows = [...(countriesRaw as CountryRow[])].sort((a, b) =>
-  a.name.localeCompare(b.name, "en")
-);
 
 export type CountryOption = {
   label: string;
@@ -12,17 +9,32 @@ export type CountryOption = {
   flagUrl: string;
 };
 
-const COUNTRY_CODES = new Set(rows.map((country) => country.code));
-
 // Host dei vecchi servizi esterni: usati solo per riconoscere e normalizzare
 // eventuali URL ancora salvati nel DB verso le bandiere locali.
 const EXTERNAL_FLAG_HOSTS = ["flagsapi.com", "flagcdn.com"];
 
-export const COUNTRY_OPTIONS: CountryOption[] = rows.map((country) => ({
+// Paesi ISO: bandiera self-hosted come /flags/{cc}.png (vedi scripts/download-flags.mjs).
+const isoRows: CountryOption[] = (countriesRaw as CountryRow[]).map((country) => ({
   label: country.name,
   value: country.code,
-  flagUrl: buildFlagUrl(country.code),
+  flagUrl: `/flags/${country.code.toLowerCase()}.png`,
 }));
+
+// Paesi/regioni custom (vedi lib/custom-countries.ts): bandiera a percorso esplicito.
+const customRows: CountryOption[] = CUSTOM_COUNTRIES.map((country) => ({
+  label: country.name,
+  value: country.code,
+  flagUrl: country.flagUrl,
+}));
+
+export const COUNTRY_OPTIONS: CountryOption[] = [...isoRows, ...customRows].sort(
+  (a, b) => a.label.localeCompare(b.label, "en")
+);
+
+const COUNTRY_CODES = new Set(COUNTRY_OPTIONS.map((option) => option.value));
+const FLAG_URL_BY_CODE = new Map(
+  COUNTRY_OPTIONS.map((option) => [option.value, option.flagUrl])
+);
 
 export function normalizeCountryCode(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
@@ -34,19 +46,21 @@ export function normalizeCountryCode(value: unknown): string | undefined {
 export function isSupportedCountryCode(value: unknown): boolean {
   const normalized = normalizeCountryCode(value);
   if (!normalized) return false;
-  if (!/^[A-Z]{2}$/.test(normalized)) return false;
+  // ISO a 2 lettere oppure codici custom fino a 3 lettere (es. "EUS").
+  if (!/^[A-Z]{2,3}$/.test(normalized)) return false;
   return COUNTRY_CODES.has(normalized);
 }
 
-// Bandiere self-hosted in public/flags/{cc}.png (vedi scripts/download-flags.mjs).
+// Restituisce il percorso della bandiera per un codice (ISO o custom).
 export function buildFlagUrl(countryCode: string): string {
-  return `/flags/${countryCode.toLowerCase()}.png`;
+  const normalized = countryCode.trim().toUpperCase();
+  return FLAG_URL_BY_CODE.get(normalized) ?? `/flags/${normalized.toLowerCase()}.png`;
 }
 
 export function getFlagUrlFromCountryCode(value: unknown): string | null {
   const normalized = normalizeCountryCode(value);
   if (!normalized || !isSupportedCountryCode(normalized)) return null;
-  return buildFlagUrl(normalized);
+  return FLAG_URL_BY_CODE.get(normalized) ?? null;
 }
 
 export function isExternalFlagUrl(url: string): boolean {

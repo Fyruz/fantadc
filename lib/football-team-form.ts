@@ -11,7 +11,7 @@ const CountryCodeSchema = z
   .toUpperCase()
   .optional()
   .or(z.literal(""))
-  .refine((value) => !value || /^[A-Z]{2}$/.test(value), {
+  .refine((value) => !value || /^[A-Z]{2,3}$/.test(value), {
     message: "Codice nazione non valido",
   })
   .refine((value) => !value || isSupportedCountryCode(value), {
