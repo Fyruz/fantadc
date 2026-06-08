@@ -95,9 +95,9 @@ export default async function SquadraPublicDetailPage({
     db.match.findMany({
       where: {
         OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-        NOT: { status: "DRAFT" },
+        status: "CONCLUDED",
       },
-      orderBy: { startsAt: "asc" },
+      orderBy: { startsAt: "desc" },
       select: {
         id: true, startsAt: true, status: true, homeScore: true, awayScore: true, homeSeed: true, awaySeed: true,
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
@@ -192,7 +192,7 @@ export default async function SquadraPublicDetailPage({
       </div>
 
       {activeTab === "sommario" && (
-        <SommarioTab nextMatch={nextMatch} players={team.players} scorerRows={scorerRows} teamId={teamId} />
+        <SommarioTab nextMatch={nextMatch} lastMatch={teamMatches[0] ?? null} players={team.players} scorerRows={scorerRows} teamId={teamId} />
       )}
       {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
       {activeTab === "classifica" && (
@@ -228,32 +228,37 @@ function formatTime(date: Date | null) {
 
 function SommarioTab({
   nextMatch,
+  lastMatch,
   players,
   scorerRows,
   teamId,
 }: {
   nextMatch: MatchRow | null;
+  lastMatch: MatchRow | null;
   players: { id: number; name: string; role: string }[];
   scorerRows: { name: string; goals: number }[];
   teamId: number;
 }) {
+  const featuredMatch = nextMatch ?? lastMatch;
+  const featuredLabel = nextMatch ? "Prossima partita" : "Ultima partita";
+
   return (
     <div className="flex flex-col gap-10">
-      {/* Prossima partita */}
-      {nextMatch && nextMatch.homeTeam && nextMatch.awayTeam && (
+      {/* Prossima / Ultima partita */}
+      {featuredMatch && featuredMatch.homeTeam && featuredMatch.awayTeam && (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-base font-medium text-black">Prossima partita</h2>
+            <h2 className="text-base font-medium text-black">{featuredLabel}</h2>
             <Link href={`?tab=partite`} replace className="text-xs font-semibold text-black">Vedi tutto</Link>
           </div>
           <Link
-            href={`/partite/${nextMatch.id}`}
+            href={`/partite/${featuredMatch.id}`}
             className="bg-white rounded-3xl p-6 flex flex-col gap-4"
             style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
           >
             {(() => {
-              const label = nextMatch.group?.name ?? nextMatch.knockoutRound?.name ?? null;
-              const date = nextMatch.startsAt ? nextMatch.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
+              const label = featuredMatch.group?.name ?? featuredMatch.knockoutRound?.name ?? null;
+              const date = featuredMatch.startsAt ? featuredMatch.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
               return (label || date) ? (
                 <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
                   {label && <span className="text-sm text-black">{label}</span>}
@@ -265,21 +270,24 @@ function SommarioTab({
               <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
                 <div className="flex items-center gap-3">
                   <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
-                    <PartiteTeamLogo team={nextMatch.homeTeam} />
+                    <PartiteTeamLogo team={featuredMatch.homeTeam} />
                   </div>
-                  <span className="text-sm text-black flex-1 truncate">{nextMatch.homeTeam.shortName ?? nextMatch.homeTeam.name}</span>
+                  <span className="text-sm text-black flex-1 truncate">{featuredMatch.homeTeam.shortName ?? featuredMatch.homeTeam.name}</span>
+                  {!nextMatch && <span className="text-sm font-semibold text-black shrink-0">{featuredMatch.homeScore}</span>}
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
-                    <PartiteTeamLogo team={nextMatch.awayTeam} />
+                    <PartiteTeamLogo team={featuredMatch.awayTeam} />
                   </div>
-                  <span className="text-sm text-black flex-1 truncate">{nextMatch.awayTeam.shortName ?? nextMatch.awayTeam.name}</span>
+                  <span className="text-sm text-black flex-1 truncate">{featuredMatch.awayTeam.shortName ?? featuredMatch.awayTeam.name}</span>
+                  {!nextMatch && <span className="text-sm font-semibold text-black shrink-0">{featuredMatch.awayScore}</span>}
                 </div>
               </div>
               <div className="flex flex-col items-center justify-center gap-3 shrink-0">
-                {formatTime(nextMatch.startsAt) && (
-                  <span className="text-sm text-black">{formatTime(nextMatch.startsAt)}</span>
-                )}
+                {nextMatch
+                  ? formatTime(featuredMatch.startsAt) && <span className="text-sm text-black">{formatTime(featuredMatch.startsAt)}</span>
+                  : <span className="text-xs font-medium" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
+                }
                 <span className="text-xs font-medium text-black">Vedi i dettagli</span>
               </div>
             </div>
@@ -341,7 +349,7 @@ function SommarioTab({
 
 function PartiteTab({ matches }: { matches: MatchRow[] }) {
   if (matches.length === 0) {
-    return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna partita disponibile.</p>;
+    return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna partita precedente.</p>;
   }
   return (
     <div className="flex flex-col gap-6">
