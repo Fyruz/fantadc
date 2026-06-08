@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 type Player = { id: number; name: string };
 type Team = { id: number; name: string; players: Player[] };
@@ -13,12 +14,7 @@ function TeamCard({ team }: { team: Team }) {
       className="rounded-3xl overflow-hidden bg-white"
       style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
     >
-      <button
-        type="button"
-        className="w-full flex items-center gap-3 px-6 py-4 text-left"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-      >
+      <div className="flex items-center gap-3 px-6 py-4">
         {/* Avatar */}
         <div
           className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
@@ -27,18 +23,25 @@ function TeamCard({ team }: { team: Team }) {
           {team.name.slice(0, 2).toUpperCase()}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <Link href={`/greenvolley/squadre/${team.id}`} className="flex-1 min-w-0">
           <p className="text-sm font-medium text-black truncate">{team.name}</p>
           <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
             {team.players.length} {team.players.length === 1 ? "giocatore" : "giocatori"}
           </p>
-        </div>
+        </Link>
 
-        <i
-          className={`pi pi-chevron-down text-xs shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-          style={{ color: "rgba(0,0,0,0.35)" }}
-        />
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          aria-expanded={open}
+          className="shrink-0 w-6 h-6 flex items-center justify-center"
+        >
+          <i
+            className={`pi pi-chevron-down text-xs transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+            style={{ color: "rgba(0,0,0,0.35)" }}
+          />
+        </button>
+      </div>
 
       <div
         className="grid transition-[grid-template-rows] duration-300 ease-in-out"
