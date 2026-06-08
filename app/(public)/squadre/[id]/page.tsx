@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
-import { resolveTeamFlag } from "@/lib/flags";
+import { BackButton } from "./BackButton";
+import { getFlagUrlFromCountryCode } from "@/lib/flags";
 
 export const revalidate = 60;
 
@@ -21,9 +22,11 @@ type MatchRow = {
   status: string;
   homeScore: number | null;
   awayScore: number | null;
+  homeSeed: string | null;
+  awaySeed: string | null;
   homeTeam: MatchTeam | null;
   awayTeam: MatchTeam | null;
-  group: { name: string } | null;
+  group: { name: string; slug: string } | null;
   knockoutRound: { name: string } | null;
 };
 
@@ -61,10 +64,10 @@ export default async function SquadraPublicDetailPage({
       },
       orderBy: { startsAt: "asc" },
       select: {
-        id: true, startsAt: true, status: true, homeScore: true, awayScore: true,
+        id: true, startsAt: true, status: true, homeScore: true, awayScore: true, homeSeed: true, awaySeed: true,
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
         awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        group: { select: { name: true } },
+        group: { select: { name: true, slug: true } },
         knockoutRound: { select: { name: true } },
       },
     }),
@@ -96,10 +99,10 @@ export default async function SquadraPublicDetailPage({
       },
       orderBy: { startsAt: "asc" },
       select: {
-        id: true, startsAt: true, status: true, homeScore: true, awayScore: true,
+        id: true, startsAt: true, status: true, homeScore: true, awayScore: true, homeSeed: true, awaySeed: true,
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
         awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        group: { select: { name: true } },
+        group: { select: { name: true, slug: true } },
         knockoutRound: { select: { name: true } },
       },
     }),
@@ -119,13 +122,14 @@ export default async function SquadraPublicDetailPage({
   }));
 
   // Group standings
-  type StandingRow = { teamId: number; name: string; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number };
+  type StandingRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number };
   let standings: StandingRow[] = [];
   if (teamGroup) {
     const map = new Map<number, StandingRow>();
     for (const gt of teamGroup.teams) {
       map.set(gt.footballTeamId, {
         teamId: gt.footballTeamId, name: gt.footballTeam.name,
+        shortName: gt.footballTeam.shortName, countryCode: gt.footballTeam.countryCode, logoUrl: gt.footballTeam.logoUrl,
         played: 0, won: 0, drawn: 0, lost: 0, goalDiff: 0, points: 0,
       });
     }
@@ -154,12 +158,10 @@ export default async function SquadraPublicDetailPage({
   ];
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-6">
       {/* Back — mobile only (top nav is hidden on this route) */}
-      <div className="md:hidden h-12 flex items-center">
-        <Link href="/squadre" className="flex items-center justify-center w-6 h-6">
-          <img src="/icons/chevron_left.svg" width={24} height={24} alt="Indietro" />
-        </Link>
+      <div className="md:hidden flex items-center">
+        <BackButton />
       </div>
 
       {/* Team identity */}
@@ -167,7 +169,7 @@ export default async function SquadraPublicDetailPage({
         {flagSrc && (
           <img src={flagSrc} alt={team.name} className="w-16 h-16 object-contain" />
         )}
-        <h1 className="text-base font-semibold text-black">{team.name}</h1>
+        <h1 className="text-xl font-semibold text-black">{team.name}</h1>
       </div>
 
       {/* Tab bar */}
@@ -176,6 +178,7 @@ export default async function SquadraPublicDetailPage({
           <Link
             key={t.key}
             href={`?tab=${t.key}`}
+            replace
             className={`shrink-0 text-sm pb-2 mr-6 transition-colors ${activeTab === t.key ? "font-semibold" : "font-normal"}`}
             style={{
               color: activeTab === t.key ? "var(--text-primary)" : "rgba(0,0,0,0.65)",
@@ -191,7 +194,7 @@ export default async function SquadraPublicDetailPage({
       {activeTab === "sommario" && (
         <SommarioTab nextMatch={nextMatch} players={team.players} scorerRows={scorerRows} teamId={teamId} />
       )}
-      {activeTab === "partite" && <PartiteTab matches={teamMatches} teamId={teamId} />}
+      {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
       {activeTab === "classifica" && (
         <ClassificaTab standings={standings} groupName={teamGroup?.name} teamId={teamId} />
       )}
@@ -220,10 +223,6 @@ function formatTime(date: Date | null) {
   return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
 }
 
-function formatDate(date: Date | null) {
-  if (!date) return null;
-  return date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
-}
 
 // ─── Sommario ────────────────────────────────────────────────────────────────
 
@@ -239,48 +238,49 @@ function SommarioTab({
   teamId: number;
 }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       {/* Prossima partita */}
       {nextMatch && nextMatch.homeTeam && nextMatch.awayTeam && (
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-base font-medium text-black">Prossima partita</h2>
-            <Link href={`?tab=partite`} className="text-xs font-semibold text-black">Vedi tutto</Link>
+            <Link href={`?tab=partite`} replace className="text-xs font-semibold text-black">Vedi tutto</Link>
           </div>
           <Link
             href={`/partite/${nextMatch.id}`}
-            className="bg-white rounded-3xl p-6 flex flex-col gap-4 block"
+            className="bg-white rounded-3xl p-6 flex flex-col gap-4"
             style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
           >
-            {(nextMatch.group || nextMatch.knockoutRound) && (
-              <div className="pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-                <span className="text-sm text-black">{nextMatch.group?.name ?? nextMatch.knockoutRound?.name}</span>
-              </div>
-            )}
+            {(() => {
+              const label = nextMatch.group?.name ?? nextMatch.knockoutRound?.name ?? null;
+              const date = nextMatch.startsAt ? nextMatch.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
+              return (label || date) ? (
+                <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
+                  {label && <span className="text-sm text-black">{label}</span>}
+                  {date && <span className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>{date}</span>}
+                </div>
+              ) : null;
+            })()}
             <div className="flex gap-6 items-center">
-              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-4" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
+              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
                 <div className="flex items-center gap-3">
-                  {teamFlag(nextMatch.homeTeam) && (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center p-1 shrink-0 overflow-hidden" style={{ border: "1px solid rgba(9,20,76,0.06)" }}>
-                      <img src={teamFlag(nextMatch.homeTeam)!} alt="" className="w-full h-full object-contain" />
-                    </div>
-                  )}
-                  <span className="text-sm text-black truncate">{nextMatch.homeTeam.shortName ?? nextMatch.homeTeam.name}</span>
+                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                    <PartiteTeamLogo team={nextMatch.homeTeam} />
+                  </div>
+                  <span className="text-sm text-black flex-1 truncate">{nextMatch.homeTeam.shortName ?? nextMatch.homeTeam.name}</span>
                 </div>
                 <div className="flex items-center gap-3">
-                  {teamFlag(nextMatch.awayTeam) && (
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center p-1 shrink-0 overflow-hidden" style={{ border: "1px solid rgba(9,20,76,0.06)" }}>
-                      <img src={teamFlag(nextMatch.awayTeam)!} alt="" className="w-full h-full object-contain" />
-                    </div>
-                  )}
-                  <span className="text-sm text-black truncate">{nextMatch.awayTeam.shortName ?? nextMatch.awayTeam.name}</span>
+                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                    <PartiteTeamLogo team={nextMatch.awayTeam} />
+                  </div>
+                  <span className="text-sm text-black flex-1 truncate">{nextMatch.awayTeam.shortName ?? nextMatch.awayTeam.name}</span>
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-2 shrink-0">
+              <div className="flex flex-col items-center justify-center gap-3 shrink-0">
                 {formatTime(nextMatch.startsAt) && (
-                  <span className="text-sm font-semibold text-black">{formatTime(nextMatch.startsAt)}</span>
+                  <span className="text-sm text-black">{formatTime(nextMatch.startsAt)}</span>
                 )}
-                <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>Vedi i dettagli</span>
+                <span className="text-xs font-medium text-black">Vedi i dettagli</span>
               </div>
             </div>
           </Link>
@@ -290,9 +290,9 @@ function SommarioTab({
       {/* Rosa preview */}
       {players.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-6">
             <h2 className="text-base font-medium text-black">Rosa</h2>
-            <Link href="?tab=rosa" className="text-xs font-semibold text-black">Vedi tutto</Link>
+            <Link href="?tab=rosa" replace className="text-xs font-semibold text-black">Vedi tutto</Link>
           </div>
           <div className="flex gap-5 overflow-x-auto -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
             {[...players].sort((a, b) => (a.role === "P" ? -1 : b.role === "P" ? 1 : 0)).slice(0, 6).map((p) => (
@@ -314,7 +314,7 @@ function SommarioTab({
       {/* Marcatori */}
       {scorerRows.length > 0 && (
         <div>
-          <h2 className="text-base font-medium text-black mb-4">Marcatori</h2>
+          <h2 className="text-base font-medium text-black mb-6">Marcatori</h2>
           <div
             className="bg-white rounded-3xl overflow-hidden"
             style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
@@ -339,50 +339,55 @@ function SommarioTab({
 
 // ─── Partite ─────────────────────────────────────────────────────────────────
 
-function PartiteTab({ matches, teamId }: { matches: MatchRow[]; teamId: number }) {
+function PartiteTab({ matches }: { matches: MatchRow[] }) {
   if (matches.length === 0) {
     return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna partita disponibile.</p>;
   }
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
+      <h2 className="text-base font-medium text-black">Partite precedenti</h2>
       {matches.map((m) => {
+        const scored = m.homeScore !== null && m.awayScore !== null;
         const concluded = m.status === "CONCLUDED";
-        const label = m.group?.name ?? m.knockoutRound?.name;
+        const time = m.startsAt ? m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : null;
+        const date = m.startsAt ? m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
+        const label = m.group?.name ?? m.knockoutRound?.name ?? null;
         return (
           <Link
             key={m.id}
             href={`/partite/${m.id}`}
-            className="bg-white rounded-3xl p-5 flex flex-col gap-4"
+            className="bg-white rounded-3xl p-6 flex flex-col gap-4"
             style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
           >
-            {label && (
-              <div className="pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-                <span className="text-sm text-black">{label}</span>
+            {(label || date) && (
+              <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
+                {label && <span className="text-sm text-black">{label}</span>}
+                {date && <span className="text-sm text-black" style={{ color: "rgba(0,0,0,0.45)" }}>{date}</span>}
               </div>
             )}
-            <div className="flex gap-4 items-center">
-              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-4" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
-                <div className="flex items-center gap-2">
-                  {teamFlag(m.homeTeam) && <img src={teamFlag(m.homeTeam)!} alt="" className="w-6 h-6 object-contain shrink-0" />}
-                  <span className="text-sm text-black truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? "—"}</span>
+            <div className="flex gap-6 items-center">
+              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                    <PartiteTeamLogo team={m.homeTeam} />
+                  </div>
+                  <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}</span>
+                  {scored && <span className="text-sm font-semibold text-black shrink-0">{m.homeScore}</span>}
                 </div>
-                <div className="flex items-center gap-2">
-                  {teamFlag(m.awayTeam) && <img src={teamFlag(m.awayTeam)!} alt="" className="w-6 h-6 object-contain shrink-0" />}
-                  <span className="text-sm text-black truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? "—"}</span>
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                    <PartiteTeamLogo team={m.awayTeam} />
+                  </div>
+                  <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}</span>
+                  {scored && <span className="text-sm font-semibold text-black shrink-0">{m.awayScore}</span>}
                 </div>
               </div>
-              <div className="flex flex-col items-center justify-center gap-2 shrink-0">
-                {concluded ? (
-                  <span className="text-lg font-bold text-black tabular-nums">
-                    {m.homeScore} – {m.awayScore}
-                  </span>
-                ) : (
-                  <>
-                    {formatDate(m.startsAt) && <span className="text-xs text-black capitalize">{formatDate(m.startsAt)}</span>}
-                    {formatTime(m.startsAt) && <span className="text-sm font-semibold text-black">{formatTime(m.startsAt)}</span>}
-                  </>
-                )}
-                <span className="text-xs font-medium" style={{ color: "var(--primary)" }}>Vedi i dettagli</span>
+              <div className="flex flex-col items-center justify-center gap-3 shrink-0">
+                {concluded
+                  ? <span className="text-xs font-medium" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
+                  : time && <span className="text-sm text-black">{time}</span>
+                }
+                <span className="text-xs font-medium text-black">Vedi i dettagli</span>
               </div>
             </div>
           </Link>
@@ -392,6 +397,13 @@ function PartiteTab({ matches, teamId }: { matches: MatchRow[]; teamId: number }
   );
 }
 
+function PartiteTeamLogo({ team }: { team: MatchTeam | null }) {
+  if (!team) return null;
+  if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} style={{ width: 24, height: 24, objectFit: "contain" }} />;
+  if (team.countryCode) return <img src={`https://flagcdn.com/w40/${team.countryCode.toLowerCase()}.png`} alt={team.name} style={{ width: 24, height: 16, objectFit: "contain", borderRadius: 2 }} />;
+  return null;
+}
+
 // ─── Classifica ──────────────────────────────────────────────────────────────
 
 function ClassificaTab({
@@ -399,47 +411,87 @@ function ClassificaTab({
   groupName,
   teamId,
 }: {
-  standings: { teamId: number; name: string; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number }[];
+  standings: { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number }[];
   groupName: string | undefined;
   teamId: number;
 }) {
   if (standings.length === 0) {
     return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Classifica non disponibile.</p>;
   }
+
+  const cols: { key: keyof typeof standings[0]; label: string }[] = [
+    { key: "played",   label: "PG" },
+    { key: "won",      label: "V"  },
+    { key: "drawn",    label: "N"  },
+    { key: "lost",     label: "S"  },
+    { key: "goalDiff", label: "DR" },
+    { key: "points",   label: "PT" },
+  ];
+
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className="bg-white rounded-3xl overflow-hidden pb-3"
+      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+    >
       {groupName && (
-        <p className="text-sm font-semibold uppercase" style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}>{groupName}</p>
-      )}
-      <div
-        className="bg-white rounded-3xl overflow-hidden"
-        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-      >
-        <div className="flex items-center gap-4 px-5 py-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-          <span className="text-xs font-semibold uppercase text-black/50 w-5 shrink-0">POS</span>
-          <span className="text-xs font-semibold uppercase text-black/50 flex-1">Squadra</span>
-          <span className="text-xs font-semibold uppercase text-black/50 w-6 text-center shrink-0">G</span>
-          <span className="text-xs font-semibold uppercase text-black/50 w-5 text-right shrink-0">PT</span>
+        <div className="px-6 pt-6 pb-3">
+          <h2
+            className="uppercase text-base font-medium"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", wordSpacing: "0.3em" }}
+          >
+            {groupName}
+          </h2>
         </div>
-        {standings.map((row, i) => {
-          const isCurrentTeam = row.teamId === teamId;
-          return (
-            <div
-              key={row.teamId}
-              className="flex items-center gap-4 px-5 py-4"
-              style={{
-                borderTop: i > 0 ? "1px solid rgba(9,20,76,0.05)" : undefined,
-                background: isCurrentTeam ? "rgba(1,7,163,0.04)" : undefined,
-              }}
-            >
-              <span className="text-xs text-black w-5 shrink-0 tabular-nums">{i + 1}</span>
-              <span className={`text-sm flex-1 truncate ${isCurrentTeam ? "font-semibold" : "font-normal"} text-black`}>{row.name}</span>
-              <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-              <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
-            </div>
-          );
-        })}
+      )}
+
+      {/* Table header */}
+      <div className="flex items-center gap-2 px-6 pb-3">
+        <span className="text-xs font-semibold uppercase text-black/40 w-5 shrink-0" />
+        <span className="text-xs font-semibold uppercase text-black/40 flex-1">Squadra</span>
+        {cols.map((c) => (
+          <span key={c.key} className="text-xs font-semibold uppercase text-black/40 w-7 text-center shrink-0">{c.label}</span>
+        ))}
       </div>
+
+      {standings.map((row, i) => {
+        const isCurrentTeam = row.teamId === teamId;
+        const flagUrl = row.logoUrl ?? getFlagUrlFromCountryCode(row.countryCode);
+        return (
+          <div
+            key={row.teamId}
+            className="flex items-center gap-2 px-6 py-3"
+            style={{
+              borderTop: "1px solid rgba(9,20,76,0.05)",
+              background: isCurrentTeam ? "rgba(1,7,163,0.04)" : undefined,
+            }}
+          >
+            <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{i + 1}</span>
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {row.logoUrl ? (
+                <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
+              ) : row.countryCode ? (
+                <img src={getFlagUrlFromCountryCode(row.countryCode)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+              ) : null}
+              <span className={`text-sm truncate ${isCurrentTeam ? "font-semibold" : "font-normal"}`} style={{ color: "var(--text-primary)" }}>
+                {row.shortName ?? row.name}
+              </span>
+            </div>
+            {cols.map((c) => {
+              const val = row[c.key] as number;
+              const display = c.key === "goalDiff" && val > 0 ? `+${val}` : val;
+              return (
+                <span
+                  key={c.key}
+                  className="text-sm w-7 text-center shrink-0 tabular-nums"
+                  style={{ color: "var(--text-primary)", fontWeight: c.key === "points" ? 700 : 400 }}
+                >
+                  {display}
+                </span>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -465,15 +517,12 @@ function RosaTab({ players }: { players: { id: number; name: string; role: strin
 function PlayerGroup({ title, players }: { title: string; players: { id: number; name: string; role: string }[] }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "rgba(0,0,0,0.45)" }}>{title}</p>
-      <div
-        className="bg-white rounded-3xl overflow-hidden"
-        style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-      >
+      <p className="text-base font-medium text-black">{title}</p>
+      <div className="flex flex-col">
         {players.map((p, i) => (
           <div
             key={p.id}
-            className="flex items-center gap-4 px-5 py-4"
+            className="flex items-center gap-4 py-3"
             style={{ borderTop: i > 0 ? "1px solid rgba(9,20,76,0.05)" : undefined }}
           >
             <div

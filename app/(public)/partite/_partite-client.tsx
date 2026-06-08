@@ -198,7 +198,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                       {resolveTeamFlag(row) ? (
                         <img src={resolveTeamFlag(row)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
                       ) : null}
-                      <span className="text-sm font-normal text-(--text-primary) truncate">{row.shortName ?? row.name}</span>
+                      <span className="text-sm font-normal text-black truncate">{row.shortName ?? row.name}</span>
                       {row.qualified && <span className="text-[9px] font-bold shrink-0" style={{ color: "#10B981" }}>Q</span>}
                     </div>
                     {cols.map((c) => {
@@ -206,7 +206,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                       const display = c.key === "goalDiff" && val > 0 ? `+${val}` : val;
                       const isPoints = c.key === "points";
                       return (
-                        <span key={c.key} className="text-sm w-7 text-center shrink-0 tabular-nums" style={{ color: "var(--text-primary)", fontWeight: isPoints ? 700 : 400 }}>
+                        <span key={c.key} className="text-sm w-7 text-center shrink-0 tabular-nums text-black" style={{ fontWeight: isPoints ? 700 : 400 }}>
                           {display}
                         </span>
                       );

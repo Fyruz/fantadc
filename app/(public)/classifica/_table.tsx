@@ -122,11 +122,11 @@ export default function ClassificaTable({ rows }: { rows: RankRow[] }) {
               <RankBadge rank={row.rank} />
               <div className="flex-1 min-w-0">
                 <Link href={`/squadre-fanta/${row.fantasyTeamId}`} className="hover:underline">
-                  <div className="font-display font-black text-[13px] uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                  <div className="font-display font-black text-[13px] uppercase truncate text-black">
                     {row.fantasyTeamName}
                   </div>
                 </Link>
-                <div className="text-[11px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                <div className="text-[11px] mt-0.5 text-black">
                   {row.userName ?? row.userEmail}
                 </div>
               </div>

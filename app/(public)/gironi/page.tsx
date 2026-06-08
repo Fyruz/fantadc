@@ -159,7 +159,7 @@ export default async function GironiPublicPage() {
                     className="w-6 h-4 object-contain rounded-sm shrink-0"
                   />
                 ) : null}
-                <span className="text-sm font-normal text-(--text-primary) truncate">
+                <span className="text-sm font-normal text-black truncate">
                   {row.shortName ?? row.name}
                 </span>
                 {row.qualified && (
@@ -175,7 +175,7 @@ export default async function GironiPublicPage() {
                     key={c.key}
                     className="text-sm w-7 text-center shrink-0 tabular-nums"
                     style={{
-                      color: "var(--text-primary)",
+                      color: "#000",
                       fontWeight: isPoints ? 700 : 400,
                     }}
                   >

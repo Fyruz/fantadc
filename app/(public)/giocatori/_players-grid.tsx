@@ -243,7 +243,7 @@ export default function PlayersGrid({ groups }: { groups: Group[] }) {
                     </div>
                   );
                 })()}
-                <span className="text-base font-normal" style={{ color: "var(--text-primary)" }}>
+                <span className="text-base font-normal text-black">
                   {teamName}
                 </span>
               </div>
@@ -258,7 +258,7 @@ export default function PlayersGrid({ groups }: { groups: Group[] }) {
                     onClick={() => setSelected(p)}
                   >
                     <RoleBadge role={p.role} />
-                    <span className="text-sm flex-1 truncate" style={{ color: "var(--text-primary)" }}>
+                    <span className="text-sm flex-1 truncate text-black">
                       {p.name}
                     </span>
                   </button>
