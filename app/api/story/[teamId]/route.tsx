@@ -40,7 +40,8 @@ async function resolveFlagAsset(team: {
   if (src.startsWith("/")) {
     try {
       const buffer = await readFile(path.join(process.cwd(), "public", src));
-      return assetSrc(buffer, "png");
+      const type = src.toLowerCase().endsWith(".svg") ? "svg+xml" : "png";
+      return assetSrc(buffer, type);
     } catch {
       return null;
     }
