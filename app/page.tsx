@@ -18,7 +18,7 @@ function MatchTeamLogo({
   const wrapClass = "w-12 h-12 p-1 flex justify-center items-center aspect-square shrink-0";
   const src = resolveTeamFlag({ countryCode, logoUrl });
   if (src) {
-    return <img src={src} alt={name} className={`${wrapClass} object-contain`} />;
+    return <img src={src} alt={name} width={40} height={27} />;
   }
   return (
     <div className={`${wrapClass} rounded-full font-black text-sm text-white bg-primary`}>
@@ -258,7 +258,7 @@ export default async function HomePage({
                 </div>
                 <Link
                   href="/partite"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-(--text-primary)"
                 >
                   Vedi tutto
                   <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
@@ -273,7 +273,7 @@ export default async function HomePage({
                       style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                     >
                       {/* Home team */}
-                      <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                      <div className="flex flex-col items-center gap-4 flex-1 min-w-0">
                         <MatchTeamLogo name={m.homeTeam!.name} shortName={m.homeTeam!.shortName} countryCode={m.homeTeam!.countryCode} logoUrl={m.homeTeam!.logoUrl} />
                         <span className="text-sm font-normal leading-normal text-center w-full text-black">
                           {m.homeTeam!.shortName ?? m.homeTeam!.name}
@@ -296,7 +296,7 @@ export default async function HomePage({
                       </div>
 
                       {/* Away team */}
-                      <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                      <div className="flex flex-col items-center gap-4 flex-1 min-w-0">
                         <MatchTeamLogo name={m.awayTeam!.name} shortName={m.awayTeam!.shortName} countryCode={m.awayTeam!.countryCode} logoUrl={m.awayTeam!.logoUrl} />
                         <span className="text-sm font-normal leading-normal text-center w-full text-black">
                           {m.awayTeam!.shortName ?? m.awayTeam!.name}
