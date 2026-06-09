@@ -146,7 +146,12 @@ export default async function SquadraPublicDetailPage({
       {/* Team identity */}
       <div className="flex flex-col gap-4">
         {flagSrc && (
-          <img src={flagSrc} alt={team.name} className="w-16 h-16 object-contain" />
+          <img
+            src={flagSrc}
+            alt={team.name}
+            width={64}
+            height={43}
+          />
         )}
         <h1 className="text-xl font-semibold text-black">{team.name}</h1>
       </div>
@@ -171,7 +176,7 @@ export default async function SquadraPublicDetailPage({
       </div>
 
       {activeTab === "sommario" && (
-        <SommarioTab nextMatch={nextMatch} lastMatch={teamMatches[0] ?? null} players={team.players} scorerRows={scorerRows} teamId={teamId} />
+        <SommarioTab nextMatch={nextMatch} lastMatch={teamMatches[0] ?? null} players={team.players} scorerRows={scorerRows} />
       )}
       {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
       {activeTab === "classifica" && (
@@ -202,13 +207,11 @@ function SommarioTab({
   lastMatch,
   players,
   scorerRows,
-  teamId,
 }: {
   nextMatch: MatchRow | null;
   lastMatch: MatchRow | null;
   players: { id: number; name: string; role: string }[];
   scorerRows: { name: string; goals: number }[];
-  teamId: number;
 }) {
   const featuredMatch = nextMatch ?? lastMatch;
   const featuredLabel = nextMatch ? "Prossima partita" : "Ultima partita";
@@ -235,7 +238,7 @@ function SommarioTab({
           </div>
           <div className="flex gap-5 overflow-x-auto -mx-4 px-4" style={{ scrollbarWidth: "none" }}>
             {[...players].sort((a, b) => (a.role === "P" ? -1 : b.role === "P" ? 1 : 0)).slice(0, 6).map((p) => (
-              <div key={p.id} className="flex flex-col items-center gap-2 shrink-0 w-[72px]">
+              <div key={p.id} className="flex flex-col items-center gap-2 shrink-0 w-18">
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center"
                   style={{ background: "#fff", border: "1px solid rgba(9,20,76,0.08)" }}
