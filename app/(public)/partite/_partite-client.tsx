@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { resolveTeamFlag } from "@/lib/flags";
 import { type GroupStandingRow } from "@/lib/standings";
 import GroupStandingCard from "@/components/group-standing-card";
+import MatchCard from "@/components/match-card";
 
 type Team = { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
 type Match = {
@@ -18,56 +18,6 @@ type Match = {
 };
 type Group = { id: number; name: string; rows: GroupStandingRow[] };
 
-function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
-  if (!team) return <div style={{ width: size, height: size }} />;
-  const src = resolveTeamFlag(team);
-  if (!src) return null;
-  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 0 }} />;
-}
-
-function MatchCard({ m }: { m: Match }) {
-  const scored = m.homeScore !== null && m.awayScore !== null;
-  const time = m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
-  const label = m.group?.name ?? m.knockoutRound?.name ?? null;
-
-  return (
-    <Link
-      href={`/partite/${m.id}`}
-      className="bg-white rounded-3xl p-6 flex flex-col gap-4 block"
-      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-    >
-      {label && (
-        <div className="pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-          <span className="text-sm text-black">{label}</span>
-        </div>
-      )}
-      <div className="flex gap-6 items-center">
-        {/* Teams + scores */}
-        <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
-          <div className="flex items-center gap-3">
-            <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-              <TeamLogo team={m.homeTeam} size={24} />
-            </div>
-            <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}</span>
-            {scored && <span className="text-sm font-semibold text-black shrink-0">{m.homeScore}</span>}
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-              <TeamLogo team={m.awayTeam} size={24} />
-            </div>
-            <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}</span>
-            {scored && <span className="text-sm font-semibold text-black shrink-0">{m.awayScore}</span>}
-          </div>
-        </div>
-        {/* Time + link */}
-        <div className="flex flex-col items-center justify-center gap-3 shrink-0">
-          <span className="text-sm text-black">{time}</span>
-          <span className="text-xs font-medium text-black">Vedi i dettagli</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 export default function PartiteClient({ matches, groups }: { matches: Match[]; groups: Group[] }) {
   const searchParams = useSearchParams();
@@ -154,7 +104,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                 {day}
               </h2>
               <div className="flex flex-col gap-4">
-                {dayMatches.map((m) => <MatchCard key={m.id} m={m} />)}
+                {dayMatches.map((m) => <MatchCard key={m.id} match={m} />)}
               </div>
             </div>
           ))}

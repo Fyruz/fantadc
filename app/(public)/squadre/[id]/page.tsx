@@ -2,7 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { BackButton } from "./BackButton";
-import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { resolveTeamFlag } from "@/lib/flags";
+import MatchCard from "@/components/match-card";
 import { buildGroupStandings, type GroupStandingRow } from "@/lib/standings";
 import GroupStandingCard from "@/components/group-standing-card";
 
@@ -127,7 +128,7 @@ export default async function SquadraPublicDetailPage({
     ? buildGroupStandings(teamGroup.teams, teamGroup.matches)
     : [];
 
-  const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
+  const flagSrc = resolveTeamFlag(team);
   const TABS: { key: Tab; label: string }[] = [
     { key: "sommario", label: "Sommario" },
     { key: "partite", label: "Partite" },
@@ -185,22 +186,12 @@ export default async function SquadraPublicDetailPage({
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-function teamFlag(t: { countryCode: string | null; logoUrl: string | null } | null) {
-  if (!t) return null;
-  return t.logoUrl ?? getFlagUrlFromCountryCode(t.countryCode);
-}
-
 function roleIcon(role: string) {
   return role === "P" ? "/icons/goalkeeper.svg" : "/icons/player.svg";
 }
 
 function roleLabel(role: string) {
   return role === "P" ? "Portiere" : "Giocatore";
-}
-
-function formatTime(date: Date | null) {
-  if (!date) return null;
-  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
 }
 
 
@@ -225,53 +216,13 @@ function SommarioTab({
   return (
     <div className="flex flex-col gap-10">
       {/* Prossima / Ultima partita */}
-      {featuredMatch && featuredMatch.homeTeam && featuredMatch.awayTeam && (
+      {featuredMatch && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-base font-medium text-black">{featuredLabel}</h2>
-            <Link href={`?tab=partite`} replace className="text-xs font-semibold text-black">Vedi tutto</Link>
+            <Link href="?tab=partite" replace className="text-xs font-semibold text-black">Vedi tutto</Link>
           </div>
-          <Link
-            href={`/partite/${featuredMatch.id}`}
-            className="bg-white rounded-3xl p-6 flex flex-col gap-4"
-            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-          >
-            {(() => {
-              const label = featuredMatch.group?.name ?? featuredMatch.knockoutRound?.name ?? null;
-              const date = featuredMatch.startsAt ? featuredMatch.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
-              return (label || date) ? (
-                <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-                  {label && <span className="text-sm text-black">{label}</span>}
-                  {date && <span className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>{date}</span>}
-                </div>
-              ) : null;
-            })()}
-            <div className="flex gap-6 items-center">
-              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
-                <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-                    <PartiteTeamLogo team={featuredMatch.homeTeam} />
-                  </div>
-                  <span className="text-sm text-black flex-1 truncate">{featuredMatch.homeTeam.shortName ?? featuredMatch.homeTeam.name}</span>
-                  {!nextMatch && <span className="text-sm font-semibold text-black shrink-0">{featuredMatch.homeScore}</span>}
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-                    <PartiteTeamLogo team={featuredMatch.awayTeam} />
-                  </div>
-                  <span className="text-sm text-black flex-1 truncate">{featuredMatch.awayTeam.shortName ?? featuredMatch.awayTeam.name}</span>
-                  {!nextMatch && <span className="text-sm font-semibold text-black shrink-0">{featuredMatch.awayScore}</span>}
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-3 shrink-0">
-                {nextMatch
-                  ? formatTime(featuredMatch.startsAt) && <span className="text-sm text-black">{formatTime(featuredMatch.startsAt)}</span>
-                  : <span className="text-xs font-medium" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
-                }
-                <span className="text-xs font-medium text-black">Vedi i dettagli</span>
-              </div>
-            </div>
-          </Link>
+          <MatchCard match={featuredMatch} showDate />
         </div>
       )}
 
@@ -334,62 +285,9 @@ function PartiteTab({ matches }: { matches: MatchRow[] }) {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-base font-medium text-black">Partite precedenti</h2>
-      {matches.map((m) => {
-        const scored = m.homeScore !== null && m.awayScore !== null;
-        const concluded = m.status === "CONCLUDED";
-        const time = m.startsAt ? m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" }) : null;
-        const date = m.startsAt ? m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
-        const label = m.group?.name ?? m.knockoutRound?.name ?? null;
-        return (
-          <Link
-            key={m.id}
-            href={`/partite/${m.id}`}
-            className="bg-white rounded-3xl p-6 flex flex-col gap-4"
-            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-          >
-            {(label || date) && (
-              <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-                {label && <span className="text-sm text-black">{label}</span>}
-                {date && <span className="text-sm text-black" style={{ color: "rgba(0,0,0,0.45)" }}>{date}</span>}
-              </div>
-            )}
-            <div className="flex gap-6 items-center">
-              <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
-                <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-                    <PartiteTeamLogo team={m.homeTeam} />
-                  </div>
-                  <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}</span>
-                  {scored && <span className="text-sm font-semibold text-black shrink-0">{m.homeScore}</span>}
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
-                    <PartiteTeamLogo team={m.awayTeam} />
-                  </div>
-                  <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}</span>
-                  {scored && <span className="text-sm font-semibold text-black shrink-0">{m.awayScore}</span>}
-                </div>
-              </div>
-              <div className="flex flex-col items-center justify-center gap-3 shrink-0">
-                {concluded
-                  ? <span className="text-xs font-medium" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
-                  : time && <span className="text-sm text-black">{time}</span>
-                }
-                <span className="text-xs font-medium text-black">Vedi i dettagli</span>
-              </div>
-            </div>
-          </Link>
-        );
-      })}
+      {matches.map((m) => <MatchCard key={m.id} match={m} showDate />)}
     </div>
   );
-}
-
-function PartiteTeamLogo({ team }: { team: MatchTeam | null }) {
-  if (!team) return null;
-  if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} style={{ width: 24, height: 24, objectFit: "contain" }} />;
-  if (team.countryCode) { const flagSrc = getFlagUrlFromCountryCode(team.countryCode); if (flagSrc) return <img src={flagSrc} alt={team.name} style={{ width: 24, height: 16, objectFit: "contain" }} />; }
-  return null;
 }
 
 // ─── Rosa ────────────────────────────────────────────────────────────────────
