@@ -42,7 +42,7 @@ export default function MatchCard({ match: m, showDate = false }: Props) {
   return (
     <Link
       href={`/partite/${m.id}`}
-      className="bg-white rounded-3xl p-6 flex flex-col gap-4 block"
+      className="bg-white rounded-3xl p-6 flex flex-col gap-4"
       style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
     >
       {(label || (showDate && date)) && (
@@ -53,7 +53,7 @@ export default function MatchCard({ match: m, showDate = false }: Props) {
       )}
 
       <div className="flex gap-6 items-center">
-        <div className="flex flex-col gap-4 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
+        <div className="flex flex-col gap-5 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
           <div className="flex items-center gap-4">
             <div className="shrink-0 flex items-center justify-center">
               <TeamFlag team={m.homeTeam} />

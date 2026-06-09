@@ -1,4 +1,4 @@
-import BackChevron from "@/components/back-chevron";
+import PageHeader from "@/components/page-header";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -10,7 +10,7 @@ import { resolveTeamFlag } from "@/lib/flags";
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const matchId = Number(id);
-  if (Number.isNaN(matchId)) notFound();
+  if (!Number.isInteger(matchId) || matchId <= 0) notFound();
 
   const match = await db.match.findUnique({
     where: { id: matchId, status: { not: "DRAFT" } },
@@ -91,33 +91,10 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const scored = match.homeScore !== null && match.awayScore !== null;
 
-  const TeamLogo = ({ team, size = 64 }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null; size?: number }) => {
-    if (!team) return <div style={{ width: size, height: size }} />;
-    const src = resolveTeamFlag(team);
-    return (
-      <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
-        {src ? (
-          <img src={src} alt={team.name} className="w-full h-auto object-contain" />
-        ) : (
-          <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
 
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="flex items-center relative py-2">
-        <BackChevron />
-        <h1
-          className="uppercase mx-auto font-medium"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
-        >
-          Dettagli Partita
-        </h1>
-      </div>
+      <PageHeader title="Dettagli Partita" />
 
       {/* ── Match card ─────────────────────────────────────────────── */}
       <div
@@ -148,11 +125,11 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                 </span>
               ) : (
                 <span className="font-bold text-black" style={{ fontSize: 24 }}>
-                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
                 </span>
               )}
               <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>
-                {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}
               </span>
             </div>
 
@@ -209,9 +186,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           <div>
             <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>MVP della partita</p>
             <div className="flex items-center gap-2">
-              {mvpTeam && resolveTeamFlag(mvpTeam) ? (
-                <img src={resolveTeamFlag(mvpTeam)!} alt={mvpTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
-              ) : null}
+              {mvpTeam && (() => { const f = resolveTeamFlag(mvpTeam); return f ? <img src={f} alt={mvpTeam.name} width={24} height={16} className="object-contain shrink-0" /> : null; })()}
               <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{mvpPlayer.name}</p>
             </div>
           </div>
@@ -239,9 +214,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div>
               <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>Il tuo MVP</p>
               <div className="flex items-center gap-2">
-                {resolveTeamFlag(userVote.player.footballTeam) ? (
-                  <img src={resolveTeamFlag(userVote.player.footballTeam)!} alt={userVote.player.footballTeam.name} className="h-3 w-auto object-contain rounded-sm shrink-0" />
-                ) : null}
+                {(() => { const f = resolveTeamFlag(userVote.player.footballTeam); return f ? <img src={f} alt={userVote.player.footballTeam.name} width={24} height={16} className="object-contain shrink-0" /> : null; })()}
                 <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{userVote.player.name}</p>
               </div>
             </div>
@@ -291,9 +264,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div className="flex-1 min-w-0 px-6">
               <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.homeTeam && resolveTeamFlag(match.homeTeam) ? (
-                    <img src={resolveTeamFlag(match.homeTeam)!} alt={match.homeTeam.name} className="w-full h-auto object-contain" />
-                  ) : null}
+                  {match.homeTeam && (() => { const f = resolveTeamFlag(match.homeTeam!); return f ? <img src={f} alt={match.homeTeam!.name} width={24} height={16} className="object-contain" /> : null; })()}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
                   {match.homeTeam?.shortName ?? match.homeTeam?.name ?? "Casa"}
@@ -313,9 +284,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             <div className="flex-1 min-w-0 px-6">
               <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.awayTeam && resolveTeamFlag(match.awayTeam) ? (
-                    <img src={resolveTeamFlag(match.awayTeam)!} alt={match.awayTeam.name} className="w-full h-auto object-contain" />
-                  ) : null}
+                  {match.awayTeam && (() => { const f = resolveTeamFlag(match.awayTeam!); return f ? <img src={f} alt={match.awayTeam!.name} width={24} height={16} className="object-contain" /> : null; })()}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
                   {match.awayTeam?.shortName ?? match.awayTeam?.name ?? "Ospiti"}
@@ -332,6 +301,20 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+function TeamLogo({ team, size = 64 }: { team: { name: string; countryCode: string | null; logoUrl: string | null } | null; size?: number }) {
+  if (!team) return <div style={{ width: size, height: size }} />;
+  const src = resolveTeamFlag(team);
+  return (
+    <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
+      {src ? (
+        <img src={src} alt={team.name} className="w-full h-auto object-contain" />
+      ) : (
+        <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
       )}
     </div>
   );

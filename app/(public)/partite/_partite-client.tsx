@@ -60,7 +60,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
             style={{
               marginRight: t === "calendario" ? 24 : 0,
               color: tab === t ? "var(--text-primary)" : "rgba(0,0,0,0.45)",
-              fontWeight: tab === t ? 500 : 400,
+              fontWeight: tab === t ? 600 : 400,
               borderBottom: tab === t ? "2px solid var(--text-primary)" : "2px solid transparent",
               marginBottom: -1,
             }}
