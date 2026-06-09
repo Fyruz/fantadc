@@ -83,7 +83,7 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
     return (
       <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64, padding: 4 }}>
         {src ? (
-          <img src={src} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
+          <img src={src} alt={team.name} className="w-full h-auto object-contain" />
         ) : (
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
         )}
