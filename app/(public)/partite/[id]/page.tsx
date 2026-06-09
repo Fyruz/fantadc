@@ -97,7 +97,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
     return (
       <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
         {src ? (
-          <img src={src} alt={team.name} className="w-full h-auto object-contain rounded-sm" />
+          <img src={src} alt={team.name} className="w-full h-auto object-contain" />
         ) : (
           <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
         )}
@@ -292,7 +292,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.homeTeam && resolveTeamFlag(match.homeTeam) ? (
-                    <img src={resolveTeamFlag(match.homeTeam)!} alt={match.homeTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                    <img src={resolveTeamFlag(match.homeTeam)!} alt={match.homeTeam.name} className="w-full h-auto object-contain" />
                   ) : null}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
@@ -314,7 +314,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
                 <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
                   {match.awayTeam && resolveTeamFlag(match.awayTeam) ? (
-                    <img src={resolveTeamFlag(match.awayTeam)!} alt={match.awayTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                    <img src={resolveTeamFlag(match.awayTeam)!} alt={match.awayTeam.name} className="w-full h-auto object-contain" />
                   ) : null}
                 </div>
                 <span className="text-sm font-medium text-black truncate">

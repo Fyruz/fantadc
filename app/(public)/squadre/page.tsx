@@ -13,17 +13,18 @@ export default async function SquadrePublicPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Header mobile — hidden on desktop (global nav handles it) */}
-      <div className="md:hidden flex items-center justify-between h-12">
+      <div className="flex items-center justify-between">
         <div className="flex-1 flex items-center">
           <BackButton />
         </div>
-        <span
-          className="flex-1 text-center uppercase"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+
+        <h1
+          className="flex-1 text-center uppercase text-xl"
+          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
         >
           Squadre
-        </span>
+        </h1>
+
         <div className="flex-1" />
       </div>
 
@@ -40,11 +41,17 @@ export default async function SquadrePublicPage() {
               <Link
                 key={team.id}
                 href={`/squadre/${team.id}`}
-                className="flex flex-col items-center gap-3 transition-colors hover:bg-[var(--surface-1)]"
+                className="flex flex-col items-center gap-4"
               >
-                <div className="w-16 h-16 flex items-center justify-center p-1 overflow-hidden shrink-0">
+                <div className="flex items-center justify-center overflow-hidden shrink-0">
                   {flagSrc ? (
-                    <img src={flagSrc} alt={team.name} className="w-full h-full object-contain" />
+                    <img
+                      src={flagSrc}
+                      alt={team.name}
+                      width={56}
+                      height={37}
+                      className=""
+                    />
                   ) : (
                     <span className="text-xs font-black uppercase" style={{ color: "var(--primary)" }}>
                       {(team.shortName ?? team.name).slice(0, 2).toUpperCase()}

@@ -487,7 +487,7 @@ export default async function HomePage({
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
                       {resolveTeamFlag(player.footballTeam) ? (
-                        <img src={resolveTeamFlag(player.footballTeam)!} alt={player.footballTeam.name} className="w-full h-auto object-contain rounded-sm" />
+                        <img src={resolveTeamFlag(player.footballTeam)!} alt={player.footballTeam.name} className="w-full h-auto object-contain" />
                       ) : null}
                     </div>
                     <span className="text-sm font-normal text-black truncate">{player.name}</span>
