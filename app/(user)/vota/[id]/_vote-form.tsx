@@ -12,7 +12,7 @@ type Player = { id: number; name: string; role: string; footballTeamId: number; 
 function TeamLogo({ team, size = 24 }: { team: Team; size?: number }) {
   const src = resolveTeamFlag(team);
   if (!src) return null;
-  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
+  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 0 }} />;
 }
 
 function displayName(player: Player, allPlayers: Player[]) {

@@ -21,7 +21,7 @@ function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
   if (!team) return <div style={{ width: size, height: size }} />;
   const src = resolveTeamFlag(team);
   if (!src) return null;
-  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 2 }} />;
+  return <img src={src} alt={team.name} style={{ width: size, height: size * 0.67, objectFit: "contain", borderRadius: 0 }} />;
 }
 
 function MatchCard({ m }: { m: Match }) {
@@ -44,14 +44,14 @@ function MatchCard({ m }: { m: Match }) {
         {/* Teams + scores */}
         <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
           <div className="flex items-center gap-3">
-            <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+            <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
               <TeamLogo team={m.homeTeam} size={24} />
             </div>
             <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}</span>
             {scored && <span className="text-sm font-semibold text-black shrink-0">{m.homeScore}</span>}
           </div>
           <div className="flex items-center gap-3">
-            <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+            <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
               <TeamLogo team={m.awayTeam} size={24} />
             </div>
             <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}</span>
@@ -196,7 +196,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                     <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{idx + 1}</span>
                     <div className="flex items-center gap-3 flex-1 min-w-0">
                       {resolveTeamFlag(row) ? (
-                        <img src={resolveTeamFlag(row)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                        <img src={resolveTeamFlag(row)!} alt={row.name} className="w-9 h-9 object-contain shrink-0" />
                       ) : null}
                       <span className="text-sm font-normal text-black truncate">{row.shortName ?? row.name}</span>
                       {row.qualified && <span className="text-[9px] font-bold shrink-0" style={{ color: "#10B981" }}>Q</span>}

@@ -13,11 +13,31 @@ export type CountryOption = {
 // eventuali URL ancora salvati nel DB verso le bandiere locali.
 const EXTERNAL_FLAG_HOSTS = ["flagsapi.com", "flagcdn.com"];
 
-// Paesi ISO: bandiera self-hosted come /flags/{cc}.png (vedi scripts/download-flags.mjs).
+// Bandiere SVG self-hosted che hanno priorità sui PNG scaricati da download-flags.mjs.
+const SVG_FLAGS: Record<string, string> = {
+  AR: "/flags/argentina.svg",
+  BR: "/flags/brazil.svg",
+  BI: "/flags/burundi.svg",
+  CX: "/flags/christmas_island.svg",
+  ER: "/flags/eritrea.svg",
+  DE: "/flags/germany.svg",
+  IE: "/flags/ireland.svg",
+  KW: "/flags/kuwait.svg",
+  LA: "/flags/laos.svg",
+  NZ: "/flags/new_zealand.svg",
+  NG: "/flags/nigeria.svg",
+  PT: "/flags/portugal.svg",
+  RU: "/flags/russia.svg",
+  ES: "/flags/spain.svg",
+  VE: "/flags/venezuela.svg",
+};
+
+// Paesi ISO: bandiera self-hosted come /flags/{cc}.png (vedi scripts/download-flags.mjs),
+// oppure SVG dove disponibile.
 const isoRows: CountryOption[] = (countriesRaw as CountryRow[]).map((country) => ({
   label: country.name,
   value: country.code,
-  flagUrl: `/flags/${country.code.toLowerCase()}.png`,
+  flagUrl: SVG_FLAGS[country.code] ?? `/flags/${country.code.toLowerCase()}.png`,
 }));
 
 // Paesi/regioni custom (vedi lib/custom-countries.ts): bandiera a percorso esplicito.

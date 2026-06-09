@@ -269,14 +269,14 @@ function SommarioTab({
             <div className="flex gap-6 items-center">
               <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
                     <PartiteTeamLogo team={featuredMatch.homeTeam} />
                   </div>
                   <span className="text-sm text-black flex-1 truncate">{featuredMatch.homeTeam.shortName ?? featuredMatch.homeTeam.name}</span>
                   {!nextMatch && <span className="text-sm font-semibold text-black shrink-0">{featuredMatch.homeScore}</span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
                     <PartiteTeamLogo team={featuredMatch.awayTeam} />
                   </div>
                   <span className="text-sm text-black flex-1 truncate">{featuredMatch.awayTeam.shortName ?? featuredMatch.awayTeam.name}</span>
@@ -376,14 +376,14 @@ function PartiteTab({ matches }: { matches: MatchRow[] }) {
             <div className="flex gap-6 items-center">
               <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
                 <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
                     <PartiteTeamLogo team={m.homeTeam} />
                   </div>
                   <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD"}</span>
                   {scored && <span className="text-sm font-semibold text-black shrink-0">{m.homeScore}</span>}
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="shrink-0 flex items-center justify-center p-1 rounded-full" style={{ width: 32, height: 32 }}>
+                  <div className="shrink-0 flex items-center justify-center p-1 w-8 h-8">
                     <PartiteTeamLogo team={m.awayTeam} />
                   </div>
                   <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD"}</span>
@@ -408,7 +408,7 @@ function PartiteTab({ matches }: { matches: MatchRow[] }) {
 function PartiteTeamLogo({ team }: { team: MatchTeam | null }) {
   if (!team) return null;
   if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} style={{ width: 24, height: 24, objectFit: "contain" }} />;
-  if (team.countryCode) return <img src={`https://flagcdn.com/w40/${team.countryCode.toLowerCase()}.png`} alt={team.name} style={{ width: 24, height: 16, objectFit: "contain", borderRadius: 2 }} />;
+  if (team.countryCode) { const flagSrc = getFlagUrlFromCountryCode(team.countryCode); if (flagSrc) return <img src={flagSrc} alt={team.name} style={{ width: 24, height: 16, objectFit: "contain" }} />; }
   return null;
 }
 
@@ -428,12 +428,12 @@ function ClassificaTab({
   }
 
   const cols: { key: keyof typeof standings[0]; label: string }[] = [
-    { key: "played",   label: "PG" },
-    { key: "won",      label: "V"  },
-    { key: "drawn",    label: "N"  },
-    { key: "lost",     label: "S"  },
+    { key: "played", label: "PG" },
+    { key: "won", label: "V" },
+    { key: "drawn", label: "N" },
+    { key: "lost", label: "S" },
     { key: "goalDiff", label: "DR" },
-    { key: "points",   label: "PT" },
+    { key: "points", label: "PT" },
   ];
 
   return (
@@ -476,9 +476,21 @@ function ClassificaTab({
             <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{i + 1}</span>
             <div className="flex items-center gap-3 flex-1 min-w-0">
               {row.logoUrl ? (
-                <img src={row.logoUrl} alt={row.name} className="w-6 h-6 object-contain shrink-0" />
+                <img
+                  src={row.logoUrl}
+                  alt={row.name}
+                  width={30}
+                  height={20}
+                  className=""
+                />
               ) : row.countryCode ? (
-                <img src={getFlagUrlFromCountryCode(row.countryCode)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                <img
+                  src={getFlagUrlFromCountryCode(row.countryCode)!}
+                  alt={row.name}
+                  width={30}
+                  height={20}
+                  className=""
+                />
               ) : null}
               <span className={`text-sm truncate ${isCurrentTeam ? "font-semibold" : "font-normal"}`} style={{ color: "var(--text-primary)" }}>
                 {row.shortName ?? row.name}

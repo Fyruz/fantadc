@@ -156,7 +156,7 @@ export default async function GironiPublicPage() {
                   <img
                     src={resolveTeamFlag(row)!}
                     alt={row.name}
-                    className="w-6 h-4 object-contain rounded-sm shrink-0"
+                    className="w-9 h-9 object-contain shrink-0"
                   />
                 ) : null}
                 <span className="text-sm font-normal text-black truncate">

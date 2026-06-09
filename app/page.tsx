@@ -18,7 +18,7 @@ function MatchTeamLogo({
   const wrapClass = "w-12 h-12 p-1 flex justify-center items-center aspect-square shrink-0";
   const src = resolveTeamFlag({ countryCode, logoUrl });
   if (src) {
-    return <img src={src} alt={name} className={`${wrapClass} object-contain rounded`} />;
+    return <img src={src} alt={name} className={`${wrapClass} object-contain`} />;
   }
   return (
     <div className={`${wrapClass} rounded-full font-black text-sm text-white bg-primary`}>
@@ -434,7 +434,7 @@ export default async function HomePage({
                       <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {resolveTeamFlag(row) ? (
-                          <img src={resolveTeamFlag(row)!} alt={row.name} className="w-6 h-4 object-contain rounded-sm shrink-0" />
+                          <img src={resolveTeamFlag(row)!} alt={row.name} className="w-9 h-9 object-contain shrink-0" />
                         ) : null}
                         <span className="text-sm font-normal text-black truncate">
                           {row.shortName ?? row.name}
