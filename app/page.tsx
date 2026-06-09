@@ -5,6 +5,7 @@ import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import { resolveTeamFlag } from "@/lib/flags";
+import { buildGroupStandings } from "@/lib/standings";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -72,33 +73,10 @@ export default async function HomePage({
     }),
   ]);
 
-  // Compute inline standings per group (no DB round-trip needed — data already fetched)
-  type GroupRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; goalDiff: number; points: number; qualified: boolean };
-  const groupStandings = groups.map((g) => {
-    const map = new Map<number, GroupRow>();
-    for (const gt of g.teams) {
-      map.set(gt.footballTeamId, {
-        teamId: gt.footballTeamId,
-        name: gt.footballTeam.name,
-        shortName: gt.footballTeam.shortName,
-        countryCode: gt.footballTeam.countryCode,
-        logoUrl: gt.footballTeam.logoUrl,
-        played: 0,
-        goalDiff: 0,
-        points: 0,
-        qualified: gt.qualified,
-      });
-    }
-    for (const m of g.matches) {
-      if (!m.homeTeamId || !m.awayTeamId) continue;
-      const hs = m.homeScore!; const as_ = m.awayScore!;
-      const home = map.get(m.homeTeamId); const away = map.get(m.awayTeamId);
-      if (home) { home.played++; home.goalDiff += hs - as_; if (hs > as_) home.points += 3; else if (hs === as_) home.points += 1; }
-      if (away) { away.played++; away.goalDiff += as_ - hs; if (as_ > hs) away.points += 3; else if (hs === as_) away.points += 1; }
-    }
-    const rows = [...map.values()].sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it"));
-    return { id: g.id, slug: g.slug, name: g.name, rows };
-  });
+  const groupStandings = groups.map((g) => ({
+    id: g.id, slug: g.slug, name: g.name,
+    rows: buildGroupStandings(g.teams, g.matches),
+  }));
 
   return (
     <MobileOnlyGate>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { resolveTeamFlag } from "@/lib/flags";
+import { type GroupStandingRow } from "@/lib/standings";
+import GroupStandingCard from "@/components/group-standing-card";
 
 type Team = { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
 type Match = {
@@ -14,8 +16,7 @@ type Match = {
   group: { name: string; slug: string } | null;
   knockoutRound: { name: string } | null;
 };
-type GroupRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; qualified: boolean; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number };
-type Group = { id: number; name: string; rows: GroupRow[] };
+type Group = { id: number; name: string; rows: GroupStandingRow[] };
 
 function TeamLogo({ team, size = 28 }: { team: Team; size?: number }) {
   if (!team) return <div style={{ width: size, height: size }} />;
@@ -164,58 +165,9 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
         </div>
       ) : (
         <div className="flex flex-col gap-6 pt-10">
-          {groups.map((g) => {
-            const cols = [
-              { key: "played" as const, label: "PG" },
-              { key: "won"    as const, label: "V"  },
-              { key: "drawn"  as const, label: "N"  },
-              { key: "lost"   as const, label: "S"  },
-              { key: "goalDiff" as const, label: "DR" },
-              { key: "points" as const, label: "PT" },
-            ];
-            return (
-              <div
-                key={g.id}
-                className="bg-white rounded-3xl overflow-hidden pb-3"
-                style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-              >
-                <div className="px-6 pt-6 pb-3">
-                  <p className="uppercase text-base font-medium text-(--text-primary)" style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}>
-                    {g.name}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 px-6 pb-3">
-                  <span className="text-xs font-semibold uppercase text-black/40 w-5 shrink-0" />
-                  <span className="text-xs font-semibold uppercase text-black/40 flex-1">SQUADRA</span>
-                  {cols.map((c) => (
-                    <span key={c.key} className="text-xs font-semibold uppercase text-black/40 w-7 text-center shrink-0">{c.label}</span>
-                  ))}
-                </div>
-                {g.rows.map((row, idx) => (
-                  <div key={row.teamId} className="flex items-center gap-2 px-6 py-3" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
-                    <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{idx + 1}</span>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      {resolveTeamFlag(row) ? (
-                        <img src={resolveTeamFlag(row)!} alt={row.name} className="w-9 h-9 object-contain shrink-0" />
-                      ) : null}
-                      <span className="text-sm font-normal text-black truncate">{row.shortName ?? row.name}</span>
-                      {row.qualified && <span className="text-[9px] font-bold shrink-0" style={{ color: "#10B981" }}>Q</span>}
-                    </div>
-                    {cols.map((c) => {
-                      const val = row[c.key] as number;
-                      const display = c.key === "goalDiff" && val > 0 ? `+${val}` : val;
-                      const isPoints = c.key === "points";
-                      return (
-                        <span key={c.key} className="text-sm w-7 text-center shrink-0 tabular-nums text-black" style={{ fontWeight: isPoints ? 700 : 400 }}>
-                          {display}
-                        </span>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
-            );
-          })}
+          {groups.map((g) => (
+            <GroupStandingCard key={g.id} group={g} />
+          ))}
         </div>
       )}
     </div>

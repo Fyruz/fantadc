@@ -1,5 +1,82 @@
 import { db } from "./db";
 
+// ─── Sync helper (dati già fetchati dalla pagina) ────────────────────────────
+
+export type GroupStandingRow = {
+  teamId: number;
+  name: string;
+  shortName: string | null;
+  countryCode: string | null;
+  logoUrl: string | null;
+  qualified: boolean;
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDiff: number;
+  points: number;
+};
+
+type TeamEntry = {
+  footballTeamId: number;
+  qualified?: boolean;
+  footballTeam: {
+    name: string;
+    shortName: string | null;
+    countryCode: string | null;
+    logoUrl: string | null;
+  };
+};
+
+type MatchEntry = {
+  homeTeamId: number | null;
+  awayTeamId: number | null;
+  homeScore: number | null;
+  awayScore: number | null;
+};
+
+export function buildGroupStandings(teams: TeamEntry[], matches: MatchEntry[]): GroupStandingRow[] {
+  const map = new Map<number, GroupStandingRow>();
+  for (const gt of teams) {
+    map.set(gt.footballTeamId, {
+      teamId: gt.footballTeamId,
+      name: gt.footballTeam.name,
+      shortName: gt.footballTeam.shortName,
+      countryCode: gt.footballTeam.countryCode,
+      logoUrl: gt.footballTeam.logoUrl,
+      qualified: gt.qualified ?? false,
+      played: 0, won: 0, drawn: 0, lost: 0,
+      goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
+    });
+  }
+  for (const m of matches) {
+    if (!m.homeTeamId || !m.awayTeamId || m.homeScore === null || m.awayScore === null) continue;
+    const hs = m.homeScore;
+    const as_ = m.awayScore;
+    const home = map.get(m.homeTeamId);
+    const away = map.get(m.awayTeamId);
+    if (home) {
+      home.played++; home.goalsFor += hs; home.goalsAgainst += as_; home.goalDiff += hs - as_;
+      if (hs > as_) { home.won++; home.points += 3; }
+      else if (hs === as_) { home.drawn++; home.points += 1; }
+      else home.lost++;
+    }
+    if (away) {
+      away.played++; away.goalsFor += as_; away.goalsAgainst += hs; away.goalDiff += as_ - hs;
+      if (as_ > hs) { away.won++; away.points += 3; }
+      else if (hs === as_) { away.drawn++; away.points += 1; }
+      else away.lost++;
+    }
+  }
+  return [...map.values()].sort(
+    (a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it")
+  );
+}
+
+// ─── Async helpers (fanno le proprie query DB) ───────────────────────────────
+
 export type StandingEntry = {
   groupSlug?: string; // present when computing per-group standings
   rank: number;

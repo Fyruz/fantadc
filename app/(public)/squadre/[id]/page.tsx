@@ -3,6 +3,8 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import { BackButton } from "./BackButton";
 import { getFlagUrlFromCountryCode } from "@/lib/flags";
+import { buildGroupStandings, type GroupStandingRow } from "@/lib/standings";
+import GroupStandingCard from "@/components/group-standing-card";
 
 export const revalidate = 60;
 
@@ -121,33 +123,9 @@ export default async function SquadraPublicDetailPage({
     goals: s._count.scorerId,
   }));
 
-  // Group standings
-  type StandingRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number };
-  let standings: StandingRow[] = [];
-  if (teamGroup) {
-    const map = new Map<number, StandingRow>();
-    for (const gt of teamGroup.teams) {
-      map.set(gt.footballTeamId, {
-        teamId: gt.footballTeamId, name: gt.footballTeam.name,
-        shortName: gt.footballTeam.shortName, countryCode: gt.footballTeam.countryCode, logoUrl: gt.footballTeam.logoUrl,
-        played: 0, won: 0, drawn: 0, lost: 0, goalDiff: 0, points: 0,
-      });
-    }
-    for (const m of teamGroup.matches) {
-      if (!m.homeTeamId || !m.awayTeamId) continue;
-      const hs = m.homeScore!; const as_ = m.awayScore!;
-      const home = map.get(m.homeTeamId); const away = map.get(m.awayTeamId);
-      if (home) {
-        home.played++; home.goalDiff += hs - as_;
-        if (hs > as_) { home.won++; home.points += 3; } else if (hs === as_) { home.drawn++; home.points += 1; } else home.lost++;
-      }
-      if (away) {
-        away.played++; away.goalDiff += as_ - hs;
-        if (as_ > hs) { away.won++; away.points += 3; } else if (hs === as_) { away.drawn++; away.points += 1; } else away.lost++;
-      }
-    }
-    standings = [...map.values()].sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it"));
-  }
+  const standings: GroupStandingRow[] = teamGroup
+    ? buildGroupStandings(teamGroup.teams, teamGroup.matches)
+    : [];
 
   const flagSrc = team.logoUrl ?? getFlagUrlFromCountryCode(team.countryCode);
   const TABS: { key: Tab; label: string }[] = [
@@ -196,7 +174,9 @@ export default async function SquadraPublicDetailPage({
       )}
       {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
       {activeTab === "classifica" && (
-        <ClassificaTab standings={standings} groupName={teamGroup?.name} teamId={teamId} />
+        standings.length === 0
+          ? <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Classifica non disponibile.</p>
+          : <GroupStandingCard group={{ id: teamGroup!.id, name: teamGroup!.name, rows: standings }} highlightTeamId={teamId} />
       )}
       {activeTab === "rosa" && <RosaTab players={team.players} />}
     </div>
@@ -410,110 +390,6 @@ function PartiteTeamLogo({ team }: { team: MatchTeam | null }) {
   if (team.logoUrl) return <img src={team.logoUrl} alt={team.name} style={{ width: 24, height: 24, objectFit: "contain" }} />;
   if (team.countryCode) { const flagSrc = getFlagUrlFromCountryCode(team.countryCode); if (flagSrc) return <img src={flagSrc} alt={team.name} style={{ width: 24, height: 16, objectFit: "contain" }} />; }
   return null;
-}
-
-// ─── Classifica ──────────────────────────────────────────────────────────────
-
-function ClassificaTab({
-  standings,
-  groupName,
-  teamId,
-}: {
-  standings: { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number }[];
-  groupName: string | undefined;
-  teamId: number;
-}) {
-  if (standings.length === 0) {
-    return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Classifica non disponibile.</p>;
-  }
-
-  const cols: { key: keyof typeof standings[0]; label: string }[] = [
-    { key: "played", label: "PG" },
-    { key: "won", label: "V" },
-    { key: "drawn", label: "N" },
-    { key: "lost", label: "S" },
-    { key: "goalDiff", label: "DR" },
-    { key: "points", label: "PT" },
-  ];
-
-  return (
-    <div
-      className="bg-white rounded-3xl overflow-hidden pb-3"
-      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-    >
-      {groupName && (
-        <div className="px-6 pt-6 pb-3">
-          <h2
-            className="uppercase text-base font-medium"
-            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", wordSpacing: "0.3em" }}
-          >
-            {groupName}
-          </h2>
-        </div>
-      )}
-
-      {/* Table header */}
-      <div className="flex items-center gap-2 px-6 pb-3">
-        <span className="text-xs font-semibold uppercase text-black/40 w-5 shrink-0" />
-        <span className="text-xs font-semibold uppercase text-black/40 flex-1">Squadra</span>
-        {cols.map((c) => (
-          <span key={c.key} className="text-xs font-semibold uppercase text-black/40 w-7 text-center shrink-0">{c.label}</span>
-        ))}
-      </div>
-
-      {standings.map((row, i) => {
-        const isCurrentTeam = row.teamId === teamId;
-        const flagUrl = row.logoUrl ?? getFlagUrlFromCountryCode(row.countryCode);
-        return (
-          <div
-            key={row.teamId}
-            className="flex items-center gap-2 px-6 py-3"
-            style={{
-              borderTop: "1px solid rgba(9,20,76,0.05)",
-              background: isCurrentTeam ? "rgba(1,7,163,0.04)" : undefined,
-            }}
-          >
-            <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{i + 1}</span>
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              {row.logoUrl ? (
-                <img
-                  src={row.logoUrl}
-                  alt={row.name}
-                  width={30}
-                  height={20}
-                  className=""
-                />
-              ) : row.countryCode ? (
-                <img
-                  src={getFlagUrlFromCountryCode(row.countryCode)!}
-                  alt={row.name}
-                  width={30}
-                  height={20}
-                  className=""
-                />
-              ) : null}
-              <span className={`text-sm truncate ${isCurrentTeam ? "font-semibold" : "font-normal"}`} style={{ color: "var(--text-primary)" }}>
-                {row.shortName ?? row.name}
-              </span>
-            </div>
-            {cols.map((c) => {
-              const val = row[c.key] as number;
-              const display = c.key === "goalDiff" && val > 0 ? `+${val}` : val;
-              return (
-                <span
-                  key={c.key}
-                  className="text-sm w-7 text-center shrink-0 tabular-nums"
-                  style={{ color: "var(--text-primary)", fontWeight: c.key === "points" ? 700 : 400 }}
-                >
-                  {display}
-                </span>
-              );
-            })}
-          </div>
-        );
-      })}
-    </div>
-  );
 }
 
 // ─── Rosa ────────────────────────────────────────────────────────────────────

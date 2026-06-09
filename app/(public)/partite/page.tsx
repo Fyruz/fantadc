@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { buildGroupStandings } from "@/lib/standings";
 import PartiteClient from "./_partite-client";
 export const dynamic = 'force-dynamic'
 
@@ -31,30 +32,10 @@ export default async function PartitePublicPage() {
     }),
   ]);
 
-  type GroupRow = { teamId: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null; qualified: boolean; played: number; won: number; drawn: number; lost: number; goalDiff: number; points: number };
-  const groupStandings = groups.map((g) => {
-    const map = new Map<number, GroupRow>();
-    for (const gt of g.teams) {
-      map.set(gt.footballTeamId, {
-        teamId: gt.footballTeamId,
-        name: gt.footballTeam.name,
-        shortName: gt.footballTeam.shortName,
-        countryCode: gt.footballTeam.countryCode,
-        logoUrl: gt.footballTeam.logoUrl,
-        qualified: gt.qualified,
-        played: 0, won: 0, drawn: 0, lost: 0, goalDiff: 0, points: 0,
-      });
-    }
-    for (const m of g.matches) {
-      if (!m.homeTeamId || !m.awayTeamId) continue;
-      const hs = m.homeScore!; const as_ = m.awayScore!;
-      const home = map.get(m.homeTeamId); const away = map.get(m.awayTeamId);
-      if (home) { home.played++; home.goalDiff += hs - as_; if (hs > as_) { home.won++; home.points += 3; } else if (hs === as_) { home.drawn++; home.points += 1; } else home.lost++; }
-      if (away) { away.played++; away.goalDiff += as_ - hs; if (as_ > hs) { away.won++; away.points += 3; } else if (hs === as_) { away.drawn++; away.points += 1; } else away.lost++; }
-    }
-    const rows = [...map.values()].sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it"));
-    return { id: g.id, name: g.name, rows };
-  });
+  const groupStandings = groups.map((g) => ({
+    id: g.id, name: g.name,
+    rows: buildGroupStandings(g.teams, g.matches),
+  }));
 
   if (matches.length === 0 && groupStandings.length === 0) {
     return (
