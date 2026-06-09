@@ -1,9 +1,9 @@
-import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
-export const dynamic = 'force-dynamic'
+import PageHeader from "@/components/page-header";
 
+export const dynamic = 'force-dynamic'
 
 export default async function SquadrePublicPage() {
   const teams = await db.footballTeam.findMany({
@@ -13,20 +13,7 @@ export default async function SquadrePublicPage() {
 
   return (
     <div className="flex flex-col gap-10">
-      <div className="flex items-center justify-between">
-        <div className="flex-1 flex items-center">
-          <BackButton />
-        </div>
-
-        <h1
-          className="flex-1 text-center uppercase text-xl"
-          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
-        >
-          Squadre
-        </h1>
-
-        <div className="flex-1" />
-      </div>
+      <PageHeader title="Squadre" />
 
       {/* Grid */}
       {teams.length === 0 ? (
@@ -50,7 +37,7 @@ export default async function SquadrePublicPage() {
                       alt={team.name}
                       width={56}
                       height={37}
-                      className=""
+  
                     />
                   ) : (
                     <span className="text-xs font-black uppercase" style={{ color: "var(--primary)" }}>
