@@ -99,16 +99,16 @@ export default async function GironiPublicPage() {
   return (
     <div className="flex flex-col">
       {/* Header mobile */}
-      <div className="md:hidden flex items-center justify-between h-12">
+      <div className="md:hidden flex items-center justify-between">
         <div className="flex-1 flex items-center">
           <BackButton />
         </div>
-        <span
-          className="flex-1 text-center uppercase"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+        <h1
+          className="flex-1 text-center uppercase text-xl"
+          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
         >
           Gironi
-        </span>
+        </h1>
         <div className="flex-1" />
       </div>
 
@@ -156,14 +156,16 @@ export default async function GironiPublicPage() {
                   <img
                     src={resolveTeamFlag(row)!}
                     alt={row.name}
-                    className="w-9 h-9 object-contain shrink-0"
+                    width={24}
+                    height={16}
+                    className=""
                   />
                 ) : null}
                 <span className="text-sm font-normal text-black truncate">
                   {row.shortName ?? row.name}
                 </span>
                 {row.qualified && (
-                  <span className="text-[9px] font-bold shrink-0" style={{ color: "#10B981" }}>Q</span>
+                  <span className="text-[10px] font-semibold shrink-0" style={{ color: "#10B981" }}>Q</span>
                 )}
               </div>
               {cols.map((c, i) => {
