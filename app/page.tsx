@@ -107,26 +107,26 @@ export default async function HomePage({
 
         <main className="flex-1 pb-34 md:pb-0">
 
-        {/* ══ TOAST ACCOUNT ELIMINATO ═══════════════════════════════ */}
-        {accountDeleted && (
-          <div
-            className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-2rem)] px-4 py-3 rounded-2xl flex items-center gap-3"
-            style={{
-              background: "#ECFDF5",
-              border: "1.5px solid #A7F3D0",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
-              zIndex: 9999,
-            }}
-          >
-            <i className="pi pi-check-circle flex-shrink-0" style={{ color: "#059669" }} />
-            <p className="text-sm font-semibold whitespace-nowrap" style={{ color: "#065F46" }}>
-              Account eliminato con successo.
-            </p>
-          </div>
-        )}
+          {/* ══ TOAST ACCOUNT ELIMINATO ═══════════════════════════════ */}
+          {accountDeleted && (
+            <div
+              className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 w-max max-w-[calc(100vw-2rem)] px-4 py-3 rounded-2xl flex items-center gap-3"
+              style={{
+                background: "#ECFDF5",
+                border: "1.5px solid #A7F3D0",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.12)",
+                zIndex: 9999,
+              }}
+            >
+              <i className="pi pi-check-circle flex-shrink-0" style={{ color: "#059669" }} />
+              <p className="text-sm font-semibold whitespace-nowrap" style={{ color: "#065F46" }}>
+                Account eliminato con successo.
+              </p>
+            </div>
+          )}
 
-        {/* ══ HERO ══════════════════════════════════════════════════ */}
-        {/* <section
+          {/* ══ HERO ══════════════════════════════════════════════════ */}
+          {/* <section
           className="relative overflow-hidden flex flex-col items-center justify-center text-center"
           style={{
             minHeight: "86svh",
@@ -242,75 +242,75 @@ export default async function HomePage({
           </div>
         </section> */}
 
-        {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
-        <MvpVoteHintCard />
+          {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
+          <MvpVoteHintCard />
 
-        {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
-        {upcomingMatches.length > 0 && (
-          <section className="max-w-lg mx-auto w-full px-4 my-10">
-            <div className="flex items-center justify-between mb-6">
-              <div
-                className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium flex items-center gap-1"
-                style={{ fontFamily: "var(--font-tallica)" }}
-              >
-                <span>Prossime</span>
-                <span>partite</span>
-              </div>
-              <Link
-                href="/partite"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
-              >
-                Vedi tutto
-                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-4">
-              {upcomingMatches.filter((m) => m.homeTeam && m.awayTeam).map((m) => (
-                <Link key={m.id} href={`/partite/${m.id}`} className="block group">
-                  <div
-                    className="flex items-center gap-3 p-6 bg-white rounded-3xl transition-shadow group-hover:shadow-md"
-                    style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-                  >
-                    {/* Home team */}
-                    <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
-                      <MatchTeamLogo name={m.homeTeam!.name} shortName={m.homeTeam!.shortName} countryCode={m.homeTeam!.countryCode} logoUrl={m.homeTeam!.logoUrl} />
-                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
-                        {m.homeTeam!.shortName ?? m.homeTeam!.name}
-                      </span>
-                    </div>
-
-                    {/* Center — girone + orario + data */}
-                    <div className="flex flex-col items-center gap-2 shrink-0">
-                      {m.group && (
-                        <span className="text-xs font-light text-black/65">
-                          {m.group.name}
-                        </span>
-                      )}
-                      <span className="text-base font-semibold leading-6 tabular-nums text-black">
-                        {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                      <span className="text-xs font-light text-black/65">
-                        {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
-                      </span>
-                    </div>
-
-                    {/* Away team */}
-                    <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
-                      <MatchTeamLogo name={m.awayTeam!.name} shortName={m.awayTeam!.shortName} countryCode={m.awayTeam!.countryCode} logoUrl={m.awayTeam!.logoUrl} />
-                      <span className="text-sm font-normal leading-normal text-center w-full text-black">
-                        {m.awayTeam!.shortName ?? m.awayTeam!.name}
-                      </span>
-                    </div>
-                  </div>
+          {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
+          {upcomingMatches.length > 0 && (
+            <section className="max-w-lg mx-auto w-full px-4 my-10">
+              <div className="flex items-center justify-between mb-6">
+                <div
+                  className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium flex items-center gap-1"
+                  style={{ fontFamily: "var(--font-tallica)" }}
+                >
+                  <span>Prossime</span>
+                  <span>partite</span>
+                </div>
+                <Link
+                  href="/partite"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
+                >
+                  Vedi tutto
+                  <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
                 </Link>
-              ))}
-            </div>
-          </section>
-        )}
+              </div>
 
-        {/* ══ STATS ═════════════════════════════════════════════════ */}
-        {/* {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
+              <div className="flex flex-col gap-4">
+                {upcomingMatches.filter((m) => m.homeTeam && m.awayTeam).map((m) => (
+                  <Link key={m.id} href={`/partite/${m.id}`} className="block group">
+                    <div
+                      className="flex items-center gap-3 p-6 bg-white rounded-3xl transition-shadow group-hover:shadow-md"
+                      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+                    >
+                      {/* Home team */}
+                      <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                        <MatchTeamLogo name={m.homeTeam!.name} shortName={m.homeTeam!.shortName} countryCode={m.homeTeam!.countryCode} logoUrl={m.homeTeam!.logoUrl} />
+                        <span className="text-sm font-normal leading-normal text-center w-full text-black">
+                          {m.homeTeam!.shortName ?? m.homeTeam!.name}
+                        </span>
+                      </div>
+
+                      {/* Center — girone + orario + data */}
+                      <div className="flex flex-col items-center gap-2 shrink-0">
+                        {m.group && (
+                          <span className="text-xs font-light text-black/65">
+                            {m.group.name}
+                          </span>
+                        )}
+                        <span className="text-base font-semibold leading-6 tabular-nums text-black">
+                          {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-xs font-light text-black/65">
+                          {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                        </span>
+                      </div>
+
+                      {/* Away team */}
+                      <div className="flex flex-col items-center gap-3 flex-1 min-w-0">
+                        <MatchTeamLogo name={m.awayTeam!.name} shortName={m.awayTeam!.shortName} countryCode={m.awayTeam!.countryCode} logoUrl={m.awayTeam!.logoUrl} />
+                        <span className="text-sm font-normal leading-normal text-center w-full text-black">
+                          {m.awayTeam!.shortName ?? m.awayTeam!.name}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ══ STATS ═════════════════════════════════════════════════ */}
+          {/* {(teamCount > 0 || playerCount > 0 || fantasyCount > 0) && (
           <section className="max-w-lg mx-auto w-full px-4 my-10">
             <div
               className="rounded-2xl overflow-hidden"
@@ -343,172 +343,184 @@ export default async function HomePage({
           </section>
         )} */}
 
-        {/* ══ GIOCA ═════════════════════════════════════════════════ */}
-        <section className="max-w-lg mx-auto w-full px-4">
-          <h2
-            className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium mb-6"
-            style={{ fontFamily: "var(--font-tallica)" }}
-          >
-            Gioca
-          </h2>
-          <Link
-            href="/squadra"
-            className="flex flex-col gap-3 bg-white rounded-3xl overflow-hidden p-6"
-            style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-          >
-            <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
-              <img
-                src="/images/fantasy-football-shirt.png"
-                alt="Fanta"
-                className="h-full object-contain"
-              />
-            </div>
-            <div className="flex flex-col gap-3">
-              <p
-                className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
-                style={{ fontFamily: "var(--font-tallica)" }}
-              >
-                Fanta
-              </p>
-              <p className="text-sm text-black font-normal max-w-48">
-                Gestisci il tuo dream team in Danimarca&apos;s Cup!
-              </p>
-              <p className="text-sm font-semibold text-black">Gioca al Fanta</p>
-            </div>
-          </Link>
-        </section>
-
-        {/* ══ GIRONI ════════════════════════════════════════════════ */}
-        {groupStandings.length > 0 && (
-          <section className="max-w-lg mx-auto px-4 my-10">
-            <div className="mx-auto flex items-center justify-between mb-6">
-              <h2
-                className="uppercase text-xl font-medium leading-8.5 text-(--text-primary)"
-                style={{ fontFamily: "var(--font-tallica)" }}
-              >
-                CLASSIFICA
-              </h2>
-              <Link href="/partite?tab=classifica" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
-                Vedi tutto
-                <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
-              </Link>
-            </div>
-
-            <div
-              className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-3 md:grid md:grid-cols-1 md:overflow-visible md:mx-0 md:px-0"
-              style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+          {/* ══ GIOCA ═════════════════════════════════════════════════ */}
+          <section className="max-w-lg mx-auto w-full px-4">
+            <h2
+              className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium mb-6"
+              style={{ fontFamily: "var(--font-tallica)" }}
             >
-              {groupStandings.map((g) => (
-                <Link
-                  key={g.id}
-                  href="/partite?tab=classifica"
-                  className="block rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
-                  style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-                >
-                  {/* Card header */}
-                  <div className="px-6 pt-6 pb-3">
-                    <p
-                      className="uppercase text-base font-medium text-(--text-primary)"
-                      style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}
-                    >
-                      {g.name}
-                    </p>
-                  </div>
-
-                  {/* Table header */}
-                  <div className="flex items-center gap-4 px-6 pb-3">
-                    <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
-                    <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
-                    <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
-                    <span className="text-xs font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
-                    <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
-                  </div>
-
-                  {/* Rows */}
-                  {g.rows.map((row, idx) => (
-                    <div
-                      key={row.teamId}
-                      className="flex items-center gap-4 px-6"
-                      style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
-                    >
-                      <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {resolveTeamFlag(row) ? (
-                          <img src={resolveTeamFlag(row)!} alt={row.name} className="w-9 h-9 object-contain shrink-0" />
-                        ) : null}
-                        <span className="text-sm font-normal text-black truncate">
-                          {row.shortName ?? row.name}
-                        </span>
-                      </div>
-                      <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-                      <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
-                        {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
-                      </span>
-                      <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
-                    </div>
-                  ))}
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ══ MARCATORI ════════════════════════════════════════════ */}
-        {topScorers.length > 0 && (
-          <section className="max-w-lg mx-auto px-4">
-            <div
-              className="bg-white rounded-3xl overflow-hidden"
+              Gioca
+            </h2>
+            <Link
+              href="/squadra"
+              className="flex flex-col gap-3 bg-white rounded-3xl overflow-hidden p-6"
               style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
             >
-              {/* Card header */}
-              <div className="px-6 pt-6 pb-3">
-                <h2
-                  className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
+              <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
+                <img
+                  src="/images/fantasy-football-shirt.png"
+                  alt="Fanta"
+                  className="h-full object-contain"
+                />
+              </div>
+              <div className="flex flex-col gap-3">
+                <p
+                  className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
                   style={{ fontFamily: "var(--font-tallica)" }}
                 >
-                  MARCATORI
-                </h2>
+                  Fanta
+                </p>
+                <p className="text-sm text-black font-normal max-w-48">
+                  Gestisci il tuo dream team in Danimarca&apos;s Cup!
+                </p>
+                <p className="text-sm font-semibold text-black">Gioca al Fanta</p>
               </div>
+            </Link>
+          </section>
 
-              {/* Table header */}
-              <div className="flex items-center px-6 pb-3 gap-4">
-                <span className="text-xs font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
-                <span className="text-xs font-semibold uppercase text-black/65 shrink-0">GOL</span>
-              </div>
-
-              {/* Rows */}
-              {topScorers.map((player, idx) => (
-                <div
-                  key={player.id}
-                  className="flex items-center gap-4 px-6 py-3"
-                  style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
+          {/* ══ GIRONI ════════════════════════════════════════════════ */}
+          {groupStandings.length > 0 && (
+            <section className="max-w-lg mx-auto px-4 my-10">
+              <div className="mx-auto flex items-center justify-between mb-6">
+                <h2
+                  className="uppercase text-xl font-medium leading-8.5 text-(--text-primary)"
+                  style={{ fontFamily: "var(--font-tallica)" }}
                 >
-                  <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
-                      {resolveTeamFlag(player.footballTeam) ? (
-                        <img src={resolveTeamFlag(player.footballTeam)!} alt={player.footballTeam.name} className="w-full h-auto object-contain" />
-                      ) : null}
-                    </div>
-                    <span className="text-sm font-normal text-black truncate">{player.name}</span>
-                  </div>
-                  <span className="text-sm font-bold text-black shrink-0 tabular-nums">
-                    {player._count.goals}
-                  </span>
-                </div>
-              ))}
-              <div className="p-6" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
-                <Link href="/classifica-marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
-                  Vedi classifica completa
+                  CLASSIFICA
+                </h2>
+                <Link href="/partite?tab=classifica" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+                  Vedi tutto
                   <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
                 </Link>
               </div>
-            </div>
-          </section>
-        )}
 
-        {/* ══ QUICK ACTIONS ═════════════════════════════════════════ */}
-        {/* <section className="max-w-lg mx-auto w-full px-4 py-4">
+              <div
+                className="flex gap-4 overflow-x-auto -mx-4 px-4 pb-3 md:grid md:grid-cols-1 md:overflow-visible md:mx-0 md:px-0"
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
+              >
+                {groupStandings.map((g) => (
+                  <Link
+                    key={g.id}
+                    href="/partite?tab=classifica"
+                    className="block rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
+                    style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+                  >
+                    {/* Card header */}
+                    <div className="px-6 pt-6 pb-3">
+                      <p
+                        className="uppercase text-base font-medium text-(--text-primary)"
+                        style={{ fontFamily: "var(--font-tallica)", wordSpacing: "0.3em" }}
+                      >
+                        {g.name}
+                      </p>
+                    </div>
+
+                    {/* Table header */}
+                    <div className="flex items-center gap-4 px-6 pb-3">
+                      <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
+                      <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
+                      <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">PG</span>
+                      <span className="text-xs font-semibold uppercase text-black/65 w-7 text-center shrink-0">DR</span>
+                      <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
+                    </div>
+
+                    {/* Rows */}
+                    {g.rows.map((row, idx) => (
+                      <div
+                        key={row.teamId}
+                        className="flex items-center gap-4 px-6"
+                        style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
+                      >
+                        <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          {resolveTeamFlag(row) ? (
+                            <img
+                              src={resolveTeamFlag(row)!}
+                              alt={row.name}
+                              width={24}
+                              height={16}
+                              className=""
+                            />
+                          ) : null}
+                          <span className="text-sm font-normal text-black truncate">
+                            {row.shortName ?? row.name}
+                          </span>
+                        </div>
+                        <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
+                        <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
+                          {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
+                        </span>
+                        <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
+                      </div>
+                    ))}
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ══ MARCATORI ════════════════════════════════════════════ */}
+          {topScorers.length > 0 && (
+            <section className="max-w-lg mx-auto px-4">
+              <div
+                className="bg-white rounded-3xl overflow-hidden"
+                style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
+              >
+                {/* Card header */}
+                <div className="px-6 pt-6 pb-3">
+                  <h2
+                    className="uppercase text-base font-medium leading-8.5 text-(--text-primary)"
+                    style={{ fontFamily: "var(--font-tallica)" }}
+                  >
+                    MARCATORI
+                  </h2>
+                </div>
+
+                {/* Table header */}
+                <div className="flex items-center px-6 pb-3 gap-4">
+                  <span className="text-xs font-semibold uppercase text-black/65 flex-1">GIOCATORE</span>
+                  <span className="text-xs font-semibold uppercase text-black/65 shrink-0">GOL</span>
+                </div>
+
+                {/* Rows */}
+                {topScorers.map((player, idx) => (
+                  <div
+                    key={player.id}
+                    className="flex items-center gap-4 px-6 py-3"
+                    style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
+                  >
+                    <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
+                        {resolveTeamFlag(player.footballTeam) ? (
+                          <img
+                            src={resolveTeamFlag(player.footballTeam)!}
+                            alt={player.footballTeam.name}
+                            width={24}
+                            height={16}
+                            className=""
+                          />
+                        ) : null}
+                      </div>
+                      <span className="text-sm font-normal text-black truncate">{player.name}</span>
+                    </div>
+                    <span className="text-sm font-bold text-black shrink-0 tabular-nums">
+                      {player._count.goals}
+                    </span>
+                  </div>
+                ))}
+                <div className="p-6" style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+                  <Link href="/classifica-marcatori" className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)">
+                    Vedi classifica completa
+                    <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* ══ QUICK ACTIONS ═════════════════════════════════════════ */}
+          {/* <section className="max-w-lg mx-auto w-full px-4 py-4">
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: "/classifica",  label: "Classifica",  icon: "pi-trophy",   bg: "rgba(232,160,0,0.10)", color: "#C48A00" },
