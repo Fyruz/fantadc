@@ -1,9 +1,11 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { resolveTeamFlag } from "@/lib/flags";
+import { getActiveEditWindow } from "@/lib/roster-edit-window";
 
 const CARD: React.CSSProperties = {
   background: "#fff",
@@ -50,8 +52,53 @@ export default async function SquadraPage() {
   const gk = fantasyTeam.players.find((p) => p.player.role === "P");
   const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
 
+  // Finestra di modifica rosa ("mercato")
+  const editWindow = await getActiveEditWindow();
+  let changesLeft = 0;
+  if (editWindow) {
+    const usage = await db.rosterEditUsage.findUnique({
+      where: { windowId_fantasyTeamId: { windowId: editWindow.id, fantasyTeamId: fantasyTeam.id } },
+      select: { changesUsed: true },
+    });
+    changesLeft = Math.max(0, editWindow.maxChanges - (usage?.changesUsed ?? 0));
+  }
+  const closesAtLabel = editWindow
+    ? editWindow.closesAt.toLocaleString("it-IT", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Rome",
+      })
+    : null;
+
   return (
     <div className="flex flex-col gap-6">
+
+      {/* Banner finestra di modifica aperta */}
+      {editWindow && (
+        <div
+          className="flex flex-col gap-3 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between"
+          style={{ background: "rgba(50,215,75,0.10)", border: "1px solid rgba(50,215,75,0.35)" }}
+        >
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#1A7F37" }}>
+              <i className="pi pi-unlock text-sm" />
+              Modifiche aperte fino al {closesAtLabel}
+            </div>
+            <p className="mt-0.5 text-xs" style={{ color: "var(--text-secondary)" }}>
+              Cambi rimasti: <strong>{changesLeft}/{editWindow.maxChanges}</strong> — il cambio di capitano è libero.
+            </p>
+          </div>
+          <Link
+            href="/squadra/modifica"
+            className="shrink-0 rounded-full px-4 py-2 text-center text-sm font-semibold text-white"
+            style={{ background: "var(--primary)" }}
+          >
+            Modifica rosa
+          </Link>
+        </div>
+      )}
 
       {/* Team name + points */}
       <div>
@@ -159,7 +206,9 @@ export default async function SquadraPage() {
         })}
 
         <p className="px-6 py-3 text-[10px]" style={{ color: "var(--text-disabled)", ...ROW_BORDER }}>
-          La rosa è bloccata. Solo un admin può modificarla.
+          {editWindow
+            ? "Modifiche aperte: puoi cambiare giocatori e capitano fino alla chiusura."
+            : "La rosa è bloccata. Solo un admin può modificarla."}
         </p>
       </div>
 
