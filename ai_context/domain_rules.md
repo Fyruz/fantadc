@@ -15,7 +15,8 @@
 * la composizione e fissa: 1 portiere e 4 giocatori di movimento
 * i 5 giocatori della rosa devono appartenere a 5 squadre reali diverse
 * un giocatore puo comparire in piu squadre fantasy
-* la rosa fantasy e bloccata per l'utente dopo la creazione iniziale
+* la rosa fantasy e bloccata per l'utente dopo la creazione iniziale, **salvo durante una finestra di modifica ("mercato") aperta dall'admin**
+* durante la finestra l'utente puo sostituire fino a un numero massimo di giocatori configurato dall'admin (budget cumulativo rispetto alla rosa di partenza); il cambio di capitano e sempre consentito e non consuma cambi; il nome squadra resta non modificabile
 * gli admin possono intervenire manualmente sulle rose
 * il capitano deve appartenere alla rosa della squadra fantasy
 * il capitano raddoppia il punteggio del proprio giocatore
@@ -105,6 +106,7 @@
 * gli admin possono correggere dati anche dopo la pubblicazione
 * le azioni admin che modificano dati devono essere tracciate in un log
 * gli admin possono vedere tutte le squadre fantasy, modificarne la rosa, sospendere utenti, vedere e correggere voti
+* gli admin possono aprire una finestra di modifica rosa (periodo + numero massimo di cambi) valida per tutte le squadre, e chiuderla in anticipo
 * esiste un admin di default
 * gli admin possono creare altri admin
 * operativamente esiste un solo livello di admin
