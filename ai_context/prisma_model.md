@@ -21,7 +21,6 @@ model User {
   fantasyTeam       FantasyTeam?
   votes             Vote[]
   adminAuditLogs    AdminAuditLog[]
-  pushSubscriptions PushSubscription[]
 }
 
 model FantasyTeam {
@@ -140,7 +139,6 @@ model Match {
   votes           Vote[]
   bonuses         PlayerMatchBonus[]
   goals           MatchGoal[]
-  pushDeliveries  PushNotificationDelivery[]
 
   @@index([homeTeamId])
   @@index([awayTeamId])
@@ -253,36 +251,6 @@ model AdminAuditLog {
   @@index([entityType, entityId])
 }
 
-model PushSubscription {
-  id                Int                        @id @default(autoincrement())
-  userId            Int
-  endpoint          String                     @unique
-  p256dh            String
-  auth              String
-  expirationTime    DateTime?
-  createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @updatedAt
-
-  user              User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sentNotifications PushNotificationDelivery[]
-
-  @@index([userId])
-}
-
-model PushNotificationDelivery {
-  id             Int                  @id @default(autoincrement())
-  subscriptionId Int
-  matchId        Int
-  type           PushNotificationType
-  sentAt         DateTime             @default(now())
-
-  subscription   PushSubscription     @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  match          Match                @relation(fields: [matchId], references: [id], onDelete: Cascade)
-
-  @@unique([subscriptionId, matchId, type])
-  @@index([matchId, type])
-}
-
 enum UserRole {
   USER
   ADMIN
@@ -297,8 +265,4 @@ enum MatchStatus {
   DRAFT
   SCHEDULED
   CONCLUDED
-}
-
-enum PushNotificationType {
-  VOTE_OPEN
 }

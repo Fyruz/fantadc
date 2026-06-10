@@ -38,8 +38,6 @@ Stack target:
 ### Supporto
 
 * AdminAuditLog
-* PushSubscription
-* PushNotificationDelivery
 
 ### Tabelle ponte
 
@@ -183,17 +181,6 @@ Significato:
 Significato:
 
 * ogni modifica amministrativa rilevante deve lasciare traccia
-
-### Push notifications
-
-* `User 1 -- N PushSubscription`
-* `PushSubscription 1 -- N PushNotificationDelivery`
-* `Match 1 -- N PushNotificationDelivery`
-
-Significato:
-
-* `PushSubscription` salva endpoint e chiavi browser per utente/dispositivo
-* `PushNotificationDelivery` traccia gli invii effettuati per evitare duplicati per match/evento
 
 ---
 
