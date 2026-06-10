@@ -27,6 +27,7 @@ const DCUP_MORE = [
   { href: "/admin/utenti",          label: "Utenti",        icon: "pi-id-card"  },
   { href: "/admin/bonus-types",     label: "Tipi bonus",    icon: "pi-star"     },
   { href: "/admin/squadre-fantasy", label: "Squadre Fanta", icon: "pi-trophy"   },
+  { href: "/admin/modifiche-rosa",  label: "Modifiche rosa",icon: "pi-pencil"   },
   { href: "/admin/audit",           label: "Audit log",     icon: "pi-history"  },
 ];
 
