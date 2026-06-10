@@ -104,6 +104,8 @@ export default function BonusTypesTable({ rows }: { rows: Row[] }) {
 
 function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => void }) {
   const [state, action, pending] = useActionState(updateBonusType, undefined);
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
   const [points, setPoints] = useState<number | null>(0);
   const [secret, setSecret] = useState(false);
   const { success, error } = useAppToast();
@@ -112,6 +114,8 @@ function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => voi
   // Sincronizza i valori quando si apre il dialog su una riga.
   useEffect(() => {
     if (row) {
+      setCode(row.code);
+      setName(row.name);
       setPoints(Number(row.points));
       setSecret(row.isSecret);
     }
@@ -135,31 +139,59 @@ function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => voi
     <Dialog
       visible={!!row}
       onHide={onClose}
-      header="Modifica tipo bonus"
+      closable={false}
+      dismissableMask
       style={{ width: "min(28rem, 94vw)" }}
+      pt={{
+        root: { style: { borderRadius: "22px", overflow: "hidden" } },
+        header: { className: "!hidden" },
+        content: { className: "!p-0" },
+      }}
       modal
       draggable={false}
       resizable={false}
     >
-      <form action={action} onSubmit={() => { submitted.current = true; }} className="flex flex-col gap-4 pt-2">
+      {/* Header */}
+      <div
+        className="relative overflow-hidden px-5 pb-5 pt-6 text-white"
+        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)" }}
+      >
+        <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full border border-white/10" />
+        <div className="relative flex items-center gap-3">
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl"
+            style={{ background: "rgba(232,160,0,0.18)", border: "1px solid rgba(232,160,0,0.45)" }}
+          >
+            <i className="pi pi-pencil text-lg" style={{ color: "#E8A000" }} />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[10px] font-black uppercase tracking-[2px] text-white/55">Modifica</div>
+            <h2 className="font-display text-xl font-black uppercase leading-none">Tipo bonus</h2>
+          </div>
+        </div>
+      </div>
+
+      <form action={action} onSubmit={() => { submitted.current = true; }} className="flex flex-col gap-4 p-5">
         <input type="hidden" name="id" value={row.id} />
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Codice *
-          </label>
-          <InputText name="code" defaultValue={row.code} className="w-full uppercase" required />
-          {state?.errors?.code && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.code[0]}</p>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+              Codice *
+            </label>
+            <InputText name="code" value={code} onChange={(e) => setCode(e.target.value)} className="w-full uppercase" required />
+            {state?.errors?.code && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.code[0]}</p>}
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+              Nome *
+            </label>
+            <InputText name="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full" required />
+            {state?.errors?.name && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.name[0]}</p>}
+          </div>
         </div>
         <div>
           <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Nome *
-          </label>
-          <InputText name="name" defaultValue={row.name} className="w-full" required />
-          {state?.errors?.name && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.name[0]}</p>}
-        </div>
-        <div>
-          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Punti * <span className="font-normal" style={{ color: "var(--text-muted)" }}>(usa valori negativi per i malus, es. -1)</span>
+            Punti * <span className="font-normal" style={{ color: "var(--text-muted)" }}>(negativo per i malus, es. -1)</span>
           </label>
           <input type="hidden" name="points" value={points ?? ""} />
           <InputNumber
@@ -206,7 +238,7 @@ function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => voi
 
         <div className="flex justify-end gap-2 pt-1">
           <Button type="button" label="Annulla" text size="small" onClick={onClose} disabled={pending} />
-          <Button type="submit" label={pending ? "Salvo..." : "Salva"} size="small" disabled={pending} />
+          <Button type="submit" label={pending ? "Salvo..." : "Salva"} icon="pi pi-check" size="small" disabled={pending} />
         </div>
       </form>
     </Dialog>
