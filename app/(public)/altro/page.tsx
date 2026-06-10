@@ -40,6 +40,7 @@ export default async function AltroPage() {
       {/* Lega */}
       <Section label="Lega">
         <Item icon={<img src="/icons/football-player-sign.svg" width={18} height={18} alt="" />} label="Scelti dai fantallenatori" href="/giocatori-fanta" />
+        <Item icon={<img src="/icons/medal.svg" width={18} height={18} alt="" />} label="Bonus pubblici" href="/bonus-pubblici" />
         <Item icon={<img src="/icons/lock.svg" width={18} height={18} alt="" />} label="Bonus segreti" href="/bonus-segreti" />
       </Section>
 
