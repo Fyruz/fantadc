@@ -11,8 +11,10 @@ export default async function BonusTypesPage() {
   return (
     <div>
       <AdminPageHeader title="Tipi bonus" />
+      <div className="mb-4">
+        <NewBonusTypeForm />
+      </div>
       <BonusTypesTable rows={bonusTypes} />
-      <NewBonusTypeForm />
     </div>
   );
 }

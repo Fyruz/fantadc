@@ -1,16 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useActionState } from "react";
 import { Button } from "primereact/button";
-import { deleteBonusType } from "@/app/actions/admin/bonus-types";
+import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
+import { deleteBonusType, updateBonusType } from "@/app/actions/admin/bonus-types";
 import ConfirmDeleteForm from "@/components/confirm-delete-form";
+import { useAppToast } from "@/components/toast-provider";
 
-type Row = { id: number; code: string; name: string; points: unknown };
+type Row = { id: number; code: string; name: string; points: unknown; isSecret: boolean };
 
 const PAGE_SIZE = 20;
 
 export default function BonusTypesTable({ rows }: { rows: Row[] }) {
   const [page, setPage] = useState(0);
+  const [editRow, setEditRow] = useState<Row | null>(null);
   const total = rows.length;
   const start = page * PAGE_SIZE;
   const slice = rows.slice(start, start + PAGE_SIZE);
@@ -44,11 +50,28 @@ export default function BonusTypesTable({ rows }: { rows: Row[] }) {
                     >
                       {ptsLabel} pt
                     </span>
+                    {row.isSecret && (
+                      <span
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 inline-flex items-center gap-1"
+                        style={{ background: "rgba(232,160,0,0.14)", color: "#B77900" }}
+                      >
+                        <i className="pi pi-eye-slash text-[9px]" />
+                        Segreto
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {row.name}
                   </div>
                 </div>
+                <Button
+                  type="button"
+                  icon="pi pi-pencil"
+                  text
+                  size="small"
+                  aria-label="Modifica"
+                  onClick={() => setEditRow(row)}
+                />
                 <ConfirmDeleteForm
                   action={deleteBonusType}
                   hiddenInputs={{ id: row.id }}
@@ -73,6 +96,119 @@ export default function BonusTypesTable({ rows }: { rows: Row[] }) {
           )}
         </>
       )}
+
+      <EditBonusDialog row={editRow} onClose={() => setEditRow(null)} />
     </div>
+  );
+}
+
+function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => void }) {
+  const [state, action, pending] = useActionState(updateBonusType, undefined);
+  const [points, setPoints] = useState<number | null>(0);
+  const [secret, setSecret] = useState(false);
+  const { success, error } = useAppToast();
+  const submitted = useRef(false);
+
+  // Sincronizza i valori quando si apre il dialog su una riga.
+  useEffect(() => {
+    if (row) {
+      setPoints(Number(row.points));
+      setSecret(row.isSecret);
+    }
+  }, [row]);
+
+  useEffect(() => {
+    if (!submitted.current) return;
+    if (state?.message) {
+      error(state.message);
+      submitted.current = false;
+    } else if (state && !state.errors) {
+      success("Tipo bonus aggiornato.");
+      submitted.current = false;
+      onClose();
+    }
+  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!row) return null;
+
+  return (
+    <Dialog
+      visible={!!row}
+      onHide={onClose}
+      header="Modifica tipo bonus"
+      style={{ width: "min(28rem, 94vw)" }}
+      modal
+      draggable={false}
+      resizable={false}
+    >
+      <form action={action} onSubmit={() => { submitted.current = true; }} className="flex flex-col gap-4 pt-2">
+        <input type="hidden" name="id" value={row.id} />
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Codice *
+          </label>
+          <InputText name="code" defaultValue={row.code} className="w-full uppercase" required />
+          {state?.errors?.code && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.code[0]}</p>}
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Nome *
+          </label>
+          <InputText name="name" defaultValue={row.name} className="w-full" required />
+          {state?.errors?.name && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.name[0]}</p>}
+        </div>
+        <div>
+          <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>
+            Punti * <span className="font-normal" style={{ color: "var(--text-muted)" }}>(usa valori negativi per i malus, es. -1)</span>
+          </label>
+          <input type="hidden" name="points" value={points ?? ""} />
+          <InputNumber
+            value={points}
+            onValueChange={(e) => setPoints(e.value ?? null)}
+            step={0.5}
+            minFractionDigits={0}
+            maxFractionDigits={2}
+            placeholder="es. -1"
+            className="w-full"
+          />
+          {state?.errors?.points && <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.points[0]}</p>}
+        </div>
+
+        {/* Segreto */}
+        <input type="hidden" name="isSecret" value={secret ? "true" : "false"} />
+        <button
+          type="button"
+          onClick={() => setSecret((v) => !v)}
+          className="flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors"
+          style={{
+            borderColor: secret ? "rgba(232,160,0,0.45)" : "var(--border-soft)",
+            background: secret ? "rgba(232,160,0,0.08)" : "#fff",
+          }}
+        >
+          <span
+            className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border"
+            style={{
+              borderColor: secret ? "#E8A000" : "var(--border-medium)",
+              background: secret ? "#E8A000" : "#fff",
+            }}
+          >
+            {secret && <i className="pi pi-check text-[11px]" style={{ color: "#06073D" }} />}
+          </span>
+          <span className="min-w-0">
+            <span className="block text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+              Bonus segreto
+            </span>
+            <span className="block text-xs" style={{ color: "var(--text-muted)" }}>
+              Resta nascosto nella pagina Bonus Segreti finché non viene assegnato
+            </span>
+          </span>
+        </button>
+
+        <div className="flex justify-end gap-2 pt-1">
+          <Button type="button" label="Annulla" text size="small" onClick={onClose} disabled={pending} />
+          <Button type="submit" label={pending ? "Salvo..." : "Salva"} size="small" disabled={pending} />
+        </div>
+      </form>
+    </Dialog>
   );
 }
