@@ -42,16 +42,16 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const userVote = windowOpen && userId
     ? await db.vote.findUnique({
-        where: { userId_matchId: { userId, matchId } },
-        select: {
-          player: {
-            select: {
-              name: true,
-              footballTeam: { select: { countryCode: true, logoUrl: true, name: true } },
-            },
+      where: { userId_matchId: { userId, matchId } },
+      select: {
+        player: {
+          select: {
+            name: true,
+            footballTeam: { select: { countryCode: true, logoUrl: true, name: true } },
           },
         },
-      })
+      },
+    })
     : null;
 
   let mvpPlayer: { name: string; footballTeamId: number } | null = null;
@@ -105,7 +105,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           {/* Teams + score */}
           <div className="flex items-center gap-3">
             {/* Home */}
-            <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex flex-col items-center gap-4 flex-1 min-w-0">
               <TeamLogo team={match.homeTeam} />
               <span className="text-sm text-black text-center leading-tight">
                 {match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD"}
@@ -134,7 +134,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
             </div>
 
             {/* Away */}
-            <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex flex-col items-center gap-3 flex-1 min-w-0">
+            <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex flex-col items-center gap-4 flex-1 min-w-0">
               <TeamLogo team={match.awayTeam} />
               <span className="text-sm text-black text-center leading-tight">
                 {match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD"}
@@ -262,9 +262,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           <div className="flex pb-6">
             {/* Home column */}
             <div className="flex-1 min-w-0 px-6">
-              <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
-                <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.homeTeam && (() => { const f = resolveTeamFlag(match.homeTeam!); return f ? <img src={f} alt={match.homeTeam!.name} width={24} height={16} className="object-contain" /> : null; })()}
+              <Link href={match.homeTeam ? `/squadre/${match.homeTeam.id}` : "#"} className="flex items-center gap-4 mb-4">
+                <div className="shrink-0 flex items-center justify-center">
+                  {match.homeTeam && (() => { const f = resolveTeamFlag(match.homeTeam!); return f ? <img src={f} alt={match.homeTeam!.name} width={24} height={16} /> : null; })()}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
                   {match.homeTeam?.shortName ?? match.homeTeam?.name ?? "Casa"}
@@ -282,9 +282,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
             {/* Away column */}
             <div className="flex-1 min-w-0 px-6">
-              <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex items-center gap-2 mb-4">
-                <div className="shrink-0 flex items-center justify-center" style={{ width: 32, height: 32, padding: 4 }}>
-                  {match.awayTeam && (() => { const f = resolveTeamFlag(match.awayTeam!); return f ? <img src={f} alt={match.awayTeam!.name} width={24} height={16} className="object-contain" /> : null; })()}
+              <Link href={match.awayTeam ? `/squadre/${match.awayTeam.id}` : "#"} className="flex items-center gap-4 mb-4">
+                <div className="shrink-0 flex items-center justify-center">
+                  {match.awayTeam && (() => { const f = resolveTeamFlag(match.awayTeam!); return f ? <img src={f} alt={match.awayTeam!.name} width={24} height={16} /> : null; })()}
                 </div>
                 <span className="text-sm font-medium text-black truncate">
                   {match.awayTeam?.shortName ?? match.awayTeam?.name ?? "Ospiti"}
@@ -310,9 +310,14 @@ function TeamLogo({ team, size = 64 }: { team: { name: string; countryCode: stri
   if (!team) return <div style={{ width: size, height: size }} />;
   const src = resolveTeamFlag(team);
   return (
-    <div className="flex items-center justify-center shrink-0" style={{ width: size, height: size, padding: 4 }}>
+    <div className="flex items-center justify-center shrink-0">
       {src ? (
-        <img src={src} alt={team.name} className="w-full h-auto object-contain" />
+        <img
+          src={src}
+          alt={team.name}
+          width={56}
+          height={37}
+        />
       ) : (
         <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white font-black text-lg">{team.name.slice(0, 2).toUpperCase()}</div>
       )}

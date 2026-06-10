@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { resolveTeamFlag } from "@/lib/flags";
 import { type GroupStandingRow } from "@/lib/standings";
 
@@ -44,8 +45,9 @@ export default function GroupStandingCard({ group, highlightTeamId }: Props) {
         const flag = resolveTeamFlag(row);
         const isHighlighted = highlightTeamId === row.teamId;
         return (
-          <div
+          <Link
             key={row.teamId}
+            href={`/squadre/${row.teamId}`}
             className="flex items-center gap-2 px-6 py-3"
             style={{
               borderTop: "1px solid rgba(9,20,76,0.05)",
@@ -73,7 +75,7 @@ export default function GroupStandingCard({ group, highlightTeamId }: Props) {
                 </span>
               );
             })}
-          </div>
+          </Link>
         );
       })}
     </div>

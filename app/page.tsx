@@ -236,7 +236,7 @@ export default async function HomePage({
                 </div>
                 <Link
                   href="/partite"
-                  className="inline-flex items-center gap-1 text-sm font-semibold text-(--text-primary)"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-(--text-primary)"
                 >
                   Vedi tutto
                   <i className="pi pi-chevron-right" style={{ fontSize: 10 }} />
@@ -377,10 +377,9 @@ export default async function HomePage({
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
               >
                 {groupStandings.map((g) => (
-                  <Link
+                  <div
                     key={g.id}
-                    href="/partite?tab=classifica"
-                    className="block rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
+                    className="rounded-3xl bg-white overflow-hidden pb-3 shrink-0 w-90 md:w-auto"
                     style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
                   >
                     {/* Card header */}
@@ -403,35 +402,31 @@ export default async function HomePage({
                     </div>
 
                     {/* Rows */}
-                    {g.rows.map((row, idx) => (
-                      <div
-                        key={row.teamId}
-                        className="flex items-center gap-4 px-6"
-                        style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
-                      >
-                        <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {resolveTeamFlag(row) ? (
-                            <img
-                              src={resolveTeamFlag(row)!}
-                              alt={row.name}
-                              width={24}
-                              height={16}
-                              className=""
-                            />
-                          ) : null}
-                          <span className="text-sm font-normal text-black truncate">
-                            {row.shortName ?? row.name}
+                    {g.rows.map((row, idx) => {
+                      const flag = resolveTeamFlag(row);
+                      return (
+                        <Link
+                          key={row.teamId}
+                          href={`/squadre/${row.teamId}`}
+                          className="flex items-center gap-4 px-6"
+                          style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
+                        >
+                          <span className="text-xs text-black w-5 shrink-0 tabular-nums">{idx + 1}</span>
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {flag && <img src={flag} alt={row.name} width={24} height={16} />}
+                            <span className="text-sm font-normal text-black truncate">
+                              {row.shortName ?? row.name}
+                            </span>
+                          </div>
+                          <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
+                          <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
+                            {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
                           </span>
-                        </div>
-                        <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-                        <span className="text-sm text-black w-7 text-center shrink-0 tabular-nums">
-                          {row.goalDiff > 0 ? `+${row.goalDiff}` : row.goalDiff}
-                        </span>
-                        <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
-                      </div>
-                    ))}
-                  </Link>
+                          <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.points}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 ))}
               </div>
             </section>
@@ -468,8 +463,8 @@ export default async function HomePage({
                     style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
                   >
                     <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="shrink-0 flex items-center justify-center p-1" style={{ width: 36, height: 36 }}>
+                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                      <div className="shrink-0 flex items-center justify-center">
                         {resolveTeamFlag(player.footballTeam) ? (
                           <img
                             src={resolveTeamFlag(player.footballTeam)!}
