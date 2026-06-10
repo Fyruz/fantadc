@@ -22,6 +22,7 @@ model User {
   votes             Vote[]
   adminAuditLogs    AdminAuditLog[]
   pushSubscriptions PushSubscription[]
+  rosterEditWindows RosterEditWindow[]
 }
 
 model FantasyTeam {
@@ -35,6 +36,7 @@ model FantasyTeam {
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   captain         Player              @relation("FantasyTeamCaptain", fields: [captainPlayerId], references: [id], onDelete: Restrict)
   players         FantasyTeamPlayer[]
+  editUsages      RosterEditUsage[]
 
   @@index([captainPlayerId])
 }
@@ -235,6 +237,39 @@ model FantasyTeamPlayer {
 
   @@id([fantasyTeamId, playerId])
   @@index([playerId])
+}
+
+// Finestra di "mercato": periodo in cui gli utenti possono modificare la propria
+// rosa, con un numero massimo di sostituzioni giocatore consentite.
+model RosterEditWindow {
+  id          Int               @id @default(autoincrement())
+  opensAt     DateTime
+  closesAt    DateTime
+  maxChanges  Int               // sostituzioni giocatore consentite per utente
+  createdById Int
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  createdBy   User              @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  usages      RosterEditUsage[]
+
+  @@index([opensAt, closesAt])
+}
+
+// Conteggio dei cambi usati da una squadra in una specifica finestra.
+// baselinePlayerIds = rosa di partenza (al primo salvataggio nella finestra).
+model RosterEditUsage {
+  windowId          Int
+  fantasyTeamId     Int
+  baselinePlayerIds Json
+  changesUsed       Int      @default(0)
+  updatedAt         DateTime @updatedAt
+
+  window      RosterEditWindow @relation(fields: [windowId], references: [id], onDelete: Cascade)
+  fantasyTeam FantasyTeam      @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@id([windowId, fantasyTeamId])
+  @@index([fantasyTeamId])
 }
 
 model AdminAuditLog {
