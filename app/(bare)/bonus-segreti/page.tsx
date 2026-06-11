@@ -19,7 +19,7 @@ function LockedCard() {
       className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-4 p-5"
       style={CARD}
     >
-      <img src="/icons/bonus/lock.svg" alt="Bonus segreto" width={54} height={64} />
+      <img src="/icons/bonus/lock.svg" alt="Bonus segreto" width={54} style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="uppercase text-sm" style={{ fontFamily: "var(--font-tallica)", color: "#5e6070" }}>
           ???

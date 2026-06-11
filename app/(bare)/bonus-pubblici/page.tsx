@@ -4,46 +4,54 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 const CARD: React.CSSProperties = {
-  background: "#fff",
   border: "1px solid rgba(9,20,76,0.05)",
   boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
 };
 
-const ROW_BORDER: React.CSSProperties = { borderTop: "1px solid rgba(9,20,76,0.05)" };
+const BONUS_ICONS: Record<string, string> = {
+  ACCESSORY_MATCH:     "/icons/bonus/accesories.svg",
+  GOAL_1_3:            "/icons/bonus/goal-1-3.svg",
+  GOAL_4_PLUS:         "/icons/bonus/goal-4.svg",
+  GOALKEEPER_GOAL:     "/icons/bonus/goalkeeper-goal.svg",
+  SEXY_CELEBRATION:    "/icons/bonus/celebration.svg",
+  INTERVIEWED:         "/icons/bonus/interviewed.svg",
+  INTERVIEWER:         "/icons/bonus/who-interviews.svg",
+  MOTM:                "/icons/bonus/momt.svg",
+  FAN_FAVORITE:        "/icons/bonus/most-voted.svg",
+  GOALKEEPER_CONCEDED:    "/icons/bonus/1-5-ball-in-the-net.svg",
+  GOALKEEPER_CONCEDED_6P: "/icons/bonus/6-balls-in-the-net.svg",
+  OWN_GOAL:            "/icons/bonus/autogol.svg",
+  FIRST_GOAL:          "/icons/bonus/first-goal.svg",
+  YELLOW_CARD:         "/icons/bonus/yellow-card.svg",
+  RED_CARD:            "/icons/bonus/red-card.svg",
+  LEAST_FAN_FAVORITE:  "/icons/bonus/least-voted.svg",
+  BALL_TO_BAR:         "/icons/bonus/ball-in-the-bar.svg",
+  BALL_IN_GREVE:       "/icons/bonus/ball-in-the-river.svg",
+  CLEAN_SHEET:         "/icons/bonus/clean-sheet.svg",
+  PENALTY_MISSED:      "/icons/bonus/missed-penalty.svg",
+};
 
 function formatPoints(points: number): string {
   return points > 0 ? `+${points}` : String(points);
 }
 
-function BonusList({ title, rows }: { title: string; rows: { id: number; name: string; points: number }[] }) {
-  if (rows.length === 0) return null;
+function BonusCard({ code, name, points }: { code: string; name: string; points: number }) {
+  const positive = points >= 0;
+  const icon = BONUS_ICONS[code] ?? "/icons/bonus/lock.svg";
   return (
-    <div className="rounded-3xl overflow-hidden" style={CARD}>
-      <div className="px-6 pt-6 pb-3">
-        <h2
-          className="text-base font-medium uppercase"
-          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
-        >
-          {title}
-        </h2>
+    <div
+      className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-4 p-5"
+      style={CARD}
+    >
+      <img src={icon} alt="" width={64} style={{ height: "auto" }} />
+      <div className="flex flex-col items-center gap-2 text-center">
+        <p className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>
+          {name}
+        </p>
+        <p className="font-semibold text-sm leading-normal" style={{ color: positive ? "#065F46" : "#991B1B" }}>
+          {formatPoints(points)} pt
+        </p>
       </div>
-      {rows.map((b) => {
-        const positive = b.points >= 0;
-        return (
-          <div key={b.id} className="flex items-center gap-3 px-6 py-3" style={ROW_BORDER}>
-            <span className="flex-1 min-w-0 text-sm text-black truncate">{b.name}</span>
-            <span
-              className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
-              style={{
-                background: positive ? "#ECFDF5" : "#FEF2F2",
-                color: positive ? "#065F46" : "#991B1B",
-              }}
-            >
-              {formatPoints(b.points)} pt
-            </span>
-          </div>
-        );
-      })}
     </div>
   );
 }
@@ -52,15 +60,13 @@ export default async function BonusPubblici() {
   const publicBonuses = await db.bonusType.findMany({
     where: { isSecret: false },
     orderBy: [{ points: "desc" }, { name: "asc" }],
-    select: { id: true, name: true, points: true },
+    select: { id: true, code: true, name: true, points: true },
   });
 
-  const rows = publicBonuses.map((b) => ({ id: b.id, name: b.name, points: Number(b.points) }));
-  const bonus = rows.filter((b) => b.points >= 0);
-  const malus = rows.filter((b) => b.points < 0);
+  const rows = publicBonuses.map((b) => ({ id: b.id, code: b.code, name: b.name, points: Number(b.points) }));
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-10">
       <PageHeader title="Bonus Pubblici" />
 
       <p className="text-sm text-black text-center leading-5">
@@ -72,9 +78,10 @@ export default async function BonusPubblici() {
           Nessun bonus pubblico al momento.
         </p>
       ) : (
-        <div className="flex flex-col gap-4">
-          <BonusList title="Bonus" rows={bonus} />
-          <BonusList title="Malus" rows={malus} />
+        <div className="grid grid-cols-3 gap-3">
+          {rows.map((b) => (
+            <BonusCard key={b.id} code={b.code} name={b.name} points={b.points} />
+          ))}
         </div>
       )}
     </div>

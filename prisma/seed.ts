@@ -183,22 +183,39 @@ async function seedAdmin() {
 // ─── Bonus types ──────────────────────────────────────────────────────────
 async function seedBonusTypes() {
   const bonusTypes = [
-    { code: "GOAL",           name: "Gol",                    points:  3.0 },
-    { code: "ASSIST",         name: "Assist",                 points:  1.0 },
-    { code: "PENALTY_GOAL",   name: "Rigore segnato",         points:  3.0 },
-    { code: "PENALTY_MISSED", name: "Rigore sbagliato",       points: -3.0 },
-    { code: "OWN_GOAL",       name: "Autorete",               points: -2.0 },
-    { code: "YELLOW_CARD",    name: "Cartellino giallo",      points: -0.5 },
-    { code: "RED_CARD",       name: "Cartellino rosso",       points: -2.0 },
-    { code: "CLEAN_SHEET_GK", name: "Clean sheet (portiere)", points:  1.0 },
-    { code: "MVP",            name: "MVP Partita",            points:  5.0 },
+    // Positivi
+    { code: "ACCESSORY_MATCH",       name: "Accessorio in comune (squadra)",  points:  1.0, isSecret: false },
+    { code: "GOAL_1_3",              name: "Giocatore segna 1-3 gol",         points:  3.0, isSecret: false },
+    { code: "GOAL_4_PLUS",           name: "Giocatore segna 4+ gol",          points:  2.0, isSecret: false },
+    { code: "GOALKEEPER_GOAL",       name: "Gol del portiere",                points:  3.0, isSecret: false },
+    { code: "SEXY_CELEBRATION",      name: "Esultanza sexy (con impegno)",    points:  1.0, isSecret: false },
+    { code: "INTERVIEWED",           name: "Intervistato",                    points:  3.0, isSecret: false },
+    { code: "INTERVIEWER",           name: "Chi intervista",                  points:  1.0, isSecret: false },
+    { code: "MOTM",                  name: "MOTM",                            points:  3.0, isSecret: false },
+    { code: "FAN_FAVORITE",          name: "Fan Favorite (voto su app)",      points:  3.0, isSecret: false },
+    { code: "GOALKEEPER_CONCEDED",    name: "Portiere prende 1-5 gol",        points:  2.0, isSecret: false },
+    { code: "GOALKEEPER_CONCEDED_6P", name: "Portiere prende 6+ gol",         points:  3.0, isSecret: false },
+    { code: "OWN_GOAL",              name: "Autogol",                         points:  1.0, isSecret: false },
+    { code: "FIRST_GOAL",            name: "Primo gol della partita",         points:  1.0, isSecret: false },
+    // Negativi
+    { code: "YELLOW_CARD",           name: "Ammonizione",                     points: -1.0, isSecret: false },
+    { code: "RED_CARD",              name: "Rosso",                           points: -2.0, isSecret: false },
+    { code: "LEAST_FAN_FAVORITE",    name: "Least Fan Favorite (meno votato)", points:  3.0, isSecret: false },
+    { code: "BALL_TO_BAR",           name: "Pallone al bar",                  points: -3.0, isSecret: false },
+    { code: "BALL_IN_GREVE",         name: "Pallone in Greve",                points: -5.0, isSecret: false },
+    { code: "CLEAN_SHEET",           name: "Clean Sheet",                     points: -1.0, isSecret: false },
+    { code: "PENALTY_MISSED",        name: "Rigore sbagliato",                points: -2.0, isSecret: false },
   ];
 
   for (const bt of bonusTypes) {
-    await db.bonusType.upsert({ where: { code: bt.code }, update: { points: bt.points }, create: bt });
+    await db.bonusType.upsert({
+      where: { code: bt.code },
+      update: { name: bt.name, points: bt.points, isSecret: bt.isSecret },
+      create: bt,
+    });
   }
 
-  console.log(`✓ Bonus type verificati: ${bonusTypes.map((b) => b.code).join(", ")}`);
+  console.log(`✓ Bonus type verificati: ${bonusTypes.length} tipi`);
 }
 
 // ─── Torneo ───────────────────────────────────────────────────────────────
