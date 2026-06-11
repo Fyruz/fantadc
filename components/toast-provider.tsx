@@ -32,10 +32,14 @@ interface ToastItem {
   label?: string;
 }
 
+// I toast si auto-dismettono dopo 5s e diventano dismissibili a mano dopo 1s.
+const AUTO_DISMISS_MS = 5000;
+const DISMISSABLE_AFTER_MS = 1000;
+
 const CONFIG: Record<Severity, { icon: string; label: string; accent: string; iconBg: string; iconColor: string; life: number }> = {
-  error:   { icon: "pi-times-circle", label: "Errore",      accent: "#DC2626", iconBg: "#FEF2F2", iconColor: "#DC2626", life: 6000 },
-  success: { icon: "pi-check-circle", label: "Completato",  accent: "#059669", iconBg: "#ECFDF5", iconColor: "#059669", life: 3500 },
-  info:    { icon: "pi-spin pi-spinner", label: "Un momento", accent: "#0107A3", iconBg: "rgba(1,7,163,0.08)", iconColor: "#0107A3", life: 12000 },
+  error:   { icon: "pi-times-circle", label: "Errore",      accent: "#DC2626", iconBg: "#FEF2F2", iconColor: "#DC2626", life: AUTO_DISMISS_MS },
+  success: { icon: "pi-check-circle", label: "Completato",  accent: "#059669", iconBg: "#ECFDF5", iconColor: "#059669", life: AUTO_DISMISS_MS },
+  info:    { icon: "pi-spin pi-spinner", label: "Un momento", accent: "#0107A3", iconBg: "rgba(1,7,163,0.08)", iconColor: "#0107A3", life: AUTO_DISMISS_MS },
 };
 
 let uid = 0;
@@ -45,6 +49,14 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
   const clickable = !!item.onClick;
   const icon = item.icon ?? c.icon;
   const label = item.label ?? c.label;
+
+  // Il toast può essere chiuso a mano solo dopo 1s dalla comparsa.
+  const [dismissable, setDismissable] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setDismissable(true), DISMISSABLE_AFTER_MS);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <div
       role={clickable ? "button" : undefined}
@@ -97,6 +109,32 @@ function ToastCard({ item, onDismiss }: { item: ToastItem; onDismiss: (id: numbe
           </div>
         )}
       </div>
+      {dismissable && (
+        <button
+          type="button"
+          aria-label="Chiudi"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDismiss(item.id);
+          }}
+          style={{
+            pointerEvents: "auto",
+            flexShrink: 0,
+            width: 24,
+            height: 24,
+            borderRadius: 9999,
+            border: "none",
+            background: "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "var(--text-disabled)",
+          }}
+        >
+          <i className="pi pi-times" style={{ fontSize: 12 }} />
+        </button>
+      )}
     </div>
   );
 }
