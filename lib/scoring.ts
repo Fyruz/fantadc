@@ -101,13 +101,34 @@ export function accumulatePlayerTotals(
   return totals;
 }
 
-/** Compute total ranking across all CONCLUDED matches. */
-export async function computeRankings(): Promise<RankEntry[]> {
-  const [matches, fantasyTeams, mvpBonusType] = await Promise.all([
+type FantasyTeamMeta = {
+  id: number;
+  name: string;
+  captainPlayerId: number;
+  players: { playerId: number }[];
+  user: { email: string; name: string | null };
+};
+
+/**
+ * Punti fanta per squadra (rosa attuale) sulle partite CONCLUDED nella finestra
+ * temporale data — `from`/`to` filtrano per `concludedAt` (>= from, < to).
+ * Senza opzioni = tutte le partite concluse.
+ */
+export async function computeFantasyTeamPoints(opts?: {
+  from?: Date | null;
+  to?: Date | null;
+}): Promise<Map<number, number>> {
+  const concludedAt: { gte?: Date; lt?: Date } = {};
+  if (opts?.from) concludedAt.gte = opts.from;
+  if (opts?.to) concludedAt.lt = opts.to;
+
+  const [matches, fantasyTeams, mvpBonus] = await Promise.all([
     db.match.findMany({
-      where: { status: MatchStatus.CONCLUDED },
+      where: {
+        status: MatchStatus.CONCLUDED,
+        ...(opts?.from || opts?.to ? { concludedAt } : {}),
+      },
       select: {
-        id: true,
         concludedAt: true,
         mvpOverridePlayerId: true,
         players: { select: { playerId: true } },
@@ -117,35 +138,47 @@ export async function computeRankings(): Promise<RankEntry[]> {
       },
     }),
     db.fantasyTeam.findMany({
-      select: {
-        id: true,
-        name: true,
-        captainPlayerId: true,
-        players: { select: { playerId: true } },
-        user: { select: { email: true, name: true } },
-      },
+      select: { id: true, captainPlayerId: true, players: { select: { playerId: true } } },
     }),
-    db.bonusType.findFirst({ where: { code: "MVP" }, select: { points: true } }),
+    getMvpBonus(),
   ]);
 
-  const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
   const playerTotals = accumulatePlayerTotals(matches, mvpBonus);
 
-  const entries: Omit<RankEntry, "rank">[] = fantasyTeams.map((fantasyTeam) => {
-    const rosterTotal = fantasyTeam.players.reduce(
-      (sum, { playerId }) => sum + (playerTotals.get(playerId) ?? 0),
-      0
-    );
-    const captainTotal = playerTotals.get(fantasyTeam.captainPlayerId) ?? 0;
+  const result = new Map<number, number>();
+  for (const ft of fantasyTeams) {
+    const rosterTotal = ft.players.reduce((sum, { playerId }) => sum + (playerTotals.get(playerId) ?? 0), 0);
+    const captainTotal = playerTotals.get(ft.captainPlayerId) ?? 0;
+    result.set(ft.id, rosterTotal + captainTotal);
+  }
+  return result;
+}
 
-    return {
-      fantasyTeamId: fantasyTeam.id,
-      fantasyTeamName: fantasyTeam.name,
-      userEmail: fantasyTeam.user.email,
-      userName: fantasyTeam.user.name,
-      totalPoints: rosterTotal + captainTotal,
-    };
+async function getMvpBonus(): Promise<number> {
+  const mvpBonusType = await db.bonusType.findFirst({ where: { code: "MVP" }, select: { points: true } });
+  return mvpBonusType ? Number(mvpBonusType.points) : 0;
+}
+
+async function getFantasyTeamMeta(): Promise<FantasyTeamMeta[]> {
+  return db.fantasyTeam.findMany({
+    select: {
+      id: true,
+      name: true,
+      captainPlayerId: true,
+      players: { select: { playerId: true } },
+      user: { select: { email: true, name: true } },
+    },
   });
+}
+
+function rankFromPoints(teams: FantasyTeamMeta[], points: Map<number, number>): RankEntry[] {
+  const entries: Omit<RankEntry, "rank">[] = teams.map((ft) => ({
+    fantasyTeamId: ft.id,
+    fantasyTeamName: ft.name,
+    userEmail: ft.user.email,
+    userName: ft.user.name,
+    totalPoints: points.get(ft.id) ?? 0,
+  }));
 
   entries.sort(
     (a, b) =>
@@ -154,6 +187,98 @@ export async function computeRankings(): Promise<RankEntry[]> {
   );
 
   return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+}
+
+/** Compute total ranking across all CONCLUDED matches (rosa attuale, tutte le partite). */
+export async function computeRankings(): Promise<RankEntry[]> {
+  const [teams, points] = await Promise.all([getFantasyTeamMeta(), computeFantasyTeamPoints()]);
+  return rankFromPoints(teams, points);
+}
+
+/** Ultima fase chiusa (per il confine della fase in corso). */
+async function getLastClosedAt(): Promise<Date | null> {
+  const last = await db.scoringPhase.findFirst({
+    orderBy: { order: "desc" },
+    select: { closedAt: true },
+  });
+  return last?.closedAt ?? null;
+}
+
+/** Classifica generale: somma delle fasi congelate + fase in corso (live). */
+export async function computeCumulativeRankings(): Promise<RankEntry[]> {
+  const [teams, frozenRows, lastClosedAt] = await Promise.all([
+    getFantasyTeamMeta(),
+    db.scoringPhaseScore.findMany({ select: { fantasyTeamId: true, points: true } }),
+    getLastClosedAt(),
+  ]);
+
+  const current = await computeFantasyTeamPoints({ from: lastClosedAt });
+
+  const totals = new Map<number, number>();
+  for (const row of frozenRows) {
+    totals.set(row.fantasyTeamId, (totals.get(row.fantasyTeamId) ?? 0) + Number(row.points));
+  }
+  for (const [teamId, pts] of current) {
+    totals.set(teamId, (totals.get(teamId) ?? 0) + pts);
+  }
+
+  return rankFromPoints(teams, totals);
+}
+
+/** Classifica di una fase congelata. */
+export async function computePhaseRankings(phaseId: number): Promise<RankEntry[]> {
+  const [teams, rows] = await Promise.all([
+    getFantasyTeamMeta(),
+    db.scoringPhaseScore.findMany({ where: { phaseId }, select: { fantasyTeamId: true, points: true } }),
+  ]);
+  const points = new Map<number, number>();
+  for (const row of rows) points.set(row.fantasyTeamId, Number(row.points));
+  return rankFromPoints(teams, points);
+}
+
+/** Classifica della fase in corso (live, dalla chiusura dell'ultima fase). */
+export async function computeCurrentPhaseRankings(): Promise<RankEntry[]> {
+  const lastClosedAt = await getLastClosedAt();
+  const [teams, points] = await Promise.all([
+    getFantasyTeamMeta(),
+    computeFantasyTeamPoints({ from: lastClosedAt }),
+  ]);
+  return rankFromPoints(teams, points);
+}
+
+export type PhaseBreakdownEntry = {
+  phaseId: number | null; // null = fase in corso
+  name: string;
+  points: number;
+  current: boolean;
+};
+
+/** Punti per fase di una singola squadra (fasi congelate + fase in corso). */
+export async function getTeamPhaseBreakdown(fantasyTeamId: number): Promise<PhaseBreakdownEntry[]> {
+  const [phases, lastClosedAt] = await Promise.all([
+    db.scoringPhase.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, name: true, scores: { where: { fantasyTeamId }, select: { points: true } } },
+    }),
+    getLastClosedAt(),
+  ]);
+
+  const result: PhaseBreakdownEntry[] = phases.map((p) => ({
+    phaseId: p.id,
+    name: p.name,
+    points: p.scores[0] ? Number(p.scores[0].points) : 0,
+    current: false,
+  }));
+
+  const current = await computeFantasyTeamPoints({ from: lastClosedAt });
+  result.push({
+    phaseId: null,
+    name: "Fase in corso",
+    points: current.get(fantasyTeamId) ?? 0,
+    current: true,
+  });
+
+  return result;
 }
 
 /** Compute per-match score history for a single fantasy team. */
