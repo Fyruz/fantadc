@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { MVP_WINDOW_MS } from "./domain/vote";
 import {
   accumulatePlayerTotals,
+  buildPhaseRosterWindows,
   combinePhasePoints,
   computeMvpWinnerId,
+  findRosterWindow,
   rankFromPoints,
   teamPointsFromPlayerTotals,
   type FantasyTeamMeta,
@@ -254,5 +256,77 @@ describe("rankFromPoints", () => {
     const ranked = rankFromPoints(teams, new Map([[1, 4]]));
     expect(ranked.find((r) => r.fantasyTeamName === "Bravo")?.totalPoints).toBe(0);
     expect(ranked.map((r) => r.fantasyTeamName)).toEqual(["Alpha", "Bravo"]);
+  });
+});
+
+describe("buildPhaseRosterWindows", () => {
+  const currentRoster = { rosterPlayerIds: [10, 20, 30, 40, 50], captainPlayerId: 10 };
+
+  it("returns a single open window with the current roster when there are no phases", () => {
+    const windows = buildPhaseRosterWindows([], currentRoster);
+    expect(windows).toEqual([
+      { startsAt: null, closedAt: null, rosterPlayerIds: currentRoster.rosterPlayerIds, captainPlayerId: currentRoster.captainPlayerId },
+    ]);
+  });
+
+  it("uses the frozen roster/captain for a closed phase and appends an open window for the current phase", () => {
+    const closedAt = new Date("2026-01-15T00:00:00Z");
+    const windows = buildPhaseRosterWindows(
+      [{ startsAt: null, closedAt, score: { rosterPlayerIds: [1, 2, 3, 4, 5], captainPlayerId: 1 } }],
+      currentRoster
+    );
+    expect(windows).toEqual([
+      { startsAt: null, closedAt, rosterPlayerIds: [1, 2, 3, 4, 5], captainPlayerId: 1 },
+      { startsAt: closedAt, closedAt: null, rosterPlayerIds: currentRoster.rosterPlayerIds, captainPlayerId: currentRoster.captainPlayerId },
+    ]);
+  });
+
+  it("treats a phase without a score row (squadra non ancora esistente) as an empty roster", () => {
+    const closedAt = new Date("2026-01-15T00:00:00Z");
+    const windows = buildPhaseRosterWindows([{ startsAt: null, closedAt, score: null }], currentRoster);
+    expect(windows[0]).toEqual({ startsAt: null, closedAt, rosterPlayerIds: [], captainPlayerId: null });
+  });
+
+  it("chains successive phases using each phase's own boundaries", () => {
+    const closed1 = new Date("2026-01-15T00:00:00Z");
+    const closed2 = new Date("2026-02-15T00:00:00Z");
+    const windows = buildPhaseRosterWindows(
+      [
+        { startsAt: null, closedAt: closed1, score: { rosterPlayerIds: [1, 2], captainPlayerId: 1 } },
+        { startsAt: closed1, closedAt: closed2, score: { rosterPlayerIds: [3, 4], captainPlayerId: 3 } },
+      ],
+      currentRoster
+    );
+    expect(windows.map((w) => [w.startsAt, w.closedAt])).toEqual([
+      [null, closed1],
+      [closed1, closed2],
+      [closed2, null],
+    ]);
+  });
+});
+
+describe("findRosterWindow", () => {
+  const closed1 = new Date("2026-01-15T00:00:00Z");
+  const windows = buildPhaseRosterWindows(
+    [{ startsAt: null, closedAt: closed1, score: { rosterPlayerIds: [1, 2], captainPlayerId: 1 } }],
+    { rosterPlayerIds: [3, 4], captainPlayerId: 3 }
+  );
+
+  it("returns the frozen phase window for matches concluded before the snapshot", () => {
+    const before = new Date(closed1.getTime() - 60_000);
+    expect(findRosterWindow(windows, before).rosterPlayerIds).toEqual([1, 2]);
+  });
+
+  it("returns the current phase window for matches concluded exactly at the snapshot boundary", () => {
+    expect(findRosterWindow(windows, closed1).rosterPlayerIds).toEqual([3, 4]);
+  });
+
+  it("returns the current phase window for matches concluded after the snapshot", () => {
+    const after = new Date(closed1.getTime() + 60_000);
+    expect(findRosterWindow(windows, after).rosterPlayerIds).toEqual([3, 4]);
+  });
+
+  it("falls back to the earliest window for a null concludedAt", () => {
+    expect(findRosterWindow(windows, null).rosterPlayerIds).toEqual([1, 2]);
   });
 });

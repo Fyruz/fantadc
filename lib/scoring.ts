@@ -310,23 +310,78 @@ export async function getTeamPhaseBreakdown(fantasyTeamId: number): Promise<Phas
   return result;
 }
 
-/** Compute per-match score history for a single fantasy team. */
+export type PhaseRosterWindow = {
+  startsAt: Date | null; // confine inferiore (incluso); null = nessun limite
+  closedAt: Date | null; // confine superiore (escluso); null = fase in corso (nessun limite)
+  rosterPlayerIds: number[];
+  captainPlayerId: number | null; // null = la squadra non aveva ancora uno score per questa fase
+};
+
+/**
+ * Finestre rosa per fase: ogni fase congelata usa la rosa che aveva al momento
+ * dello snapshot (rosterPlayerIds/captainPlayerId di ScoringPhaseScore). Se la
+ * squadra non esisteva ancora (nessuno score per quella fase) la rosa è vuota,
+ * coerente con i punti a 0 restituiti da getTeamPhaseBreakdown per quella fase.
+ * L'ultima finestra (fase in corso) è sempre aperta e usa la rosa attuale.
+ */
+export function buildPhaseRosterWindows(
+  phases: Array<{
+    startsAt: Date | null;
+    closedAt: Date;
+    score: { rosterPlayerIds: number[]; captainPlayerId: number } | null;
+  }>,
+  currentRoster: { rosterPlayerIds: number[]; captainPlayerId: number }
+): PhaseRosterWindow[] {
+  const windows: PhaseRosterWindow[] = phases.map((phase) => ({
+    startsAt: phase.startsAt,
+    closedAt: phase.closedAt,
+    rosterPlayerIds: phase.score?.rosterPlayerIds ?? [],
+    captainPlayerId: phase.score?.captainPlayerId ?? null,
+  }));
+  windows.push({
+    startsAt: phases.length > 0 ? phases[phases.length - 1].closedAt : null,
+    closedAt: null,
+    rosterPlayerIds: currentRoster.rosterPlayerIds,
+    captainPlayerId: currentRoster.captainPlayerId,
+  });
+  return windows;
+}
+
+/** Trova la finestra rosa a cui appartiene una partita conclusa, in base a concludedAt. */
+export function findRosterWindow(windows: PhaseRosterWindow[], concludedAt: Date | null): PhaseRosterWindow {
+  const at = concludedAt ?? new Date(0);
+  for (const window of windows) {
+    if (window.startsAt && at < window.startsAt) continue;
+    if (window.closedAt && at >= window.closedAt) continue;
+    return window;
+  }
+  return windows[windows.length - 1];
+}
+
+/**
+ * Compute per-match score history for a single fantasy team, phase-aware: ogni
+ * partita usa la rosa congelata della fase a cui appartiene (in base a
+ * concludedAt), così la somma dei `total` per partita coincide con il totale
+ * cumulativo di getTeamPhaseBreakdown anche dopo un cambio rosa. Le partite
+ * della fase in corso usano la rosa attuale.
+ */
 export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchScore[]> {
-  const [ft, matches, mvpBonusType] = await Promise.all([
+  const [ft, phases, matches, mvpBonusType] = await Promise.all([
     db.fantasyTeam.findUnique({
       where: { id: fantasyTeamId },
       select: {
         captainPlayerId: true,
-        players: {
-          select: {
-            player: {
-              select: {
-                id: true,
-                name: true,
-                footballTeam: { select: { name: true } },
-              },
-            },
-          },
+        players: { select: { playerId: true } },
+      },
+    }),
+    db.scoringPhase.findMany({
+      orderBy: { order: "asc" },
+      select: {
+        startsAt: true,
+        closedAt: true,
+        scores: {
+          where: { fantasyTeamId },
+          select: { rosterPlayerIds: true, captainPlayerId: true },
         },
       },
     }),
@@ -362,6 +417,29 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
 
   const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
 
+  const windows = buildPhaseRosterWindows(
+    phases.map((phase) => ({
+      startsAt: phase.startsAt,
+      closedAt: phase.closedAt,
+      score: phase.scores[0]
+        ? {
+            rosterPlayerIds: phase.scores[0].rosterPlayerIds as unknown as number[],
+            captainPlayerId: phase.scores[0].captainPlayerId,
+          }
+        : null,
+    })),
+    { rosterPlayerIds: ft.players.map((p) => p.playerId), captainPlayerId: ft.captainPlayerId }
+  );
+
+  const allPlayerIds = new Set<number>();
+  for (const window of windows) for (const id of window.rosterPlayerIds) allPlayerIds.add(id);
+
+  const playerMetas = await db.player.findMany({
+    where: { id: { in: [...allPlayerIds] } },
+    select: { id: true, name: true, footballTeam: { select: { name: true } } },
+  });
+  const playerMetaById = new Map(playerMetas.map((p) => [p.id, p]));
+
   return matches.map((match) => {
     const playerPoints = accumulatePlayerTotals(
       [{
@@ -381,13 +459,15 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       eligiblePlayerIds: match.players.map((p) => p.playerId),
     });
     const playedPlayerIds = new Set(match.players.map((p) => p.playerId));
+    const window = findRosterWindow(windows, match.concludedAt);
 
-    const playerScores: PlayerMatchScore[] = ft.players.map(({ player }) => {
-      const played = playedPlayerIds.has(player.id);
+    const playerScores: PlayerMatchScore[] = window.rosterPlayerIds.map((playerId) => {
+      const meta = playerMetaById.get(playerId);
+      const played = playedPlayerIds.has(playerId);
       const goalPoints = match.goals.filter(
-        (g) => !g.isOwnGoal && g.scorerId === player.id
+        (g) => !g.isOwnGoal && g.scorerId === playerId
       ).length;
-      const bonuses = match.bonuses.filter((bonus) => bonus.playerId === player.id);
+      const bonuses = match.bonuses.filter((bonus) => bonus.playerId === playerId);
       const bonusDetailsByCode = new Map<
         string,
         { code: string; name: string; quantity: number; points: number }
@@ -407,15 +487,15 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         a.code.localeCompare(b.code, "it")
       );
       const bonusPoints = bonusDetails.reduce((sum, bonus) => sum + bonus.points, 0);
-      const isMvp = player.id === mvpId;
-      const totalPoints = playerPoints.get(player.id) ?? 0;
+      const isMvp = playerId === mvpId;
+      const totalPoints = playerPoints.get(playerId) ?? 0;
       const mvpPoints = isMvp ? mvpBonus : 0;
-      const isCaptain = ft.captainPlayerId === player.id;
+      const isCaptain = window.captainPlayerId === playerId;
       const finalPoints = totalPoints * (isCaptain ? 2 : 1);
       return {
-        playerId: player.id,
-        playerName: player.name,
-        footballTeamName: player.footballTeam.name,
+        playerId,
+        playerName: meta?.name ?? "?",
+        footballTeamName: meta?.footballTeam.name ?? "?",
         played,
         goalPoints,
         bonusPoints,
