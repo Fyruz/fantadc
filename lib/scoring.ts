@@ -101,7 +101,7 @@ export function accumulatePlayerTotals(
   return totals;
 }
 
-type FantasyTeamMeta = {
+export type FantasyTeamMeta = {
   id: number;
   name: string;
   captainPlayerId: number;
@@ -110,9 +110,43 @@ type FantasyTeamMeta = {
 };
 
 /**
+ * Punti di una squadra dati i totali per giocatore. Il capitano raddoppia:
+ * i suoi punti vengono contati nella rosa e poi sommati una seconda volta.
+ */
+export function teamPointsFromPlayerTotals(
+  team: { captainPlayerId: number; players: { playerId: number }[] },
+  playerTotals: Map<number, number>
+): number {
+  const rosterTotal = team.players.reduce((sum, { playerId }) => sum + (playerTotals.get(playerId) ?? 0), 0);
+  const captainTotal = playerTotals.get(team.captainPlayerId) ?? 0;
+  return rosterTotal + captainTotal;
+}
+
+/** Somma i punti delle fasi congelate (una riga per fase/squadra) con la fase in corso. */
+export function combinePhasePoints(
+  frozen: Array<{ fantasyTeamId: number; points: number }>,
+  current: Map<number, number>
+): Map<number, number> {
+  const totals = new Map<number, number>();
+  for (const row of frozen) {
+    totals.set(row.fantasyTeamId, (totals.get(row.fantasyTeamId) ?? 0) + row.points);
+  }
+  for (const [teamId, pts] of current) {
+    totals.set(teamId, (totals.get(teamId) ?? 0) + pts);
+  }
+  return totals;
+}
+
+/**
  * Punti fanta per squadra (rosa attuale) sulle partite CONCLUDED nella finestra
  * temporale data — `from`/`to` filtrano per `concludedAt` (>= from, < to).
  * Senza opzioni = tutte le partite concluse.
+ *
+ * Semantica dei confini: una fase congelata usa `concludedAt < closedAt`, la fase
+ * successiva/in corso usa `concludedAt >= closedAt`. Una partita conclusa esattamente
+ * all'istante dello snapshot conta una sola volta (nella fase in corso), mai due volte
+ * né persa. Ogni partita CONCLUDED ha sempre `concludedAt` valorizzato (vedi conclude
+ * match), quindi nessuna partita viene esclusa dal filtro.
  */
 export async function computeFantasyTeamPoints(opts?: {
   from?: Date | null;
@@ -147,9 +181,7 @@ export async function computeFantasyTeamPoints(opts?: {
 
   const result = new Map<number, number>();
   for (const ft of fantasyTeams) {
-    const rosterTotal = ft.players.reduce((sum, { playerId }) => sum + (playerTotals.get(playerId) ?? 0), 0);
-    const captainTotal = playerTotals.get(ft.captainPlayerId) ?? 0;
-    result.set(ft.id, rosterTotal + captainTotal);
+    result.set(ft.id, teamPointsFromPlayerTotals(ft, playerTotals));
   }
   return result;
 }
@@ -171,7 +203,7 @@ async function getFantasyTeamMeta(): Promise<FantasyTeamMeta[]> {
   });
 }
 
-function rankFromPoints(teams: FantasyTeamMeta[], points: Map<number, number>): RankEntry[] {
+export function rankFromPoints(teams: FantasyTeamMeta[], points: Map<number, number>): RankEntry[] {
   const entries: Omit<RankEntry, "rank">[] = teams.map((ft) => ({
     fantasyTeamId: ft.id,
     fantasyTeamName: ft.name,
@@ -214,13 +246,10 @@ export async function computeCumulativeRankings(): Promise<RankEntry[]> {
 
   const current = await computeFantasyTeamPoints({ from: lastClosedAt });
 
-  const totals = new Map<number, number>();
-  for (const row of frozenRows) {
-    totals.set(row.fantasyTeamId, (totals.get(row.fantasyTeamId) ?? 0) + Number(row.points));
-  }
-  for (const [teamId, pts] of current) {
-    totals.set(teamId, (totals.get(teamId) ?? 0) + pts);
-  }
+  const totals = combinePhasePoints(
+    frozenRows.map((row) => ({ fantasyTeamId: row.fantasyTeamId, points: Number(row.points) })),
+    current
+  );
 
   return rankFromPoints(teams, totals);
 }
