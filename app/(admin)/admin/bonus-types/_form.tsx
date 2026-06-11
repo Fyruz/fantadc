@@ -63,6 +63,7 @@ export default function NewBonusTypeForm() {
         modal
         draggable={false}
         resizable={false}
+        focusOnShow={false}
       >
         {/* Header */}
         <div

@@ -150,6 +150,7 @@ function EditBonusDialog({ row, onClose }: { row: Row | null; onClose: () => voi
       modal
       draggable={false}
       resizable={false}
+      focusOnShow={false}
     >
       {/* Header */}
       <div
