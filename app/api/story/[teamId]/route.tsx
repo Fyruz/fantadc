@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
-import { computeTeamHistory } from "@/lib/scoring";
+import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
 import { resolveTeamFlag } from "@/lib/flags";
 import { readFile } from "fs/promises";
 import path from "path";
@@ -98,7 +98,9 @@ export async function GET(
     if (!team) return new Response("Team not found", { status: 404 });
 
     const history = await computeTeamHistory(teamId);
-    const totalPoints = history.reduce((s, m) => s + m.total, 0);
+    // Totale cumulativo coerente con la classifica (fasi congelate + fase in corso).
+    const phaseBreakdown = await getTeamPhaseBreakdown(teamId);
+    const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
     const playerTotals = new Map<number, number>();
 
     for (const match of history) {

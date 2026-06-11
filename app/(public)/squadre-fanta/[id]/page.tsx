@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
-import { computeTeamHistory } from "@/lib/scoring";
+import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
 import BackButton from "@/components/back-button";
 import { resolveTeamFlag } from "@/lib/flags";
 
@@ -49,7 +49,9 @@ export default async function SquadraFantasyPublicPage({
   if (!team) notFound();
 
   const history = await computeTeamHistory(teamId);
-  const totalPoints = history.reduce((s, m) => s + m.total, 0);
+  // Totale cumulativo coerente con la classifica (fasi congelate + fase in corso).
+  const phaseBreakdown = await getTeamPhaseBreakdown(teamId);
+  const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
   const ownerLabel = team.user.name ?? team.user.email;
 
   return (

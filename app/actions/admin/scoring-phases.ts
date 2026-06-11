@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
-import { computeFantasyTeamPoints } from "@/lib/scoring";
+import { closeScoringPhase } from "@/lib/scoring-phases";
 import type { ActionResult } from "./football-teams";
 
 function revalidateScoring() {
@@ -15,56 +15,6 @@ function revalidateScoring() {
   revalidatePath("/squadra");
   revalidatePath("/dashboard");
   revalidatePath("/squadre-fanta");
-}
-
-/**
- * Chiude la fase di punteggio corrente: congela i punti di ogni squadra (rosa
- * attuale) sulle partite concluse dall'ultima chiusura a ora. Core riusato sia
- * dal pulsante dedicato sia dalla spunta all'apertura del mercato.
- */
-export async function closeScoringPhase(name: string, adminUserId: number): Promise<number> {
-  const last = await db.scoringPhase.findFirst({
-    orderBy: { order: "desc" },
-    select: { closedAt: true, order: true },
-  });
-  const from = last?.closedAt ?? null;
-  const to = new Date();
-
-  const [points, teams] = await Promise.all([
-    computeFantasyTeamPoints({ from, to }),
-    db.fantasyTeam.findMany({
-      select: { id: true, captainPlayerId: true, players: { select: { playerId: true } } },
-    }),
-  ]);
-
-  const order = (last?.order ?? 0) + 1;
-
-  const phase = await db.$transaction(async (tx) => {
-    const created = await tx.scoringPhase.create({
-      data: { name, order, startsAt: from, closedAt: to, createdById: adminUserId },
-    });
-    if (teams.length > 0) {
-      await tx.scoringPhaseScore.createMany({
-        data: teams.map((t) => ({
-          phaseId: created.id,
-          fantasyTeamId: t.id,
-          points: points.get(t.id) ?? 0,
-          rosterPlayerIds: t.players.map((p) => p.playerId),
-          captainPlayerId: t.captainPlayerId,
-        })),
-      });
-    }
-    return created;
-  });
-
-  await logAdminAction(adminUserId, "CLOSE_SCORING_PHASE", "ScoringPhase", phase.id, null, {
-    name,
-    order,
-    closedAt: to,
-    teams: teams.length,
-  });
-
-  return phase.id;
 }
 
 const NameSchema = z.object({ name: z.string().min(1, "Nome fase obbligatorio").max(60, "Max 60 caratteri").trim() });
@@ -108,5 +58,5 @@ export async function deleteScoringPhase(_prev: ActionResult | undefined, formDa
   await db.scoringPhase.delete({ where: { id } });
   await logAdminAction(Number(admin.id), "DELETE_SCORING_PHASE", "ScoringPhase", id, before, null);
   revalidateScoring();
-  return { message: "Fase eliminata." };
+  return {}; // ConfirmDeleteForm mostra `message` come errore: nessun messaggio = successo
 }

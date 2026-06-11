@@ -5,7 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
-import { closeScoringPhase } from "./scoring-phases";
+import { closeScoringPhase } from "@/lib/scoring-phases";
 import type { ActionResult } from "./football-teams";
 
 const SetSchema = z
