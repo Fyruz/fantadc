@@ -28,8 +28,8 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
   // Unique days for pills
   const days = [...new Map(
     matches.map((m) => {
-      const key = m.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
-      const full = m.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+      const key = m.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+      const full = m.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
       return [key, { key, full, date: m.startsAt.toDateString() }];
     })
   ).values()];
@@ -42,7 +42,7 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
 
   const byDay = new Map<string, Match[]>();
   for (const m of filteredMatches) {
-    const key = m.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+    const key = m.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
     if (!byDay.has(key)) byDay.set(key, []);
     byDay.get(key)!.push(m);
   }
