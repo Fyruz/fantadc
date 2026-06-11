@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
+import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { confirmPopup, ConfirmPopup } from "primereact/confirmpopup";
 import { setRosterEditWindow, closeRosterEditWindow } from "@/app/actions/admin/roster-edit-window";
@@ -23,6 +24,8 @@ export default function WindowForm({
   const [closes, setCloses] = useState<Date | null>(closesAt);
   const [max, setMax] = useState<number>(maxChanges);
   const [closing, setClosing] = useState(false);
+  const [saveSnapshot, setSaveSnapshot] = useState(false);
+  const [phaseName, setPhaseName] = useState("");
 
   async function handleClose(e: React.MouseEvent) {
     confirmPopup({
@@ -46,6 +49,8 @@ export default function WindowForm({
         <input type="hidden" name="opensAt" value={opens ? opens.toISOString() : ""} />
         <input type="hidden" name="closesAt" value={closes ? closes.toISOString() : ""} />
         <input type="hidden" name="maxChanges" value={Number.isFinite(max) ? String(max) : ""} />
+        <input type="hidden" name="saveScoringSnapshot" value={saveSnapshot ? "true" : "false"} />
+        <input type="hidden" name="phaseName" value={phaseName} />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -107,6 +112,53 @@ export default function WindowForm({
           <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
             Il cambio di capitano è sempre consentito e non consuma cambi.
           </p>
+        </div>
+
+        {/* Salva storico punteggio (chiudi fase corrente) */}
+        <div className="flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setSaveSnapshot((v) => !v)}
+            className="flex items-center gap-3 rounded-2xl border px-4 py-3 text-left transition-colors max-w-md"
+            style={{
+              borderColor: saveSnapshot ? "rgba(232,160,0,0.45)" : "var(--border-soft)",
+              background: saveSnapshot ? "rgba(232,160,0,0.08)" : "#fff",
+            }}
+          >
+            <span
+              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md border"
+              style={{
+                borderColor: saveSnapshot ? "#E8A000" : "var(--border-medium)",
+                background: saveSnapshot ? "#E8A000" : "#fff",
+              }}
+            >
+              {saveSnapshot && <i className="pi pi-check text-[11px]" style={{ color: "#06073D" }} />}
+            </span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                Salva storico punteggio
+              </span>
+              <span className="block text-xs" style={{ color: "var(--text-muted)" }}>
+                Congela i punti attuali come fase chiusa, prima dei cambi rosa
+              </span>
+            </span>
+          </button>
+          {saveSnapshot && (
+            <div className="max-w-xs">
+              <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
+                Nome fase *
+              </label>
+              <InputText
+                value={phaseName}
+                onChange={(e) => setPhaseName(e.target.value)}
+                placeholder="es. Fase gironi"
+                className="w-full"
+              />
+              {state?.errors?.phaseName && (
+                <p className="text-xs mt-1" style={{ color: "#991B1B" }}>{state.errors.phaseName[0]}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {state?.message && (

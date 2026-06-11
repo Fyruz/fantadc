@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { closeScoringPhase } from "./scoring-phases";
 import type { ActionResult } from "./football-teams";
 
 const SetSchema = z
@@ -12,10 +13,16 @@ const SetSchema = z
     opensAt: z.coerce.date({ message: "Data di apertura non valida" }),
     closesAt: z.coerce.date({ message: "Data di chiusura non valida" }),
     maxChanges: z.coerce.number().int().min(0, "Deve essere >= 0").max(5, "Massimo 5"),
+    saveScoringSnapshot: z.preprocess((v) => v === "true" || v === "on" || v === true, z.boolean()),
+    phaseName: z.string().trim().optional(),
   })
   .refine((d) => d.closesAt > d.opensAt, {
     message: "La chiusura deve essere successiva all'apertura",
     path: ["closesAt"],
+  })
+  .refine((d) => !d.saveScoringSnapshot || (d.phaseName && d.phaseName.length > 0), {
+    message: "Inserisci il nome della fase da salvare",
+    path: ["phaseName"],
   });
 
 /**
@@ -29,13 +36,24 @@ export async function setRosterEditWindow(_prev: ActionResult | undefined, formD
     opensAt: formData.get("opensAt"),
     closesAt: formData.get("closesAt"),
     maxChanges: formData.get("maxChanges"),
+    saveScoringSnapshot: formData.get("saveScoringSnapshot"),
+    phaseName: formData.get("phaseName"),
   });
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
   }
 
-  const { opensAt, closesAt, maxChanges } = parsed.data;
+  const { opensAt, closesAt, maxChanges, saveScoringSnapshot, phaseName } = parsed.data;
   const now = new Date();
+
+  // Snapshot dello stato pre-mercato: congela la fase corrente PRIMA che gli
+  // utenti possano cambiare rosa.
+  if (saveScoringSnapshot && phaseName) {
+    await closeScoringPhase(phaseName, Number(admin.id));
+    revalidatePath("/classifica-fanta");
+    revalidatePath("/dashboard");
+    revalidatePath("/admin/fasi-punteggio");
+  }
 
   const existing = await db.rosterEditWindow.findFirst({
     where: { closesAt: { gt: now } },
