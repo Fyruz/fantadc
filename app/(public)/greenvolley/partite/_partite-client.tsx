@@ -17,15 +17,15 @@ type StandingRow = { teamId: number; teamName: string; played: number; setsWon: 
 type Group = { id: number; name: string; rows: StandingRow[] };
 
 function formatMatchTime(date: Date) {
-  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 }
 
 function formatDayPill(date: Date) {
-  return date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
+  return date.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
 }
 
 function formatDayHeading(date: Date) {
-  return date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" });
+  return date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
 }
 
 function MatchCard({ m }: { m: Match }) {

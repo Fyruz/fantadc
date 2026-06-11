@@ -190,7 +190,7 @@ export default async function VolleySquadraDetailPage({
 
 function formatTime(date: Date | null) {
   if (!date) return null;
-  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 }
 
 // ─── Sommario ────────────────────────────────────────────────────────────────
@@ -252,7 +252,7 @@ function SommarioTab({
 
 function MatchCard({ m, isNext }: { m: VolleyMatchRow; isNext: boolean }) {
   const label = m.group?.name ?? m.knockoutRound?.name ?? null;
-  const date = m.date ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short" }) : null;
+  const date = m.date ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" }) : null;
   const scored = m.status === "CONCLUDED";
 
   return (

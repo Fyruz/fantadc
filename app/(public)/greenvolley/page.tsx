@@ -59,8 +59,8 @@ export default async function GreenVolleyHomePage() {
 
           <div className="flex flex-col gap-4">
             {nextMatches.map((m) => {
-              const dateLabel = m.date?.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" });
-              const timeLabel = m.date?.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+              const dateLabel = m.date?.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+              const timeLabel = m.date?.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
               return (
                 <Link
                   key={m.id}
