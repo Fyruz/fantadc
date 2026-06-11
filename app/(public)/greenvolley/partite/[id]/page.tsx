@@ -31,7 +31,7 @@ export default async function VolleyMatchPublicPage({
   const scored = match.status === "CONCLUDED" && match.sets.length > 0;
   const phaseName = match.group?.name ?? match.knockoutRound?.name ?? null;
   const matchDateLabel = match.date
-    ? match.date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })
+    ? match.date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
     : null;
 
   return (
@@ -96,7 +96,7 @@ export default async function VolleyMatchPublicPage({
           {!scored && (
             <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
               {match.date
-                ? match.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })
+                ? match.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })
                 : "Orario da definire"}
             </p>
           )}
