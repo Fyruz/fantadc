@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { computeStandings } from "@/lib/standings";
-import { computeRankings } from "@/lib/scoring";
+import { computeCumulativeRankings } from "@/lib/scoring";
 
 export default async function AdminDashboardPage() {
   const [
@@ -43,7 +43,7 @@ export default async function AdminDashboardPage() {
     }),
     db.user.count({ where: { fantasyTeam: null } }),
     computeStandings(),
-    computeRankings(),
+    computeCumulativeRankings(),
     db.group.findMany({
       orderBy: { order: "asc" },
       include: { teams: { select: { qualified: true } } },

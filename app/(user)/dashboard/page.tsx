@@ -3,7 +3,7 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
-import { computeTeamHistory } from "@/lib/scoring";
+import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
 import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
 import { resolveTeamFlag } from "@/lib/flags";
@@ -65,6 +65,10 @@ export default async function DashboardPage() {
         timeZone: "Europe/Rome",
       })
     : null;
+
+  // Punti per fase
+  const phaseBreakdown = await getTeamPhaseBreakdown(fantasyTeam.id);
+  const hasClosedPhases = phaseBreakdown.some((p) => !p.current);
 
   const voteCutoff = new Date(Date.now() - MVP_WINDOW_MS);
   const [recentConcludedMatches, expressedVotes] = await Promise.all([
@@ -207,6 +211,36 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Punti per fase */}
+      {hasClosedPhases && (
+        <div className="card overflow-hidden">
+          <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid var(--border-soft)" }}>
+            <div className="over-label">Punti per fase</div>
+          </div>
+          {phaseBreakdown.map((p, index) => (
+            <div
+              key={p.phaseId ?? "current"}
+              className="flex items-center justify-between gap-3 px-4 py-2.5"
+              style={index < phaseBreakdown.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[13px] font-display font-black uppercase truncate" style={{ color: "var(--text-primary)" }}>
+                  {p.name}
+                </span>
+                {p.current && (
+                  <span className="text-[9px] font-bold uppercase tracking-wide shrink-0" style={{ color: "#1A7F37" }}>
+                    in corso
+                  </span>
+                )}
+              </div>
+              <span className="font-display font-black text-sm tabular-nums shrink-0" style={{ color: "var(--primary)" }}>
+                {p.points.toFixed(1)} pt
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Vota MVP */}
       {pendingOpenMatches.length > 0 && (

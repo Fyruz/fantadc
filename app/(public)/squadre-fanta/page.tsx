@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { computeRankings } from "@/lib/scoring";
+import { computeCumulativeRankings } from "@/lib/scoring";
 import { getCurrentUser } from "@/lib/session";
 export const dynamic = 'force-dynamic'
 
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function SquadreFantasyPublicPage() {
-  const [rankings, user] = await Promise.all([computeRankings(), getCurrentUser()]);
+  const [rankings, user] = await Promise.all([computeCumulativeRankings(), getCurrentUser()]);
 
   if (rankings.length === 0) {
     return (

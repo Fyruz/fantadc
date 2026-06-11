@@ -66,6 +66,9 @@
 * il punteggio di una squadra e la somma dei punteggi dei 5 giocatori della rosa
 * il raddoppio del capitano si applica al punteggio del singolo giocatore capitano
 * la classifica principale e cumulata totale
+* il punteggio fanta e articolato in **fasi** (es. gironi, eliminazione, semifinali, finali): alla chiusura di una fase i punti fatti da ogni squadra fino a quel momento (con la rosa di allora) vengono **congelati** in uno snapshot e non cambiano piu, anche se in seguito cambiano le rose o si correggono bonus passati
+* la classifica generale = somma delle fasi congelate + fase in corso; esistono anche viste per singola fase
+* le fasi le chiude l'admin: spuntando "salva storico" all'apertura del mercato, oppure con un pulsante dedicato "Chiudi fase ora"
 * non esiste il concetto di giornata
 * deve esistere uno storico punteggi per partita
 * il dettaglio dei bonus assegnati deve essere consultabile
@@ -96,7 +99,7 @@
 
 #### Punteggio fantasy e fasi
 
-* il punteggio fantasy è cumulativo su tutte le fasi — non si resetta tra gironi e knockout
+* il punteggio fantasy è cumulativo su tutte le fasi — non si resetta tra gironi e knockout; le **fasi di punteggio** (snapshot storici, vedi sezione "Punteggio e classifica") sono un meccanismo trasversale gestito dall'admin, indipendente dalla suddivisione gironi/knockout delle partite
 * `computeStandings()` globale rimane invariata per la classifica generale
 
 ### Admin e audit

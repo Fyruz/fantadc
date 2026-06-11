@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
-import { computeTeamHistory } from "@/lib/scoring";
+import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { resolveTeamFlag } from "@/lib/flags";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
@@ -39,7 +39,6 @@ export default async function SquadraPage() {
   if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
   const history = await computeTeamHistory(fantasyTeam.id);
-  const totalPoints = history.reduce((s, m) => s + m.total, 0);
 
   const playerTotals = new Map<number, number>();
   for (const ms of history) {
@@ -53,6 +52,12 @@ export default async function SquadraPage() {
 
   // Finestra di modifica rosa ("mercato") — la notifica con CTA vive sulla dashboard.
   const editWindow = await getActiveEditWindow();
+
+  // Punti per fase (mostrati solo se esiste almeno una fase chiusa)
+  const phaseBreakdown = await getTeamPhaseBreakdown(fantasyTeam.id);
+  const hasClosedPhases = phaseBreakdown.some((p) => !p.current);
+  // Totale cumulativo = somma fasi congelate + fase in corso (coerente con la classifica)
+  const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -168,6 +173,38 @@ export default async function SquadraPage() {
             : "La rosa è bloccata. Solo un admin può modificarla."}
         </p>
       </div>
+
+      {/* Punti per fase */}
+      {hasClosedPhases && (
+        <div className="rounded-3xl overflow-hidden" style={CARD}>
+          <div className="px-6 pt-6 pb-3">
+            <h2
+              className="text-base font-medium uppercase"
+              style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+            >
+              Punti per fase
+            </h2>
+          </div>
+          {phaseBreakdown.map((p) => (
+            <div key={p.phaseId ?? "current"} className="flex items-center justify-between gap-3 px-6 py-3" style={ROW_BORDER}>
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-sm text-black truncate">{p.name}</span>
+                {p.current && (
+                  <span className="text-[9px] font-bold uppercase tracking-wide shrink-0" style={{ color: "#1A7F37" }}>
+                    in corso
+                  </span>
+                )}
+              </div>
+              <span
+                className="text-sm font-semibold shrink-0 tabular-nums"
+                style={{ color: p.points !== 0 ? "var(--primary)" : "rgba(0,0,0,0.35)" }}
+              >
+                {p.points.toFixed(1)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
 
     </div>
   );
