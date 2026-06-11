@@ -270,9 +270,12 @@ export default function ModificaSquadraForm({
       </div>
 
       {overLimit && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 lg:hidden">
+        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
           <i className="pi pi-exclamation-triangle shrink-0 text-sm text-red-600" />
-          <p className="text-[12px] font-medium text-red-700">Hai superato il numero massimo di cambi.</p>
+          <p className="text-[12px] font-medium text-red-700">
+            Hai selezionato troppi cambi: puoi sostituire al massimo {maxChanges}{" "}
+            {maxChanges === 1 ? "giocatore" : "giocatori"} rispetto alla rosa di partenza.
+          </p>
         </div>
       )}
 
