@@ -109,7 +109,7 @@ export default async function DashboardPage() {
   const pendingOpenMatches = openMatches.filter((match) => !votedMatchIds.has(match.id));
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-10">
       {/* Header */}
       <div>
         <div className="over-label mb-0.5">Bentornato</div>
@@ -121,22 +121,23 @@ export default async function DashboardPage() {
       {/* Banner finestra di modifica rosa aperta */}
       {editWindow && (
         <div
-          className="flex flex-col gap-3 rounded-2xl p-4 sm:flex-row sm:items-center sm:justify-between"
-          style={{ background: "rgba(50,215,75,0.10)", border: "1px solid rgba(50,215,75,0.35)" }}
+          className="flex flex-col gap-3 bg-white rounded-3xl p-6"
+          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: "#1A7F37" }}>
-              <i className="pi pi-unlock text-sm" />
-              Modifiche rosa aperte fino al {editWindowClosesAt}
-            </div>
-            <p className="mt-0.5 text-xs" style={{ color: "var(--text-secondary)" }}>
-              Cambi rimasti: <strong>{changesLeft}/{editWindow.maxChanges}</strong> — il cambio di capitano è libero.
-            </p>
-          </div>
+          <p
+            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+            style={{ fontFamily: "var(--font-tallica)" }}
+          >
+            Mercato aperto
+          </p>
+          <p className="text-sm text-black font-normal">
+            Hai <strong>{changesLeft}/{editWindow.maxChanges} cambi</strong> disponibili.<br/>
+            La finestra chiude il <strong>{editWindowClosesAt}</strong>.
+          </p>
           <Link
             href="/squadra/modifica"
-            className="shrink-0 rounded-full px-4 py-2 text-center text-sm font-semibold text-white"
-            style={{ background: "var(--primary)" }}
+            className="flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white"
+            style={{ background: "var(--text-primary)" }}
           >
             Modifica rosa
           </Link>
