@@ -205,6 +205,9 @@ async function seedBonusTypes() {
     { code: "BALL_IN_GREVE",         name: "Pallone in Greve",                points: -5.0, isSecret: false },
     { code: "CLEAN_SHEET",           name: "Clean Sheet",                     points: -1.0, isSecret: false },
     { code: "PENALTY_MISSED",        name: "Rigore sbagliato",                points: -2.0, isSecret: false },
+    // Segreti
+    { code: "SECRET_TEST",            name: "Bonus segreto di prova",          points:  5.0, isSecret: true  },
+    { code: "SECRET_TEST_2",          name: "Bonus segreto di prova 2",        points:  2.0, isSecret: true  },
   ];
 
   for (const bt of bonusTypes) {

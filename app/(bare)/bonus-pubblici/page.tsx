@@ -40,12 +40,12 @@ function BonusCard({ code, name, points }: { code: string; name: string; points:
   const icon = BONUS_ICONS[code] ?? "/icons/bonus/lock.svg";
   return (
     <div
-      className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-4 p-5"
+      className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-start gap-4 py-5 px-4"
       style={CARD}
     >
       <img src={icon} alt="" width={64} style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
-        <p className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>
+        <p className="font-medium text-xs" style={{ color: "var(--color-text-primary)" }}>
           {name}
         </p>
         <p className="font-semibold text-sm leading-normal" style={{ color: positive ? "#065F46" : "#991B1B" }}>

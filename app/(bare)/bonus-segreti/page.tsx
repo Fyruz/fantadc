@@ -19,12 +19,10 @@ function LockedCard() {
       className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-4 p-5"
       style={CARD}
     >
-      <img src="/icons/bonus/lock.svg" alt="Bonus segreto" width={54} style={{ height: "auto" }} />
+      <img src="/icons/bonus/secret-bonus.svg" alt="" width={64} style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
-        <p className="uppercase text-sm" style={{ fontFamily: "var(--font-tallica)", color: "#5e6070" }}>
-          ???
-        </p>
-        <p className="text-xs text-black leading-normal">Bonus segreto da scoprire</p>
+        <p className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>???</p>
+        <p className="font-semibold text-sm leading-normal" style={{ color: "rgba(0,0,0,0.4)" }}>? pt</p>
       </div>
     </div>
   );
@@ -34,24 +32,16 @@ function RevealedCard({ name, points }: { name: string; points: number }) {
   const positive = points >= 0;
   return (
     <div
-      className="rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-3 p-5 text-center"
-      style={{ ...CARD, background: "#fff", borderColor: "rgba(232,160,0,0.35)" }}
+      className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-start gap-4 py-5 px-4"
+      style={CARD}
     >
-      <span
-        className="text-sm font-black px-3 py-1 rounded-full"
-        style={{
-          background: positive ? "#ECFDF5" : "#FEF2F2",
-          color: positive ? "#065F46" : "#991B1B",
-        }}
-      >
-        {formatPoints(points)} pt
-      </span>
-      <p
-        className="uppercase text-sm leading-tight"
-        style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
-      >
-        {name}
-      </p>
+      <img src="/icons/bonus/secret-bonus-unlocked.svg" alt="" width={64} style={{ height: "auto" }} />
+      <div className="flex flex-col items-center gap-2 text-center">
+        <p className="font-medium text-xs" style={{ color: "var(--color-text-primary)" }}>{name}</p>
+        <p className="font-semibold text-sm leading-normal" style={{ color: positive ? "#065F46" : "#991B1B" }}>
+          {formatPoints(points)} pt
+        </p>
+      </div>
     </div>
   );
 }
