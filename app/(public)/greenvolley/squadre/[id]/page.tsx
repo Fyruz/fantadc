@@ -218,7 +218,7 @@ function SommarioTab({
             label={featuredMatch.group?.name ?? featuredMatch.knockoutRound?.name ?? null}
             date={featuredMatch.date}
             status={featuredMatch.status}
-            showHeaderDate={!isNext}
+            showHeaderDate
           />
         </div>
       )}

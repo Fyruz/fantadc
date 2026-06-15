@@ -63,7 +63,6 @@ export default async function VolleyGironiPage() {
               name={group.name}
               rows={standings}
               qualifiedIds={qualifiedIds}
-              compact
             />
           );
         })}

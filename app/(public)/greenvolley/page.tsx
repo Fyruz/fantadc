@@ -73,7 +73,7 @@ export default async function GreenVolleyHomePage() {
                 label={m.group?.name ?? null}
                 date={m.date}
                 status={m.status}
-                showDateWithTime
+                showHeaderDate
               />
             ))}
           </div>
