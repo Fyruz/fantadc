@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 import MobileOnlyGate from "@/components/mobile-only-gate";
 import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
 import LiveMatchCard from "@/components/live-match-card";
@@ -37,10 +39,20 @@ export default async function HomePage({
   const params = await searchParams;
   const accountDeleted = params.deleted === "1";
 
+  const now = new Date();
+  const liveWindowMs = 120 * 60 * 1000; // 120 minuti di finestra
+
   const [liveMatch, upcomingMatches, groups, topScorers] = await Promise.all([
-    // Partita in diretta
+    // Partita in diretta: iniziata negli ultimi 120 minuti, non ancora conclusa
     db.match.findFirst({
-      where: { status: "LIVE" },
+      where: {
+        status: { notIn: ["DRAFT", "CONCLUDED"] },
+        startsAt: {
+          lte: now,
+          gte: new Date(now.getTime() - liveWindowMs),
+        },
+      },
+      orderBy: { startsAt: "desc" },
       include: {
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
         awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
