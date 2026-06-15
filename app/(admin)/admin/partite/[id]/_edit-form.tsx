@@ -7,6 +7,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { updateMatch } from "@/app/actions/admin/matches";
+import { formatMatchDateInputValue, formatMatchTimeInputValue } from "@/lib/domain/match";
 
 type Team = { id: number; name: string };
 type Group = { id: number; name: string; slug: string };
@@ -43,6 +44,18 @@ function safeInitialStartsAt(startsAt: Date) {
   return startsAt.getTime() <= 0 ? startOfToday() : startsAt;
 }
 
+function dateInputToLocalDate(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function timeInputToLocalDate(value: string) {
+  const [hour, minute] = value.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date;
+}
+
 export default function EditMatchForm({
   match,
   teams,
@@ -57,23 +70,17 @@ export default function EditMatchForm({
   const [state, action, pending] = useActionState(updateMatch, undefined);
 
   const initialStartsAt = safeInitialStartsAt(match.startsAt);
-  const startsAtLocal = new Date(initialStartsAt.getTime() - initialStartsAt.getTimezoneOffset() * 60000);
-  const defaultDate = startsAtLocal.toISOString().slice(0, 10);
-  const defaultTime = startsAtLocal.toISOString().slice(11, 16);
+  const defaultDate = formatMatchDateInputValue(initialStartsAt);
+  const defaultTime = formatMatchTimeInputValue(initialStartsAt);
 
   const [homeTeamId, setHomeTeamId] = useState<string>(match.homeTeamId ? String(match.homeTeamId) : "");
   const [awayTeamId, setAwayTeamId] = useState<string>(match.awayTeamId ? String(match.awayTeamId) : "");
   const [status, setStatus] = useState<string>(match.status);
   const [date, setDate] = useState<Date | null>(() => {
-    const d = new Date(defaultDate);
+    const d = dateInputToLocalDate(defaultDate);
     return isNaN(d.getTime()) ? null : d;
   });
-  const [time, setTime] = useState<Date | null>(() => {
-    const [h, m] = defaultTime.split(":").map(Number);
-    const t = new Date();
-    t.setHours(h, m, 0, 0);
-    return t;
-  });
+  const [time, setTime] = useState<Date | null>(() => timeInputToLocalDate(defaultTime));
   const [phase, setPhase] = useState<string>(
     match.groupId ? "group" : match.knockoutRoundId ? "knockout" : ""
   );

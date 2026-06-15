@@ -9,7 +9,7 @@ import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import { resolveTeamFlag } from "@/lib/flags";
 import { buildGroupStandings } from "@/lib/standings";
-import { LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
+import { getMatchClockNow, LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -40,7 +40,7 @@ export default async function HomePage({
   const params = await searchParams;
   const accountDeleted = params.deleted === "1";
 
-  const now = new Date();
+  const matchClockNow = getMatchClockNow();
 
   const [liveMatch, upcomingMatches, groups, topScorers] = await Promise.all([
     // Partita in diretta: programmata e iniziata negli ultimi 120 minuti.
@@ -48,8 +48,8 @@ export default async function HomePage({
       where: {
         status: "SCHEDULED",
         startsAt: {
-          lte: now,
-          gte: new Date(now.getTime() - LIVE_MATCH_WINDOW_MS),
+          lte: matchClockNow,
+          gte: new Date(matchClockNow.getTime() - LIVE_MATCH_WINDOW_MS),
         },
       },
       orderBy: [{ startsAt: "asc" }, { id: "asc" }],
@@ -62,7 +62,7 @@ export default async function HomePage({
     }),
     // Prossime partite programmate
     db.match.findMany({
-      where: { status: "SCHEDULED", startsAt: { gte: now } },
+      where: { status: "SCHEDULED", startsAt: { gte: matchClockNow } },
       orderBy: { startsAt: "asc" },
       take: 4,
       include: {

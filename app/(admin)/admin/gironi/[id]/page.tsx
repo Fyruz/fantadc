@@ -177,7 +177,7 @@ export default async function GironeDetailPage({ params }: { params: Promise<{ i
                       </span>
                     )}
                     <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-muted)" }}>
-                      {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                      {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" })}
                     </span>
                   </Link>
                 );

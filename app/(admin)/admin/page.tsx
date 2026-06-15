@@ -103,9 +103,9 @@ export default async function AdminDashboardPage() {
               </span>
             </div>
             <span className="text-[11px] font-semibold text-white/50 capitalize">
-              {nextMatch.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short" })}
+              {nextMatch.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}
               {" · "}
-              {nextMatch.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+              {nextMatch.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
             </span>
           </div>
           {/* Teams */}
@@ -306,7 +306,7 @@ export default async function AdminDashboardPage() {
                   {away}
                 </span>
                 <span className="text-[11px] flex-shrink-0 hidden sm:block" style={{ color: "var(--text-disabled)" }}>
-                  {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                  {m.startsAt.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" })}
                 </span>
               </Link>
             );

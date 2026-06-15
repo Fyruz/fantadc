@@ -125,11 +125,11 @@ export default async function VotaPage({ params }: { params: Promise<{ id: strin
               </span>
             ) : (
               <span className="font-bold text-black" style={{ fontSize: 24 }}>
-                {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
               </span>
             )}
             <span className="text-xs font-light" style={{ color: "rgba(0,0,0,0.65)" }}>
-              {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+              {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}
             </span>
           </div>
           <div className="flex flex-col items-center gap-3 flex-1 min-w-0">

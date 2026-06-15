@@ -153,7 +153,7 @@ export default async function SquadraFantasyPublicPage({
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-black truncate">{match.label}</p>
                   <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
-                    {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric" })}
+                    {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })}
                   </p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-4">

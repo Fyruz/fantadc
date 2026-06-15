@@ -126,7 +126,7 @@ export default async function PartitaDetailPage({
             )}
           </div>
           <span className="text-[11px] font-semibold text-white/50 capitalize">
-            {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}
           </span>
         </div>
         {/* Teams */}
@@ -148,7 +148,7 @@ export default async function PartitaDetailPage({
               <>
                 <div className="font-display font-black text-2xl leading-none text-white/30">VS</div>
                 <div className="text-[11px] font-bold text-white/40 tabular-nums">
-                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                  {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
                 </div>
               </>
             )}
@@ -168,9 +168,9 @@ export default async function PartitaDetailPage({
             className="px-5 py-2.5 text-center text-[11px] font-semibold text-white/40 capitalize"
             style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
           >
-            {match.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long" })}
+            {match.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })}
             {" · "}
-            {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+            {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
           </div>
         )}
       </div>

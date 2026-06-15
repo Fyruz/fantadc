@@ -91,8 +91,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const awayPlayers = match.players.filter((p) => p.player.footballTeamId === awayId);
 
   const scored = match.homeScore !== null && match.awayScore !== null;
-  const now = new Date();
-  const isLive = isScheduledMatchInProgress({ status: match.status, startsAt: match.startsAt, now });
+  const isLive = isScheduledMatchInProgress({ status: match.status, startsAt: match.startsAt });
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">

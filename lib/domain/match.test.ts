@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { isScheduledMatchInProgress, LIVE_MATCH_WINDOW_MS } from "./match";
+import {
+  formatMatchDateInputValue,
+  formatMatchTimeInputValue,
+  getMatchClockNow,
+  isScheduledMatchInProgress,
+  LIVE_MATCH_WINDOW_MS,
+  parseMatchDateTimeInput,
+} from "./match";
 
 const now = new Date("2026-06-15T18:00:00.000Z");
 
@@ -52,5 +59,28 @@ describe("isScheduledMatchInProgress", () => {
         now,
       })
     ).toBe(false);
+  });
+});
+
+describe("match date/time input helpers", () => {
+  it("formats match inputs from UTC values without applying local timezone offset", () => {
+    const startsAt = new Date("2026-06-15T13:40:00.000Z");
+
+    expect(formatMatchDateInputValue(startsAt)).toBe("2026-06-15");
+    expect(formatMatchTimeInputValue(startsAt)).toBe("13:40");
+  });
+
+  it("parses match inputs as UTC wall-clock values", () => {
+    expect(parseMatchDateTimeInput("2026-06-15", "13:40").toISOString()).toBe(
+      "2026-06-15T13:40:00.000Z"
+    );
+  });
+});
+
+describe("getMatchClockNow", () => {
+  it("converts the real instant to the tournament wall-clock stored as UTC", () => {
+    expect(getMatchClockNow(new Date("2026-06-15T11:40:00.000Z")).toISOString()).toBe(
+      "2026-06-15T13:40:00.000Z"
+    );
   });
 });

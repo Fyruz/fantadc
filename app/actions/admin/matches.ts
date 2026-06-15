@@ -7,6 +7,7 @@ import { MatchStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
+import { parseMatchDateTimeInput } from "@/lib/domain/match";
 import type { ActionResult } from "./football-teams";
 
 const scoreField = z.preprocess(
@@ -38,7 +39,7 @@ const CreateSchema = z.object({
 
 function startsAtFromForm(date: string | undefined, time: string | undefined) {
   if (date && time) {
-    return new Date(`${date}T${time}:00`);
+    return parseMatchDateTimeInput(date, time);
   }
 
   const startsAt = new Date();
@@ -125,7 +126,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
   const updateData: Parameters<typeof db.match.update>[0]["data"] = {
     homeTeamId: parsed.data.homeTeamId,
     awayTeamId: parsed.data.awayTeamId,
-    startsAt: new Date(`${parsed.data.date}T${parsed.data.time}:00`),
+    startsAt: parseMatchDateTimeInput(parsed.data.date, parsed.data.time),
     homeScore: parsed.data.homeScore ?? null,
     awayScore: parsed.data.awayScore ?? null,
     groupId: parsed.data.groupId ?? null,
