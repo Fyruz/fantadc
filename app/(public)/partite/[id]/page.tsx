@@ -6,6 +6,7 @@ import { isMvpWindowOpen } from "@/lib/domain/vote";
 import { resolveMvp } from "@/lib/domain/mvp";
 import { getCurrentUser } from "@/lib/session";
 import { resolveTeamFlag } from "@/lib/flags";
+import { isScheduledMatchInProgress } from "@/lib/domain/match";
 
 export default async function PartitaPublicPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -91,7 +92,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
 
   const scored = match.homeScore !== null && match.awayScore !== null;
   const now = new Date();
-  const isLive = match.status !== "CONCLUDED" && match.status !== "DRAFT" && match.startsAt <= now;
+  const isLive = isScheduledMatchInProgress({ status: match.status, startsAt: match.startsAt, now });
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">

@@ -9,6 +9,7 @@ import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import { resolveTeamFlag } from "@/lib/flags";
 import { buildGroupStandings } from "@/lib/standings";
+import { LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -40,19 +41,18 @@ export default async function HomePage({
   const accountDeleted = params.deleted === "1";
 
   const now = new Date();
-  const liveWindowMs = 120 * 60 * 1000; // 120 minuti di finestra
 
   const [liveMatch, upcomingMatches, groups, topScorers] = await Promise.all([
-    // Partita in diretta: iniziata negli ultimi 120 minuti, non ancora conclusa
+    // Partita in diretta: programmata e iniziata negli ultimi 120 minuti.
     db.match.findFirst({
       where: {
-        status: { notIn: ["DRAFT", "CONCLUDED"] },
+        status: "SCHEDULED",
         startsAt: {
           lte: now,
-          gte: new Date(now.getTime() - liveWindowMs),
+          gte: new Date(now.getTime() - LIVE_MATCH_WINDOW_MS),
         },
       },
-      orderBy: { startsAt: "desc" },
+      orderBy: [{ startsAt: "asc" }, { id: "asc" }],
       include: {
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
         awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
