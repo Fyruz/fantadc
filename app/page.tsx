@@ -2,6 +2,7 @@ import Link from "next/link";
 import { db } from "@/lib/db";
 import MobileOnlyGate from "@/components/mobile-only-gate";
 import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
+import LiveMatchCard from "@/components/live-match-card";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import { resolveTeamFlag } from "@/lib/flags";
@@ -36,7 +37,17 @@ export default async function HomePage({
   const params = await searchParams;
   const accountDeleted = params.deleted === "1";
 
-  const [upcomingMatches, groups, topScorers] = await Promise.all([
+  const [liveMatch, upcomingMatches, groups, topScorers] = await Promise.all([
+    // Partita in diretta
+    db.match.findFirst({
+      where: { status: "LIVE" },
+      include: {
+        homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+        awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
+        group: { select: { name: true } },
+        knockoutRound: { select: { name: true } },
+      },
+    }),
     // Prossime partite programmate
     db.match.findMany({
       where: { status: "SCHEDULED" },
@@ -222,6 +233,17 @@ export default async function HomePage({
 
           {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
           <MvpVoteHintCard />
+
+          {/* ══ PARTITA LIVE ══════════════════════════════════════════ */}
+          {liveMatch && liveMatch.homeTeam && liveMatch.awayTeam && (
+            <section className="max-w-lg mx-auto w-full px-4 my-10">
+              <LiveMatchCard match={{
+                ...liveMatch,
+                homeTeam: liveMatch.homeTeam,
+                awayTeam: liveMatch.awayTeam,
+              }} />
+            </section>
+          )}
 
           {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
           {upcomingMatches.length > 0 && (

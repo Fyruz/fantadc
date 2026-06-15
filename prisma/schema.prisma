@@ -340,6 +340,7 @@ enum PlayerRole {
 enum MatchStatus {
   DRAFT
   SCHEDULED
+  LIVE
   CONCLUDED
 }
 
