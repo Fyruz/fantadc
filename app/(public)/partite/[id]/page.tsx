@@ -90,6 +90,8 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const awayPlayers = match.players.filter((p) => p.player.footballTeamId === awayId);
 
   const scored = match.homeScore !== null && match.awayScore !== null;
+  const now = new Date();
+  const isLive = match.status !== "CONCLUDED" && match.status !== "DRAFT" && match.startsAt <= now;
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
@@ -119,9 +121,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
                   {match.group?.name ?? match.knockoutRound?.name}
                 </span>
               )}
-              {scored ? (
+              {scored || isLive ? (
                 <span className="font-bold text-black tabular-nums" style={{ fontSize: 24 }}>
-                  {match.homeScore} - {match.awayScore}
+                  {match.homeScore ?? 0} - {match.awayScore ?? 0}
                 </span>
               ) : (
                 <span className="font-bold text-black" style={{ fontSize: 24 }}>

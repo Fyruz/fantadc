@@ -62,7 +62,7 @@ export default async function HomePage({
     }),
     // Prossime partite programmate
     db.match.findMany({
-      where: { status: "SCHEDULED" },
+      where: { status: "SCHEDULED", startsAt: { gte: now } },
       orderBy: { startsAt: "asc" },
       take: 4,
       include: {
@@ -300,10 +300,10 @@ export default async function HomePage({
                           </span>
                         )}
                         <span className="text-base font-semibold leading-6 tabular-nums text-black">
-                          {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
+                          {m.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
                         </span>
                         <span className="text-xs font-light text-black/65">
-                          {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric" })}
+                          {m.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "UTC" })}
                         </span>
                       </div>
 
