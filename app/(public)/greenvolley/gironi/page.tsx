@@ -1,7 +1,9 @@
-
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { computeVolleyStandings } from "@/lib/volley/standings";
+import VolleyStandingsCard from "@/components/volley-standings-card";
+
+export const dynamic = "force-dynamic";
 
 export default async function VolleyGironiPage() {
   const groups = await db.volleyGroup.findMany({
@@ -42,72 +44,27 @@ export default async function VolleyGironiPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {groups.map((group) => {
-          const teamList = group.teams.map((gt) => gt.team);
-          const matches = group.matches.map((m) => ({
-            homeTeamId: m.homeTeamId,
-            awayTeamId: m.awayTeamId,
-            status: m.status,
-            sets: m.sets,
-          }));
-          const standings = computeVolleyStandings(teamList, matches);
+          const standings = computeVolleyStandings(
+            group.teams.map((gt) => gt.team),
+            group.matches.map((m) => ({
+              homeTeamId: m.homeTeamId,
+              awayTeamId: m.awayTeamId,
+              status: m.status,
+              sets: m.sets,
+            }))
+          );
+          const qualifiedIds = group.teams
+            .filter((gt) => gt.qualified)
+            .map((gt) => gt.teamId);
 
           return (
-            <div
+            <VolleyStandingsCard
               key={group.id}
-              className="bg-white rounded-3xl overflow-hidden pb-3"
-              style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-            >
-              {/* Card header */}
-              <div className="px-6 pt-6 pb-3">
-                <p
-                  className="uppercase text-base font-medium"
-                  style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", wordSpacing: "0.3em" }}
-                >
-                  {group.name}
-                </p>
-              </div>
-
-              {/* Table header */}
-              <div className="flex items-center gap-4 px-6 pb-3">
-                <span className="text-xs font-semibold uppercase text-black/65 w-5 shrink-0">POS</span>
-                <span className="text-xs font-semibold uppercase text-black/65 flex-1">SQUADRA</span>
-                <span className="text-xs font-semibold uppercase text-black/65 w-6 text-center shrink-0">G</span>
-                <span className="text-xs font-semibold uppercase text-black/65 w-5 text-right shrink-0">PT</span>
-              </div>
-
-              {/* Rows */}
-              {standings.length === 0 ? (
-                <p className="px-6 py-3 text-xs" style={{ color: "var(--text-muted)", borderTop: "1px solid rgba(9,20,76,0.05)" }}>
-                  Nessuna squadra.
-                </p>
-              ) : (
-                standings.map((row, i) => {
-                  const qualified = group.teams.find((gt) => gt.teamId === row.teamId)?.qualified;
-                  return (
-                    <div
-                      key={row.teamId}
-                      className="flex items-center gap-4 px-6"
-                      style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12, paddingBottom: 12 }}
-                    >
-                      <span className="text-xs text-black w-5 shrink-0 tabular-nums">{i + 1}</span>
-                      <div className="flex items-center gap-2 flex-1 min-w-0">
-                        <span className="text-sm text-black truncate">{row.teamName}</span>
-                        {qualified && (
-                          <span
-                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full shrink-0"
-                            style={{ background: "var(--primary-light)", color: "var(--primary)" }}
-                          >
-                            Q
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-sm text-black w-6 text-center shrink-0 tabular-nums">{row.played}</span>
-                      <span className="text-sm font-bold text-black w-5 text-right shrink-0 tabular-nums">{row.setsWon}</span>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+              name={group.name}
+              rows={standings}
+              qualifiedIds={qualifiedIds}
+              compact
+            />
           );
         })}
       </div>

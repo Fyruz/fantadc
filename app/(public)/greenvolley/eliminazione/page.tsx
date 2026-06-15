@@ -1,6 +1,8 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 
 export default async function VolleyEliminazionePublicPage() {
   const rounds = await db.volleyKnockoutRound.findMany({

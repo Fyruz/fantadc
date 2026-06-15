@@ -2,6 +2,7 @@ import BackChevron from "@/components/back-chevron";
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { formatVolleyDayHeading, formatVolleyMatchTime } from "@/lib/volley/format";
 
 const CARD: React.CSSProperties = {
   border: "1px solid rgba(9,20,76,0.05)",
@@ -30,9 +31,7 @@ export default async function VolleyMatchPublicPage({
   const awaySets = match.sets.filter((s) => s.awayPoints > s.homePoints).length;
   const scored = match.status === "CONCLUDED" && match.sets.length > 0;
   const phaseName = match.group?.name ?? match.knockoutRound?.name ?? null;
-  const matchDateLabel = match.date
-    ? match.date.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" })
-    : null;
+  const matchDateLabel = match.date ? formatVolleyDayHeading(match.date) : null;
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
@@ -96,7 +95,7 @@ export default async function VolleyMatchPublicPage({
           {!scored && (
             <p className="text-xs text-center" style={{ color: "var(--text-muted)" }}>
               {match.date
-                ? match.date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })
+                ? formatVolleyMatchTime(match.date)
                 : "Orario da definire"}
             </p>
           )}

@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import VolleySquadreAccordion from "./_accordion";
+
+export const dynamic = "force-dynamic";
 export default async function VolleySquadrePublicPage() {
   const teams = await db.volleyTeam.findMany({
     orderBy: { name: "asc" },

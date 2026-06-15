@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyPartiteClient from "./_partite-client";
 
+export const dynamic = "force-dynamic";
+
 export default async function VolleyPartitePublicPage() {
   const [matchesRaw, groupsRaw] = await Promise.all([
     db.volleyMatch.findMany({
@@ -38,31 +40,22 @@ export default async function VolleyPartitePublicPage() {
     };
   });
 
-  const groups = groupsRaw.map((g) => {
-    const teamList = g.teams.map((gt) => gt.team);
-    const gMatches = g.matches.map((m) => ({
-      homeTeamId: m.homeTeamId,
-      awayTeamId: m.awayTeamId,
-      status: m.status,
-      sets: m.sets,
-    }));
-    const standings = computeVolleyStandings(teamList, gMatches);
-    return {
-      id: g.id,
-      name: g.name,
-      rows: standings.map((r) => ({
-        teamId: r.teamId,
-        teamName: r.teamName,
-        played: r.played,
-        setsWon: r.setsWon,
-        setsLost: r.setsLost,
-      })),
-    };
-  });
+  const groups = groupsRaw.map((g) => ({
+    id: g.id,
+    name: g.name,
+    rows: computeVolleyStandings(
+      g.teams.map((gt) => gt.team),
+      g.matches.map((m) => ({
+        homeTeamId: m.homeTeamId,
+        awayTeamId: m.awayTeamId,
+        status: m.status,
+        sets: m.sets,
+      }))
+    ),
+  }));
 
   return (
     <div className="flex flex-col gap-4 max-w-lg mx-auto w-full">
-
       <VolleyPartiteClient matches={matches} groups={groups} />
     </div>
   );

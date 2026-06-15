@@ -2,7 +2,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { computeVolleyStandings } from "@/lib/volley/standings";
-import { BackButton } from "./BackButton";
+import VolleyMatchCard from "@/components/volley-match-card";
+import VolleyStandingsCard from "@/components/volley-standings-card";
+import BackButton from "@/components/back-button";
 
 export const revalidate = 60;
 
@@ -99,25 +101,24 @@ export default async function VolleySquadraDetailPage({
 
   if (!team) notFound();
 
-  function toMatchRow(m: typeof nextMatchRaw & {}): VolleyMatchRow {
-    const { homeSets, awaySets } = computeSets(m!.sets);
+  function toMatchRow(m: NonNullable<typeof nextMatchRaw>): VolleyMatchRow {
+    const { homeSets, awaySets } = computeSets(m.sets);
     return {
-      id: m!.id,
-      date: m!.date,
-      status: m!.status,
+      id: m.id,
+      date: m.date,
+      status: m.status,
       homeSets,
       awaySets,
-      homeTeam: m!.homeTeam,
-      awayTeam: m!.awayTeam,
-      group: m!.group,
-      knockoutRound: m!.knockoutRound,
+      homeTeam: m.homeTeam,
+      awayTeam: m.awayTeam,
+      group: m.group,
+      knockoutRound: m.knockoutRound,
     };
   }
 
   const nextMatch: VolleyMatchRow | null = nextMatchRaw ? toMatchRow(nextMatchRaw) : null;
   const teamMatches: VolleyMatchRow[] = teamMatchesRaw.map(toMatchRow);
 
-  // Group standings
   const standings = teamGroup
     ? computeVolleyStandings(
         teamGroup.teams.map((gt) => gt.team),
@@ -174,7 +175,6 @@ export default async function VolleySquadraDetailPage({
           nextMatch={nextMatch}
           lastMatch={teamMatches[0] ?? null}
           players={team.players}
-          teamId={teamId}
         />
       )}
       {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
@@ -186,43 +186,43 @@ export default async function VolleySquadraDetailPage({
   );
 }
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
-
-function formatTime(date: Date | null) {
-  if (!date) return null;
-  return date.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
-}
-
 // ─── Sommario ────────────────────────────────────────────────────────────────
 
 function SommarioTab({
   nextMatch,
   lastMatch,
   players,
-  teamId,
 }: {
   nextMatch: VolleyMatchRow | null;
   lastMatch: VolleyMatchRow | null;
   players: { id: number; name: string }[];
-  teamId: number;
 }) {
   const featuredMatch = nextMatch ?? lastMatch;
   const featuredLabel = nextMatch ? "Prossima partita" : "Ultima partita";
+  const isNext = !!nextMatch;
 
   return (
     <div className="flex flex-col gap-10">
-      {/* Prossima / Ultima partita */}
       {featuredMatch && featuredMatch.homeTeam && featuredMatch.awayTeam && (
         <div>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-base font-medium text-black">{featuredLabel}</h2>
             <Link href="?tab=partite" replace className="text-xs font-semibold text-black">Vedi tutto</Link>
           </div>
-          <MatchCard m={featuredMatch} isNext={!!nextMatch} />
+          <VolleyMatchCard
+            id={featuredMatch.id}
+            homeTeam={featuredMatch.homeTeam.name}
+            awayTeam={featuredMatch.awayTeam.name}
+            homeSets={isNext ? null : featuredMatch.homeSets}
+            awaySets={isNext ? null : featuredMatch.awaySets}
+            label={featuredMatch.group?.name ?? featuredMatch.knockoutRound?.name ?? null}
+            date={featuredMatch.date}
+            status={featuredMatch.status}
+            showHeaderDate={!isNext}
+          />
         </div>
       )}
 
-      {/* Rosa preview */}
       {players.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-6">
@@ -248,48 +248,6 @@ function SommarioTab({
   );
 }
 
-// ─── Match card ───────────────────────────────────────────────────────────────
-
-function MatchCard({ m, isNext }: { m: VolleyMatchRow; isNext: boolean }) {
-  const label = m.group?.name ?? m.knockoutRound?.name ?? null;
-  const date = m.date ? m.date.toLocaleDateString("it-IT", { day: "numeric", month: "short", timeZone: "UTC" }) : null;
-  const scored = m.status === "CONCLUDED";
-
-  return (
-    <Link
-      href={`/greenvolley/partite/${m.id}`}
-      className="bg-white rounded-3xl p-6 flex flex-col gap-4"
-      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-    >
-      {(label || date) && (
-        <div className="flex items-center justify-between pb-3" style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}>
-          {label && <span className="text-sm text-black">{label}</span>}
-          {date && <span className="text-sm" style={{ color: "rgba(0,0,0,0.45)" }}>{date}</span>}
-        </div>
-      )}
-      <div className="flex gap-6 items-center">
-        <div className="flex flex-col gap-3 flex-1 min-w-0 pr-6" style={{ borderRight: "1px solid rgba(9,20,76,0.05)" }}>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-black flex-1 truncate">{m.homeTeam?.name ?? "—"}</span>
-            {scored && <span className="text-sm font-semibold shrink-0" style={{ color: "var(--primary)" }}>{m.homeSets}</span>}
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-black flex-1 truncate">{m.awayTeam?.name ?? "—"}</span>
-            {scored && <span className="text-sm font-semibold shrink-0" style={{ color: "var(--primary)" }}>{m.awaySets}</span>}
-          </div>
-        </div>
-        <div className="flex flex-col items-center justify-center gap-3 shrink-0">
-          {isNext
-            ? formatTime(m.date) && <span className="text-sm text-black">{formatTime(m.date)}</span>
-            : <span className="text-xs font-medium" style={{ color: "rgba(0,0,0,0.65)" }}>Fischio finale</span>
-          }
-          <span className="text-xs font-medium text-black">Vedi i dettagli</span>
-        </div>
-      </div>
-    </Link>
-  );
-}
-
 // ─── Partite ─────────────────────────────────────────────────────────────────
 
 function PartiteTab({ matches }: { matches: VolleyMatchRow[] }) {
@@ -299,9 +257,22 @@ function PartiteTab({ matches }: { matches: VolleyMatchRow[] }) {
   return (
     <div className="flex flex-col gap-6">
       <h2 className="text-base font-medium text-black">Partite precedenti</h2>
-      {matches.map((m) => (
-        <MatchCard key={m.id} m={m} isNext={false} />
-      ))}
+      <div className="flex flex-col gap-4">
+        {matches.map((m) => (
+          <VolleyMatchCard
+            key={m.id}
+            id={m.id}
+            homeTeam={m.homeTeam?.name ?? "—"}
+            awayTeam={m.awayTeam?.name ?? "—"}
+            homeSets={m.homeSets}
+            awaySets={m.awaySets}
+            label={m.group?.name ?? m.knockoutRound?.name ?? null}
+            date={m.date}
+            status={m.status}
+            showHeaderDate
+          />
+        ))}
+      </div>
     </div>
   );
 }
@@ -320,66 +291,12 @@ function ClassificaTab({
   if (standings.length === 0) {
     return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Classifica non disponibile.</p>;
   }
-
-  const cols: { key: keyof typeof standings[0]; label: string }[] = [
-    { key: "played",   label: "G"  },
-    { key: "setsWon",  label: "SV" },
-    { key: "setsLost", label: "SP" },
-  ];
-
   return (
-    <div
-      className="bg-white rounded-3xl overflow-hidden pb-3"
-      style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-    >
-      {groupName && (
-        <div className="px-6 pt-6 pb-3">
-          <h2
-            className="uppercase text-base font-medium"
-            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", wordSpacing: "0.3em" }}
-          >
-            {groupName}
-          </h2>
-        </div>
-      )}
-
-      {/* Table header */}
-      <div className="flex items-center gap-2 px-6 pb-3">
-        <span className="text-xs font-semibold uppercase text-black/40 w-5 shrink-0" />
-        <span className="text-xs font-semibold uppercase text-black/40 flex-1">Squadra</span>
-        {cols.map((c) => (
-          <span key={c.key} className="text-xs font-semibold uppercase text-black/40 w-7 text-center shrink-0">{c.label}</span>
-        ))}
-        <span className="text-xs font-semibold uppercase w-7 text-center shrink-0" style={{ color: "var(--primary)" }}>Pt</span>
-      </div>
-
-      {standings.map((row, i) => {
-        const isCurrentTeam = row.teamId === teamId;
-        return (
-          <div
-            key={row.teamId}
-            className="flex items-center gap-2 px-6 py-3"
-            style={{
-              borderTop: "1px solid rgba(9,20,76,0.05)",
-              background: isCurrentTeam ? "rgba(1,7,163,0.04)" : undefined,
-            }}
-          >
-            <span className="text-xs text-black/40 w-5 shrink-0 tabular-nums">{i + 1}</span>
-            <span className={`text-sm flex-1 truncate text-black ${isCurrentTeam ? "font-semibold" : "font-normal"}`}>
-              {row.teamName}
-            </span>
-            {cols.map((c) => (
-              <span key={c.key} className="text-sm w-7 text-center shrink-0 tabular-nums text-black">
-                {row[c.key] as number}
-              </span>
-            ))}
-            <span className="text-sm w-7 text-center shrink-0 tabular-nums font-bold" style={{ color: "var(--primary)" }}>
-              {row.setsWon}
-            </span>
-          </div>
-        );
-      })}
-    </div>
+    <VolleyStandingsCard
+      name={groupName ?? "Classifica"}
+      rows={standings}
+      highlightTeamId={teamId}
+    />
   );
 }
 
