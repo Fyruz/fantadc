@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 
@@ -6,16 +7,18 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function VolleyClassificaPage() {
-  const groups = await db.volleyGroup.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      teams: { include: { team: { select: { id: true, name: true } } } },
-      matches: {
-        where: { status: "CONCLUDED" },
-        include: { sets: true },
+  const groups = await measureServerTiming("public.greenvolley.classifica.fetch", () =>
+    db.volleyGroup.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        teams: { include: { team: { select: { id: true, name: true } } } },
+        matches: {
+          where: { status: "CONCLUDED" },
+          include: { sets: true },
+        },
       },
-    },
-  });
+    })
+  );
 
   return (
     <div className="flex flex-col gap-6">

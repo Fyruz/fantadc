@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { measureServerTiming } from "@/lib/perf";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 
@@ -7,19 +8,21 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function VolleyGironiPage() {
-  const groups = await db.volleyGroup.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      teams: {
-        include: { team: { select: { id: true, name: true } } },
-        orderBy: { team: { name: "asc" } },
+  const groups = await measureServerTiming("public.greenvolley.gironi.fetch", () =>
+    db.volleyGroup.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        teams: {
+          include: { team: { select: { id: true, name: true } } },
+          orderBy: { team: { name: "asc" } },
+        },
+        matches: {
+          where: { status: "CONCLUDED" },
+          include: { sets: true },
+        },
       },
-      matches: {
-        where: { status: "CONCLUDED" },
-        include: { sets: true },
-      },
-    },
-  });
+    })
+  );
 
   return (
     <div className="flex flex-col gap-6">

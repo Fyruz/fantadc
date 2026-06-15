@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import { buildGroupStandings } from "@/lib/standings";
 import PageHeader from "@/components/page-header";
 import GroupStandingCard from "@/components/group-standing-card";
@@ -8,22 +9,24 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function GironiPublicPage() {
-  const groups = await db.group.findMany({
-    orderBy: { order: "asc" },
-    include: {
-      teams: {
-        include: {
-          footballTeam: {
-            select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
+  const groups = await measureServerTiming("public.gironi.fetch", () =>
+    db.group.findMany({
+      orderBy: { order: "asc" },
+      include: {
+        teams: {
+          include: {
+            footballTeam: {
+              select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
+            },
           },
         },
+        matches: {
+          where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
+          select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
+        },
       },
-      matches: {
-        where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
-        select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
-      },
-    },
-  });
+    })
+  );
 
   if (groups.length === 0) {
     return (

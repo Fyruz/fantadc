@@ -1,16 +1,19 @@
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import VolleySquadreAccordion from "./_accordion";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function VolleySquadrePublicPage() {
-  const teams = await db.volleyTeam.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      players: { orderBy: { name: "asc" }, select: { id: true, name: true } },
-    },
-  });
+  const teams = await measureServerTiming("public.greenvolley.squadre.fetch", () =>
+    db.volleyTeam.findMany({
+      orderBy: { name: "asc" },
+      include: {
+        players: { orderBy: { name: "asc" }, select: { id: true, name: true } },
+      },
+    })
+  );
 
   return (
     <div className="flex flex-col gap-4">

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { measureServerTiming } from "@/lib/perf";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyMatchCard from "@/components/volley-match-card";
 import VolleyStandingsCard from "@/components/volley-standings-card";
@@ -8,28 +9,30 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function GreenVolleyHomePage() {
-  const [nextMatches, groups] = await Promise.all([
-    db.volleyMatch.findMany({
-      where: { status: "SCHEDULED" },
-      orderBy: { date: "asc" },
-      take: 4,
-      include: {
-        homeTeam: { select: { id: true, name: true } },
-        awayTeam: { select: { id: true, name: true } },
-        group: { select: { name: true } },
-      },
-    }),
-    db.volleyGroup.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        teams: { include: { team: { select: { id: true, name: true } } } },
-        matches: {
-          where: { status: "CONCLUDED" },
-          include: { sets: true },
+  const [nextMatches, groups] = await measureServerTiming("public.greenvolley.home.fetch", () =>
+    Promise.all([
+      db.volleyMatch.findMany({
+        where: { status: "SCHEDULED" },
+        orderBy: { date: "asc" },
+        take: 4,
+        include: {
+          homeTeam: { select: { id: true, name: true } },
+          awayTeam: { select: { id: true, name: true } },
+          group: { select: { name: true } },
         },
-      },
-    }),
-  ]);
+      }),
+      db.volleyGroup.findMany({
+        orderBy: { name: "asc" },
+        include: {
+          teams: { include: { team: { select: { id: true, name: true } } } },
+          matches: {
+            where: { status: "CONCLUDED" },
+            include: { sets: true },
+          },
+        },
+      }),
+    ])
+  );
 
   return (
     <div>

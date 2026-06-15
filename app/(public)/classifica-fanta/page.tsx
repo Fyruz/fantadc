@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import {
   computeCumulativeRankings,
   computePhaseRankings,
@@ -16,20 +17,28 @@ export default async function ClassificaFantaPage({
   searchParams: Promise<{ fase?: string }>;
 }) {
   const { fase } = await searchParams;
-  const phases = await db.scoringPhase.findMany({
-    orderBy: { order: "asc" },
-    select: { id: true, name: true },
-  });
+  const phases = await measureServerTiming("public.classifica-fanta.phases.fetch", () =>
+    db.scoringPhase.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, name: true },
+    })
+  );
 
   const selected: string = fase ?? "generale";
 
   let rankings;
   if (selected === "corrente") {
-    rankings = await computeCurrentPhaseRankings();
+    rankings = await measureServerTiming("public.classifica-fanta.rankings.fetch", () =>
+      computeCurrentPhaseRankings()
+    );
   } else if (/^\d+$/.test(selected) && phases.some((p) => String(p.id) === selected)) {
-    rankings = await computePhaseRankings(Number(selected));
+    rankings = await measureServerTiming("public.classifica-fanta.rankings.fetch", () =>
+      computePhaseRankings(Number(selected))
+    );
   } else {
-    rankings = await computeCumulativeRankings();
+    rankings = await measureServerTiming("public.classifica-fanta.rankings.fetch", () =>
+      computeCumulativeRankings()
+    );
   }
 
   const tabs: { key: string; label: string; href: string }[] = [

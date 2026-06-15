@@ -1,4 +1,5 @@
 import { db } from "./db";
+import { measureServerTiming } from "./perf";
 
 // ─── Sync helper (dati già fetchati dalla pagina) ────────────────────────────
 
@@ -38,41 +39,43 @@ type MatchEntry = {
 };
 
 export function buildGroupStandings(teams: TeamEntry[], matches: MatchEntry[]): GroupStandingRow[] {
-  const map = new Map<number, GroupStandingRow>();
-  for (const gt of teams) {
-    map.set(gt.footballTeamId, {
-      teamId: gt.footballTeamId,
-      name: gt.footballTeam.name,
-      shortName: gt.footballTeam.shortName,
-      countryCode: gt.footballTeam.countryCode,
-      logoUrl: gt.footballTeam.logoUrl,
-      qualified: gt.qualified ?? false,
-      played: 0, won: 0, drawn: 0, lost: 0,
-      goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
-    });
-  }
-  for (const m of matches) {
-    if (!m.homeTeamId || !m.awayTeamId || m.homeScore === null || m.awayScore === null) continue;
-    const hs = m.homeScore;
-    const as_ = m.awayScore;
-    const home = map.get(m.homeTeamId);
-    const away = map.get(m.awayTeamId);
-    if (home) {
-      home.played++; home.goalsFor += hs; home.goalsAgainst += as_; home.goalDiff += hs - as_;
-      if (hs > as_) { home.won++; home.points += 3; }
-      else if (hs === as_) { home.drawn++; home.points += 1; }
-      else home.lost++;
+  return measureServerTiming("standings.buildGroupStandings", () => {
+    const map = new Map<number, GroupStandingRow>();
+    for (const gt of teams) {
+      map.set(gt.footballTeamId, {
+        teamId: gt.footballTeamId,
+        name: gt.footballTeam.name,
+        shortName: gt.footballTeam.shortName,
+        countryCode: gt.footballTeam.countryCode,
+        logoUrl: gt.footballTeam.logoUrl,
+        qualified: gt.qualified ?? false,
+        played: 0, won: 0, drawn: 0, lost: 0,
+        goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
+      });
     }
-    if (away) {
-      away.played++; away.goalsFor += as_; away.goalsAgainst += hs; away.goalDiff += as_ - hs;
-      if (as_ > hs) { away.won++; away.points += 3; }
-      else if (hs === as_) { away.drawn++; away.points += 1; }
-      else away.lost++;
+    for (const m of matches) {
+      if (!m.homeTeamId || !m.awayTeamId || m.homeScore === null || m.awayScore === null) continue;
+      const hs = m.homeScore;
+      const as_ = m.awayScore;
+      const home = map.get(m.homeTeamId);
+      const away = map.get(m.awayTeamId);
+      if (home) {
+        home.played++; home.goalsFor += hs; home.goalsAgainst += as_; home.goalDiff += hs - as_;
+        if (hs > as_) { home.won++; home.points += 3; }
+        else if (hs === as_) { home.drawn++; home.points += 1; }
+        else home.lost++;
+      }
+      if (away) {
+        away.played++; away.goalsFor += as_; away.goalsAgainst += hs; away.goalDiff += as_ - hs;
+        if (as_ > hs) { away.won++; away.points += 3; }
+        else if (hs === as_) { away.drawn++; away.points += 1; }
+        else away.lost++;
+      }
     }
-  }
-  return [...map.values()].sort(
-    (a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it")
-  );
+    return [...map.values()].sort(
+      (a, b) => b.points - a.points || b.goalDiff - a.goalDiff || a.name.localeCompare(b.name, "it")
+    );
+  });
 }
 
 // ─── Async helpers (fanno le proprie query DB) ───────────────────────────────
@@ -94,75 +97,77 @@ export type StandingEntry = {
 };
 
 export async function computeStandings(): Promise<StandingEntry[]> {
-  const [matches, allTeams] = await Promise.all([
-    db.match.findMany({
-      where: {
-        status: "CONCLUDED",
-        homeScore: { not: null },
-        awayScore: { not: null },
-      },
-      select: {
-        homeTeamId: true,
-        awayTeamId: true,
-        homeScore: true,
-        awayScore: true,
-        homeTeam: { select: { id: true, name: true, shortName: true } },
-        awayTeam: { select: { id: true, name: true, shortName: true } },
-      },
-    }),
-    db.footballTeam.findMany({ select: { id: true, name: true, shortName: true } }),
-  ]);
+  return measureServerTiming("standings.computeStandings", async () => {
+    const [matches, allTeams] = await Promise.all([
+      db.match.findMany({
+        where: {
+          status: "CONCLUDED",
+          homeScore: { not: null },
+          awayScore: { not: null },
+        },
+        select: {
+          homeTeamId: true,
+          awayTeamId: true,
+          homeScore: true,
+          awayScore: true,
+          homeTeam: { select: { id: true, name: true, shortName: true } },
+          awayTeam: { select: { id: true, name: true, shortName: true } },
+        },
+      }),
+      db.footballTeam.findMany({ select: { id: true, name: true, shortName: true } }),
+    ]);
 
-  const map = new Map<number, Omit<StandingEntry, "rank">>();
+    const map = new Map<number, Omit<StandingEntry, "rank">>();
 
-  const ensure = (team: { id: number; name: string; shortName: string | null }) => {
-    if (!map.has(team.id)) {
-      map.set(team.id, {
-        teamId: team.id,
-        teamName: team.name,
-        shortName: team.shortName,
-        played: 0, won: 0, drawn: 0, lost: 0,
-        goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
-      });
+    const ensure = (team: { id: number; name: string; shortName: string | null }) => {
+      if (!map.has(team.id)) {
+        map.set(team.id, {
+          teamId: team.id,
+          teamName: team.name,
+          shortName: team.shortName,
+          played: 0, won: 0, drawn: 0, lost: 0,
+          goalsFor: 0, goalsAgainst: 0, goalDiff: 0, points: 0,
+        });
+      }
+      return map.get(team.id)!;
+    };
+
+    // Seed all teams (even those without matches)
+    for (const t of allTeams) ensure(t);
+
+    for (const m of matches) {
+      if (!m.homeTeam || !m.awayTeam) continue; // skip TBD knockout matches
+      const hs = m.homeScore!;
+      const as_ = m.awayScore!;
+      const home = ensure(m.homeTeam);
+      const away = ensure(m.awayTeam);
+
+      home.played++; away.played++;
+      home.goalsFor += hs; home.goalsAgainst += as_;
+      away.goalsFor += as_; away.goalsAgainst += hs;
+
+      if (hs > as_) {
+        home.won++; home.points += 3; away.lost++;
+      } else if (hs < as_) {
+        away.won++; away.points += 3; home.lost++;
+      } else {
+        home.drawn++; home.points += 1;
+        away.drawn++; away.points += 1;
+      }
     }
-    return map.get(team.id)!;
-  };
 
-  // Seed all teams (even those without matches)
-  for (const t of allTeams) ensure(t);
+    const entries = [...map.values()];
+    for (const e of entries) e.goalDiff = e.goalsFor - e.goalsAgainst;
 
-  for (const m of matches) {
-    if (!m.homeTeam || !m.awayTeam) continue; // skip TBD knockout matches
-    const hs = m.homeScore!;
-    const as_ = m.awayScore!;
-    const home = ensure(m.homeTeam);
-    const away = ensure(m.awayTeam);
+    entries.sort((a, b) =>
+      b.points - a.points ||
+      b.goalDiff - a.goalDiff ||
+      b.goalsFor - a.goalsFor ||
+      a.teamName.localeCompare(b.teamName, "it")
+    );
 
-    home.played++; away.played++;
-    home.goalsFor += hs; home.goalsAgainst += as_;
-    away.goalsFor += as_; away.goalsAgainst += hs;
-
-    if (hs > as_) {
-      home.won++; home.points += 3; away.lost++;
-    } else if (hs < as_) {
-      away.won++; away.points += 3; home.lost++;
-    } else {
-      home.drawn++; home.points += 1;
-      away.drawn++; away.points += 1;
-    }
-  }
-
-  const entries = [...map.values()];
-  for (const e of entries) e.goalDiff = e.goalsFor - e.goalsAgainst;
-
-  entries.sort((a, b) =>
-    b.points - a.points ||
-    b.goalDiff - a.goalDiff ||
-    b.goalsFor - a.goalsFor ||
-    a.teamName.localeCompare(b.teamName, "it")
-  );
-
-  return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+    return entries.map((e, i) => ({ ...e, rank: i + 1 }));
+  });
 }
 
 /** Classifica di un singolo girone — solo partite CONCLUDED con groupId = groupId */

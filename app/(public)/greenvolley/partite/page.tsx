@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyPartiteClient from "./_partite-client";
 
@@ -6,26 +7,28 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function VolleyPartitePublicPage() {
-  const [matchesRaw, groupsRaw] = await Promise.all([
-    db.volleyMatch.findMany({
-      where: { status: { not: "DRAFT" } },
-      orderBy: { date: "asc" },
-      include: {
-        homeTeam: { select: { name: true } },
-        awayTeam: { select: { name: true } },
-        sets: { select: { homePoints: true, awayPoints: true } },
-        group: { select: { name: true } },
-        knockoutRound: { select: { name: true } },
-      },
-    }),
-    db.volleyGroup.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        teams: { include: { team: { select: { id: true, name: true } } } },
-        matches: { where: { status: "CONCLUDED" }, include: { sets: true } },
-      },
-    }),
-  ]);
+  const [matchesRaw, groupsRaw] = await measureServerTiming("public.greenvolley.partite.fetch", () =>
+    Promise.all([
+      db.volleyMatch.findMany({
+        where: { status: { not: "DRAFT" } },
+        orderBy: { date: "asc" },
+        include: {
+          homeTeam: { select: { name: true } },
+          awayTeam: { select: { name: true } },
+          sets: { select: { homePoints: true, awayPoints: true } },
+          group: { select: { name: true } },
+          knockoutRound: { select: { name: true } },
+        },
+      }),
+      db.volleyGroup.findMany({
+        orderBy: { name: "asc" },
+        include: {
+          teams: { include: { team: { select: { id: true, name: true } } } },
+          matches: { where: { status: "CONCLUDED" }, include: { sets: true } },
+        },
+      }),
+    ])
+  );
 
   const matches = matchesRaw.map((m) => {
     const scored = m.status === "CONCLUDED" && m.sets.length > 0;

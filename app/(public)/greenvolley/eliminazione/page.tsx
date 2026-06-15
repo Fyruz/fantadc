@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -6,20 +7,22 @@ export const revalidate = 60;
 
 
 export default async function VolleyEliminazionePublicPage() {
-  const rounds = await db.volleyKnockoutRound.findMany({
-    orderBy: { order: "asc" },
-    include: {
-      matches: {
-        where: { status: { not: "DRAFT" } },
-        include: {
-          homeTeam: { select: { id: true, name: true } },
-          awayTeam: { select: { id: true, name: true } },
-          sets: { orderBy: { setNumber: "asc" } },
+  const rounds = await measureServerTiming("public.greenvolley.eliminazione.fetch", () =>
+    db.volleyKnockoutRound.findMany({
+      orderBy: { order: "asc" },
+      include: {
+        matches: {
+          where: { status: { not: "DRAFT" } },
+          include: {
+            homeTeam: { select: { id: true, name: true } },
+            awayTeam: { select: { id: true, name: true } },
+            sets: { orderBy: { setNumber: "asc" } },
+          },
+          orderBy: { date: "asc" },
         },
-        orderBy: { date: "asc" },
       },
-    },
-  });
+    })
+  );
 
   const activeRounds = rounds.filter((r) => r.matches.length > 0);
 

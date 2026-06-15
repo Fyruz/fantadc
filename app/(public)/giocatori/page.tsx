@@ -1,50 +1,53 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import PlayersGrid from "./_players-grid";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function GiocatoriPublicPage() {
-  const [players, appearances, goals, bonuses] = await Promise.all([
-    db.player.findMany({
-      orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
-      include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
-    }),
-    db.matchPlayer.findMany({
-      include: {
-        match: {
-          select: {
-            id: true,
-            startsAt: true,
-            status: true,
-            homeScore: true,
-            awayScore: true,
-            homeTeamId: true,
-            awayTeamId: true,
-            homeSeed: true,
-            awaySeed: true,
-            homeTeam: { select: { shortName: true, name: true } },
-            awayTeam: { select: { shortName: true, name: true } },
+  const [players, appearances, goals, bonuses] = await measureServerTiming("public.giocatori.fetch", () =>
+    Promise.all([
+      db.player.findMany({
+        orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
+        include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
+      }),
+      db.matchPlayer.findMany({
+        include: {
+          match: {
+            select: {
+              id: true,
+              startsAt: true,
+              status: true,
+              homeScore: true,
+              awayScore: true,
+              homeTeamId: true,
+              awayTeamId: true,
+              homeSeed: true,
+              awaySeed: true,
+              homeTeam: { select: { shortName: true, name: true } },
+              awayTeam: { select: { shortName: true, name: true } },
+            },
           },
         },
-      },
-      orderBy: { match: { startsAt: "desc" } },
-    }),
-    db.matchGoal.findMany({
-      select: { matchId: true, scorerId: true, isOwnGoal: true },
-    }),
-    db.playerMatchBonus.findMany({
-      select: {
-        playerId: true,
-        matchId: true,
-        points: true,
-        quantity: true,
-        bonusType: { select: { code: true } },
-      },
-    }),
-  ]);
+        orderBy: { match: { startsAt: "desc" } },
+      }),
+      db.matchGoal.findMany({
+        select: { matchId: true, scorerId: true, isOwnGoal: true },
+      }),
+      db.playerMatchBonus.findMany({
+        select: {
+          playerId: true,
+          matchId: true,
+          points: true,
+          quantity: true,
+          bonusType: { select: { code: true } },
+        },
+      }),
+    ])
+  );
 
   // Pre-group by player ID
   const appearancesByPlayer = new Map<number, typeof appearances>();

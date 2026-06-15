@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { measureServerTiming } from "@/lib/perf";
 import { buildGroupStandings } from "@/lib/standings";
 import PartiteClient from "./_partite-client";
 
@@ -6,32 +7,34 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function PartitePublicPage() {
-  const [matches, groups] = await Promise.all([
-    db.match.findMany({
-      where: { status: { not: "DRAFT" } },
-      orderBy: { startsAt: "asc" },
-      select: {
-        id: true, status: true, startsAt: true, homeScore: true, awayScore: true,
-        homeSeed: true, awaySeed: true,
-        homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
-        awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
-        group: { select: { name: true, slug: true } },
-        knockoutRound: { select: { name: true } },
-      },
-    }),
-    db.group.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        teams: {
-          include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
+  const [matches, groups] = await measureServerTiming("public.partite.fetch", () =>
+    Promise.all([
+      db.match.findMany({
+        where: { status: { not: "DRAFT" } },
+        orderBy: { startsAt: "asc" },
+        select: {
+          id: true, status: true, startsAt: true, homeScore: true, awayScore: true,
+          homeSeed: true, awaySeed: true,
+          homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+          awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+          group: { select: { name: true, slug: true } },
+          knockoutRound: { select: { name: true } },
         },
-        matches: {
-          where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
-          select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
+      }),
+      db.group.findMany({
+        orderBy: { order: "asc" },
+        include: {
+          teams: {
+            include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
+          },
+          matches: {
+            where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
+            select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ])
+  );
 
   const groupStandings = groups.map((g) => ({
     id: g.id, name: g.name,
