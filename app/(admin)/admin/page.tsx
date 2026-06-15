@@ -1,11 +1,25 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getMatchClockNow, LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
 import { computeStandings } from "@/lib/standings";
 import { computeCumulativeRankings } from "@/lib/scoring";
 
+type AdminDashboardMatch = {
+  id: number;
+  startsAt: Date;
+  homeScore: number | null;
+  awayScore: number | null;
+  homeSeed: string | null;
+  awaySeed: string | null;
+  homeTeam: { name: string; shortName: string | null } | null;
+  awayTeam: { name: string; shortName: string | null } | null;
+};
+
 export default async function AdminDashboardPage() {
+  const matchClockNow = getMatchClockNow();
   const [
     teamCount, playerCount, matchCount, userCount, fantasyTeamCount,
+    liveMatch,
     nextMatch,
     recentMatches,
     concludedNoPlayers,
@@ -20,7 +34,21 @@ export default async function AdminDashboardPage() {
     db.user.count(),
     db.fantasyTeam.count(),
     db.match.findFirst({
-      where: { status: "SCHEDULED" },
+      where: {
+        status: "SCHEDULED",
+        startsAt: {
+          lte: matchClockNow,
+          gte: new Date(matchClockNow.getTime() - LIVE_MATCH_WINDOW_MS),
+        },
+      },
+      orderBy: [{ startsAt: "asc" }, { id: "asc" }],
+      include: {
+        homeTeam: { select: { name: true, shortName: true } },
+        awayTeam: { select: { name: true, shortName: true } },
+      },
+    }),
+    db.match.findFirst({
+      where: { status: "SCHEDULED", startsAt: { gt: matchClockNow } },
       orderBy: { startsAt: "asc" },
       include: {
         homeTeam: { select: { name: true, shortName: true } },
@@ -87,57 +115,15 @@ export default async function AdminDashboardPage() {
         </span>
       </div>
 
+      {/* ── Live match hero ─────────────────────────────────────────── */}
+      {liveMatch && (
+        <AdminMatchHero match={liveMatch} variant="live" />
+      )}
+
       {/* ── Next match hero ─────────────────────────────────────────── */}
       {nextMatch ? (
-        <Link
-          href={`/admin/partite/${nextMatch.id}`}
-          className="block rounded-[20px] overflow-hidden transition-transform hover:-translate-y-px"
-          style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 32px rgba(1,7,163,0.32)" }}
-        >
-          {/* Top bar */}
-          <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="text-[11px] font-black uppercase tracking-widest text-white/60">
-                Prossima partita
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold text-white/50 capitalize">
-              {nextMatch.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}
-              {" · "}
-              {nextMatch.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
-            </span>
-          </div>
-          {/* Teams */}
-          <div className="px-5 py-5 flex items-center gap-3">
-            <div className="flex-1 text-center">
-              <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
-                {nextMatch.homeTeam?.shortName ?? nextMatch.homeTeam?.name ?? nextMatch.homeSeed ?? "TBD"}
-              </div>
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
-                {nextMatch.homeTeam?.name ?? nextMatch.homeSeed ?? ""}
-              </div>
-            </div>
-            <div className="flex-shrink-0 font-display font-black text-2xl text-white/30 px-2">VS</div>
-            <div className="flex-1 text-center">
-              <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
-                {nextMatch.awayTeam?.shortName ?? nextMatch.awayTeam?.name ?? nextMatch.awaySeed ?? "TBD"}
-              </div>
-              <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
-                {nextMatch.awayTeam?.name ?? nextMatch.awaySeed ?? ""}
-              </div>
-            </div>
-          </div>
-          {/* Bottom strip */}
-          <div
-            className="px-5 py-2.5 flex items-center justify-end gap-1"
-            style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
-          >
-            <span className="text-[11px] font-semibold text-white/40">Gestisci</span>
-            <i className="pi pi-arrow-right text-[10px] text-white/40" />
-          </div>
-        </Link>
-      ) : (
+        <AdminMatchHero match={nextMatch} variant="next" />
+      ) : !liveMatch ? (
         <div
           className="rounded-[20px] px-5 py-6 flex items-center gap-4"
           style={{ background: "var(--surface-1)", border: "1px dashed var(--border-medium)" }}
@@ -150,7 +136,7 @@ export default async function AdminDashboardPage() {
             </Link>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* ── Standings + Fanta rankings ─────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -483,5 +469,80 @@ export default async function AdminDashboardPage() {
         </div>
       )}
     </div>
+  );
+}
+
+function AdminMatchHero({
+  match,
+  variant,
+}: {
+  match: AdminDashboardMatch;
+  variant: "live" | "next";
+}) {
+  const homeLabel = match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD";
+  const awayLabel = match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD";
+  const hasScore = match.homeScore !== null && match.awayScore !== null;
+  const centerLabel = variant === "live"
+    ? `${match.homeScore ?? 0} — ${match.awayScore ?? 0}`
+    : "VS";
+  const dotClass = variant === "live" ? "bg-red-500" : "bg-emerald-400";
+  const title = variant === "live" ? "Partita in corso" : "Prossima partita";
+  const background = variant === "live"
+    ? "linear-gradient(145deg, #7F1D1D 0%, #0107A3 100%)"
+    : "linear-gradient(145deg, #0107A3 0%, #000669 100%)";
+  const shadow = variant === "live"
+    ? "0 6px 32px rgba(127,29,29,0.32)"
+    : "0 6px 32px rgba(1,7,163,0.32)";
+
+  return (
+    <Link
+      href={`/admin/partite/${match.id}`}
+      className="block rounded-[20px] overflow-hidden transition-transform hover:-translate-y-px"
+      style={{ background, boxShadow: shadow }}
+    >
+      <div className="flex items-center justify-between px-5 py-3" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="flex items-center gap-2">
+          <span className={`w-1.5 h-1.5 rounded-full ${dotClass} animate-pulse`} />
+          <span className="text-[11px] font-black uppercase tracking-widest text-white/60">
+            {title}
+          </span>
+        </div>
+        <span className="text-[11px] font-semibold text-white/50 capitalize">
+          {match.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" })}
+          {" · "}
+          {match.startsAt.toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
+        </span>
+      </div>
+
+      <div className="px-5 py-5 flex items-center gap-3">
+        <div className="flex-1 text-center">
+          <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
+            {homeLabel}
+          </div>
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
+            {match.homeTeam?.name ?? match.homeSeed ?? ""}
+          </div>
+        </div>
+        <div className={`flex-shrink-0 font-display font-black leading-none text-white/30 px-2 ${hasScore || variant === "live" ? "text-3xl" : "text-2xl"}`}>
+          {centerLabel}
+        </div>
+        <div className="flex-1 text-center">
+          <div className="font-display font-black text-2xl sm:text-3xl uppercase leading-none tracking-tight text-white">
+            {awayLabel}
+          </div>
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-white/40 mt-1 truncate">
+            {match.awayTeam?.name ?? match.awaySeed ?? ""}
+          </div>
+        </div>
+      </div>
+
+      <div
+        className="px-5 py-2.5 flex items-center justify-end gap-1"
+        style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}
+      >
+        <span className="text-[11px] font-semibold text-white/40">Gestisci</span>
+        <i className="pi pi-arrow-right text-[10px] text-white/40" />
+      </div>
+    </Link>
   );
 }
