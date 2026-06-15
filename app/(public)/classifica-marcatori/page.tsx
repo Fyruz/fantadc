@@ -2,8 +2,9 @@ import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
-export const dynamic = 'force-dynamic'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 60;
 
 export const metadata = { title: "Capocannoniere" };
 

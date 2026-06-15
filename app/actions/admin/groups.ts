@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
+import { revalidateDcupPublicPaths } from "./revalidate-public";
 
 const GroupSchema = z.object({
   name: z.string().min(1, "Nome obbligatorio").max(50),
@@ -30,6 +31,7 @@ export async function createGroup(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "CREATE", "Group", group.id, null, group);
 
   revalidatePath("/admin/gironi");
+  revalidateDcupPublicPaths();
   redirect(`/admin/gironi/${group.id}`);
 }
 
@@ -52,6 +54,7 @@ export async function updateGroup(_prev: ActionResult | undefined, formData: For
 
   revalidatePath("/admin/gironi");
   revalidatePath(`/admin/gironi/${id}`);
+  revalidateDcupPublicPaths();
   return {};
 }
 
@@ -67,6 +70,7 @@ export async function deleteGroup(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE", "Group", id, before, null);
 
   revalidatePath("/admin/gironi");
+  revalidateDcupPublicPaths();
   redirect("/admin/gironi");
 }
 
@@ -85,6 +89,7 @@ export async function addTeamToGroup(_prev: ActionResult | undefined, formData: 
 
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
+  revalidateDcupPublicPaths();
   return {};
 }
 
@@ -98,6 +103,7 @@ export async function removeTeamFromGroup(formData: FormData): Promise<ActionRes
 
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
+  revalidateDcupPublicPaths();
   return {};
 }
 
@@ -116,5 +122,6 @@ export async function setTeamQualified(formData: FormData): Promise<ActionResult
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
   revalidatePath("/gironi");
+  revalidateDcupPublicPaths();
   return {};
 }

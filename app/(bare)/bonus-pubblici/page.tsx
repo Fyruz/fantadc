@@ -2,6 +2,7 @@ import PageHeader from "@/components/page-header";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const CARD: React.CSSProperties = {
   border: "1px solid rgba(9,20,76,0.05)",
@@ -10,47 +11,47 @@ const CARD: React.CSSProperties = {
 
 const BONUS_ICONS: Record<string, string> = {
   // Codici prod
-  "1-3 GOAL":                    "/icons/bonus/goal-1-3.svg",
-  "4+ GOAL":                     "/icons/bonus/goal-4.svg",
-  "ACCESSORIO":                  "/icons/bonus/accesories.svg",
-  "AMMONIZIONE":                 "/icons/bonus/yellow-card.svg",
-  "AUTOGOAL":                    "/icons/bonus/autogol.svg",
-  "CLEAN SHEET":                 "/icons/bonus/clean-sheet.svg",
-  "ESPULSIONE":                  "/icons/bonus/red-card.svg",
-  "ESULTANZA IMPEGNATA":         "/icons/bonus/celebration.svg",
-  "FAN FAVOURITE":               "/icons/bonus/most-voted.svg",
-  "GOAL PORTIERE":               "/icons/bonus/goalkeeper-goal.svg",
-  "INTERVISTATO":                "/icons/bonus/interviewed.svg",
-  "INTERVISTATORE":              "/icons/bonus/who-interviews.svg",
-  "LEAST FAVOURITE":             "/icons/bonus/least-voted.svg",
-  "MAN OF THE MATCH":            "/icons/bonus/momt.svg",
-  "PALLONE AL BAR":              "/icons/bonus/ball-in-the-bar.svg",
-  "PALLONE IN GREVE":            "/icons/bonus/ball-in-the-river.svg",
-  "PORTIERE 1-5 GOAL SUBITI":    "/icons/bonus/1-5-ball-in-the-net.svg",
-  "PORTIERE 6+ GOAL SUBITI":     "/icons/bonus/6-balls-in-the-net.svg",
-  "PRIMO GOAL DELLA PARTITA":    "/icons/bonus/first-goal.svg",
-  "RIGORE SBAGLIATO":            "/icons/bonus/missed-penalty.svg",
+  "1-3 GOAL":                    "/icons/bonus/goal-1-3.webp",
+  "4+ GOAL":                     "/icons/bonus/goal-4.webp",
+  "ACCESSORIO":                  "/icons/bonus/accesories.webp",
+  "AMMONIZIONE":                 "/icons/bonus/yellow-card.webp",
+  "AUTOGOAL":                    "/icons/bonus/autogol.webp",
+  "CLEAN SHEET":                 "/icons/bonus/clean-sheet.webp",
+  "ESPULSIONE":                  "/icons/bonus/red-card.webp",
+  "ESULTANZA IMPEGNATA":         "/icons/bonus/celebration.webp",
+  "FAN FAVOURITE":               "/icons/bonus/most-voted.webp",
+  "GOAL PORTIERE":               "/icons/bonus/goalkeeper-goal.webp",
+  "INTERVISTATO":                "/icons/bonus/interviewed.webp",
+  "INTERVISTATORE":              "/icons/bonus/who-interviews.webp",
+  "LEAST FAVOURITE":             "/icons/bonus/least-voted.webp",
+  "MAN OF THE MATCH":            "/icons/bonus/momt.webp",
+  "PALLONE AL BAR":              "/icons/bonus/ball-in-the-bar.webp",
+  "PALLONE IN GREVE":            "/icons/bonus/ball-in-the-river.webp",
+  "PORTIERE 1-5 GOAL SUBITI":    "/icons/bonus/1-5-ball-in-the-net.webp",
+  "PORTIERE 6+ GOAL SUBITI":     "/icons/bonus/6-balls-in-the-net.webp",
+  "PRIMO GOAL DELLA PARTITA":    "/icons/bonus/first-goal.webp",
+  "RIGORE SBAGLIATO":            "/icons/bonus/missed-penalty.webp",
   // Codici locali (dev)
-  ACCESSORY_MATCH:               "/icons/bonus/accesories.svg",
-  GOAL_1_3:                      "/icons/bonus/goal-1-3.svg",
-  GOAL_4_PLUS:                   "/icons/bonus/goal-4.svg",
-  GOALKEEPER_GOAL:               "/icons/bonus/goalkeeper-goal.svg",
-  SEXY_CELEBRATION:              "/icons/bonus/celebration.svg",
-  INTERVIEWED:                   "/icons/bonus/interviewed.svg",
-  INTERVIEWER:                   "/icons/bonus/who-interviews.svg",
-  MOTM:                          "/icons/bonus/momt.svg",
-  FAN_FAVORITE:                  "/icons/bonus/most-voted.svg",
-  GOALKEEPER_CONCEDED:           "/icons/bonus/1-5-ball-in-the-net.svg",
-  GOALKEEPER_CONCEDED_6P:        "/icons/bonus/6-balls-in-the-net.svg",
-  OWN_GOAL:                      "/icons/bonus/autogol.svg",
-  FIRST_GOAL:                    "/icons/bonus/first-goal.svg",
-  YELLOW_CARD:                   "/icons/bonus/yellow-card.svg",
-  RED_CARD:                      "/icons/bonus/red-card.svg",
-  LEAST_FAN_FAVORITE:            "/icons/bonus/least-voted.svg",
-  BALL_TO_BAR:                   "/icons/bonus/ball-in-the-bar.svg",
-  BALL_IN_GREVE:                 "/icons/bonus/ball-in-the-river.svg",
-  CLEAN_SHEET:                   "/icons/bonus/clean-sheet.svg",
-  PENALTY_MISSED:                "/icons/bonus/missed-penalty.svg",
+  ACCESSORY_MATCH:               "/icons/bonus/accesories.webp",
+  GOAL_1_3:                      "/icons/bonus/goal-1-3.webp",
+  GOAL_4_PLUS:                   "/icons/bonus/goal-4.webp",
+  GOALKEEPER_GOAL:               "/icons/bonus/goalkeeper-goal.webp",
+  SEXY_CELEBRATION:              "/icons/bonus/celebration.webp",
+  INTERVIEWED:                   "/icons/bonus/interviewed.webp",
+  INTERVIEWER:                   "/icons/bonus/who-interviews.webp",
+  MOTM:                          "/icons/bonus/momt.webp",
+  FAN_FAVORITE:                  "/icons/bonus/most-voted.webp",
+  GOALKEEPER_CONCEDED:           "/icons/bonus/1-5-ball-in-the-net.webp",
+  GOALKEEPER_CONCEDED_6P:        "/icons/bonus/6-balls-in-the-net.webp",
+  OWN_GOAL:                      "/icons/bonus/autogol.webp",
+  FIRST_GOAL:                    "/icons/bonus/first-goal.webp",
+  YELLOW_CARD:                   "/icons/bonus/yellow-card.webp",
+  RED_CARD:                      "/icons/bonus/red-card.webp",
+  LEAST_FAN_FAVORITE:            "/icons/bonus/least-voted.webp",
+  BALL_TO_BAR:                   "/icons/bonus/ball-in-the-bar.webp",
+  BALL_IN_GREVE:                 "/icons/bonus/ball-in-the-river.webp",
+  CLEAN_SHEET:                   "/icons/bonus/clean-sheet.webp",
+  PENALTY_MISSED:                "/icons/bonus/missed-penalty.webp",
 };
 
 function formatPoints(points: number): string {
@@ -59,13 +60,13 @@ function formatPoints(points: number): string {
 
 function BonusCard({ code, name, points }: { code: string; name: string; points: number }) {
   const positive = points >= 0;
-  const icon = BONUS_ICONS[code] ?? "/icons/bonus/lock.svg";
+  const icon = BONUS_ICONS[code] ?? "/icons/bonus/lock.webp";
   return (
     <div
       className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-start gap-4 py-5 px-4"
       style={CARD}
     >
-      <img src={icon} alt="" width={64} style={{ height: "auto" }} />
+      <img src={icon} alt="" width={64} height={64} loading="lazy" decoding="async" style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-medium text-xs" style={{ color: "var(--color-text-primary)" }}>
           {name}

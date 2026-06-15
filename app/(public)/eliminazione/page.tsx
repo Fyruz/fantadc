@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 60;
+
 export default async function EliminazionePublicPage() {
   const rounds = await db.knockoutRound.findMany({
     orderBy: { order: "asc" },

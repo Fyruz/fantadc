@@ -1,8 +1,9 @@
 import { db } from "@/lib/db";
 import { buildGroupStandings } from "@/lib/standings";
 import PartiteClient from "./_partite-client";
-export const dynamic = 'force-dynamic'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 60;
 
 export default async function PartitePublicPage() {
   const [matches, groups] = await Promise.all([

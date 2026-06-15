@@ -4,6 +4,7 @@ import { resolveTeamFlag } from "@/lib/flags";
 import PageHeader from "@/components/page-header";
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 60;
 
 export default async function SquadrePublicPage() {
   const teams = await db.footballTeam.findMany({

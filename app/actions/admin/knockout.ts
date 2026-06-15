@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import { MatchStatus } from "@prisma/client";
 import type { ActionResult } from "./football-teams";
+import { revalidateDcupPublicPaths } from "./revalidate-public";
 
 // Struttura fissa del bracket (determinata dalla regola del torneo)
 const BRACKET_TEMPLATE = [
@@ -68,6 +69,7 @@ export async function initBracket(_prev: ActionResult | undefined, _formData: Fo
 
   revalidatePath("/admin/eliminazione");
   revalidatePath("/eliminazione");
+  revalidateDcupPublicPaths();
   return {};
 }
 
@@ -90,6 +92,7 @@ export async function assignKnockoutTeams(_prev: ActionResult | undefined, formD
   revalidatePath("/admin/eliminazione");
   revalidatePath(`/admin/partite/${matchId}`);
   revalidatePath("/eliminazione");
+  revalidateDcupPublicPaths(matchId);
   return {};
 }
 
@@ -104,6 +107,7 @@ export async function updateKnockoutRound(_prev: ActionResult | undefined, formD
   await logAdminAction(Number(admin.id), "UPDATE", "KnockoutRound", id, before, round);
 
   revalidatePath("/admin/eliminazione");
+  revalidateDcupPublicPaths();
   return {};
 }
 
@@ -118,5 +122,6 @@ export async function deleteBracket(_prev: ActionResult | undefined, _formData: 
 
   revalidatePath("/admin/eliminazione");
   revalidatePath("/eliminazione");
+  revalidateDcupPublicPaths();
   return {};
 }

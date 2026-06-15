@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { getCurrentUser } from "@/lib/session";
 
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -24,9 +23,7 @@ function Item({ icon, label, href, external }: { icon: React.ReactNode; label: s
   );
 }
 
-export default async function AltroPage() {
-  const user = await getCurrentUser();
-
+export default function AltroPage() {
   return (
     <div className="flex flex-col gap-6 max-w-lg mx-auto">
       {/* Competizione */}

@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
+import { revalidateBonusPublicPaths, revalidateDcupPublicPaths } from "./revalidate-public";
 
 const Schema = z.object({
   matchId: z.coerce.number().int().positive(),
@@ -45,6 +46,8 @@ export async function assignBonus(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "ASSIGN_BONUS", "PlayerMatchBonus", bonus.id, null, bonus);
 
   revalidatePath(`/admin/partite/${parsed.data.matchId}`);
+  revalidateDcupPublicPaths(parsed.data.matchId);
+  revalidateBonusPublicPaths();
   return {};
 }
 
@@ -60,5 +63,7 @@ export async function deleteBonus(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE_BONUS", "PlayerMatchBonus", id, before, null);
 
   revalidatePath(`/admin/partite/${matchId}`);
+  revalidateDcupPublicPaths(matchId);
+  revalidateBonusPublicPaths();
   return {};
 }

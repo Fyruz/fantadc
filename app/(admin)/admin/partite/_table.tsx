@@ -92,12 +92,23 @@ export default function PartiteTable({ rows }: { rows: Row[] }) {
         <>
           {slice.map((row, idx) => {
             const isAnomaly = row.status === "CONCLUDED" && row._count.players === 0;
+            const href = `/admin/partite/${row.id}`;
             return (
               <div
                 key={row.id}
+                role="button"
+                tabIndex={0}
                 className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
                 style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
-                onClick={() => router.push(`/admin/partite/${row.id}`)}
+                onMouseEnter={() => router.prefetch(href)}
+                onFocus={() => router.prefetch(href)}
+                onClick={() => router.push(href)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    router.push(href);
+                  }
+                }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap mb-0.5">

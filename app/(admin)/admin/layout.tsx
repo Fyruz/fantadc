@@ -2,6 +2,8 @@ import { requireAdmin } from "@/lib/session";
 import TopBar from "./_top-bar";
 import BottomNav from "./_bottom-nav";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminAreaLayout({
   children,
 }: {

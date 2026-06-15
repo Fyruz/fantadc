@@ -7,6 +7,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
+import { revalidateBonusPublicPaths } from "./revalidate-public";
 
 const Schema = z.object({
   code: z.string().min(1).toUpperCase().trim(),
@@ -40,6 +41,7 @@ export async function createBonusType(_prev: ActionResult | undefined, formData:
   await logAdminAction(Number(admin.id), "CREATE", "BonusType", bt.id, null, bt);
 
   revalidatePath("/admin/bonus-types");
+  revalidateBonusPublicPaths();
   return {};
 }
 
@@ -67,6 +69,7 @@ export async function updateBonusType(_prev: ActionResult | undefined, formData:
   await logAdminAction(Number(admin.id), "UPDATE", "BonusType", id, before, bt);
 
   revalidatePath("/admin/bonus-types");
+  revalidateBonusPublicPaths();
   return {};
 }
 
@@ -85,5 +88,6 @@ export async function deleteBonusType(_prev: ActionResult | undefined, formData:
   }
 
   revalidatePath("/admin/bonus-types");
+  revalidateBonusPublicPaths();
   return {};
 }

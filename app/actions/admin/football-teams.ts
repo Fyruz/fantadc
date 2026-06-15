@@ -9,6 +9,7 @@ import {
   buildFootballTeamPayload,
   FootballTeamFormSchema,
 } from "@/lib/football-team-form";
+import { revalidateDcupPublicPaths } from "./revalidate-public";
 
 const Schema = FootballTeamFormSchema;
 
@@ -31,6 +32,7 @@ export async function createFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "CREATE", "FootballTeam", team.id, null, team);
 
   revalidatePath("/admin/squadre");
+  revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }
 
@@ -52,6 +54,7 @@ export async function updateFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "UPDATE", "FootballTeam", id, before, team);
 
   revalidatePath("/admin/squadre");
+  revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }
 
@@ -70,5 +73,6 @@ export async function deleteFootballTeam(_prev: ActionResult | undefined, formDa
   }
 
   revalidatePath("/admin/squadre");
+  revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }

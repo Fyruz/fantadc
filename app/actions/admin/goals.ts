@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
+import { revalidateDcupPublicPaths } from "./revalidate-public";
 
 async function syncMatchScore(matchId: number) {
   const match = await db.match.findUnique({
@@ -66,6 +67,7 @@ export async function addGoal(_prev: ActionResult | undefined, formData: FormDat
   await syncMatchScore(parsed.data.matchId);
 
   revalidatePath(`/admin/partite/${parsed.data.matchId}`);
+  revalidateDcupPublicPaths(parsed.data.matchId);
   return {};
 }
 
@@ -82,5 +84,6 @@ export async function deleteGoal(formData: FormData): Promise<ActionResult> {
   await syncMatchScore(matchId);
 
   revalidatePath(`/admin/partite/${matchId}`);
+  revalidateDcupPublicPaths(matchId);
   return {};
 }

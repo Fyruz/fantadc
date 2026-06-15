@@ -25,12 +25,24 @@ export default function GiocatoriTable({ rows }: { rows: Row[] }) {
         <p className="px-4 py-10 text-center over-label">Nessun giocatore.</p>
       ) : (
         <>
-          {slice.map((row, idx) => (
+          {slice.map((row, idx) => {
+            const href = `/admin/giocatori/${row.id}/edit`;
+            return (
             <div
               key={row.id}
+              role="button"
+              tabIndex={0}
               className="flex items-center gap-3 px-4 py-3.5 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
               style={idx < slice.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
-              onClick={() => router.push(`/admin/giocatori/${row.id}/edit`)}
+              onMouseEnter={() => router.prefetch(href)}
+              onFocus={() => router.prefetch(href)}
+              onClick={() => router.push(href)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  router.push(href);
+                }
+              }}
             >
               <RoleBadge role={row.role} />
               <div className="flex-1 min-w-0">
@@ -50,7 +62,8 @@ export default function GiocatoriTable({ rows }: { rows: Row[] }) {
               </div>
               <i className="pi pi-chevron-right text-xs flex-shrink-0" style={{ color: "var(--text-disabled)" }} />
             </div>
-          ))}
+            );
+          })}
           {totalPages > 1 && (
             <div
               className="flex items-center justify-between px-4 py-2.5"

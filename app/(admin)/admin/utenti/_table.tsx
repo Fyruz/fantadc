@@ -18,11 +18,29 @@ function formatDateTime(d: Date | null) {
   return d.toLocaleString("it-IT", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-function UserRow({ row, onClick }: { row: Row; onClick: () => void }) {
+function UserRow({
+  row,
+  onClick,
+  onPrefetch,
+}: {
+  row: Row;
+  onClick: () => void;
+  onPrefetch: () => void;
+}) {
   return (
     <div
+      role="button"
+      tabIndex={0}
       className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
+      onMouseEnter={onPrefetch}
+      onFocus={onPrefetch}
       onClick={onClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
     >
       {/* Avatar monogram */}
       <div
@@ -117,7 +135,11 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
           <div className="flex flex-col divide-y" style={{ borderTop: "1px solid var(--border-soft)" }}>
             {admins.map((u, idx) => (
               <div key={u.id} style={{ borderBottom: idx < admins.length - 1 ? "1px solid var(--border-soft)" : undefined }}>
-                <UserRow row={u} onClick={() => router.push(`/admin/utenti/${u.id}`)} />
+                <UserRow
+                  row={u}
+                  onClick={() => router.push(`/admin/utenti/${u.id}`)}
+                  onPrefetch={() => router.prefetch(`/admin/utenti/${u.id}`)}
+                />
               </div>
             ))}
           </div>
@@ -131,7 +153,11 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
           <div className="flex flex-col">
             {users.map((u, idx) => (
               <div key={u.id} style={{ borderBottom: idx < users.length - 1 ? "1px solid var(--border-soft)" : undefined }}>
-                <UserRow row={u} onClick={() => router.push(`/admin/utenti/${u.id}`)} />
+                <UserRow
+                  row={u}
+                  onClick={() => router.push(`/admin/utenti/${u.id}`)}
+                  onPrefetch={() => router.prefetch(`/admin/utenti/${u.id}`)}
+                />
               </div>
             ))}
           </div>

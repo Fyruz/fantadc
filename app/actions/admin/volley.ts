@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { revalidateVolleyPublicPaths } from "./revalidate-public";
 
 type ActionResult = { error?: string } | undefined;
 
@@ -26,6 +27,7 @@ export async function createVolleyTeam(
   if (!name) return { error: "Nome obbligatorio" };
   await db.volleyTeam.create({ data: { name } });
   revalidatePath("/admin/greenvolley/squadre");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/squadre");
 }
 
@@ -38,12 +40,14 @@ export async function updateVolleyTeam(
   if (!name) return { error: "Nome obbligatorio" };
   await db.volleyTeam.update({ where: { id }, data: { name } });
   revalidatePath("/admin/greenvolley/squadre");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/squadre");
 }
 
 export async function deleteVolleyTeam(id: number): Promise<void> {
   await db.volleyTeam.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/squadre");
+  revalidateVolleyPublicPaths();
 }
 
 // ─── GIOCATORI ────────────────────────────────────────────────────────────────
@@ -58,6 +62,7 @@ export async function createVolleyPlayer(
   if (!teamId) return { error: "Squadra obbligatoria" };
   await db.volleyPlayer.create({ data: { name, teamId } });
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/giocatori");
 }
 
@@ -72,12 +77,14 @@ export async function updateVolleyPlayer(
   if (!teamId) return { error: "Squadra obbligatoria" };
   await db.volleyPlayer.update({ where: { id }, data: { name, teamId } });
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/giocatori");
 }
 
 export async function deleteVolleyPlayer(id: number): Promise<void> {
   await db.volleyPlayer.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
 }
 
 // ─── PARTITE ──────────────────────────────────────────────────────────────────
@@ -105,6 +112,7 @@ export async function createVolleyMatch(
     },
   });
   revalidatePath("/admin/greenvolley/partite");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/partite");
 }
 
@@ -134,28 +142,33 @@ export async function updateVolleyMatch(
   });
   revalidatePath("/admin/greenvolley/partite");
   revalidatePath(`/admin/greenvolley/partite/${id}`);
+  revalidateVolleyPublicPaths(id);
   redirect(`/admin/greenvolley/partite/${id}`);
 }
 
 export async function deleteVolleyMatch(id: number): Promise<void> {
   await db.volleyMatch.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/partite");
+  revalidateVolleyPublicPaths(id);
 }
 
 export async function scheduleVolleyMatch(id: number): Promise<void> {
   await db.volleyMatch.update({ where: { id }, data: { status: "SCHEDULED" } });
   revalidatePath(`/admin/greenvolley/partite/${id}`);
+  revalidateVolleyPublicPaths(id);
 }
 
 export async function concludeVolleyMatch(id: number): Promise<void> {
   await db.volleyMatch.update({ where: { id }, data: { status: "CONCLUDED" } });
   revalidatePath(`/admin/greenvolley/partite/${id}`);
   revalidatePath("/greenvolley/classifica");
+  revalidateVolleyPublicPaths(id);
 }
 
 export async function reopenVolleyMatch(id: number): Promise<void> {
   await db.volleyMatch.update({ where: { id }, data: { status: "SCHEDULED" } });
   revalidatePath(`/admin/greenvolley/partite/${id}`);
+  revalidateVolleyPublicPaths(id);
 }
 
 // ─── SET ──────────────────────────────────────────────────────────────────────
@@ -178,6 +191,7 @@ export async function addVolleySet(
     data: { matchId, setNumber: existing + 1, homePoints, awayPoints },
   });
   revalidatePath(`/admin/greenvolley/partite/${matchId}`);
+  revalidateVolleyPublicPaths(matchId);
 }
 
 export async function updateVolleySet(
@@ -204,6 +218,7 @@ export async function updateVolleySet(
     data: { homePoints, awayPoints },
   });
   revalidatePath(`/admin/greenvolley/partite/${matchId}`);
+  revalidateVolleyPublicPaths(matchId);
 }
 
 export async function deleteVolleySet(setId: number, matchId: number): Promise<void> {
@@ -220,6 +235,7 @@ export async function deleteVolleySet(setId: number, matchId: number): Promise<v
     });
   }
   revalidatePath(`/admin/greenvolley/partite/${matchId}`);
+  revalidateVolleyPublicPaths(matchId);
 }
 
 // ─── GIRONI ───────────────────────────────────────────────────────────────────
@@ -232,12 +248,14 @@ export async function createVolleyGroup(
   if (!name) return { error: "Nome obbligatorio" };
   await db.volleyGroup.create({ data: { name } });
   revalidatePath("/admin/greenvolley/gironi");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/gironi");
 }
 
 export async function deleteVolleyGroup(id: number): Promise<void> {
   await db.volleyGroup.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/gironi");
+  revalidateVolleyPublicPaths();
 }
 
 export async function addTeamToVolleyGroup(
@@ -253,6 +271,7 @@ export async function addTeamToVolleyGroup(
   if (exists) return { error: "Squadra già nel girone" };
   await db.volleyGroupTeam.create({ data: { groupId, teamId } });
   revalidatePath("/admin/greenvolley/gironi");
+  revalidateVolleyPublicPaths();
 }
 
 export async function removeTeamFromVolleyGroup(
@@ -263,6 +282,7 @@ export async function removeTeamFromVolleyGroup(
     where: { groupId_teamId: { groupId, teamId } },
   });
   revalidatePath("/admin/greenvolley/gironi");
+  revalidateVolleyPublicPaths();
 }
 
 export async function setVolleyTeamQualified(
@@ -275,6 +295,7 @@ export async function setVolleyTeamQualified(
     data: { qualified },
   });
   revalidatePath("/admin/greenvolley/gironi");
+  revalidateVolleyPublicPaths();
 }
 
 // ─── KNOCKOUT ─────────────────────────────────────────────────────────────────
@@ -289,12 +310,14 @@ export async function createVolleyKnockoutRound(
   if (!order) return { error: "Ordine obbligatorio" };
   await db.volleyKnockoutRound.create({ data: { name, order } });
   revalidatePath("/admin/greenvolley/eliminazione");
+  revalidateVolleyPublicPaths();
   redirect("/admin/greenvolley/eliminazione");
 }
 
 export async function deleteVolleyKnockoutRound(id: number): Promise<void> {
   await db.volleyKnockoutRound.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/eliminazione");
+  revalidateVolleyPublicPaths();
 }
 
 export async function createVolleyPlayerForTeam(
@@ -307,6 +330,7 @@ export async function createVolleyPlayerForTeam(
   await db.volleyPlayer.create({ data: { name, teamId } });
   revalidatePath(`/admin/greenvolley/squadre/${teamId}/edit`);
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
   return undefined;
 }
 
@@ -316,6 +340,7 @@ export async function removeVolleyPlayerById(playerId: number): Promise<void> {
   await db.volleyPlayer.delete({ where: { id: playerId } });
   revalidatePath(`/admin/greenvolley/squadre/${player.teamId}/edit`);
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
 }
 
 // ─── FORM DELETE VARIANTS (for ConfirmDeleteForm) ─────────────────────────────
@@ -325,6 +350,7 @@ export async function deleteVolleyTeamForm(_prev: unknown, formData: FormData): 
   if (!id) return;
   await db.volleyTeam.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/squadre");
+  revalidateVolleyPublicPaths();
 }
 
 export async function deleteVolleyPlayerForm(_prev: unknown, formData: FormData): Promise<void> {
@@ -332,6 +358,7 @@ export async function deleteVolleyPlayerForm(_prev: unknown, formData: FormData)
   if (!id) return;
   await db.volleyPlayer.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/giocatori");
+  revalidateVolleyPublicPaths();
 }
 
 export async function deleteVolleyMatchForm(_prev: unknown, formData: FormData): Promise<void> {
@@ -339,4 +366,5 @@ export async function deleteVolleyMatchForm(_prev: unknown, formData: FormData):
   if (!id) return;
   await db.volleyMatch.delete({ where: { id } });
   revalidatePath("/admin/greenvolley/partite");
+  revalidateVolleyPublicPaths(id);
 }

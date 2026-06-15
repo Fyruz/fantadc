@@ -370,8 +370,12 @@ export default async function HomePage({
             >
               <div className="flex justify-center overflow-hidden" style={{ height: 144 }}>
                 <img
-                  src="/images/fantasy-football-shirt.png"
+                  src="/images/fantasy-football-shirt.webp"
                   alt="Fanta"
+                  width={648}
+                  height={432}
+                  loading="lazy"
+                  decoding="async"
                   className="h-full object-contain"
                 />
               </div>

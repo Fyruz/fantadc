@@ -6,7 +6,12 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect, useTransition } from "react";
 import { Button } from "primereact/button";
 import { logout } from "@/app/actions/auth";
-import type { SessionUser } from "@/lib/session";
+
+type PublicNavUser = {
+  email: string;
+  name?: string | null;
+  role?: "USER" | "ADMIN";
+};
 
 const GV = "#0E3D2B";                          // accento brand lime (switcher + logo)
 const GV_PRIMARY = "#0E3D2B";                  // verde profondo: stati attivi nav volley
@@ -42,14 +47,56 @@ const GV_LINKS = [
   { href: "/greenvolley/squadre",      label: "Squadre",     exact: false },
 ];
 
-export default function PublicNavClient({ user }: { user: SessionUser | null }) {
+export default function PublicNavClient() {
   const pathname = usePathname();
+  const [user, setUser] = useState<PublicNavUser | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
   const avatarRef = useRef<HTMLDivElement>(null);
   const [logoutPending, startTransition] = useTransition();
   const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/auth/session", {
+          cache: "no-store",
+          credentials: "same-origin",
+          signal: controller.signal,
+        });
+        if (!response.ok) throw new Error("Session request failed");
+
+        const session = await response.json() as {
+          user?: {
+            email?: string | null;
+            name?: string | null;
+            role?: "USER" | "ADMIN";
+          } | null;
+        };
+        const sessionUser = session.user;
+        setUser(
+          sessionUser?.email
+            ? {
+                email: sessionUser.email,
+                name: sessionUser.name,
+                role: sessionUser.role ?? "USER",
+              }
+            : null
+        );
+      } catch {
+        if (!controller.signal.aborted) setUser(null);
+      } finally {
+        if (!controller.signal.aborted) setSessionLoading(false);
+      }
+    }
+
+    loadSession();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 0);
@@ -375,6 +422,21 @@ export default function PublicNavClient({ user }: { user: SessionUser | null }) 
                 </div>
               )}
             </div>
+          ) : sessionLoading ? (
+            <>
+              <Link
+                href={isGV ? "/profilo?from=greenvolley" : "/profilo"}
+                className="md:hidden w-9 h-9 flex items-center justify-center transition-opacity hover:opacity-70"
+                aria-label="Profilo"
+              >
+                <img src="/icons/profile_circle.svg" width={36} height={36} alt="Profilo" />
+              </Link>
+              <div
+                className="hidden md:block h-9 w-28 rounded-full animate-pulse"
+                style={{ background: "var(--surface-1)" }}
+                aria-hidden="true"
+              />
+            </>
           ) : (
             <>
               <Link

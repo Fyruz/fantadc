@@ -3,6 +3,7 @@ import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function VolleyClassificaPage() {
   const groups = await db.volleyGroup.findMany({

@@ -19,6 +19,6 @@ export const CUSTOM_COUNTRIES: CustomCountry[] = [
   {
     name: "Paesi Baschi",
     code: "EUS",
-    flagUrl: "/flags/basque_country.svg",
+    flagUrl: "/flags/paesi_baschi.svg",
   },
 ];

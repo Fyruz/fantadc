@@ -2,8 +2,9 @@ import BackButton from "@/components/back-button";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import PlayersGrid from "./_players-grid";
-export const dynamic = 'force-dynamic'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 60;
 
 export default async function GiocatoriPublicPage() {
   const [players, appearances, goals, bonuses] = await Promise.all([

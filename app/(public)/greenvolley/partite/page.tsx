@@ -3,6 +3,7 @@ import { computeVolleyStandings } from "@/lib/volley/standings";
 import VolleyPartiteClient from "./_partite-client";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function VolleyPartitePublicPage() {
   const [matchesRaw, groupsRaw] = await Promise.all([

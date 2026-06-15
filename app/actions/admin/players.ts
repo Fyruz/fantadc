@@ -8,6 +8,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import type { ActionResult } from "./football-teams";
+import { revalidateDcupPublicPaths } from "./revalidate-public";
 
 const Schema = z.object({
   name: z.string().min(1, "Nome obbligatorio").trim(),
@@ -63,6 +64,7 @@ export async function createPlayer(_prev: ActionResult | undefined, formData: Fo
   await logAdminAction(Number(admin.id), "CREATE", "Player", player.id, null, player);
 
   revalidatePath("/admin/giocatori");
+  revalidateDcupPublicPaths();
   redirect("/admin/giocatori");
 }
 
@@ -83,6 +85,7 @@ export async function updatePlayer(_prev: ActionResult | undefined, formData: Fo
   await logAdminAction(Number(admin.id), "UPDATE", "Player", id, before, player);
 
   revalidatePath("/admin/giocatori");
+  revalidateDcupPublicPaths();
   redirect("/admin/giocatori");
 }
 
@@ -104,6 +107,7 @@ export async function deletePlayer(_prev: ActionResult | undefined, formData: Fo
   await logAdminAction(Number(admin.id), "DELETE", "Player", id, before, null);
 
   revalidatePath("/admin/giocatori");
+  revalidateDcupPublicPaths();
   redirect("/admin/giocatori");
 }
 
@@ -135,5 +139,6 @@ export async function removePlayerFromFootballTeam(
   revalidatePath("/admin/squadre");
   revalidatePath(`/admin/squadre/${footballTeamId}/edit`);
   revalidatePath("/admin/giocatori");
+  revalidateDcupPublicPaths();
   redirect(`/admin/squadre/${footballTeamId}/edit`);
 }

@@ -3,6 +3,7 @@ import { siteConfig } from "@/lib/site";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 const CARD: React.CSSProperties = {
   border: "1px solid rgba(9,20,76,0.05)",
@@ -19,7 +20,7 @@ function LockedCard() {
       className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-center gap-4 p-5"
       style={CARD}
     >
-      <img src="/icons/bonus/secret-bonus.svg" alt="" width={64} style={{ height: "auto" }} />
+      <img src="/icons/bonus/secret-bonus.webp" alt="" width={64} height={64} loading="lazy" decoding="async" style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-medium text-sm" style={{ color: "var(--color-text-primary)" }}>???</p>
         <p className="font-semibold text-sm leading-normal" style={{ color: "rgba(0,0,0,0.4)" }}>? pt</p>
@@ -35,7 +36,7 @@ function RevealedCard({ name, points }: { name: string; points: number }) {
       className="bg-white rounded-3xl overflow-hidden flex flex-col items-center justify-start gap-4 py-5 px-4"
       style={CARD}
     >
-      <img src="/icons/bonus/secret-bonus-unlocked.svg" alt="" width={64} style={{ height: "auto" }} />
+      <img src="/icons/bonus/secret-bonus-unlocked.webp" alt="" width={64} height={64} loading="lazy" decoding="async" style={{ height: "auto" }} />
       <div className="flex flex-col items-center gap-2 text-center">
         <p className="font-medium text-xs" style={{ color: "var(--color-text-primary)" }}>{name}</p>
         <p className="font-semibold text-sm leading-normal" style={{ color: positive ? "#065F46" : "#991B1B" }}>

@@ -5,6 +5,7 @@ import PageHeader from "@/components/page-header";
 import GroupStandingCard from "@/components/group-standing-card";
 
 export const dynamic = 'force-dynamic'
+export const revalidate = 60;
 
 export default async function GironiPublicPage() {
   const groups = await db.group.findMany({
