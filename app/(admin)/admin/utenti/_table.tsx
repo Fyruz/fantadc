@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Accordion, AccordionTab } from "primereact/accordion";
 
 type Row = {
@@ -20,27 +20,15 @@ function formatDateTime(d: Date | null) {
 
 function UserRow({
   row,
-  onClick,
-  onPrefetch,
+  href,
 }: {
   row: Row;
-  onClick: () => void;
-  onPrefetch: () => void;
+  href: string;
 }) {
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <Link
+      href={href}
       className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--surface-1)] transition-colors cursor-pointer"
-      onMouseEnter={onPrefetch}
-      onFocus={onPrefetch}
-      onClick={onClick}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          onClick();
-        }
-      }}
     >
       {/* Avatar monogram */}
       <div
@@ -89,13 +77,11 @@ function UserRow({
         )}
         <i className="pi pi-chevron-right text-xs" style={{ color: "var(--text-disabled)" }} />
       </div>
-    </div>
+    </Link>
   );
 }
 
 export default function UtentiTable({ admins, users }: { admins: Row[]; users: Row[] }) {
-  const router = useRouter();
-
   const adminHeader = (
     <div className="flex items-center gap-2">
       <i className="pi pi-shield text-sm" style={{ color: "#92400E" }} />
@@ -137,8 +123,7 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
               <div key={u.id} style={{ borderBottom: idx < admins.length - 1 ? "1px solid var(--border-soft)" : undefined }}>
                 <UserRow
                   row={u}
-                  onClick={() => router.push(`/admin/utenti/${u.id}`)}
-                  onPrefetch={() => router.prefetch(`/admin/utenti/${u.id}`)}
+                  href={`/admin/utenti/${u.id}`}
                 />
               </div>
             ))}
@@ -155,8 +140,7 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
               <div key={u.id} style={{ borderBottom: idx < users.length - 1 ? "1px solid var(--border-soft)" : undefined }}>
                 <UserRow
                   row={u}
-                  onClick={() => router.push(`/admin/utenti/${u.id}`)}
-                  onPrefetch={() => router.prefetch(`/admin/utenti/${u.id}`)}
+                  href={`/admin/utenti/${u.id}`}
                 />
               </div>
             ))}
