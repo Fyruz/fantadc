@@ -52,7 +52,7 @@ export function cachePublicData<T extends AsyncDataLoader>(
 }
 
 export function revivePublicDates<T>(value: T): T {
-  return reviveDateFields(value, new Set(["startsAt", "concludedAt", "date"]));
+  return reviveDateFields(value, new Set(["startsAt", "concludedAt", "date", "lastClosedAt"]));
 }
 
 function reviveDateFields<T>(value: T, dateKeys: Set<string>): T {

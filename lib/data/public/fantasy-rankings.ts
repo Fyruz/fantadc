@@ -5,6 +5,7 @@ import {
   computeCurrentPhaseRankings,
   computePhaseRankings,
   computeTeamHistory,
+  getLastClosedAt,
   getTeamPhaseBreakdown,
   type RankEntry,
 } from "@/lib/scoring";
@@ -43,6 +44,7 @@ export type PublicFantasyTeamDetail = {
   };
   history: Awaited<ReturnType<typeof computeTeamHistory>>;
   totalPoints: number;
+  lastClosedAt: Date | null;
 };
 
 export const getPublicFantasyRankingPageData = cachePublicData(
@@ -108,9 +110,10 @@ export const getPublicFantasyTeamDetail = cachePublicData(
 
     if (!team) return null;
 
-    const [history, phaseBreakdown] = await Promise.all([
+    const [history, phaseBreakdown, lastClosedAt] = await Promise.all([
       computeTeamHistory(teamId),
       getTeamPhaseBreakdown(teamId),
+      getLastClosedAt(),
     ]);
     const totalPoints = phaseBreakdown.reduce((sum, phase) => sum + phase.points, 0);
 
@@ -124,6 +127,7 @@ export const getPublicFantasyTeamDetail = cachePublicData(
       },
       history,
       totalPoints,
+      lastClosedAt,
     };
   },
   ["data.public.fantasy-rankings.team-detail"],
