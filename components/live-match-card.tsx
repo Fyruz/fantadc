@@ -73,11 +73,11 @@ export default function LiveMatchCard({ match: m }: Props) {
       >
         {/* Top row: LIVE · score · clock */}
         <div
-          className="flex items-center gap-4 px-3.5 py-2.5 rounded-2xl"
+          className="flex items-center gap-2 sm:gap-4 px-3.5 py-2.5 rounded-2xl"
           style={{ background: "#0f195a", border: "1px solid rgba(255,255,255,0.07)" }}
         >
           {/* Live badge */}
-          <div className="flex flex-1 items-center gap-2">
+          <div className="flex flex-1 items-center gap-2 min-w-0">
             <span className="relative flex h-2.5 w-2.5 shrink-0">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
               <span
@@ -85,16 +85,16 @@ export default function LiveMatchCard({ match: m }: Props) {
                 style={{ boxShadow: "0 0 10px 0 rgba(255,31,31,0.4)" }}
               />
             </span>
-            <span className="text-xs font-extrabold text-[#ff1f1f] uppercase tracking-wide">LIVE</span>
+            <span className="text-xs font-extrabold text-[#ff1f1f] uppercase tracking-wide truncate">LIVE</span>
           </div>
 
           {/* Score */}
-          <span className="flex-1 text-center text-4xl font-black text-white tabular-nums">
+          <span className="shrink-0 text-center text-4xl font-black text-white tabular-nums whitespace-nowrap">
             {homeScore} - {awayScore}
           </span>
 
           {/* Clock */}
-          <div className="flex flex-1 justify-end">
+          <div className="flex flex-1 justify-end shrink-0">
             <i className="pi pi-clock" style={{ fontSize: 16, color: "rgba(255,255,255,0.4)" }} />
           </div>
         </div>
