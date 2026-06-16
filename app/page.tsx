@@ -42,9 +42,9 @@ export default async function HomePage({
 
   const matchClockNow = getMatchClockNow();
 
-  const [liveMatch, upcomingMatches, groups, topScorers] = await Promise.all([
-    // Partita in diretta: programmata e iniziata negli ultimi 120 minuti.
-    db.match.findFirst({
+  const [liveMatches, upcomingMatches, groups, topScorers] = await Promise.all([
+    // Partite in diretta: programmate e iniziate negli ultimi 120 minuti (possono essere più di una in contemporanea).
+    db.match.findMany({
       where: {
         status: "SCHEDULED",
         startsAt: {
@@ -246,16 +246,31 @@ export default async function HomePage({
           {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
           <MvpVoteHintCard />
 
-          {/* ══ PARTITA LIVE ══════════════════════════════════════════ */}
-          {liveMatch && liveMatch.homeTeam && liveMatch.awayTeam && (
-            <section className="max-w-lg mx-auto w-full px-4 my-10">
-              <LiveMatchCard match={{
-                ...liveMatch,
-                homeTeam: liveMatch.homeTeam,
-                awayTeam: liveMatch.awayTeam,
-              }} />
-            </section>
-          )}
+          {/* ══ PARTITE LIVE ══════════════════════════════════════════ */}
+          {(() => {
+            const liveMatchesWithTeams = liveMatches.filter((m) => m.homeTeam && m.awayTeam);
+            if (liveMatchesWithTeams.length === 0) return null;
+            return (
+              <section className="max-w-lg mx-auto w-full px-4 my-10 flex flex-col gap-6">
+                <h2
+                  className="uppercase font-medium"
+                  style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+                >
+                  {liveMatchesWithTeams.length > 1 ? "Partite in diretta" : "Partita in diretta"}
+                </h2>
+                {liveMatchesWithTeams.map((m) => (
+                  <LiveMatchCard
+                    key={m.id}
+                    match={{
+                      ...m,
+                      homeTeam: m.homeTeam!,
+                      awayTeam: m.awayTeam!,
+                    }}
+                  />
+                ))}
+              </section>
+            );
+          })()}
 
           {/* ══ PROSSIME PARTITE ══════════════════════════════════════ */}
           {upcomingMatches.length > 0 && (

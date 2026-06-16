@@ -35,13 +35,11 @@ export default function EditVolleyMatchForm({
   const [groupId, setGroupId] = useState<number | null>(match.groupId);
   const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(match.knockoutRoundId);
   const [date, setDate] = useState<Date | null>(() => match.date ? new Date(match.date) : null);
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(max-width: 768px)").matches;
-  });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
     const handler = (event: MediaQueryListEvent) => setIsMobile(event.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);

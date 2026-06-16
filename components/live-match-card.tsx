@@ -54,14 +54,6 @@ export default function LiveMatchCard({ match: m }: Props) {
   const awayScore = m.awayScore ?? 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      <h2
-        className="uppercase font-medium"
-        style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
-      >
-        Partita in diretta
-      </h2>
-
       <Link
         href={`/partite/${m.id}`}
         className="flex flex-col gap-4 rounded-3xl p-6 w-full"
@@ -126,6 +118,5 @@ export default function LiveMatchCard({ match: m }: Props) {
           </div>
         </div>
       </Link>
-    </div>
   );
 }

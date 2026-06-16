@@ -86,16 +86,11 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
   const [shareVisible, setShareVisible] = useState(false);
   const [rulesVisible, setRulesVisible] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") {
-      return false;
-    }
-
-    return window.matchMedia("(max-width: 1023px)").matches;
-  });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
+    setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);

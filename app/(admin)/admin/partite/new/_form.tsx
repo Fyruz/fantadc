@@ -54,10 +54,7 @@ export default function NuovaPartitaForm({
   const [status, setStatus]         = useState<string>("DRAFT");
   const [date, setDate]             = useState<Date | null>(() => startOfToday());
   const [time, setTime]             = useState<Date | null>(() => roundedCurrentTime());
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(max-width: 768px)").matches;
-  });
+  const [isMobile, setIsMobile] = useState(false);
   const [phase, setPhase] = useState<string>(
     defaultGroupId ? "group" : defaultKnockoutRoundId ? "knockout" : ""
   );
@@ -68,6 +65,7 @@ export default function NuovaPartitaForm({
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);

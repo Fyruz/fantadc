@@ -36,13 +36,11 @@ export default function NewVolleyMatchForm({
   const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(null);
   const [date, setDate] = useState<Date | null>(() => roundedCurrentTime());
   const minDate = startOfToday();
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(max-width: 768px)").matches;
-  });
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
+    setIsMobile(mq.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
