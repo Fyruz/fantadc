@@ -30,6 +30,7 @@ const DCUP_MORE = [
   { href: "/admin/modifiche-rosa",  label: "Modifiche rosa",icon: "pi-pencil"   },
   { href: "/admin/fasi-punteggio",  label: "Fasi punteggio",icon: "pi-flag"     },
   { href: "/admin/audit",           label: "Audit log",     icon: "pi-history"  },
+  { href: "/admin/impostazioni",    label: "Impostazioni",  icon: "pi-sliders-h"},
 ];
 
 const GV_MORE = [

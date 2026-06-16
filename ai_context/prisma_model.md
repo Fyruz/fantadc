@@ -264,6 +264,12 @@ model AdminAuditLog {
   @@index([entityType, entityId])
 }
 
+// Impostazioni singleton dell'app (id=1 fisso, upsert).
+model AppSetting {
+  id               Int     @id
+  registrationOpen Boolean @default(true)
+}
+
 enum UserRole {
   USER
   ADMIN

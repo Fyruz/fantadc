@@ -56,6 +56,9 @@ function UserRow({
           {row.name && (
             <span className="text-xs" style={{ color: "var(--text-muted)" }}>{row.name}</span>
           )}
+          <span className="text-[11px]" style={{ color: "var(--text-disabled)" }}>
+            · registrato {formatDateTime(row.createdAt)}
+          </span>
           {row.lastLoginAt ? (
             <span className="text-[11px]" style={{ color: "var(--text-disabled)" }}>
               · accesso {formatDateTime(row.lastLoginAt)}

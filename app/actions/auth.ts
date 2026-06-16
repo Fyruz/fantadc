@@ -12,6 +12,7 @@ import {
   sanitizeNextPath,
 } from "@/lib/post-auth";
 import { RegisterSchema, LoginSchema } from "@/lib/auth-schemas";
+import { getRegistrationOpen } from "@/lib/app-settings";
 
 export type AuthActionResult = {
   errors?: Record<string, string[]>;
@@ -24,6 +25,11 @@ export async function register(
   _prev: AuthActionResult | undefined,
   formData: FormData
 ): Promise<AuthActionResult> {
+  const registrationOpen = await getRegistrationOpen();
+  if (!registrationOpen) {
+    return { message: "Le registrazioni sono attualmente chiuse." };
+  }
+
   const parsed = RegisterSchema.safeParse({
     name: formData.get("name") ?? "",
     email: formData.get("email") ?? "",
