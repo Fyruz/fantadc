@@ -26,7 +26,15 @@ export default async function SquadraFantasyPublicPage({
   const detail = await getPublicFantasyTeamDetail(teamId);
   if (!detail) notFound();
 
-  const { team, history, totalPoints } = detail;
+  const { team, history, totalPoints, lastClosedAt } = detail;
+
+  const currentPhasePlayerTotals = new Map<number, number>();
+  for (const ms of history) {
+    if (lastClosedAt && ms.concludedAt && ms.concludedAt < lastClosedAt) continue;
+    for (const ps of ms.playerScores) {
+      currentPhasePlayerTotals.set(ps.playerId, (currentPhasePlayerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
@@ -102,6 +110,19 @@ export default async function SquadraFantasyPublicPage({
                   CAP
                 </span>
               )}
+
+              {/* Current phase points */}
+              {history.length > 0 && (() => {
+                const pts = currentPhasePlayerTotals.get(player.id) ?? 0;
+                return (
+                  <span
+                    className="text-sm font-semibold shrink-0 tabular-nums"
+                    style={{ color: pts > 0 ? "var(--primary)" : "rgba(0,0,0,0.35)" }}
+                  >
+                    {pts.toFixed(1)}
+                  </span>
+                );
+              })()}
             </div>
           );
         })}
@@ -147,22 +168,51 @@ export default async function SquadraFantasyPublicPage({
                   {match.playerScores.map((ps) => (
                     <div
                       key={ps.playerId}
-                      className="flex items-center justify-between py-2"
+                      className="flex items-start justify-between py-2"
                       style={{ borderBottom: "1px solid rgba(9,20,76,0.04)" }}
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        {ps.isCaptain && (
-                          <span className="text-[10px] font-semibold shrink-0" style={{ color: "#C48A00" }}>CAP</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {ps.isCaptain && (
+                            <span className="text-[10px] font-semibold shrink-0" style={{ color: "#C48A00" }}>CAP</span>
+                          )}
+                          {ps.isMvp && (
+                            <span className="text-[10px] font-semibold shrink-0" style={{ color: "#E8A000" }}>MVP</span>
+                          )}
+                          <span className="text-sm text-black truncate">{ps.playerName}</span>
+                          <span className="text-xs shrink-0" style={{ color: "rgba(0,0,0,0.45)" }}>
+                            {ps.footballTeamName}
+                          </span>
+                        </div>
+                        {(ps.bonusDetails.length > 0 || (ps.isMvp && ps.mvpPoints > 0)) && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {ps.isMvp && ps.mvpPoints > 0 && (
+                              <span
+                                className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                                style={{ borderColor: "rgba(232,160,0,0.45)", color: "#C48A00" }}
+                              >
+                                MVP
+                                <span className="ml-1">+{ps.mvpPoints.toFixed(1)}</span>
+                              </span>
+                            )}
+                            {ps.bonusDetails.map((bonus) => (
+                              <span
+                                key={bonus.code}
+                                className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                                style={{ borderColor: "rgba(9,20,76,0.12)", color: "rgba(0,0,0,0.55)" }}
+                                title={bonus.name}
+                              >
+                                {bonus.code}
+                                {bonus.quantity > 1 ? ` ×${bonus.quantity}` : ""}
+                                <span className="ml-1">
+                                  {bonus.points > 0 ? "+" : ""}{bonus.points.toFixed(1)}
+                                </span>
+                              </span>
+                            ))}
+                          </div>
                         )}
-                        {ps.isMvp && (
-                          <span className="text-[10px] font-semibold shrink-0" style={{ color: "#E8A000" }}>MVP</span>
-                        )}
-                        <span className="text-sm text-black truncate">{ps.playerName}</span>
-                        <span className="text-xs shrink-0" style={{ color: "rgba(0,0,0,0.45)" }}>
-                          {ps.footballTeamName}
-                        </span>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 ml-3">
+                      <div className="flex items-center gap-1.5 shrink-0 ml-3 pt-0.5">
                         {ps.isCaptain && ps.basePoints > 0 && (
                           <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>×2</span>
                         )}
