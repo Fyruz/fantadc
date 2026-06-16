@@ -8,6 +8,7 @@ import {
   findRosterWindow,
   rankFromPoints,
   teamPointsFromPlayerTotals,
+  teamPointsWithStartDate,
   type FantasyTeamMeta,
 } from "./scoring";
 
@@ -316,6 +317,54 @@ describe("buildPhaseRosterWindows", () => {
       [closed1, closed2],
       [closed2, null],
     ]);
+  });
+});
+
+describe("teamPointsWithStartDate", () => {
+  const makeTeam = (createdAt: Date) => ({
+    createdAt,
+    captainPlayerId: 1,
+    players: [1, 2, 3].map((playerId) => ({ playerId })),
+  });
+
+  const makeContrib = (concludedAt: Date | null, pid1: number, pts1: number) => ({
+    concludedAt,
+    points: new Map<number, number>([[pid1, pts1]]),
+  });
+
+  it("conta tutte le partite se la squadra è creata prima di tutte", () => {
+    const createdAt = new Date("2026-01-01T00:00:00Z");
+    const match1 = makeContrib(new Date("2026-01-10T00:00:00Z"), 1, 5);
+    const match2 = makeContrib(new Date("2026-01-20T00:00:00Z"), 2, 3);
+    // team: captain=1 (doubles), players [1,2,3]
+    // totals: p1=5, p2=3
+    // rosterTotal(5+3+0)=8; captainExtra(5)=5 → total 13
+    expect(teamPointsWithStartDate(makeTeam(createdAt), [match1, match2])).toBe(13);
+  });
+
+  it("esclude le partite con concludedAt < createdAt", () => {
+    const createdAt = new Date("2026-01-15T00:00:00Z");
+    const before = makeContrib(new Date("2026-01-10T00:00:00Z"), 1, 10);
+    const after = makeContrib(new Date("2026-01-20T00:00:00Z"), 2, 4);
+    // only 'after' counts: p2=4, p1=0
+    // rosterTotal(0+4+0)=4; captainExtra(0)=0 → total 4
+    expect(teamPointsWithStartDate(makeTeam(createdAt), [before, after])).toBe(4);
+  });
+
+  it("include la partita con concludedAt == createdAt (confine incluso)", () => {
+    const createdAt = new Date("2026-01-15T00:00:00Z");
+    const exact = makeContrib(createdAt, 1, 7);
+    // p1=7, captain doubles → rosterTotal(7+0+0)=7; captainExtra=7 → total 14
+    expect(teamPointsWithStartDate(makeTeam(createdAt), [exact])).toBe(14);
+  });
+
+  it("raddoppia il capitano solo sulle partite conteggiate", () => {
+    const createdAt = new Date("2026-01-15T00:00:00Z");
+    const before = makeContrib(new Date("2026-01-10T00:00:00Z"), 1, 100); // captain scores 100 before registration
+    const after = makeContrib(new Date("2026-01-20T00:00:00Z"), 1, 3);   // captain scores 3 after
+    // only 'after' counts: p1=3
+    // rosterTotal(3+0+0)=3; captainExtra(3)=3 → total 6
+    expect(teamPointsWithStartDate(makeTeam(createdAt), [before, after])).toBe(6);
   });
 });
 

@@ -30,6 +30,7 @@ export type MatchScore = {
   concludedAt: Date | null;
   playerScores: PlayerMatchScore[];
   total: number;
+  beforeRegistration: boolean; // true se la partita è stata conclusa prima della creazione della squadra
 };
 
 export type RankEntry = {
@@ -118,6 +119,22 @@ export function teamPointsFromPlayerTotals(
   return rosterTotal + captainTotal;
 }
 
+/**
+ * Punti di una squadra contando solo le partite concluse dalla sua createdAt in poi.
+ * Le partite con concludedAt < team.createdAt vengono ignorate.
+ */
+export function teamPointsWithStartDate(
+  team: { createdAt: Date; captainPlayerId: number; players: { playerId: number }[] },
+  matchContribs: Array<{ concludedAt: Date | null; points: Map<number, number> }>
+): number {
+  const totals = new Map<number, number>();
+  for (const m of matchContribs) {
+    if (m.concludedAt && m.concludedAt < team.createdAt) continue;
+    for (const [pid, pts] of m.points) totals.set(pid, (totals.get(pid) ?? 0) + pts);
+  }
+  return teamPointsFromPlayerTotals(team, totals);
+}
+
 /** Somma i punti delle fasi congelate (una riga per fase/squadra) con la fase in corso. */
 export function combinePhasePoints(
   frozen: Array<{ fantasyTeamId: number; points: number }>,
@@ -169,16 +186,20 @@ export async function computeFantasyTeamPoints(opts?: {
         },
       }),
       db.fantasyTeam.findMany({
-        select: { id: true, captainPlayerId: true, players: { select: { playerId: true } } },
+        select: { id: true, createdAt: true, captainPlayerId: true, players: { select: { playerId: true } } },
       }),
       getMvpBonus(),
     ]);
 
-    const playerTotals = accumulatePlayerTotals(matches, mvpBonus);
+    // Build per-match contribution maps so each team can filter by its own createdAt
+    const matchContribs = matches.map((m) => ({
+      concludedAt: m.concludedAt,
+      points: accumulatePlayerTotals([m], mvpBonus),
+    }));
 
     const result = new Map<number, number>();
     for (const ft of fantasyTeams) {
-      result.set(ft.id, teamPointsFromPlayerTotals(ft, playerTotals));
+      result.set(ft.id, teamPointsWithStartDate(ft, matchContribs));
     }
     return result;
   });
@@ -376,6 +397,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
     db.fantasyTeam.findUnique({
       where: { id: fantasyTeamId },
       select: {
+        createdAt: true,
         captainPlayerId: true,
         players: { select: { playerId: true } },
       },
@@ -467,6 +489,8 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
     const playedPlayerIds = new Set(match.players.map((p) => p.playerId));
     const window = findRosterWindow(windows, match.concludedAt);
 
+    const beforeRegistration = !!match.concludedAt && match.concludedAt < ft.createdAt;
+
     const playerScores: PlayerMatchScore[] = window.rosterPlayerIds.map((playerId) => {
       const meta = playerMetaById.get(playerId);
       const played = playedPlayerIds.has(playerId);
@@ -497,7 +521,8 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       const totalPoints = playerPoints.get(playerId) ?? 0;
       const mvpPoints = isMvp ? mvpBonus : 0;
       const isCaptain = window.captainPlayerId === playerId;
-      const finalPoints = totalPoints * (isCaptain ? 2 : 1);
+      // Se la partita è precedente all'iscrizione, azzera i punti finali
+      const finalPoints = beforeRegistration ? 0 : totalPoints * (isCaptain ? 2 : 1);
       return {
         playerId,
         playerName: meta?.name ?? "?",
@@ -521,6 +546,12 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       concludedAt: match.concludedAt,
       playerScores,
       total: playerScores.reduce((s, p) => s + p.finalPoints, 0),
+      beforeRegistration,
     };
   });
+}
+
+/** Restituisce true se esiste almeno una partita conclusa nel sistema. */
+export async function hasConcludedMatches(): Promise<boolean> {
+  return (await db.match.count({ where: { status: MatchStatus.CONCLUDED } })) > 0;
 }
