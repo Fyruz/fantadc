@@ -1,7 +1,6 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
 import {
   computeCumulativeRankings,
   computeCurrentPhaseRankings,
@@ -10,6 +9,7 @@ import {
   getTeamPhaseBreakdown,
   type RankEntry,
 } from "@/lib/scoring";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS, revivePublicDates } from "./cache";
 
 export type PublicFantasyRankingPhase = {
   id: number;
@@ -45,10 +45,9 @@ export type PublicFantasyTeamDetail = {
   totalPoints: number;
 };
 
-export async function getPublicFantasyRankingPageData(
-  selected: string
-): Promise<PublicFantasyRankingPageData> {
-  return measureServerTiming("data.public.fantasy-rankings.page.fetch", async () => {
+export const getPublicFantasyRankingPageData = cachePublicData(
+  "data.public.fantasy-rankings.page.fetch",
+  async (selected: string): Promise<PublicFantasyRankingPageData> => {
     const phases = await db.scoringPhase.findMany({
       orderBy: { order: "asc" },
       select: { id: true, name: true },
@@ -64,17 +63,27 @@ export async function getPublicFantasyRankingPageData(
     }
 
     return { phases, rankings };
-  });
-}
+  },
+  ["data.public.fantasy-rankings.page"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.fantasy, PUBLIC_CACHE_TAGS.fantasyRankings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicFantasyTeamRankings(): Promise<RankEntry[]> {
-  return measureServerTiming("data.public.fantasy-rankings.teams.fetch", () =>
-    computeCumulativeRankings()
-  );
-}
+export const getPublicFantasyTeamRankings = cachePublicData(
+  "data.public.fantasy-rankings.teams.fetch",
+  async (): Promise<RankEntry[]> => computeCumulativeRankings(),
+  ["data.public.fantasy-rankings.teams"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.fantasy, PUBLIC_CACHE_TAGS.fantasyRankings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicFantasyTeamDetail(teamId: number): Promise<PublicFantasyTeamDetail | null> {
-  return measureServerTiming("data.public.fantasy-rankings.team-detail.fetch", async () => {
+export const getPublicFantasyTeamDetail = cachePublicData(
+  "data.public.fantasy-rankings.team-detail.fetch",
+  async (teamId: number): Promise<PublicFantasyTeamDetail | null> => {
     const team = await db.fantasyTeam.findUnique({
       where: { id: teamId },
       select: {
@@ -116,5 +125,11 @@ export async function getPublicFantasyTeamDetail(teamId: number): Promise<Public
       history,
       totalPoints,
     };
-  });
-}
+  },
+  ["data.public.fantasy-rankings.team-detail"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.fantasy, PUBLIC_CACHE_TAGS.fantasyRankings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);

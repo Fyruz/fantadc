@@ -1,9 +1,9 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
 import { buildGroupStandings, type GroupStandingRow } from "@/lib/standings";
 import type { PublicMatchRow } from "./matches";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS, revivePublicDates } from "./cache";
 
 export type PublicFootballTeamSummary = {
   id: number;
@@ -27,17 +27,22 @@ export type PublicFootballTeamDetail = {
   } | null;
 };
 
-export async function getPublicFootballTeams(): Promise<PublicFootballTeamSummary[]> {
-  return measureServerTiming("data.public.teams.index.fetch", () =>
-    db.footballTeam.findMany({
+export const getPublicFootballTeams = cachePublicData(
+  "data.public.teams.index.fetch",
+  async (): Promise<PublicFootballTeamSummary[]> => db.footballTeam.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
-    })
-  );
-}
+    }),
+  ["data.public.teams.index"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupTeams],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.stable,
+  }
+);
 
-export async function getPublicFootballTeamDetail(teamId: number): Promise<PublicFootballTeamDetail | null> {
-  return measureServerTiming("data.public.teams.detail.fetch", async () => {
+export const getPublicFootballTeamDetail = cachePublicData(
+  "data.public.teams.detail.fetch",
+  async (teamId: number): Promise<PublicFootballTeamDetail | null> => {
     const [team, nextMatch, teamGroup, scorerGroups, teamMatches] = await Promise.all([
       db.footballTeam.findUnique({
         where: { id: teamId },
@@ -150,5 +155,17 @@ export async function getPublicFootballTeamDetail(teamId: number): Promise<Publi
           }
         : null,
     };
-  });
-}
+  },
+  ["data.public.teams.detail"],
+  {
+    tags: [
+      PUBLIC_CACHE_TAGS.dcup,
+      PUBLIC_CACHE_TAGS.dcupMatches,
+      PUBLIC_CACHE_TAGS.dcupScorers,
+      PUBLIC_CACHE_TAGS.dcupStandings,
+      PUBLIC_CACHE_TAGS.dcupTeams,
+    ],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);

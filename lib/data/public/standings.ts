@@ -1,8 +1,8 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
 import { buildGroupStandings, computeStandings, type GroupStandingRow, type StandingEntry } from "@/lib/standings";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS } from "./cache";
 
 export type PublicGroupStanding = {
   id: number;
@@ -11,14 +11,19 @@ export type PublicGroupStanding = {
   rows: GroupStandingRow[];
 };
 
-export async function getPublicTournamentStandings(): Promise<StandingEntry[]> {
-  return measureServerTiming("data.public.standings.tournament.fetch", () =>
-    computeStandings()
-  );
-}
+export const getPublicTournamentStandings = cachePublicData(
+  "data.public.standings.tournament.fetch",
+  async (): Promise<StandingEntry[]> => computeStandings(),
+  ["data.public.standings.tournament"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicGroupStandings(): Promise<PublicGroupStanding[]> {
-  return measureServerTiming("data.public.standings.groups.fetch", async () => {
+export const getPublicGroupStandings = cachePublicData(
+  "data.public.standings.groups.fetch",
+  async (): Promise<PublicGroupStanding[]> => {
     const groups = await db.group.findMany({
       orderBy: { order: "asc" },
       select: {
@@ -47,5 +52,10 @@ export async function getPublicGroupStandings(): Promise<PublicGroupStanding[]> 
       slug: group.slug,
       rows: buildGroupStandings(group.teams, group.matches),
     }));
-  });
-}
+  },
+  ["data.public.standings.groups"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);

@@ -1,8 +1,8 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
 import { computeVolleyStandings, type VolleyStandingRow } from "@/lib/volley/standings";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS, revivePublicDates } from "./cache";
 
 type VolleySetScore = {
   homePoints: number;
@@ -79,8 +79,9 @@ function computeSets(sets: VolleySetScore[]): { homeSets: number; awaySets: numb
   };
 }
 
-export async function getPublicGreenVolleyHomeData(): Promise<PublicGreenVolleyHomeData> {
-  return measureServerTiming("data.public.volley.home.fetch", async () => {
+export const getPublicGreenVolleyHomeData = cachePublicData(
+  "data.public.volley.home.fetch",
+  async (): Promise<PublicGreenVolleyHomeData> => {
     const [nextMatches, groups] = await Promise.all([
       db.volleyMatch.findMany({
         where: { status: "SCHEDULED" },
@@ -125,11 +126,18 @@ export async function getPublicGreenVolleyHomeData(): Promise<PublicGreenVolleyH
         ),
       })),
     };
-  });
-}
+  },
+  ["data.public.volley.home"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyMatches, PUBLIC_CACHE_TAGS.volleyStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
-export async function getPublicVolleyMatchesPageData(): Promise<PublicVolleyMatchesPageData> {
-  return measureServerTiming("data.public.volley.matches.fetch", async () => {
+export const getPublicVolleyMatchesPageData = cachePublicData(
+  "data.public.volley.matches.fetch",
+  async (): Promise<PublicVolleyMatchesPageData> => {
     const [matchesRaw, groupsRaw] = await Promise.all([
       db.volleyMatch.findMany({
         where: { status: { not: "DRAFT" } },
@@ -188,8 +196,14 @@ export async function getPublicVolleyMatchesPageData(): Promise<PublicVolleyMatc
         ),
       })),
     };
-  });
-}
+  },
+  ["data.public.volley.matches"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyMatches, PUBLIC_CACHE_TAGS.volleyStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
 export async function getPublicVolleyClassifica(): Promise<PublicVolleyGroupStanding[]> {
   return getPublicVolleyGroupStandings(false);
@@ -199,8 +213,9 @@ export async function getPublicVolleyGironi(): Promise<PublicVolleyGroupStanding
   return getPublicVolleyGroupStandings(true);
 }
 
-async function getPublicVolleyGroupStandings(withQualifiedIds: boolean): Promise<PublicVolleyGroupStanding[]> {
-  return measureServerTiming("data.public.volley.groups.fetch", async () => {
+const getPublicVolleyGroupStandings = cachePublicData(
+  "data.public.volley.groups.fetch",
+  async (withQualifiedIds: boolean): Promise<PublicVolleyGroupStanding[]> => {
     const groups = await db.volleyGroup.findMany({
       orderBy: { name: "asc" },
       select: {
@@ -237,12 +252,17 @@ async function getPublicVolleyGroupStandings(withQualifiedIds: boolean): Promise
         ? { qualifiedIds: group.teams.filter((groupTeam) => groupTeam.qualified).map((groupTeam) => groupTeam.teamId) }
         : {}),
     }));
-  });
-}
+  },
+  ["data.public.volley.groups"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicVolleyEliminationRounds() {
-  return measureServerTiming("data.public.volley.elimination.fetch", () =>
-    db.volleyKnockoutRound.findMany({
+export const getPublicVolleyEliminationRounds = cachePublicData(
+  "data.public.volley.elimination.fetch",
+  async () => db.volleyKnockoutRound.findMany({
       orderBy: { order: "asc" },
       select: {
         id: true,
@@ -261,26 +281,35 @@ export async function getPublicVolleyEliminationRounds() {
           orderBy: { date: "asc" },
         },
       },
-    })
-  );
-}
+    }),
+  ["data.public.volley.elimination"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyMatches],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
-export async function getPublicVolleyTeams() {
-  return measureServerTiming("data.public.volley.teams.fetch", () =>
-    db.volleyTeam.findMany({
+export const getPublicVolleyTeams = cachePublicData(
+  "data.public.volley.teams.fetch",
+  async () => db.volleyTeam.findMany({
       orderBy: { name: "asc" },
       select: {
         id: true,
         name: true,
         players: { orderBy: { name: "asc" }, select: { id: true, name: true } },
       },
-    })
-  );
-}
+    }),
+  ["data.public.volley.teams"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyTeams],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.stable,
+  }
+);
 
-export async function getPublicVolleyMatchDetail(matchId: number) {
-  return measureServerTiming("data.public.volley.match-detail.fetch", () =>
-    db.volleyMatch.findUnique({
+export const getPublicVolleyMatchDetail = cachePublicData(
+  "data.public.volley.match-detail.fetch",
+  async (matchId: number) => db.volleyMatch.findUnique({
       where: { id: matchId },
       select: {
         id: true,
@@ -304,12 +333,18 @@ export async function getPublicVolleyMatchDetail(matchId: number) {
         group: { select: { name: true } },
         knockoutRound: { select: { name: true } },
       },
-    })
-  );
-}
+    }),
+  ["data.public.volley.match-detail"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.volley, PUBLIC_CACHE_TAGS.volleyMatches],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
-export async function getPublicVolleyTeamDetail(teamId: number): Promise<PublicVolleyTeamDetail | null> {
-  return measureServerTiming("data.public.volley.team-detail.fetch", async () => {
+export const getPublicVolleyTeamDetail = cachePublicData(
+  "data.public.volley.team-detail.fetch",
+  async (teamId: number): Promise<PublicVolleyTeamDetail | null> => {
     const [team, nextMatchRaw, teamGroup, teamMatchesRaw] = await Promise.all([
       db.volleyTeam.findUnique({
         where: { id: teamId },
@@ -397,8 +432,19 @@ export async function getPublicVolleyTeamDetail(teamId: number): Promise<PublicV
         ? computeVolleyStandings(
             teamGroup.teams.map((groupTeam) => groupTeam.team),
             teamGroup.matches
-          )
+        )
         : [],
     };
-  });
-}
+  },
+  ["data.public.volley.team-detail"],
+  {
+    tags: [
+      PUBLIC_CACHE_TAGS.volley,
+      PUBLIC_CACHE_TAGS.volleyMatches,
+      PUBLIC_CACHE_TAGS.volleyStandings,
+      PUBLIC_CACHE_TAGS.volleyTeams,
+    ],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);

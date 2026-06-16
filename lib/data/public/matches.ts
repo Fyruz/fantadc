@@ -1,8 +1,8 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
 import { buildGroupStandings, type GroupStandingRow } from "@/lib/standings";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS, revivePublicDates } from "./cache";
 
 export type PublicMatchTeam = {
   id: number;
@@ -54,8 +54,9 @@ export type PublicKnockoutRound = {
 
 export type PublicMatchDetail = Awaited<ReturnType<typeof getPublicMatchDetail>>;
 
-export async function getPublicMatchesPageData(): Promise<PublicMatchesPageData> {
-  return measureServerTiming("data.public.matches.index.fetch", async () => {
+export const getPublicMatchesPageData = cachePublicData(
+  "data.public.matches.index.fetch",
+  async (): Promise<PublicMatchesPageData> => {
     const [matches, groups] = await Promise.all([
       db.match.findMany({
         where: { status: { not: "DRAFT" } },
@@ -104,12 +105,18 @@ export async function getPublicMatchesPageData(): Promise<PublicMatchesPageData>
         rows: buildGroupStandings(group.teams, group.matches),
       })),
     };
-  });
-}
+  },
+  ["data.public.matches.index"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupMatches, PUBLIC_CACHE_TAGS.dcupStandings],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
-export async function getPublicMatchDetail(matchId: number) {
-  return measureServerTiming("data.public.matches.detail.fetch", () =>
-    db.match.findUnique({
+export const getPublicMatchDetail = cachePublicData(
+  "data.public.matches.detail.fetch",
+  async (matchId: number) => db.match.findUnique({
       where: { id: matchId, status: { not: "DRAFT" } },
       select: {
         id: true,
@@ -143,13 +150,18 @@ export async function getPublicMatchDetail(matchId: number) {
         },
         votes: { select: { playerId: true } },
       },
-    })
-  );
-}
+    }),
+  ["data.public.matches.detail"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupMatches],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+    hydrate: revivePublicDates,
+  }
+);
 
-export async function getPublicKnockoutRounds(): Promise<PublicKnockoutRound[]> {
-  return measureServerTiming("data.public.matches.knockout.fetch", () =>
-    db.knockoutRound.findMany({
+export const getPublicKnockoutRounds = cachePublicData(
+  "data.public.matches.knockout.fetch",
+  async (): Promise<PublicKnockoutRound[]> => db.knockoutRound.findMany({
       orderBy: { order: "asc" },
       select: {
         id: true,
@@ -171,6 +183,10 @@ export async function getPublicKnockoutRounds(): Promise<PublicKnockoutRound[]> 
           },
         },
       },
-    })
-  );
-}
+    }),
+  ["data.public.matches.knockout"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupMatches],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);

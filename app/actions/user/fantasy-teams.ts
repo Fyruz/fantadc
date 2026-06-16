@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { z } from "zod";
 import { PlayerRole } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -9,6 +9,7 @@ import { validateRoster } from "@/lib/domain/roster";
 import { fantasyTeamNameSchema } from "@/lib/domain/fantasy-team";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
 import { countSubstitutions } from "@/lib/domain/roster-edit-window";
+import { PUBLIC_CACHE_TAGS } from "@/lib/data/public/cache";
 
 export type CreateTeamResult =
   | { success: true; teamId: number }
@@ -21,6 +22,12 @@ const Schema = z.object({
     .array(z.coerce.number().int().positive())
     .length(5, "Seleziona esattamente 5 giocatori"),
 });
+
+function updateFantasyPublicCache() {
+  updateTag(PUBLIC_CACHE_TAGS.fantasy);
+  updateTag(PUBLIC_CACHE_TAGS.fantasyPicks);
+  updateTag(PUBLIC_CACHE_TAGS.fantasyRankings);
+}
 
 export async function createFantasyTeam(
   _prev: CreateTeamResult | undefined,
@@ -88,6 +95,7 @@ export async function createFantasyTeam(
 
   revalidatePath("/dashboard");
   revalidatePath("/squadra");
+  updateFantasyPublicCache();
   return { success: true, teamId: newTeam.id };
 }
 
@@ -195,5 +203,6 @@ export async function updateMyFantasyRoster(
 
   revalidatePath("/squadra");
   revalidatePath("/dashboard");
+  updateFantasyPublicCache();
   return { success: true };
 }

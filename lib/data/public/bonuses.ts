@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS } from "./cache";
 
 export type PublicBonusRow = {
   id: number;
@@ -17,8 +17,9 @@ export type SecretBonusRow = {
   revealed: boolean;
 };
 
-export async function getPublicBonusRows(): Promise<PublicBonusRow[]> {
-  return measureServerTiming("data.public.bonuses.public.fetch", async () => {
+export const getPublicBonusRows = cachePublicData(
+  "data.public.bonuses.public.fetch",
+  async (): Promise<PublicBonusRow[]> => {
     const bonuses = await db.bonusType.findMany({
       where: { isSecret: false },
       orderBy: [{ points: "desc" }, { name: "asc" }],
@@ -31,11 +32,17 @@ export async function getPublicBonusRows(): Promise<PublicBonusRow[]> {
       name: bonus.name,
       points: Number(bonus.points),
     }));
-  });
-}
+  },
+  ["data.public.bonuses.public"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.bonuses],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.stable,
+  }
+);
 
-export async function getSecretBonusRows(): Promise<SecretBonusRow[]> {
-  return measureServerTiming("data.public.bonuses.secret.fetch", async () => {
+export const getSecretBonusRows = cachePublicData(
+  "data.public.bonuses.secret.fetch",
+  async (): Promise<SecretBonusRow[]> => {
     const bonuses = await db.bonusType.findMany({
       where: { isSecret: true },
       orderBy: { name: "asc" },
@@ -53,5 +60,10 @@ export async function getSecretBonusRows(): Promise<SecretBonusRow[]> {
       points: Number(bonus.points),
       revealed: bonus._count.assignments > 0,
     }));
-  });
-}
+  },
+  ["data.public.bonuses.secret"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.bonuses],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.stable,
+  }
+);

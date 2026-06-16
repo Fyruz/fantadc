@@ -8,6 +8,7 @@ import { logAdminAction } from "@/lib/audit";
 import { validateRoster } from "@/lib/domain/roster";
 import { fantasyTeamNameSchema } from "@/lib/domain/fantasy-team";
 import type { ActionResult } from "./football-teams";
+import { revalidateFantasyPublicPaths } from "./revalidate-public";
 import { PlayerRole } from "@prisma/client";
 
 const UpdateRosterSchema = z.object({
@@ -59,5 +60,6 @@ export async function adminUpdateFantasyRoster(_prev: ActionResult | undefined, 
   await logAdminAction(Number(admin.id), "UPDATE_ROSTER", "FantasyTeam", fantasyTeamId, before, { name, captainPlayerId, playerIds });
 
   revalidatePath(`/admin/squadre-fantasy/${fantasyTeamId}`);
+  revalidateFantasyPublicPaths(fantasyTeamId);
   return { message: "Rosa aggiornata." };
 }

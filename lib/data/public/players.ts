@@ -2,7 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
-import { measureServerTiming } from "@/lib/perf";
+import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS } from "./cache";
 
 export type PublicScorerRankingRow = {
   id: number;
@@ -67,8 +67,9 @@ export type PublicFantasyPlayerPickRow = {
   }>;
 };
 
-export async function getPublicScorerRanking(): Promise<PublicScorerRankingRow[]> {
-  return measureServerTiming("data.public.players.scorers.fetch", async () => {
+export const getPublicScorerRanking = cachePublicData(
+  "data.public.players.scorers.fetch",
+  async (): Promise<PublicScorerRankingRow[]> => {
     const [players, goals] = await Promise.all([
       db.player.findMany({
         select: {
@@ -103,11 +104,17 @@ export async function getPublicScorerRanking(): Promise<PublicScorerRankingRow[]
       }))
       .filter((player) => player.goals > 0)
       .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name, "it"));
-  });
-}
+  },
+  ["data.public.players.scorers"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.dcup, PUBLIC_CACHE_TAGS.dcupScorers],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
-  return measureServerTiming("data.public.players.index.fetch", async () => {
+export const getPublicPlayersGroups = cachePublicData(
+  "data.public.players.index.fetch",
+  async (): Promise<PublicPlayersGroup[]> => {
     const [players, appearances, goals, bonuses] = await Promise.all([
       db.player.findMany({
         orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
@@ -241,11 +248,23 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
       teamName,
       players: teamPlayers,
     }));
-  });
-}
+  },
+  ["data.public.players.index"],
+  {
+    tags: [
+      PUBLIC_CACHE_TAGS.bonuses,
+      PUBLIC_CACHE_TAGS.dcup,
+      PUBLIC_CACHE_TAGS.dcupMatches,
+      PUBLIC_CACHE_TAGS.dcupPlayers,
+      PUBLIC_CACHE_TAGS.dcupScorers,
+    ],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
 
-export async function getPublicFantasyPlayerPickRows(): Promise<PublicFantasyPlayerPickRow[]> {
-  return measureServerTiming("data.public.players.fantasy-picks.fetch", async () => {
+export const getPublicFantasyPlayerPickRows = cachePublicData(
+  "data.public.players.fantasy-picks.fetch",
+  async (): Promise<PublicFantasyPlayerPickRow[]> => {
     const [players, totalFantasyTeams] = await Promise.all([
       db.player.findMany({
         select: {
@@ -299,5 +318,10 @@ export async function getPublicFantasyPlayerPickRows(): Promise<PublicFantasyPla
           a.footballTeamName.localeCompare(b.footballTeamName, "it")
       )
       .map((row, index) => ({ ...row, rank: index + 1 }));
-  });
-}
+  },
+  ["data.public.players.fantasy-picks"],
+  {
+    tags: [PUBLIC_CACHE_TAGS.fantasy, PUBLIC_CACHE_TAGS.fantasyPicks],
+    revalidate: PUBLIC_CACHE_TTL_SECONDS.live,
+  }
+);
