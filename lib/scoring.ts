@@ -88,12 +88,6 @@ export function accumulatePlayerTotals(
       );
     }
 
-    for (const goal of match.goals) {
-      if (!goal.isOwnGoal) {
-        totals.set(goal.scorerId, (totals.get(goal.scorerId) ?? 0) + 1);
-      }
-    }
-
     if (mvpId !== null) {
       totals.set(mvpId, (totals.get(mvpId) ?? 0) + mvpBonus);
     }

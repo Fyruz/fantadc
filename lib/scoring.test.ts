@@ -138,6 +138,20 @@ describe("accumulatePlayerTotals", () => {
 
     expect(totals.get(1)).toBeUndefined();
   });
+
+  it("does not assign points for goals (goals are tracked in MatchGoal but scored via bonus types)", () => {
+    const totals = accumulatePlayerTotals(
+      [{
+        bonuses: [],
+        goals: [{ scorerId: 1, isOwnGoal: false }, { scorerId: 1, isOwnGoal: false }],
+        votes: [],
+        concludedAt: closedAt,
+        players: [{ playerId: 1 }],
+      }],
+      5
+    );
+    expect(totals.get(1)).toBeUndefined();
+  });
 });
 
 describe("teamPointsFromPlayerTotals", () => {
