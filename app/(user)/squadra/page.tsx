@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
-import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
+import { computeTeamHistory, getTeamPhaseBreakdown, getLastClosedAt } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { resolveTeamFlag } from "@/lib/flags";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
@@ -38,12 +38,16 @@ export default async function SquadraPage() {
 
   if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
-  const history = await computeTeamHistory(fantasyTeam.id);
+  const [history, lastClosedAt] = await Promise.all([
+    computeTeamHistory(fantasyTeam.id),
+    getLastClosedAt(),
+  ]);
 
-  const playerTotals = new Map<number, number>();
+  const currentPhasePlayerTotals = new Map<number, number>();
   for (const ms of history) {
+    if (lastClosedAt && ms.concludedAt && ms.concludedAt < lastClosedAt) continue;
     for (const ps of ms.playerScores) {
-      playerTotals.set(ps.playerId, (playerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
+      currentPhasePlayerTotals.set(ps.playerId, (currentPhasePlayerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
     }
   }
 
@@ -134,7 +138,7 @@ export default async function SquadraPage() {
         {fantasyTeam.players.map(({ player }) => {
           const isCaptain = player.id === fantasyTeam.captainPlayerId;
           const flagSrc = resolveTeamFlag(player.footballTeam);
-          const pts = playerTotals.get(player.id) ?? 0;
+          const pts = currentPhasePlayerTotals.get(player.id) ?? 0;
           return (
             <div key={player.id} className="flex items-center gap-3 px-6 py-3" style={ROW_BORDER}>
               <div className="w-9 h-9 shrink-0 flex items-center justify-center p-1">
