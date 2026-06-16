@@ -27,6 +27,7 @@ export type MatchScore = {
   matchId: number;
   label: string; // "HomeTeam vs AwayTeam"
   startsAt: Date;
+  concludedAt: Date | null;
   playerScores: PlayerMatchScore[];
   total: number;
 };
@@ -227,7 +228,7 @@ export async function computeRankings(): Promise<RankEntry[]> {
 }
 
 /** Ultima fase chiusa (per il confine della fase in corso). */
-async function getLastClosedAt(): Promise<Date | null> {
+export async function getLastClosedAt(): Promise<Date | null> {
   const last = await db.scoringPhase.findFirst({
     orderBy: { order: "desc" },
     select: { closedAt: true },
@@ -517,6 +518,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
       matchId: match.id,
       label: `${match.homeTeam?.name ?? match.homeSeed ?? "TBD"} vs ${match.awayTeam?.name ?? match.awaySeed ?? "TBD"}`,
       startsAt: match.startsAt,
+      concludedAt: match.concludedAt,
       playerScores,
       total: playerScores.reduce((s, p) => s + p.finalPoints, 0),
     };
