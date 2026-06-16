@@ -178,6 +178,107 @@ export default async function SquadraPage() {
         </p>
       </div>
 
+      {/* Storico partite */}
+      {history.length > 0 && (
+        <div className="rounded-3xl overflow-hidden" style={CARD}>
+          <div className="px-6 pt-6 pb-3">
+            <h2
+              className="text-base font-medium uppercase"
+              style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+            >
+              Storico partite
+            </h2>
+          </div>
+          {history.map((ms) => (
+            <details key={ms.matchId} className="group" style={ROW_BORDER}>
+              <summary className="flex items-center justify-between px-6 py-4 cursor-pointer list-none">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-black truncate">{ms.label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
+                    {ms.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })}
+                  </p>
+                  {ms.beforeRegistration && (
+                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(0,0,0,0.4)" }}>
+                      Precedente all&apos;iscrizione — non conteggiata
+                    </p>
+                  )}
+                </div>
+                <div className="flex items-center gap-3 shrink-0 ml-4">
+                  <span className="text-sm font-semibold" style={{ color: ms.beforeRegistration ? "rgba(0,0,0,0.35)" : "var(--primary)" }}>
+                    {ms.total.toFixed(1)} pt
+                  </span>
+                  <i
+                    className="pi pi-chevron-down text-[10px] transition-transform group-open:rotate-180"
+                    style={{ color: "rgba(0,0,0,0.35)" }}
+                  />
+                </div>
+              </summary>
+              <div className="px-6 pb-4" style={{ borderTop: "1px solid rgba(9,20,76,0.05)", paddingTop: 12 }}>
+                <div className="flex flex-col gap-0">
+                  {ms.playerScores.map((ps) => (
+                    <div
+                      key={ps.playerId}
+                      className="flex items-start justify-between py-2"
+                      style={{ borderBottom: "1px solid rgba(9,20,76,0.04)" }}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {ps.isCaptain && (
+                            <span className="text-[10px] font-semibold shrink-0" style={{ color: "#C48A00" }}>CAP</span>
+                          )}
+                          {ps.isMvp && (
+                            <span className="text-[10px] font-semibold shrink-0" style={{ color: "#E8A000" }}>MVP</span>
+                          )}
+                          <span className="text-sm text-black truncate">{ps.playerName}</span>
+                        </div>
+                        {!ms.beforeRegistration && (ps.bonusDetails.length > 0 || (ps.isMvp && ps.mvpPoints > 0)) && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {ps.isMvp && ps.mvpPoints > 0 && (
+                              <span
+                                className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                                style={{ borderColor: "rgba(232,160,0,0.45)", color: "#C48A00" }}
+                              >
+                                MVP <span className="ml-1">+{ps.mvpPoints.toFixed(1)}</span>
+                              </span>
+                            )}
+                            {ps.bonusDetails.map((bonus) => (
+                              <span
+                                key={bonus.code}
+                                className="inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide"
+                                style={{ borderColor: "rgba(9,20,76,0.12)", color: "rgba(0,0,0,0.55)" }}
+                                title={bonus.name}
+                              >
+                                {bonus.code}{bonus.quantity > 1 ? ` ×${bonus.quantity}` : ""}
+                                <span className="ml-1">{bonus.points > 0 ? "+" : ""}{bonus.points.toFixed(1)}</span>
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-3 pt-0.5">
+                        {!ms.beforeRegistration && ps.isCaptain && ps.basePoints !== 0 && (
+                          <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>×2</span>
+                        )}
+                        <span
+                          className="text-sm font-semibold"
+                          style={{
+                            color: ms.beforeRegistration
+                              ? "rgba(0,0,0,0.35)"
+                              : ps.finalPoints > 0 ? "#16A34A" : ps.finalPoints < 0 ? "#DC2626" : "rgba(0,0,0,0.45)",
+                          }}
+                        >
+                          {ms.beforeRegistration ? "—" : `${ps.finalPoints > 0 ? "+" : ""}${ps.finalPoints.toFixed(1)}`}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </details>
+          ))}
+        </div>
+      )}
+
       {/* Punti per fase */}
       {hasClosedPhases && (
         <div className="rounded-3xl overflow-hidden" style={CARD}>

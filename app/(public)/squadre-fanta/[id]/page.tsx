@@ -150,9 +150,14 @@ export default async function SquadraFantasyPublicPage({
                   <p className="text-xs mt-0.5" style={{ color: "rgba(0,0,0,0.55)" }}>
                     {match.startsAt.toLocaleDateString("it-IT", { day: "2-digit", month: "long", year: "numeric", timeZone: "UTC" })}
                   </p>
+                  {match.beforeRegistration && (
+                    <p className="text-[10px] mt-0.5 font-medium" style={{ color: "rgba(0,0,0,0.4)" }}>
+                      Precedente all&apos;iscrizione — non conteggiata
+                    </p>
+                  )}
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-4">
-                  <span className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>
+                  <span className="text-sm font-semibold" style={{ color: match.beforeRegistration ? "rgba(0,0,0,0.35)" : "var(--text-primary)" }}>
                     {match.total.toFixed(1)} pt
                   </span>
                   <i
