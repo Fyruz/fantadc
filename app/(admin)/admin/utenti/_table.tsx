@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Accordion, AccordionTab } from "primereact/accordion";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 
 type Row = {
   id: number;
@@ -147,25 +148,38 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
   return (
     <div className="flex flex-col gap-3">
       {/* Toolbar: ricerca + ordinamento */}
-      <div className="flex items-center gap-2">
-        <span className="p-input-icon-left flex-1">
-          <i className="pi pi-search" />
+      <div className="flex flex-col gap-2">
+        <IconField iconPosition="left">
+          <InputIcon className="pi pi-search" />
           <InputText
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cerca per nome o email…"
             className="w-full"
           />
-        </span>
-        <Button
-          icon={newestFirst ? "pi pi-sort-amount-down" : "pi pi-sort-amount-up-alt"}
-          tooltip={newestFirst ? "Più recenti prima" : "Meno recenti prima"}
-          tooltipOptions={{ position: "left" }}
-          text
-          onClick={() => setNewestFirst((v) => !v)}
-          style={{ color: "var(--text-secondary)" }}
-          aria-label="Inverti ordinamento"
-        />
+        </IconField>
+
+        <div className="flex gap-1.5">
+          {(["oldest", "newest"] as const).map((opt) => {
+            const active = (opt === "newest") === newestFirst;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => setNewestFirst(opt === "newest")}
+                className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-colors"
+                style={
+                  active
+                    ? { background: "var(--primary)", color: "#fff" }
+                    : { background: "var(--surface-1)", color: "var(--text-secondary)" }
+                }
+              >
+                <i className={`pi ${opt === "newest" ? "pi-sort-amount-down" : "pi-sort-amount-up-alt"} text-[10px]`} />
+                {opt === "newest" ? "Più recenti" : "Meno recenti"}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <Accordion multiple activeIndex={[0, 1]} className="flex flex-col gap-2">
