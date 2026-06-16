@@ -2,6 +2,7 @@ import PageHeader from "@/components/page-header";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getPublicMatchDetail } from "@/lib/data/public/matches";
 import { isMvpWindowOpen } from "@/lib/domain/vote";
 import { resolveMvp } from "@/lib/domain/mvp";
 import { getCurrentUser } from "@/lib/session";
@@ -13,28 +14,7 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
   const matchId = Number(id);
   if (!Number.isInteger(matchId) || matchId <= 0) notFound();
 
-  const match = await db.match.findUnique({
-    where: { id: matchId, status: { not: "DRAFT" } },
-    include: {
-      homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-      awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-      group: { select: { name: true, slug: true } },
-      knockoutRound: { select: { name: true } },
-      goals: {
-        include: {
-          scorer: { select: { id: true, name: true, footballTeamId: true } },
-        },
-        orderBy: { minute: "asc" },
-      },
-      players: {
-        include: {
-          player: { select: { id: true, name: true, role: true, footballTeamId: true } },
-        },
-        orderBy: { player: { name: "asc" } },
-      },
-      votes: { select: { playerId: true } },
-    },
-  });
+  const match = await getPublicMatchDetail(matchId);
   if (!match) notFound();
 
   const windowOpen = isMvpWindowOpen(match.concludedAt);

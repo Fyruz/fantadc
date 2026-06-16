@@ -1,7 +1,6 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import { resolveTeamFlag } from "@/lib/flags";
+import { getPublicScorerRanking } from "@/lib/data/public/players";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60;
@@ -9,37 +8,7 @@ export const revalidate = 60;
 export const metadata = { title: "Capocannoniere" };
 
 export default async function ClassificaMarcatoriPage() {
-  const [players, goals] = await Promise.all([
-    db.player.findMany({
-      select: {
-        id: true,
-        name: true,
-        footballTeam: {
-          select: {
-            name: true,
-            shortName: true,
-            countryCode: true,
-            logoUrl: true,
-          },
-        },
-      },
-    }),
-    db.matchGoal.findMany({
-      select: { scorerId: true, isOwnGoal: true },
-    }),
-  ]);
-
-  const goalMap = new Map<number, number>();
-  for (const g of goals) {
-    if (!g.isOwnGoal) {
-      goalMap.set(g.scorerId, (goalMap.get(g.scorerId) ?? 0) + 1);
-    }
-  }
-
-  const ranked = players
-    .map((p) => ({ ...p, goals: goalMap.get(p.id) ?? 0 }))
-    .filter((p) => p.goals > 0)
-    .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name, "it"));
+  const ranked = await getPublicScorerRanking();
 
   return (
     <div className="flex flex-col gap-10">
@@ -64,7 +33,6 @@ export default async function ClassificaMarcatoriPage() {
       ) : (
         <div className="flex flex-col">
           {ranked.map((p, idx) => {
-            const flagSrc = resolveTeamFlag(p.footballTeam);
             return (
               <div
                 key={p.id}
@@ -77,8 +45,8 @@ export default async function ClassificaMarcatoriPage() {
                 {/* Logo + name */}
                 <div className="flex flex-1 gap-3 items-center min-w-0">
                   <div className="w-9 h-9 flex items-center justify-center p-1 overflow-hidden shrink-0">
-                    {flagSrc ? (
-                      <img src={flagSrc} alt={p.footballTeam.name} className="w-full h-full object-contain" />
+                    {p.flagSrc ? (
+                      <img src={p.flagSrc} alt={p.footballTeam.name} className="w-full h-full object-contain" />
                     ) : (
                       <span className="text-[10px] font-black uppercase" style={{ color: "var(--primary)" }}>
                         {(p.footballTeam.shortName ?? p.footballTeam.name).slice(0, 2).toUpperCase()}

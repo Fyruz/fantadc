@@ -1,7 +1,5 @@
-import { db } from "@/lib/db";
 import Link from "next/link";
-import { measureServerTiming } from "@/lib/perf";
-import { computeVolleyStandings } from "@/lib/volley/standings";
+import { getPublicGreenVolleyHomeData } from "@/lib/data/public/volley";
 import VolleyMatchCard from "@/components/volley-match-card";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 
@@ -9,30 +7,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function GreenVolleyHomePage() {
-  const [nextMatches, groups] = await measureServerTiming("public.greenvolley.home.fetch", () =>
-    Promise.all([
-      db.volleyMatch.findMany({
-        where: { status: "SCHEDULED" },
-        orderBy: { date: "asc" },
-        take: 4,
-        include: {
-          homeTeam: { select: { id: true, name: true } },
-          awayTeam: { select: { id: true, name: true } },
-          group: { select: { name: true } },
-        },
-      }),
-      db.volleyGroup.findMany({
-        orderBy: { name: "asc" },
-        include: {
-          teams: { include: { team: { select: { id: true, name: true } } } },
-          matches: {
-            where: { status: "CONCLUDED" },
-            include: { sets: true },
-          },
-        },
-      }),
-    ])
-  );
+  const { nextMatches, groups } = await getPublicGreenVolleyHomeData();
 
   return (
     <div>
@@ -107,22 +82,11 @@ export default async function GreenVolleyHomePage() {
             className="flex gap-4 overflow-x-auto -mx-4 px-4 py-3 -my-3 md:grid md:grid-cols-2 md:overflow-visible md:mx-0 md:px-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" } as React.CSSProperties}
           >
-            {groups.map((group) => {
-              const teamList = group.teams.map((gt) => gt.team);
-              const matches = group.matches.map((m) => ({
-                homeTeamId: m.homeTeamId,
-                awayTeamId: m.awayTeamId,
-                status: m.status,
-                sets: m.sets,
-              }));
-              const standings = computeVolleyStandings(teamList, matches).slice(0, 4);
-
-              return (
-                <div key={group.id} className="shrink-0 w-90 md:w-auto">
-                  <VolleyStandingsCard name={group.name} rows={standings} compact />
-                </div>
-              );
-            })}
+            {groups.map((group) => (
+              <div key={group.id} className="shrink-0 w-90 md:w-auto">
+                <VolleyStandingsCard name={group.name} rows={group.rows.slice(0, 4)} compact />
+              </div>
+            ))}
           </div>
         </div>
       )}

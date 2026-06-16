@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
-import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
+import { getPublicFantasyTeamDetail } from "@/lib/data/public/fantasy-rankings";
 import BackButton from "@/components/back-button";
 import { resolveTeamFlag } from "@/lib/flags";
 
@@ -24,35 +23,10 @@ export default async function SquadraFantasyPublicPage({
   const { id } = await params;
   const teamId = Number(id);
 
-  const team = await db.fantasyTeam.findUnique({
-    where: { id: teamId },
-    select: {
-      id: true,
-      name: true,
-      captainPlayerId: true,
-      user: { select: { name: true, email: true } },
-      players: {
-        select: {
-          player: {
-            select: {
-              id: true,
-              name: true,
-              role: true,
-              footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
-            },
-          },
-        },
-      },
-    },
-  });
+  const detail = await getPublicFantasyTeamDetail(teamId);
+  if (!detail) notFound();
 
-  if (!team) notFound();
-
-  const history = await computeTeamHistory(teamId);
-  // Totale cumulativo coerente con la classifica (fasi congelate + fase in corso).
-  const phaseBreakdown = await getTeamPhaseBreakdown(teamId);
-  const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
-  const ownerLabel = team.user.name ?? team.user.email;
+  const { team, history, totalPoints } = detail;
 
   return (
     <div className="flex flex-col gap-10 max-w-lg mx-auto">
@@ -67,7 +41,7 @@ export default async function SquadraFantasyPublicPage({
             {team.name}
           </span>
           <span className="text-xs truncate w-full text-center text-black">
-            {ownerLabel}
+            {team.ownerLabel}
           </span>
         </div>
         <div className="flex-1" />

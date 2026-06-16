@@ -1,28 +1,12 @@
-import { db } from "@/lib/db";
 import Link from "next/link";
-import { measureServerTiming } from "@/lib/perf";
-import { computeVolleyStandings } from "@/lib/volley/standings";
+import { getPublicVolleyGironi } from "@/lib/data/public/volley";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function VolleyGironiPage() {
-  const groups = await measureServerTiming("public.greenvolley.gironi.fetch", () =>
-    db.volleyGroup.findMany({
-      orderBy: { name: "asc" },
-      include: {
-        teams: {
-          include: { team: { select: { id: true, name: true } } },
-          orderBy: { team: { name: "asc" } },
-        },
-        matches: {
-          where: { status: "CONCLUDED" },
-          include: { sets: true },
-        },
-      },
-    })
-  );
+  const groups = await getPublicVolleyGironi();
 
   return (
     <div className="flex flex-col gap-6">
@@ -48,25 +32,12 @@ export default async function VolleyGironiPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {groups.map((group) => {
-          const standings = computeVolleyStandings(
-            group.teams.map((gt) => gt.team),
-            group.matches.map((m) => ({
-              homeTeamId: m.homeTeamId,
-              awayTeamId: m.awayTeamId,
-              status: m.status,
-              sets: m.sets,
-            }))
-          );
-          const qualifiedIds = group.teams
-            .filter((gt) => gt.qualified)
-            .map((gt) => gt.teamId);
-
           return (
             <VolleyStandingsCard
               key={group.id}
               name={group.name}
-              rows={standings}
-              qualifiedIds={qualifiedIds}
+              rows={group.rows}
+              qualifiedIds={group.qualifiedIds}
             />
           );
         })}

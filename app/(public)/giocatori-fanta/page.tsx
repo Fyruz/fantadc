@@ -1,61 +1,12 @@
 import BackButton from "@/components/back-button";
-import { db } from "@/lib/db";
-import { resolveTeamFlag } from "@/lib/flags";
+import { getPublicFantasyPlayerPickRows } from "@/lib/data/public/players";
 import PlayerPickRow from "./_player-row";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function GiocatoriFantaPage() {
-  const [players, totalFantasyTeams] = await Promise.all([
-    db.player.findMany({
-      include: {
-        footballTeam: {
-          select: { name: true, shortName: true, countryCode: true, logoUrl: true },
-        },
-        fantasyTeams: {
-          include: {
-            fantasyTeam: {
-              select: { id: true, name: true, user: { select: { name: true, email: true } } },
-            },
-          },
-        },
-      },
-    }),
-    db.fantasyTeam.count(),
-  ]);
-
-  const rows = players
-    .map((player) => {
-      const pickCount = player.fantasyTeams.length;
-      const fantasyTeamRows = player.fantasyTeams
-        .map(({ fantasyTeam }) => ({
-          id: fantasyTeam.id,
-          name: fantasyTeam.name,
-          ownerLabel: fantasyTeam.user.name ?? fantasyTeam.user.email,
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name, "it"));
-      return {
-        rank: 0,
-        playerId: player.id,
-        playerName: player.name,
-        role: player.role,
-        footballTeamName: player.footballTeam.name,
-        footballTeamShortName: player.footballTeam.shortName,
-        flagSrc: resolveTeamFlag(player.footballTeam),
-        pickCount,
-        pickRate: totalFantasyTeams > 0 ? (pickCount / totalFantasyTeams) * 100 : 0,
-        fantasyTeams: fantasyTeamRows,
-      };
-    })
-    .filter((row) => row.pickCount > 0)
-    .sort(
-      (a, b) =>
-        b.pickCount - a.pickCount ||
-        a.playerName.localeCompare(b.playerName, "it") ||
-        a.footballTeamName.localeCompare(b.footballTeamName, "it")
-    )
-    .map((row, index) => ({ ...row, rank: index + 1 }));
+  const rows = await getPublicFantasyPlayerPickRows();
 
   if (rows.length === 0) {
     return (

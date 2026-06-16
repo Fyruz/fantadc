@@ -1,23 +1,11 @@
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { getPublicKnockoutRounds } from "@/lib/data/public/matches";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function EliminazionePublicPage() {
-  const rounds = await db.knockoutRound.findMany({
-    orderBy: { order: "asc" },
-    include: {
-      matches: {
-        where: { status: { not: "DRAFT" } },
-        orderBy: { bracketPosition: "asc" },
-        include: {
-          homeTeam: { select: { name: true, shortName: true } },
-          awayTeam: { select: { name: true, shortName: true } },
-        },
-      },
-    },
-  });
+  const rounds = await getPublicKnockoutRounds();
 
   if (rounds.length === 0) {
     return (

@@ -1,5 +1,5 @@
 import BackChevron from "@/components/back-chevron";
-import { db } from "@/lib/db";
+import { getPublicVolleyMatchDetail } from "@/lib/data/public/volley";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { formatVolleyDayHeading, formatVolleyMatchTime } from "@/lib/volley/format";
@@ -15,16 +15,10 @@ export default async function VolleyMatchPublicPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const match = await db.volleyMatch.findUnique({
-    where: { id: Number(id) },
-    include: {
-      homeTeam: { select: { id: true, name: true, players: { orderBy: { name: "asc" }, select: { id: true, name: true } } } },
-      awayTeam: { select: { id: true, name: true, players: { orderBy: { name: "asc" }, select: { id: true, name: true } } } },
-      sets: { orderBy: { setNumber: "asc" } },
-      group: { select: { name: true } },
-      knockoutRound: { select: { name: true } },
-    },
-  });
+  const matchId = Number(id);
+  if (!Number.isInteger(matchId) || matchId <= 0) notFound();
+
+  const match = await getPublicVolleyMatchDetail(matchId);
   if (!match || match.status === "DRAFT") notFound();
 
   const homeSets = match.sets.filter((s) => s.homePoints > s.awayPoints).length;

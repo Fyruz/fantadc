@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { getPublicFootballTeams } from "@/lib/data/public/teams";
 import { resolveTeamFlag } from "@/lib/flags";
 import PageHeader from "@/components/page-header";
 
@@ -7,10 +7,7 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function SquadrePublicPage() {
-  const teams = await db.footballTeam.findMany({
-    orderBy: { name: "asc" },
-    select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
-  });
+  const teams = await getPublicFootballTeams();
 
   return (
     <div className="flex flex-col gap-10">

@@ -1,146 +1,13 @@
 import BackButton from "@/components/back-button";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import { measureServerTiming } from "@/lib/perf";
+import { getPublicPlayersGroups } from "@/lib/data/public/players";
 import PlayersGrid from "./_players-grid";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function GiocatoriPublicPage() {
-  const [players, appearances, goals, bonuses] = await measureServerTiming("public.giocatori.fetch", () =>
-    Promise.all([
-      db.player.findMany({
-        orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
-        include: { footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } } },
-      }),
-      db.matchPlayer.findMany({
-        include: {
-          match: {
-            select: {
-              id: true,
-              startsAt: true,
-              status: true,
-              homeScore: true,
-              awayScore: true,
-              homeTeamId: true,
-              awayTeamId: true,
-              homeSeed: true,
-              awaySeed: true,
-              homeTeam: { select: { shortName: true, name: true } },
-              awayTeam: { select: { shortName: true, name: true } },
-            },
-          },
-        },
-        orderBy: { match: { startsAt: "desc" } },
-      }),
-      db.matchGoal.findMany({
-        select: { matchId: true, scorerId: true, isOwnGoal: true },
-      }),
-      db.playerMatchBonus.findMany({
-        select: {
-          playerId: true,
-          matchId: true,
-          points: true,
-          quantity: true,
-          bonusType: { select: { code: true } },
-        },
-      }),
-    ])
-  );
-
-  // Pre-group by player ID
-  const appearancesByPlayer = new Map<number, typeof appearances>();
-  for (const a of appearances) {
-    const arr = appearancesByPlayer.get(a.playerId) ?? [];
-    arr.push(a);
-    appearancesByPlayer.set(a.playerId, arr);
-  }
-
-  const goalsByPlayer = new Map<number, typeof goals>();
-  for (const g of goals) {
-    const arr = goalsByPlayer.get(g.scorerId) ?? [];
-    arr.push(g);
-    goalsByPlayer.set(g.scorerId, arr);
-  }
-
-  const bonusesByPlayer = new Map<number, typeof bonuses>();
-  for (const b of bonuses) {
-    const arr = bonusesByPlayer.get(b.playerId) ?? [];
-    arr.push(b);
-    bonusesByPlayer.set(b.playerId, arr);
-  }
-
-  // Build enriched player objects
-  const enriched = players.map((p) => {
-    const apps = appearancesByPlayer.get(p.id) ?? [];
-    const pGoals = goalsByPlayer.get(p.id) ?? [];
-    const pBonuses = bonusesByPlayer.get(p.id) ?? [];
-
-    const totalGoals = pGoals.filter((g) => !g.isOwnGoal).length;
-    const totalOwnGoals = pGoals.filter((g) => g.isOwnGoal).length;
-    const totalBonusPoints = pBonuses.reduce(
-      (s, b) => s + Number(b.points),
-      0
-    );
-
-    // Per-match stats (last 5 appearances)
-    const matchStats = apps.slice(0, 5).map((a) => {
-      const m = a.match;
-      const isHome = m.homeTeamId === p.footballTeamId;
-      const hs = isHome ? m.homeScore : m.awayScore;
-      const as_ = isHome ? m.awayScore : m.homeScore;
-      const opponent = isHome
-        ? (m.awayTeam?.shortName ?? m.awayTeam?.name ?? m.awaySeed ?? "TBD")
-        : (m.homeTeam?.shortName ?? m.homeTeam?.name ?? m.homeSeed ?? "TBD");
-      const matchGoals = pGoals.filter(
-        (g) => g.matchId === m.id && !g.isOwnGoal
-      ).length;
-      const matchBonusPoints = pBonuses
-        .filter((b) => b.matchId === m.id)
-        .reduce((s, b) => s + Number(b.points), 0);
-      const won =
-        hs !== null && as_ !== null && hs > as_;
-      const lost =
-        hs !== null && as_ !== null && hs < as_;
-
-      return {
-        matchId: m.id,
-        startsAt: m.startsAt.toISOString(),
-        isHome,
-        opponent,
-        hs,
-        as_,
-        won,
-        lost,
-        matchGoals,
-        matchBonusPoints,
-        status: m.status,
-      };
-    });
-
-    return {
-      id: p.id,
-      name: p.name,
-      role: p.role,
-      footballTeamId: p.footballTeamId,
-      footballTeam: p.footballTeam,
-      totalGoals,
-      totalOwnGoals,
-      totalBonusPoints,
-      presenze: apps.length,
-      matchStats,
-    };
-  });
-
-  // Group by team
-  const byTeam = new Map<string, typeof enriched>();
-  for (const p of enriched) {
-    const team = p.footballTeam.name;
-    const arr = byTeam.get(team) ?? [];
-    arr.push(p);
-    byTeam.set(team, arr);
-  }
+  const groups = await getPublicPlayersGroups();
 
   return (
     <div className="flex flex-col gap-10">
@@ -158,7 +25,7 @@ export default async function GiocatoriPublicPage() {
         <div className="flex-1" />
       </div>
 
-      {byTeam.size === 0 ? (
+      {groups.length === 0 ? (
         <div
           className="card p-8 text-center text-sm"
           style={{ color: "var(--text-muted)" }}
@@ -166,7 +33,7 @@ export default async function GiocatoriPublicPage() {
           Nessun giocatore presente.
         </div>
       ) : (
-        <PlayersGrid groups={[...byTeam.entries()].map(([teamName, players]) => ({ teamName, players }))} />
+        <PlayersGrid groups={groups} />
       )}
     </div>
   );

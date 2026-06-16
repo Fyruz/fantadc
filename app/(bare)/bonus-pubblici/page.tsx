@@ -1,5 +1,5 @@
 import PageHeader from "@/components/page-header";
-import { db } from "@/lib/db";
+import { getPublicBonusRows } from "@/lib/data/public/bonuses";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -80,13 +80,7 @@ function BonusCard({ code, name, points }: { code: string; name: string; points:
 }
 
 export default async function BonusPubblici() {
-  const publicBonuses = await db.bonusType.findMany({
-    where: { isSecret: false },
-    orderBy: [{ points: "desc" }, { name: "asc" }],
-    select: { id: true, code: true, name: true, points: true },
-  });
-
-  const rows = publicBonuses.map((b) => ({ id: b.id, code: b.code, name: b.name, points: Number(b.points) }));
+  const rows = await getPublicBonusRows();
 
   return (
     <div className="flex flex-col gap-10">

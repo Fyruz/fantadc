@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/db";
-import { computeVolleyStandings } from "@/lib/volley/standings";
+import { getPublicVolleyTeamDetail, type VolleyTeamMatchRow } from "@/lib/data/public/volley";
+import type { VolleyStandingRow } from "@/lib/volley/standings";
 import VolleyMatchCard from "@/components/volley-match-card";
 import VolleyStandingsCard from "@/components/volley-standings-card";
 import BackButton from "@/components/back-button";
@@ -9,25 +9,6 @@ import BackButton from "@/components/back-button";
 export const revalidate = 60;
 
 type Tab = "sommario" | "partite" | "classifica" | "rosa";
-
-type VolleyMatchRow = {
-  id: number;
-  date: Date | null;
-  status: string;
-  homeSets: number;
-  awaySets: number;
-  homeTeam: { id: number; name: string } | null;
-  awayTeam: { id: number; name: string } | null;
-  group: { name: string } | null;
-  knockoutRound: { name: string } | null;
-};
-
-function computeSets(sets: { homePoints: number; awayPoints: number }[]): { homeSets: number; awaySets: number } {
-  return {
-    homeSets: sets.filter((s) => s.homePoints > s.awayPoints).length,
-    awaySets: sets.filter((s) => s.awayPoints > s.homePoints).length,
-  };
-}
 
 export default async function VolleySquadraDetailPage({
   params,
@@ -45,86 +26,10 @@ export default async function VolleySquadraDetailPage({
     ? (rawTab as Tab)
     : "sommario";
 
-  const [team, nextMatchRaw, teamGroup, teamMatchesRaw] = await Promise.all([
-    db.volleyTeam.findUnique({
-      where: { id: teamId },
-      select: {
-        id: true, name: true,
-        players: { orderBy: { name: "asc" }, select: { id: true, name: true } },
-      },
-    }),
-    db.volleyMatch.findFirst({
-      where: {
-        OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-        status: "SCHEDULED",
-      },
-      orderBy: { date: "asc" },
-      select: {
-        id: true, date: true, status: true,
-        homeTeam: { select: { id: true, name: true } },
-        awayTeam: { select: { id: true, name: true } },
-        group: { select: { name: true } },
-        knockoutRound: { select: { name: true } },
-        sets: { select: { homePoints: true, awayPoints: true } },
-      },
-    }),
-    db.volleyGroup.findFirst({
-      where: { teams: { some: { teamId } } },
-      select: {
-        id: true, name: true,
-        teams: { select: { team: { select: { id: true, name: true } } } },
-        matches: {
-          where: { status: "CONCLUDED" },
-          select: {
-            homeTeamId: true, awayTeamId: true, status: true,
-            sets: { select: { homePoints: true, awayPoints: true } },
-          },
-        },
-      },
-    }),
-    db.volleyMatch.findMany({
-      where: {
-        OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-        status: "CONCLUDED",
-      },
-      orderBy: { date: "desc" },
-      select: {
-        id: true, date: true, status: true,
-        homeTeam: { select: { id: true, name: true } },
-        awayTeam: { select: { id: true, name: true } },
-        group: { select: { name: true } },
-        knockoutRound: { select: { name: true } },
-        sets: { select: { homePoints: true, awayPoints: true } },
-      },
-    }),
-  ]);
+  const detail = await getPublicVolleyTeamDetail(teamId);
+  if (!detail) notFound();
 
-  if (!team) notFound();
-
-  function toMatchRow(m: NonNullable<typeof nextMatchRaw>): VolleyMatchRow {
-    const { homeSets, awaySets } = computeSets(m.sets);
-    return {
-      id: m.id,
-      date: m.date,
-      status: m.status,
-      homeSets,
-      awaySets,
-      homeTeam: m.homeTeam,
-      awayTeam: m.awayTeam,
-      group: m.group,
-      knockoutRound: m.knockoutRound,
-    };
-  }
-
-  const nextMatch: VolleyMatchRow | null = nextMatchRaw ? toMatchRow(nextMatchRaw) : null;
-  const teamMatches: VolleyMatchRow[] = teamMatchesRaw.map(toMatchRow);
-
-  const standings = teamGroup
-    ? computeVolleyStandings(
-        teamGroup.teams.map((gt) => gt.team),
-        teamGroup.matches
-      )
-    : [];
+  const { team, nextMatch, teamMatches, standings, groupName } = detail;
 
   const TABS: { key: Tab; label: string }[] = [
     { key: "sommario", label: "Sommario" },
@@ -179,7 +84,7 @@ export default async function VolleySquadraDetailPage({
       )}
       {activeTab === "partite" && <PartiteTab matches={teamMatches} />}
       {activeTab === "classifica" && (
-        <ClassificaTab standings={standings} groupName={teamGroup?.name} teamId={teamId} />
+        <ClassificaTab standings={standings} groupName={groupName} teamId={teamId} />
       )}
       {activeTab === "rosa" && <RosaTab players={team.players} />}
     </div>
@@ -193,8 +98,8 @@ function SommarioTab({
   lastMatch,
   players,
 }: {
-  nextMatch: VolleyMatchRow | null;
-  lastMatch: VolleyMatchRow | null;
+  nextMatch: VolleyTeamMatchRow | null;
+  lastMatch: VolleyTeamMatchRow | null;
   players: { id: number; name: string }[];
 }) {
   const featuredMatch = nextMatch ?? lastMatch;
@@ -250,7 +155,7 @@ function SommarioTab({
 
 // ─── Partite ─────────────────────────────────────────────────────────────────
 
-function PartiteTab({ matches }: { matches: VolleyMatchRow[] }) {
+function PartiteTab({ matches }: { matches: VolleyTeamMatchRow[] }) {
   if (matches.length === 0) {
     return <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna partita precedente.</p>;
   }
@@ -284,7 +189,7 @@ function ClassificaTab({
   groupName,
   teamId,
 }: {
-  standings: ReturnType<typeof computeVolleyStandings>;
+  standings: VolleyStandingRow[];
   groupName: string | undefined;
   teamId: number;
 }) {

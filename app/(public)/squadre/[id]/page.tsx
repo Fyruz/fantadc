@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { db } from "@/lib/db";
+import { getPublicFootballTeamDetail } from "@/lib/data/public/teams";
+import type { PublicMatchRow } from "@/lib/data/public/matches";
 import { BackButton } from "./BackButton";
 import { resolveTeamFlag } from "@/lib/flags";
 import MatchCard from "@/components/match-card";
-import { buildGroupStandings, type GroupStandingRow } from "@/lib/standings";
 import GroupStandingCard from "@/components/group-standing-card";
 
 export const revalidate = 60;
@@ -19,19 +19,7 @@ type MatchTeam = {
   logoUrl: string | null;
 };
 
-type MatchRow = {
-  id: number;
-  startsAt: Date | null;
-  status: string;
-  homeScore: number | null;
-  awayScore: number | null;
-  homeSeed: string | null;
-  awaySeed: string | null;
-  homeTeam: MatchTeam | null;
-  awayTeam: MatchTeam | null;
-  group: { name: string; slug: string } | null;
-  knockoutRound: { name: string } | null;
-};
+type MatchRow = PublicMatchRow;
 
 export default async function SquadraPublicDetailPage({
   params,
@@ -49,84 +37,11 @@ export default async function SquadraPublicDetailPage({
     ? (rawTab as Tab)
     : "sommario";
 
-  const [team, nextMatch, teamGroup, scorerGroups, teamMatches] = await Promise.all([
-    db.footballTeam.findUnique({
-      where: { id: teamId },
-      select: {
-        id: true, name: true, shortName: true, countryCode: true, logoUrl: true,
-        players: {
-          orderBy: [{ role: "desc" }, { name: "asc" }],
-          select: { id: true, name: true, role: true },
-        },
-      },
-    }),
-    db.match.findFirst({
-      where: {
-        OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-        status: "SCHEDULED",
-      },
-      orderBy: { startsAt: "asc" },
-      select: {
-        id: true, startsAt: true, status: true, homeScore: true, awayScore: true, homeSeed: true, awaySeed: true,
-        homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        group: { select: { name: true, slug: true } },
-        knockoutRound: { select: { name: true } },
-      },
-    }),
-    db.group.findFirst({
-      where: { teams: { some: { footballTeamId: teamId } } },
-      include: {
-        teams: {
-          include: {
-            footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-          },
-        },
-        matches: {
-          where: { status: "CONCLUDED", homeScore: { not: null }, awayScore: { not: null } },
-          select: { homeTeamId: true, awayTeamId: true, homeScore: true, awayScore: true },
-        },
-      },
-    }),
-    db.matchGoal.groupBy({
-      by: ["scorerId"],
-      where: { scorer: { footballTeamId: teamId } },
-      _count: { scorerId: true },
-      orderBy: { _count: { scorerId: "desc" } },
-      take: 5,
-    }),
-    db.match.findMany({
-      where: {
-        OR: [{ homeTeamId: teamId }, { awayTeamId: teamId }],
-        status: "CONCLUDED",
-      },
-      orderBy: { startsAt: "desc" },
-      select: {
-        id: true, startsAt: true, status: true, homeScore: true, awayScore: true, homeSeed: true, awaySeed: true,
-        homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        awayTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
-        group: { select: { name: true, slug: true } },
-        knockoutRound: { select: { name: true } },
-      },
-    }),
-  ]);
+  const detail = await getPublicFootballTeamDetail(teamId);
+  if (!detail) notFound();
 
-  if (!team) notFound();
-
-  // Scorer names
-  const scorerIds = scorerGroups.map((s) => s.scorerId);
-  const scorerPlayers = scorerIds.length > 0
-    ? await db.player.findMany({ where: { id: { in: scorerIds } }, select: { id: true, name: true } })
-    : [];
-  const scorerMap = new Map(scorerPlayers.map((p) => [p.id, p.name]));
-  const scorerRows = scorerGroups.map((s) => ({
-    name: scorerMap.get(s.scorerId) ?? "—",
-    goals: s._count.scorerId,
-  }));
-
-  const standings: GroupStandingRow[] = teamGroup
-    ? buildGroupStandings(teamGroup.teams, teamGroup.matches)
-    : [];
+  const { team, nextMatch, teamMatches, scorerRows, group } = detail;
+  const standings = group?.rows ?? [];
 
   const flagSrc = resolveTeamFlag(team);
   const TABS: { key: Tab; label: string }[] = [
@@ -182,7 +97,7 @@ export default async function SquadraPublicDetailPage({
       {activeTab === "classifica" && (
         standings.length === 0
           ? <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.4)" }}>Classifica non disponibile.</p>
-          : <GroupStandingCard group={{ id: teamGroup!.id, name: teamGroup!.name, rows: standings }} highlightTeamId={teamId} />
+          : <GroupStandingCard group={{ id: group!.id, name: group!.name, rows: standings }} highlightTeamId={teamId} />
       )}
       {activeTab === "rosa" && <RosaTab players={team.players} />}
     </div>

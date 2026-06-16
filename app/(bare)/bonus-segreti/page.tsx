@@ -1,6 +1,6 @@
 import PageHeader from "@/components/page-header";
 import { siteConfig } from "@/lib/site";
-import { db } from "@/lib/db";
+import { getSecretBonusRows } from "@/lib/data/public/bonuses";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -48,16 +48,7 @@ function RevealedCard({ name, points }: { name: string; points: number }) {
 }
 
 export default async function BonusSegreti() {
-  const secretBonuses = await db.bonusType.findMany({
-    where: { isSecret: true },
-    orderBy: { name: "asc" },
-    select: {
-      id: true,
-      name: true,
-      points: true,
-      _count: { select: { assignments: true } },
-    },
-  });
+  const secretBonuses = await getSecretBonusRows();
 
   return (
     <div className="flex flex-col gap-10">
@@ -80,8 +71,8 @@ export default async function BonusSegreti() {
       ) : (
         <div className="grid grid-cols-3 gap-3">
           {secretBonuses.map((b) =>
-            b._count.assignments > 0 ? (
-              <RevealedCard key={b.id} name={b.name} points={Number(b.points)} />
+            b.revealed ? (
+              <RevealedCard key={b.id} name={b.name} points={b.points} />
             ) : (
               <LockedCard key={b.id} />
             )

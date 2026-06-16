@@ -1,10 +1,10 @@
-import { computeStandings } from "@/lib/standings";
+import { getPublicTournamentStandings } from "@/lib/data/public/standings";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
 export default async function ClassificaTorneoPage() {
-  const standings = await computeStandings();
+  const standings = await getPublicTournamentStandings();
   const played = standings.some((s) => s.played > 0);
 
   return (
