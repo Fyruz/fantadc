@@ -33,6 +33,14 @@ export default async function MvpPage({
         <div className="flex-1" />
       </div>
 
+      {/* Header desktop */}
+      <div className="hidden md:block">
+        <div className="over-label mb-1">Stagione 2026</div>
+        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
+          MVP
+        </h1>
+      </div>
+
       <MvpViews data={data} activeView={activeView} />
     </div>
   );

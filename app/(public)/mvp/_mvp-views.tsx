@@ -1,17 +1,8 @@
 "use client";
 
-import { useRouter, usePathname } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { PublicMvpData } from "@/lib/data/public/mvp";
-
-const CARD: React.CSSProperties = {
-  background: "#fff",
-  border: "1px solid rgba(9,20,76,0.05)",
-  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
-};
-
-const ROW_BORDER: React.CSSProperties = {
-  borderTop: "1px solid rgba(9,20,76,0.05)",
-};
 
 function formatDate(d: Date): string {
   return new Date(d).toLocaleDateString("it-IT", {
@@ -22,78 +13,47 @@ function formatDate(d: Date): string {
   });
 }
 
-function FlagOrInitial({ flagSrc, name }: { flagSrc: string | null; name: string }) {
+function Flag({ flagSrc, name }: { flagSrc: string | null; name: string }) {
   if (flagSrc) {
     return (
-      <img
-        src={flagSrc}
-        alt={name}
-        width={28}
-        height={20}
-        className="object-contain flex-shrink-0"
-      />
+      <img src={flagSrc} alt={name} width={24} height={16} className="object-contain flex-shrink-0" />
     );
   }
   return (
-    <span
-      className="text-[10px] font-black uppercase flex-shrink-0"
-      style={{ color: "var(--primary)", width: 28, textAlign: "center" }}
-    >
+    <span className="text-[10px] font-black uppercase flex-shrink-0" style={{ color: "var(--primary)", minWidth: 24 }}>
       {name.slice(0, 2).toUpperCase()}
     </span>
   );
 }
 
 function TabBar({ active }: { active: "partita" | "giocatore" }) {
-  const router = useRouter();
   const pathname = usePathname();
 
-  function go(vista: "partita" | "giocatore") {
-    const url = vista === "partita" ? pathname : `${pathname}?vista=giocatore`;
-    router.push(url);
-  }
-
-  const baseStyle: React.CSSProperties = {
-    padding: "6px 18px",
-    borderRadius: 999,
-    fontSize: 13,
-    fontWeight: 600,
-    cursor: "pointer",
-    border: "none",
-    transition: "background 0.15s, color 0.15s",
-  };
-
-  const activeStyle: React.CSSProperties = {
-    ...baseStyle,
-    background: "var(--text-primary)",
-    color: "#fff",
-  };
-
-  const inactiveStyle: React.CSSProperties = {
-    ...baseStyle,
-    background: "transparent",
-    color: "var(--text-muted)",
-  };
+  const tabs = [
+    { key: "partita" as const, label: "Per partita", href: pathname },
+    { key: "giocatore" as const, label: "Per giocatore", href: `${pathname}?vista=giocatore` },
+  ];
 
   return (
-    <div
-      className="flex gap-1 self-start rounded-full p-1"
-      style={{ background: "rgba(9,20,76,0.06)" }}
-    >
-      <button
-        type="button"
-        style={active === "partita" ? activeStyle : inactiveStyle}
-        onClick={() => go("partita")}
-      >
-        Per partita
-      </button>
-      <button
-        type="button"
-        style={active === "giocatore" ? activeStyle : inactiveStyle}
-        onClick={() => go("giocatore")}
-      >
-        Per giocatore
-      </button>
+    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+      {tabs.map((t) => {
+        const isActive = t.key === active;
+        return (
+          <Link
+            key={t.key}
+            href={t.href}
+            scroll={false}
+            className="shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors"
+            style={
+              isActive
+                ? { background: "var(--primary)", color: "#fff" }
+                : { background: "var(--surface-1)", color: "var(--text-secondary)" }
+            }
+          >
+            {t.label}
+          </Link>
+        );
+      })}
     </div>
   );
 }
@@ -101,43 +61,36 @@ function TabBar({ active }: { active: "partita" | "giocatore" }) {
 function ByMatchView({ byMatch }: { byMatch: PublicMvpData["byMatch"] }) {
   if (byMatch.length === 0) {
     return (
-      <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.45)" }}>
-        Nessun MVP assegnato.
-      </p>
+      <div className="card p-10 text-center over-label">Nessun MVP assegnato.</div>
     );
   }
 
   return (
-    <div className="rounded-3xl overflow-hidden" style={CARD}>
+    <div className="card overflow-hidden">
       {byMatch.map((row, idx) => (
         <div
           key={row.matchId}
-          className="flex items-center gap-4 px-5 py-4"
-          style={idx > 0 ? ROW_BORDER : undefined}
+          className="flex items-center gap-3 px-4 py-3.5"
+          style={idx < byMatch.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
         >
           {/* Date */}
-          <span
-            className="text-xs tabular-nums flex-shrink-0 w-16"
-            style={{ color: "rgba(0,0,0,0.45)" }}
-          >
+          <span className="text-xs tabular-nums flex-shrink-0 w-14" style={{ color: "var(--text-muted)" }}>
             {formatDate(row.concludedAt)}
           </span>
 
           {/* Match label */}
           <span
-            className="flex-1 text-sm font-semibold uppercase min-w-0 truncate"
+            className="flex-1 min-w-0 truncate text-sm font-semibold uppercase"
             style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
           >
             {row.label}
           </span>
 
-          {/* MVP player */}
+          {/* MVP */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <i className="pi pi-star-fill text-[11px]" style={{ color: "#E8A000" }} />
-            <FlagOrInitial flagSrc={row.mvpPlayer.flagSrc} name={row.mvpPlayer.footballTeamName} />
-            <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-              {row.mvpPlayer.name}
-            </span>
+            <i className="pi pi-star-fill text-[10px]" style={{ color: "#E8A000" }} />
+            <Flag flagSrc={row.mvpPlayer.flagSrc} name={row.mvpPlayer.footballTeamName} />
+            <span className="text-sm text-black">{row.mvpPlayer.name}</span>
           </div>
         </div>
       ))}
@@ -148,9 +101,7 @@ function ByMatchView({ byMatch }: { byMatch: PublicMvpData["byMatch"] }) {
 function ByPlayerView({ byPlayer }: { byPlayer: PublicMvpData["byPlayer"] }) {
   if (byPlayer.length === 0) {
     return (
-      <p className="text-sm text-center py-12" style={{ color: "rgba(0,0,0,0.45)" }}>
-        Nessun MVP assegnato.
-      </p>
+      <div className="card p-10 text-center over-label">Nessun MVP assegnato.</div>
     );
   }
 
@@ -159,51 +110,37 @@ function ByPlayerView({ byPlayer }: { byPlayer: PublicMvpData["byPlayer"] }) {
       {byPlayer.map((row) => (
         <details
           key={row.playerId}
-          className="group rounded-2xl overflow-hidden"
-          style={{ background: "#fff", border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 2px 8px rgba(9,20,76,0.07)" }}
+          className="group card overflow-hidden"
         >
-          <summary className="flex items-center gap-3 px-5 py-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none hover:bg-[var(--surface-1)] transition-colors">
-            {/* Chevron */}
+          <summary className="flex items-center gap-3 px-4 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden select-none hover:bg-[var(--surface-1)] transition-colors">
             <i
               className="pi pi-chevron-right text-[10px] flex-shrink-0 transition-transform group-open:rotate-90"
               style={{ color: "var(--text-disabled)" }}
             />
-
-            {/* Flag + name */}
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <FlagOrInitial flagSrc={row.flagSrc} name={row.footballTeamName} />
-              <span className="text-sm font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-                {row.playerName}
-              </span>
-            </div>
-
-            {/* Count badge */}
+            <Flag flagSrc={row.flagSrc} name={row.footballTeamName} />
+            <span className="flex-1 min-w-0 text-sm text-black truncate">{row.playerName}</span>
             <div className="flex items-center gap-1.5 flex-shrink-0">
-              <i className="pi pi-star-fill text-[11px]" style={{ color: "#E8A000" }} />
-              <span
-                className="font-black text-sm tabular-nums"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <i className="pi pi-star-fill text-[10px]" style={{ color: "#E8A000" }} />
+              <span className="font-display font-black text-sm" style={{ color: "var(--text-primary)" }}>
                 ×{row.count}
               </span>
             </div>
           </summary>
 
-          {/* Expanded match list */}
-          <div style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}>
+          <div style={{ borderTop: "1px solid var(--border-soft)" }}>
             {row.matches.map((m, idx) => (
               <div
                 key={m.matchId}
-                className="flex items-center justify-between gap-4 px-5 py-3"
-                style={idx > 0 ? ROW_BORDER : undefined}
+                className="flex items-center justify-between gap-4 px-4 py-3 pl-11"
+                style={idx > 0 ? { borderTop: "1px solid var(--border-soft)" } : undefined}
               >
                 <span
-                  className="text-sm uppercase font-medium"
+                  className="text-sm font-semibold uppercase truncate"
                   style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
                 >
                   {m.label}
                 </span>
-                <span className="text-xs tabular-nums flex-shrink-0" style={{ color: "rgba(0,0,0,0.45)" }}>
+                <span className="text-xs flex-shrink-0 tabular-nums" style={{ color: "var(--text-muted)" }}>
                   {formatDate(m.concludedAt)}
                 </span>
               </div>
@@ -225,7 +162,6 @@ export default function MvpViews({
   return (
     <div className="flex flex-col gap-6">
       <TabBar active={activeView} />
-
       {activeView === "partita" ? (
         <ByMatchView byMatch={data.byMatch} />
       ) : (
