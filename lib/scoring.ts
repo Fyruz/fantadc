@@ -180,7 +180,7 @@ export async function computeFantasyTeamPoints(opts?: {
           concludedAt: true,
           mvpOverridePlayerId: true,
           players: { select: { playerId: true } },
-          bonuses: { select: { playerId: true, points: true } },
+          bonuses: { where: { bonusType: { code: { not: "MVP" } } }, select: { playerId: true, points: true } },
           goals: { select: { scorerId: true, isOwnGoal: true } },
           votes: { select: { playerId: true } },
         },
@@ -426,6 +426,7 @@ export async function computeTeamHistory(fantasyTeamId: number): Promise<MatchSc
         concludedAt: true,
         mvpOverridePlayerId: true,
         bonuses: {
+          where: { bonusType: { code: { not: "MVP" } } },
           select: {
             playerId: true,
             quantity: true,

@@ -67,11 +67,13 @@ export default function PlayerBonusCard({ matchId, player, bonuses, bonusTypes }
   );
   const removeFormRef = useRef<HTMLFormElement>(null);
 
-  const bonusTypeOptions = bonusTypes.map((bt) => ({
-    label: `${bt.code} — ${bt.name}`,
-    value: String(bt.id),
-    points: bt.points,
-  }));
+  const bonusTypeOptions = bonusTypes
+    .filter((bt) => bt.code !== "MVP")
+    .map((bt) => ({
+      label: `${bt.code} — ${bt.name}`,
+      value: String(bt.id),
+      points: bt.points,
+    }));
 
   const selectedBt = bonusTypes.find((bt) => String(bt.id) === selectedBonusType);
 
