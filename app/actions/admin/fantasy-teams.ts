@@ -60,6 +60,6 @@ export async function adminUpdateFantasyRoster(_prev: ActionResult | undefined, 
   await logAdminAction(Number(admin.id), "UPDATE_ROSTER", "FantasyTeam", fantasyTeamId, before, { name, captainPlayerId, playerIds });
 
   revalidatePath(`/admin/squadre-fantasy/${fantasyTeamId}`);
-  revalidateFantasyPublicPaths(fantasyTeamId);
+  await revalidateFantasyPublicPaths(fantasyTeamId);
   return { message: "Rosa aggiornata." };
 }

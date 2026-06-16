@@ -67,7 +67,7 @@ export async function addGoal(_prev: ActionResult | undefined, formData: FormDat
   await syncMatchScore(parsed.data.matchId);
 
   revalidatePath(`/admin/partite/${parsed.data.matchId}`);
-  revalidateDcupPublicPaths(parsed.data.matchId);
+  await revalidateDcupPublicPaths(parsed.data.matchId);
   return {};
 }
 
@@ -84,6 +84,6 @@ export async function deleteGoal(formData: FormData): Promise<ActionResult> {
   await syncMatchScore(matchId);
 
   revalidatePath(`/admin/partite/${matchId}`);
-  revalidateDcupPublicPaths(matchId);
+  await revalidateDcupPublicPaths(matchId);
   return {};
 }

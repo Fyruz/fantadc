@@ -10,6 +10,7 @@ import { fantasyTeamNameSchema } from "@/lib/domain/fantasy-team";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
 import { countSubstitutions } from "@/lib/domain/roster-edit-window";
 import { PUBLIC_CACHE_TAGS } from "@/lib/data/public/cache";
+import { invalidateFantasyRankingSnapshot } from "@/lib/fantasy-ranking-snapshot";
 
 export type CreateTeamResult =
   | { success: true; teamId: number }
@@ -23,10 +24,11 @@ const Schema = z.object({
     .length(5, "Seleziona esattamente 5 giocatori"),
 });
 
-function updateFantasyPublicCache() {
+async function updateFantasyPublicCache() {
   updateTag(PUBLIC_CACHE_TAGS.fantasy);
   updateTag(PUBLIC_CACHE_TAGS.fantasyPicks);
   updateTag(PUBLIC_CACHE_TAGS.fantasyRankings);
+  await invalidateFantasyRankingSnapshot();
 }
 
 export async function createFantasyTeam(
@@ -95,7 +97,7 @@ export async function createFantasyTeam(
 
   revalidatePath("/dashboard");
   revalidatePath("/squadra");
-  updateFantasyPublicCache();
+  await updateFantasyPublicCache();
   return { success: true, teamId: newTeam.id };
 }
 
@@ -203,6 +205,6 @@ export async function updateMyFantasyRoster(
 
   revalidatePath("/squadra");
   revalidatePath("/dashboard");
-  updateFantasyPublicCache();
+  await updateFantasyPublicCache();
   return { success: true };
 }

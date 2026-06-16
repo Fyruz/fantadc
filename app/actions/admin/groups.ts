@@ -31,7 +31,7 @@ export async function createGroup(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "CREATE", "Group", group.id, null, group);
 
   revalidatePath("/admin/gironi");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   redirect(`/admin/gironi/${group.id}`);
 }
 
@@ -54,7 +54,7 @@ export async function updateGroup(_prev: ActionResult | undefined, formData: For
 
   revalidatePath("/admin/gironi");
   revalidatePath(`/admin/gironi/${id}`);
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }
 
@@ -70,7 +70,7 @@ export async function deleteGroup(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE", "Group", id, before, null);
 
   revalidatePath("/admin/gironi");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   redirect("/admin/gironi");
 }
 
@@ -89,7 +89,7 @@ export async function addTeamToGroup(_prev: ActionResult | undefined, formData: 
 
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }
 
@@ -103,7 +103,7 @@ export async function removeTeamFromGroup(formData: FormData): Promise<ActionRes
 
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }
 
@@ -122,6 +122,6 @@ export async function setTeamQualified(formData: FormData): Promise<ActionResult
   revalidatePath(`/admin/gironi/${groupId}`);
   revalidatePath("/admin/gironi");
   revalidatePath("/gironi");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }

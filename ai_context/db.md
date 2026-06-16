@@ -34,6 +34,7 @@ Stack target:
 * Vote
 * BonusType
 * PlayerMatchBonus
+* FantasyRankingSnapshot
 
 ### Supporto
 
@@ -173,6 +174,17 @@ Significato:
 
 * un bonus e assegnato a un giocatore in una partita
 * il record salva anche uno snapshot dei punti
+
+### Snapshot classifica fantasy
+
+* `FantasyRankingSnapshot`
+
+Significato:
+
+* conserva la classifica fantasy cumulativa pubblica gia calcolata
+* contiene `fantasyTeamId`, `rank`, `totalPoints`, `computedAt`
+* viene invalidata quando cambiano punti, fasi di punteggio o rose fantasy
+* il calcolo completo resta la fonte di fallback per rigenerare lo snapshot
 
 ### Audit amministrativo
 

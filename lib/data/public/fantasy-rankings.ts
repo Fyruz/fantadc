@@ -2,13 +2,13 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import {
-  computeCumulativeRankings,
   computeCurrentPhaseRankings,
   computePhaseRankings,
   computeTeamHistory,
   getTeamPhaseBreakdown,
   type RankEntry,
 } from "@/lib/scoring";
+import { getFantasyRankingSnapshotOrCompute } from "@/lib/fantasy-ranking-snapshot";
 import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS, revivePublicDates } from "./cache";
 
 export type PublicFantasyRankingPhase = {
@@ -59,7 +59,7 @@ export const getPublicFantasyRankingPageData = cachePublicData(
     } else if (/^\d+$/.test(selected) && phases.some((phase) => String(phase.id) === selected)) {
       rankings = await computePhaseRankings(Number(selected));
     } else {
-      rankings = await computeCumulativeRankings();
+      rankings = await getFantasyRankingSnapshotOrCompute();
     }
 
     return { phases, rankings };
@@ -73,7 +73,7 @@ export const getPublicFantasyRankingPageData = cachePublicData(
 
 export const getPublicFantasyTeamRankings = cachePublicData(
   "data.public.fantasy-rankings.teams.fetch",
-  async (): Promise<RankEntry[]> => computeCumulativeRankings(),
+  async (): Promise<RankEntry[]> => getFantasyRankingSnapshotOrCompute(),
   ["data.public.fantasy-rankings.teams"],
   {
     tags: [PUBLIC_CACHE_TAGS.fantasy, PUBLIC_CACHE_TAGS.fantasyRankings],

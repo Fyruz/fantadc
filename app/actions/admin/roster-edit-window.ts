@@ -7,6 +7,7 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import { closeScoringPhase } from "@/lib/scoring-phases";
 import type { ActionResult } from "./football-teams";
+import { revalidateFantasyPublicPaths } from "./revalidate-public";
 
 const SetSchema = z
   .object({
@@ -53,6 +54,7 @@ export async function setRosterEditWindow(_prev: ActionResult | undefined, formD
     revalidatePath("/classifica-fanta");
     revalidatePath("/dashboard");
     revalidatePath("/admin/fasi-punteggio");
+    await revalidateFantasyPublicPaths();
   }
 
   const existing = await db.rosterEditWindow.findFirst({

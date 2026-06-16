@@ -1,5 +1,6 @@
 import { revalidatePath, updateTag } from "next/cache";
 import { PUBLIC_CACHE_TAGS } from "@/lib/data/public/cache";
+import { invalidateFantasyRankingSnapshot } from "@/lib/fantasy-ranking-snapshot";
 
 const DCUP_PUBLIC_PATHS = [
   "/",
@@ -34,7 +35,7 @@ function updatePublicCacheTags(tags: string[]) {
   for (const tag of tags) updateTag(tag);
 }
 
-export function revalidateDcupPublicPaths(matchId?: number) {
+export async function revalidateDcupPublicPaths(matchId?: number) {
   for (const path of DCUP_PUBLIC_PATHS) revalidatePath(path);
   if (matchId) revalidatePath(`/partite/${matchId}`);
   updatePublicCacheTags([
@@ -47,6 +48,7 @@ export function revalidateDcupPublicPaths(matchId?: number) {
     PUBLIC_CACHE_TAGS.fantasy,
     PUBLIC_CACHE_TAGS.fantasyRankings,
   ]);
+  await invalidateFantasyRankingSnapshot();
 }
 
 export function revalidateBonusPublicPaths() {
@@ -55,7 +57,7 @@ export function revalidateBonusPublicPaths() {
   updatePublicCacheTags([PUBLIC_CACHE_TAGS.bonuses]);
 }
 
-export function revalidateFantasyPublicPaths(teamId?: number) {
+export async function revalidateFantasyPublicPaths(teamId?: number) {
   for (const path of FANTASY_PUBLIC_PATHS) revalidatePath(path);
   if (teamId) revalidatePath(`/squadre-fanta/${teamId}`);
   updatePublicCacheTags([
@@ -63,6 +65,7 @@ export function revalidateFantasyPublicPaths(teamId?: number) {
     PUBLIC_CACHE_TAGS.fantasyPicks,
     PUBLIC_CACHE_TAGS.fantasyRankings,
   ]);
+  await invalidateFantasyRankingSnapshot();
 }
 
 export function revalidateVolleyPublicPaths(matchId?: number) {

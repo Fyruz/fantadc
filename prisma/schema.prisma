@@ -38,6 +38,7 @@ model FantasyTeam {
   players         FantasyTeamPlayer[]
   editUsages      RosterEditUsage[]
   phaseScores     ScoringPhaseScore[]
+  rankingSnapshot FantasyRankingSnapshot?
 
   @@index([captainPlayerId])
 }
@@ -152,6 +153,7 @@ model Match {
   @@index([groupId])
   @@index([knockoutRoundId])
   @@index([status, startsAt])
+  @@index([status, concludedAt])
   @@index([groupId, status])
   @@index([knockoutRoundId, status, bracketPosition])
   @@index([homeTeamId, status, startsAt])
@@ -313,6 +315,20 @@ model ScoringPhaseScore {
 
   @@id([phaseId, fantasyTeamId])
   @@index([fantasyTeamId])
+}
+
+// Snapshot della classifica fantasy cumulativa pubblica.
+// Viene invalidato dalle mutazioni che cambiano punti, fasi o rose.
+model FantasyRankingSnapshot {
+  fantasyTeamId Int      @id
+  rank          Int
+  totalPoints   Decimal  @db.Decimal(7, 2)
+  computedAt    DateTime @default(now())
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@index([rank])
+  @@index([totalPoints])
 }
 
 model AdminAuditLog {

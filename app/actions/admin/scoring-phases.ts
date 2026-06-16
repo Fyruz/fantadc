@@ -7,14 +7,16 @@ import { requireAdmin } from "@/lib/session";
 import { logAdminAction } from "@/lib/audit";
 import { closeScoringPhase } from "@/lib/scoring-phases";
 import type { ActionResult } from "./football-teams";
+import { revalidateFantasyPublicPaths } from "./revalidate-public";
 
-function revalidateScoring() {
+async function revalidateScoring() {
   revalidatePath("/admin/fasi-punteggio");
   revalidatePath("/admin");
   revalidatePath("/classifica-fanta");
   revalidatePath("/squadra");
   revalidatePath("/dashboard");
   revalidatePath("/squadre-fanta");
+  await revalidateFantasyPublicPaths();
 }
 
 const NameSchema = z.object({ name: z.string().min(1, "Nome fase obbligatorio").max(60, "Max 60 caratteri").trim() });
@@ -25,7 +27,7 @@ export async function closeScoringPhaseAction(_prev: ActionResult | undefined, f
   if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors as Record<string, string[]> };
 
   await closeScoringPhase(parsed.data.name, Number(admin.id));
-  revalidateScoring();
+  await revalidateScoring();
   return { message: "Fase chiusa e storico salvato." };
 }
 
@@ -40,7 +42,7 @@ export async function renameScoringPhase(_prev: ActionResult | undefined, formDa
 
   await db.scoringPhase.update({ where: { id }, data: { name: parsed.data.name } });
   await logAdminAction(Number(admin.id), "RENAME_SCORING_PHASE", "ScoringPhase", id, before, { name: parsed.data.name });
-  revalidateScoring();
+  await revalidateScoring();
   return { message: "Fase rinominata." };
 }
 
@@ -57,6 +59,6 @@ export async function deleteScoringPhase(_prev: ActionResult | undefined, formDa
   const before = await db.scoringPhase.findUnique({ where: { id } });
   await db.scoringPhase.delete({ where: { id } });
   await logAdminAction(Number(admin.id), "DELETE_SCORING_PHASE", "ScoringPhase", id, before, null);
-  revalidateScoring();
+  await revalidateScoring();
   return {}; // ConfirmDeleteForm mostra `message` come errore: nessun messaggio = successo
 }

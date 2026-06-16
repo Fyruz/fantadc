@@ -69,7 +69,7 @@ export async function initBracket(_prev: ActionResult | undefined, _formData: Fo
 
   revalidatePath("/admin/eliminazione");
   revalidatePath("/eliminazione");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }
 
@@ -92,7 +92,7 @@ export async function assignKnockoutTeams(_prev: ActionResult | undefined, formD
   revalidatePath("/admin/eliminazione");
   revalidatePath(`/admin/partite/${matchId}`);
   revalidatePath("/eliminazione");
-  revalidateDcupPublicPaths(matchId);
+  await revalidateDcupPublicPaths(matchId);
   return {};
 }
 
@@ -107,7 +107,7 @@ export async function updateKnockoutRound(_prev: ActionResult | undefined, formD
   await logAdminAction(Number(admin.id), "UPDATE", "KnockoutRound", id, before, round);
 
   revalidatePath("/admin/eliminazione");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }
 
@@ -122,6 +122,6 @@ export async function deleteBracket(_prev: ActionResult | undefined, _formData: 
 
   revalidatePath("/admin/eliminazione");
   revalidatePath("/eliminazione");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   return {};
 }

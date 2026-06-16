@@ -34,8 +34,21 @@ model FantasyTeam {
   user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   captain         Player              @relation("FantasyTeamCaptain", fields: [captainPlayerId], references: [id], onDelete: Restrict)
   players         FantasyTeamPlayer[]
+  rankingSnapshot FantasyRankingSnapshot?
 
   @@index([captainPlayerId])
+}
+
+model FantasyRankingSnapshot {
+  fantasyTeamId Int      @id
+  rank          Int
+  totalPoints   Decimal  @db.Decimal(7, 2)
+  computedAt    DateTime @default(now())
+
+  fantasyTeam FantasyTeam @relation(fields: [fantasyTeamId], references: [id], onDelete: Cascade)
+
+  @@index([rank])
+  @@index([totalPoints])
 }
 
 model FootballTeam {

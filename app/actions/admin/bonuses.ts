@@ -46,7 +46,7 @@ export async function assignBonus(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "ASSIGN_BONUS", "PlayerMatchBonus", bonus.id, null, bonus);
 
   revalidatePath(`/admin/partite/${parsed.data.matchId}`);
-  revalidateDcupPublicPaths(parsed.data.matchId);
+  await revalidateDcupPublicPaths(parsed.data.matchId);
   revalidateBonusPublicPaths();
   return {};
 }
@@ -63,7 +63,7 @@ export async function deleteBonus(formData: FormData): Promise<ActionResult> {
   await logAdminAction(Number(admin.id), "DELETE_BONUS", "PlayerMatchBonus", id, before, null);
 
   revalidatePath(`/admin/partite/${matchId}`);
-  revalidateDcupPublicPaths(matchId);
+  await revalidateDcupPublicPaths(matchId);
   revalidateBonusPublicPaths();
   return {};
 }

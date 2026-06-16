@@ -99,7 +99,7 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
   });
 
   revalidatePath("/admin/partite");
-  revalidateDcupPublicPaths(match.id);
+  await revalidateDcupPublicPaths(match.id);
   redirect("/admin/partite");
 }
 
@@ -155,7 +155,7 @@ export async function updateMatch(_prev: ActionResult | undefined, formData: For
 
   revalidatePath("/admin/partite");
   revalidatePath(`/admin/partite/${id}`);
-  revalidateDcupPublicPaths(id);
+  await revalidateDcupPublicPaths(id);
   redirect(`/admin/partite/${id}`);
 }
 
@@ -190,7 +190,7 @@ export async function advanceMatchStatus(
 
   revalidatePath(`/admin/partite/${id}`);
   revalidatePath("/admin/partite");
-  revalidateDcupPublicPaths(id);
+  await revalidateDcupPublicPaths(id);
   return {};
 }
 
@@ -247,7 +247,7 @@ export async function updateMatchMvpOverride(
   revalidatePath(`/partite/${matchId}`);
   revalidatePath("/classifica-fanta");
   revalidatePath("/dashboard");
-  revalidateDcupPublicPaths(matchId);
+  await revalidateDcupPublicPaths(matchId);
   return {};
 }
 
@@ -276,7 +276,7 @@ export async function updateMatchScore(_prev: ActionResult | undefined, formData
 
   revalidatePath(`/admin/partite/${id}`);
   revalidatePath(`/partite/${id}`);
-  revalidateDcupPublicPaths(id);
+  await revalidateDcupPublicPaths(id);
   return {};
 }
 
@@ -291,6 +291,6 @@ export async function deleteMatch(_prev: ActionResult | undefined, formData: For
   await logAdminAction(Number(admin.id), "DELETE", "Match", id, { ...before, startsAt: before.startsAt.toISOString() }, null);
 
   revalidatePath("/admin/partite");
-  revalidateDcupPublicPaths(id);
+  await revalidateDcupPublicPaths(id);
   redirect("/admin/partite");
 }

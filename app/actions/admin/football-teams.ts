@@ -32,7 +32,7 @@ export async function createFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "CREATE", "FootballTeam", team.id, null, team);
 
   revalidatePath("/admin/squadre");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }
 
@@ -54,7 +54,7 @@ export async function updateFootballTeam(_prev: ActionResult | undefined, formDa
   await logAdminAction(Number(admin.id), "UPDATE", "FootballTeam", id, before, team);
 
   revalidatePath("/admin/squadre");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }
 
@@ -73,6 +73,6 @@ export async function deleteFootballTeam(_prev: ActionResult | undefined, formDa
   }
 
   revalidatePath("/admin/squadre");
-  revalidateDcupPublicPaths();
+  await revalidateDcupPublicPaths();
   redirect("/admin/squadre");
 }
