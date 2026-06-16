@@ -16,7 +16,6 @@ type MatchStat = {
   lost: boolean;
   matchGoals: number;
   matchBonusPoints: number;
-  status: string;
 };
 
 type Player = {

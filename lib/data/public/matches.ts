@@ -119,8 +119,6 @@ export async function getPublicMatchDetail(matchId: number) {
         awayScore: true,
         concludedAt: true,
         mvpOverridePlayerId: true,
-        homeTeamId: true,
-        awayTeamId: true,
         homeSeed: true,
         awaySeed: true,
         homeTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },

@@ -151,6 +151,11 @@ model Match {
   @@index([startsAt])
   @@index([groupId])
   @@index([knockoutRoundId])
+  @@index([status, startsAt])
+  @@index([groupId, status])
+  @@index([knockoutRoundId, status, bracketPosition])
+  @@index([homeTeamId, status, startsAt])
+  @@index([awayTeamId, status, startsAt])
 }
 
 model MatchPlayer {
@@ -192,6 +197,9 @@ model BonusType {
   updatedAt   DateTime           @updatedAt
 
   assignments PlayerMatchBonus[]
+
+  @@index([isSecret, points, name])
+  @@index([isSecret, name])
 }
 
 model PlayerMatchBonus {
@@ -226,6 +234,7 @@ model MatchGoal {
 
   @@index([matchId])
   @@index([scorerId])
+  @@index([scorerId, isOwnGoal])
 }
 
 model FantasyTeamPlayer {
@@ -238,6 +247,7 @@ model FantasyTeamPlayer {
 
   @@id([fantasyTeamId, playerId])
   @@index([playerId])
+  @@index([playerId, fantasyTeamId])
 }
 
 // Finestra di "mercato": periodo in cui gli utenti possono modificare la propria
@@ -354,6 +364,8 @@ model VolleyTeam {
   awayMatches VolleyMatch[]     @relation("VolleyAwayTeam")
   groups      VolleyGroupTeam[]
   createdAt   DateTime          @default(now())
+
+  @@index([name])
 }
 
 model VolleyPlayer {
@@ -364,6 +376,7 @@ model VolleyPlayer {
   createdAt DateTime   @default(now())
 
   @@index([teamId])
+  @@index([teamId, name])
 }
 
 model VolleyMatch {
@@ -385,6 +398,11 @@ model VolleyMatch {
   @@index([awayTeamId])
   @@index([groupId])
   @@index([knockoutRoundId])
+  @@index([status, date])
+  @@index([groupId, status])
+  @@index([knockoutRoundId, status, date])
+  @@index([homeTeamId, status, date])
+  @@index([awayTeamId, status, date])
 }
 
 enum VolleyMatchStatus {
@@ -419,6 +437,7 @@ model VolleyGroupTeam {
   qualified Boolean     @default(false)
 
   @@id([groupId, teamId])
+  @@index([teamId])
 }
 
 model VolleyKnockoutRound {
@@ -426,4 +445,6 @@ model VolleyKnockoutRound {
   name    String
   order   Int
   matches VolleyMatch[]
+
+  @@index([order])
 }

@@ -21,9 +21,7 @@ export type PublicPlayerGridRow = {
   id: number;
   name: string;
   role: string;
-  footballTeamId: number;
   footballTeam: {
-    id: number;
     name: string;
     shortName: string | null;
     countryCode: string | null;
@@ -44,7 +42,6 @@ export type PublicPlayerGridRow = {
     lost: boolean;
     matchGoals: number;
     matchBonusPoints: number;
-    status: string;
   }>;
 };
 
@@ -88,15 +85,14 @@ export async function getPublicScorerRanking(): Promise<PublicScorerRankingRow[]
         },
       }),
       db.matchGoal.findMany({
-        select: { scorerId: true, isOwnGoal: true },
+        where: { isOwnGoal: false },
+        select: { scorerId: true },
       }),
     ]);
 
     const goalMap = new Map<number, number>();
     for (const goal of goals) {
-      if (!goal.isOwnGoal) {
-        goalMap.set(goal.scorerId, (goalMap.get(goal.scorerId) ?? 0) + 1);
-      }
+      goalMap.set(goal.scorerId, (goalMap.get(goal.scorerId) ?? 0) + 1);
     }
 
     return players
@@ -121,7 +117,7 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
           role: true,
           footballTeamId: true,
           footballTeam: {
-            select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
+            select: { name: true, shortName: true, countryCode: true, logoUrl: true },
           },
         },
       }),
@@ -132,7 +128,6 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
             select: {
               id: true,
               startsAt: true,
-              status: true,
               homeScore: true,
               awayScore: true,
               homeTeamId: true,
@@ -154,8 +149,6 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
           playerId: true,
           matchId: true,
           points: true,
-          quantity: true,
-          bonusType: { select: { code: true } },
         },
       }),
     ]);
@@ -221,7 +214,6 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
           lost,
           matchGoals,
           matchBonusPoints,
-          status: match.status,
         };
       });
 
@@ -229,7 +221,6 @@ export async function getPublicPlayersGroups(): Promise<PublicPlayersGroup[]> {
         id: player.id,
         name: player.name,
         role: player.role,
-        footballTeamId: player.footballTeamId,
         footballTeam: player.footballTeam,
         totalGoals,
         totalOwnGoals,

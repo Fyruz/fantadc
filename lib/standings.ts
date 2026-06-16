@@ -191,7 +191,7 @@ export async function computeGroupStandings(groupId: number): Promise<StandingEn
     }),
     db.groupTeam.findMany({
       where: { groupId },
-      include: { footballTeam: { select: { id: true, name: true, shortName: true } } },
+      select: { footballTeam: { select: { id: true, name: true, shortName: true } } },
     }),
   ]);
 
