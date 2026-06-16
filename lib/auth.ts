@@ -36,6 +36,8 @@ const SESSION_MAX_AGE = parseInt(
 ); // 30 days default
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost:
+    process.env.AUTH_TRUST_HOST === "true" || process.env.NODE_ENV !== "production",
   session: { strategy: "jwt", maxAge: SESSION_MAX_AGE },
   providers: [
     Credentials({
