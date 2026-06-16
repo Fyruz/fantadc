@@ -32,6 +32,7 @@ export default function AltroPage() {
         <Item icon={<img src="/icons/medal.svg" width={18} height={18} alt="" />} label="Capocannoniere" href="/classifica-marcatori" />
         <Item icon={<img src="/icons/table.svg" width={18} height={18} alt="" />} label="Gironi" href="/gironi" />
         <Item icon={<img src="/icons/football-player.svg" width={18} height={18} alt="" />} label="Giocatori" href="/giocatori" />
+        <Item icon={<i className="pi pi-star-fill" style={{ color: "#E8A000", fontSize: 16 }} />} label="MVP" href="/mvp" />
       </Section>
 
       {/* Lega */}
