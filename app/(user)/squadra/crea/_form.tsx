@@ -74,7 +74,7 @@ function createEmptySlots(): SlotsState {
   };
 }
 
-export default function CreaSquadraForm({ players }: { players: Player[] }) {
+export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: { players: Player[]; tournamentAlreadyStarted?: boolean }) {
   const router = useRouter();
   const [state, action, pending] = useActionState(createFantasyTeam, undefined);
   const [slots, setSlots] = useState<SlotsState>(() => createEmptySlots());
@@ -221,6 +221,22 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
       action={action}
       className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
     >
+      {/* Avviso torneo già iniziato */}
+      {tournamentAlreadyStarted && (
+        <div
+          className="flex items-start gap-3 rounded-2xl px-4 py-3"
+          style={{
+            background: "rgba(1,7,163,0.05)",
+            border: "1px solid rgba(1,7,163,0.12)",
+          }}
+        >
+          <i className="pi pi-info-circle mt-0.5 shrink-0 text-base" style={{ color: "var(--primary)" }} />
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Il torneo è già iniziato: le partite concluse prima della tua iscrizione non verranno conteggiate nel punteggio della tua squadra.
+          </p>
+        </div>
+      )}
+
       {/* Mobile: nome squadra + link regole */}
       <div className="flex flex-col items-center gap-1.5 lg:hidden">
         <InputText
@@ -549,6 +565,21 @@ export default function CreaSquadraForm({ players }: { players: Player[] }) {
             <div className="rounded-2xl px-4 py-3 text-sm leading-relaxed" style={{ background: "rgba(232,160,0,0.10)", color: "var(--text-secondary)" }}>
               Controlla bene nomi, squadre e capitano. Questa scelta diventa definitiva appena premi conferma.
             </div>
+
+            {tournamentAlreadyStarted && (
+              <div
+                className="flex items-start gap-3 rounded-2xl px-4 py-3"
+                style={{
+                  background: "rgba(1,7,163,0.05)",
+                  border: "1px solid rgba(1,7,163,0.12)",
+                }}
+              >
+                <i className="pi pi-info-circle mt-0.5 shrink-0 text-sm" style={{ color: "var(--primary)" }} />
+                <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  Il torneo è già iniziato: le partite concluse prima della tua iscrizione non verranno conteggiate nel punteggio della tua squadra.
+                </p>
+              </div>
+            )}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row">
               <Button

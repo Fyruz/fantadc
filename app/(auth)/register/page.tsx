@@ -1,11 +1,15 @@
 import Link from "next/link";
 import { getRegistrationOpen } from "@/lib/app-settings";
+import { hasConcludedMatches } from "@/lib/scoring";
 import RegisterForm from "./_form";
 
 export const dynamic = "force-dynamic";
 
 export default async function RegisterPage() {
-  const registrationOpen = await getRegistrationOpen();
+  const [registrationOpen, tournamentStarted] = await Promise.all([
+    getRegistrationOpen(),
+    hasConcludedMatches(),
+  ]);
 
   if (!registrationOpen) {
     return (
@@ -42,5 +46,23 @@ export default async function RegisterPage() {
     );
   }
 
-  return <RegisterForm />;
+  return (
+    <div className="flex flex-col gap-4">
+      {tournamentStarted && (
+        <div
+          className="flex items-start gap-3 rounded-2xl px-4 py-3"
+          style={{
+            background: "rgba(1,7,163,0.05)",
+            border: "1px solid rgba(1,7,163,0.12)",
+          }}
+        >
+          <i className="pi pi-info-circle mt-0.5 shrink-0 text-base" style={{ color: "var(--primary)" }} />
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+            Il torneo è già iniziato: le partite concluse prima della tua iscrizione non verranno conteggiate nel punteggio della tua squadra.
+          </p>
+        </div>
+      )}
+      <RegisterForm />
+    </div>
+  );
 }
