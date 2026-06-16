@@ -3,9 +3,6 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Accordion, AccordionTab } from "primereact/accordion";
-import { IconField } from "primereact/iconfield";
-import { InputIcon } from "primereact/inputicon";
-import { InputText } from "primereact/inputtext";
 
 type Row = {
   id: number;
@@ -146,18 +143,23 @@ export default function UtentiTable({ admins, users }: { admins: Row[]; users: R
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col">
       {/* Toolbar: ricerca + ordinamento */}
-      <div className="flex flex-col gap-2">
-        <IconField iconPosition="left">
-          <InputIcon className="pi pi-search" />
-          <InputText
+      <div className="flex flex-col gap-2 mb-6">
+        <div className="relative">
+          <i
+            className="pi pi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cerca per nome o email…"
-            className="w-full"
+            className="input pl-9 pr-3"
+            style={{ fontSize: 16 }}
           />
-        </IconField>
+        </div>
 
         <div className="flex gap-1.5">
           {(["oldest", "newest"] as const).map((opt) => {
