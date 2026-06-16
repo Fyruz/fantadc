@@ -71,6 +71,7 @@
 * non esiste il concetto di giornata
 * deve esistere uno storico punteggi per partita
 * il dettaglio dei bonus assegnati deve essere consultabile
+* **una squadra fanta accumula punti solo dalle partite concluse a partire dalla propria `createdAt`** (`FantasyTeam.createdAt`): le partite e le fasi concluse prima dell'iscrizione non vengono conteggiate (contribuiscono 0); il confine e incluso (`concludedAt >= createdAt` conta). Lo storico mostra queste partite con una nota "Precedente all'iscrizione — non conteggiata" e totale 0. In fase di registrazione e di creazione squadra viene mostrato un avviso se il torneo e gia in corso.
 
 ### Fasi del torneo
 
