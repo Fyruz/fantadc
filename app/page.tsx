@@ -10,6 +10,8 @@ import PublicNav from "@/components/public-nav";
 import { resolveTeamFlag } from "@/lib/flags";
 import { buildGroupStandings } from "@/lib/standings";
 import { getMatchClockNow, LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
+import { getCurrentUser } from "@/lib/session";
+import { getPendingOpenMvpVotes } from "@/lib/pending-mvp-votes";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -42,7 +44,8 @@ export default async function HomePage({
 
   const matchClockNow = getMatchClockNow();
 
-  const [liveMatches, upcomingMatches, groups, topScorers] = await Promise.all([
+  const user = await getCurrentUser();
+  const [liveMatches, upcomingMatches, groups, topScorers, pendingMvpVotes] = await Promise.all([
     // Partite in diretta: programmate e iniziate negli ultimi 120 minuti (possono essere più di una in contemporanea).
     db.match.findMany({
       where: {
@@ -94,6 +97,8 @@ export default async function HomePage({
         _count: { select: { goals: { where: { isOwnGoal: false } } } },
       },
     }),
+    // Voti MVP pendenti (solo per utenti loggati)
+    user ? getPendingOpenMvpVotes(Number(user.id)) : Promise.resolve([]),
   ]);
 
   const groupStandings = groups.map((g) => ({
@@ -243,8 +248,71 @@ export default async function HomePage({
           </div>
         </section> */}
 
-          {/* ══ HINT VOTO MVP ═════════════════════════════════════════ */}
-          <MvpVoteHintCard />
+          {/* ══ BANNER VOTO MVP APERTO ════════════════════════════════ */}
+          {pendingMvpVotes.length > 0 ? (
+            <section className="max-w-lg mx-auto w-full px-4 mt-10">
+              <div
+                className="rounded-3xl overflow-hidden"
+                style={{ background: "linear-gradient(135deg, #B8790A 0%, #E8A000 60%, #F5B930 100%)", boxShadow: "0 6px 28px rgba(232,160,0,0.40)" }}
+              >
+                {/* Header */}
+                <div className="px-6 pt-6 pb-4 flex items-center gap-4">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(255,255,255,0.22)" }}
+                  >
+                    <i className="pi pi-star-fill" style={{ color: "#fff", fontSize: 22 }} />
+                  </div>
+                  <div>
+                    <p className="text-white/70 text-[10px] font-bold uppercase tracking-widest mb-0.5">
+                      {pendingMvpVotes.length === 1 ? "Finestra voto aperta" : `${pendingMvpVotes.length} finestre aperte`}
+                    </p>
+                    <p
+                      className="font-black text-2xl uppercase leading-tight text-white"
+                      style={{ fontFamily: "var(--font-tallica)" }}
+                    >
+                      {pendingMvpVotes.length === 1 ? "Vota il tuo MVP" : "Vota i tuoi MVP"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Matches */}
+                <div className="px-4 pb-4 flex flex-col gap-2">
+                  {pendingMvpVotes.map((vote) => (
+                    <Link
+                      key={vote.matchId}
+                      href={`/vota/${vote.matchId}`}
+                      className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3.5 transition-opacity active:opacity-75"
+                      style={{ background: "rgba(255,255,255,0.20)" }}
+                    >
+                      <span
+                        className="font-black text-sm uppercase text-white truncate flex-1"
+                        style={{ fontFamily: "var(--font-tallica)" }}
+                      >
+                        {vote.title}
+                      </span>
+                      <span
+                        className="flex items-center gap-1.5 rounded-full px-3 py-1.5 flex-shrink-0 font-black text-[11px] uppercase tracking-wide"
+                        style={{ background: "#fff", color: "#06073D" }}
+                      >
+                        <i className="pi pi-star-fill" style={{ color: "#C48A00", fontSize: 10 }} />
+                        Vota
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+
+                {/* Footer hint */}
+                <div className="px-6 pb-5">
+                  <p className="text-white/60 text-xs">
+                    Hai <span className="font-bold text-white">2 ore</span> dalla fine della partita. L&apos;MVP riceve punti bonus!
+                  </p>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <MvpVoteHintCard />
+          )}
 
           {/* ══ PARTITE LIVE ══════════════════════════════════════════ */}
           {(() => {
