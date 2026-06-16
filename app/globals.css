@@ -313,7 +313,7 @@ html {
   border-radius: 12px !important;
   min-height: 44px !important;
   padding: 0 0.875rem !important;
-  font-size: 0.9375rem !important;
+  font-size: 1rem !important;
   transition: border-color 0.15s ease !important;
 }
 .p-inputtext::placeholder { color: var(--text-muted) !important; }

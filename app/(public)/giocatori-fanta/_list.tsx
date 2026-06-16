@@ -18,11 +18,11 @@ export default function PlayerPickList({ rows }: { rows: PlayerPickRowData[] }) 
   }, [rows, search]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col">
       {/* Search */}
-      <div className="relative">
+      <div className="relative mb-6">
         <i
-          className="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none"
+          className="pi pi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none"
           style={{ color: "rgba(0,0,0,0.35)" }}
         />
         <input
@@ -30,11 +30,12 @@ export default function PlayerPickList({ rows }: { rows: PlayerPickRowData[] }) 
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cerca giocatore o squadra…"
-          className="w-full rounded-xl border py-2.5 pl-8 pr-3 text-sm outline-none transition-colors"
+          className="w-full rounded-xl border py-2.5 pl-9 pr-3 outline-none transition-colors"
           style={{
             borderColor: "rgba(9,20,76,0.12)",
             background: "#fff",
             color: "var(--text-primary)",
+            fontSize: 16,
           }}
         />
       </div>
@@ -54,7 +55,7 @@ export default function PlayerPickList({ rows }: { rows: PlayerPickRowData[] }) 
           Nessun giocatore trovato.
         </p>
       ) : (
-        <div className="flex flex-col">
+        <div className="flex flex-col mt-3">
           {filtered.map((row, idx) => (
             <PlayerPickRow key={row.playerId} row={row} isLast={idx === filtered.length - 1} />
           ))}
