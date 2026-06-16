@@ -1,6 +1,6 @@
 import BackButton from "@/components/back-button";
 import { getPublicFantasyPlayerPickRows } from "@/lib/data/public/players";
-import PlayerPickRow from "./_player-row";
+import PlayerPickList from "./_list";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -32,23 +32,7 @@ export default async function GiocatoriFantaPage() {
         <div className="flex-1" />
       </div>
 
-      <div className="flex flex-col gap-3">
-      {/* Column headers */}
-      <div
-        className="flex items-center justify-between pb-3"
-        style={{ borderBottom: "1px solid rgba(9,20,76,0.1)" }}
-      >
-        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>Rank</span>
-        <span className="text-xs uppercase" style={{ color: "rgba(0,0,0,0.65)" }}>Preso</span>
-      </div>
-
-      {/* Rows */}
-      <div className="flex flex-col">
-        {rows.map((row, idx) => (
-          <PlayerPickRow key={row.playerId} row={row} isLast={idx === rows.length - 1} />
-        ))}
-      </div>
-      </div>
+      <PlayerPickList rows={rows} />
     </div>
   );
 }
