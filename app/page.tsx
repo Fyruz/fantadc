@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 import MobileOnlyGate from "@/components/mobile-only-gate";
 import MvpVoteHintCard from "@/components/mvp-vote-hint-card";
+import MvpVoteBanner from "@/components/mvp-vote-banner";
 import LiveMatchCard from "@/components/live-match-card";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
@@ -250,59 +251,7 @@ export default async function HomePage({
 
           {/* ══ BANNER VOTO MVP APERTO ════════════════════════════════ */}
           {pendingMvpVotes.length > 0 ? (
-            <section className="max-w-lg mx-auto w-full px-4 mt-10">
-              <div
-                className="bg-white rounded-3xl overflow-hidden"
-                style={{
-                  border: "1.5px solid #E8A000",
-                  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
-                }}
-              >
-                {/* Header */}
-                <div className="flex items-center gap-3 px-5 py-4" style={{ borderBottom: "1px solid rgba(232,160,0,0.20)" }}>
-                  <span
-                    className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-                    style={{ background: "rgba(232,160,0,0.12)" }}
-                  >
-                    <i className="pi pi-star-fill" style={{ color: "#E8A000", fontSize: 16 }} />
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className="uppercase font-medium leading-snug"
-                      style={{ fontFamily: "var(--font-tallica)", fontSize: 18, color: "var(--text-primary)" }}
-                    >
-                      {pendingMvpVotes.length === 1 ? "Vota il tuo MVP" : "Vota i tuoi MVP"}
-                    </p>
-                    <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                      Hai 2 ore dalla fine della partita
-                    </p>
-                  </div>
-                </div>
-
-                {/* Matches */}
-                {pendingMvpVotes.map((vote, idx) => (
-                  <Link
-                    key={vote.matchId}
-                    href={`/vota/${vote.matchId}`}
-                    className="flex items-center justify-between gap-3 px-5 py-4 hover:bg-[var(--surface-1)] transition-colors"
-                    style={idx < pendingMvpVotes.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
-                  >
-                    <span
-                      className="text-sm font-semibold uppercase truncate flex-1"
-                      style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
-                    >
-                      {vote.title}
-                    </span>
-                    <span
-                      className="shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide text-white"
-                      style={{ background: "var(--text-primary)" }}
-                    >
-                      Vota
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </section>
+            <MvpVoteBanner votes={pendingMvpVotes} />
           ) : (
             <MvpVoteHintCard />
           )}

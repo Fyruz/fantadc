@@ -265,7 +265,7 @@ export default function VoteForm({
             className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
             style={{
               borderRadius: "24px 24px 0 0",
-              maxHeight: "90svh",
+              height: "80svh",
               transform: animIn ? "translateY(0)" : "translateY(100%)",
               transition: "transform 0.3s cubic-bezier(0.32,0.72,0,1)",
             }}

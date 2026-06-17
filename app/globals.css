@@ -589,8 +589,7 @@ html {
   background: transparent !important;
   color: var(--text-primary) !important;
   border-bottom: 1px solid var(--border-soft) !important;
-}
-.p-dialog .p-dialog-content {
+}.p-dialog .p-dialog-content {
   background: transparent !important;
   color: var(--text-primary) !important;
 }
