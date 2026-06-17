@@ -89,7 +89,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
           style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
           <p
-            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+            className="uppercase text-(--text-primary) text-base leading-8.5 font-medium"
             style={{ fontFamily: "var(--font-tallica)" }}
           >
             {count === 1 ? "Vota il tuo MVP" : "Vota i tuoi MVP"}
@@ -97,7 +97,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
           <p className="text-sm text-black font-normal">
             {count === 1
               ? "È aperta la votazione per una partita. Hai 2 ore dalla fine."
-              : <>{`Hai ${count} votazioni aperte.`}<br />{"Vota il migliore in campo per ogni partita."}</>}
+              : <>{"Hai "}<strong>{count}</strong>{" votazioni aperte."}<br />{"Vota il migliore in campo per ogni partita."}</>}
           </p>
           <button
             type="button"
