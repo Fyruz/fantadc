@@ -89,8 +89,8 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
           style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
           <p
-            className="uppercase font-medium"
-            style={{ fontFamily: "var(--font-tallica)", fontSize: 18, color: "var(--text-primary)" }}
+            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+            style={{ fontFamily: "var(--font-tallica)" }}
           >
             {count === 1 ? "Vota il tuo MVP" : "Vota i tuoi MVP"}
           </p>
