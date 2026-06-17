@@ -58,7 +58,7 @@ export default function MvpVoteHintCard() {
             <i className="pi pi-star-fill" style={{ color: "var(--primary)", fontSize: 18 }} />
           </span>
           <p
-            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
+            className="uppercase text-(--text-primary) text-base leading-8.5 font-medium"
             style={{ fontFamily: "var(--font-tallica)" }}
           >
             Vota il tuo MVP
