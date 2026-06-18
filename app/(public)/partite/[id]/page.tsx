@@ -171,10 +171,10 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               {mvpTeam && (() => {
                 const f = resolveTeamFlag(mvpTeam);
                 return f
-                  ? <img src={f} alt={mvpTeam.name} width={40} height={27} className="object-contain block" />
-                  : <div className="w-10 h-[27px] rounded bg-primary flex items-center justify-center text-white text-[9px] font-black">{mvpTeam.name.slice(0, 2).toUpperCase()}</div>;
+                  ? <img src={f} alt={mvpTeam.name} width={40} height={27} />
+                  : <div className="w-10 h-6.75 rounded bg-primary flex items-center justify-center text-white text-[9px] font-black">{mvpTeam.name.slice(0, 2).toUpperCase()}</div>;
               })()}
-              <img src="/icons/star.svg" alt="" width={8} height={8} className="absolute" style={{ top: -4, right: -4 }} />
+              <img src="/icons/star.svg" alt="" width={12} height={12} className="absolute" style={{ top: -6, right: -6 }} />
             </div>
             {/* Name + team */}
             <div className="flex flex-col items-center gap-1">
