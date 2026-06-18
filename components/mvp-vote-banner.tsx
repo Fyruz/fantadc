@@ -159,7 +159,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
             <div className="flex flex-col gap-6 overflow-y-auto px-4 pb-10">
               {groups.map((group) => (
                 <div key={group.label} className="flex flex-col">
-                  <p className="text-xs text-center mb-3 capitalize" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs text-center mb-3 capitalize">
                     {group.label}
                   </p>
                   <div className="flex flex-col">
@@ -173,7 +173,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                           key={vote.matchId}
                           type="button"
                           onClick={() => navigateTo(`/vota/${vote.matchId}`)}
-                          className="relative flex items-center py-4 hover:bg-(--surface-1) transition-colors -mx-4 px-4 text-left w-full"
+                          className="relative flex items-center py-5 px-4 w-full"
                           style={idx < group.items.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
                         >
                           <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
@@ -184,7 +184,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                           </div>
 
                           <span
-                            className="shrink-0 text-sm font-semibold tabular-nums mx-4"
+                            className="shrink-0 text-sm font-semibold tabular-nums mx-5"
                             style={{ color: "var(--text-primary)", minWidth: 32, textAlign: "center" }}
                           >
                             {scored ? `${vote.homeScore}-${vote.awayScore}` : "vs"}
