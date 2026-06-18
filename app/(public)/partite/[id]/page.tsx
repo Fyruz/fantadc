@@ -161,15 +161,25 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
       {/* ── MVP ufficiale ───────────────────────────────────────────── */}
       {mvpPlayer && (
         <div
-          className="bg-white rounded-3xl p-6 flex items-center gap-4"
+          className="bg-white rounded-3xl p-6 flex flex-col items-center gap-5"
           style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
         >
-          <img src="/images/mvp.webp" alt="MVP" className="shrink-0" />
-          <div>
-            <p className="text-xs mb-1" style={{ color: "rgba(0,0,0,0.40)" }}>MVP della partita</p>
-            <div className="flex items-center gap-2">
-              {mvpTeam && (() => { const f = resolveTeamFlag(mvpTeam); return f ? <img src={f} alt={mvpTeam.name} width={24} height={16} className="object-contain shrink-0" /> : null; })()}
-              <p className="text-base font-semibold" style={{ color: "var(--text-primary)" }}>{mvpPlayer.name}</p>
+          <p className="text-base text-black text-center">Player of the Match</p>
+          <div className="flex flex-col items-center gap-3">
+            {/* Flag + star */}
+            <div className="relative inline-block">
+              {mvpTeam && (() => {
+                const f = resolveTeamFlag(mvpTeam);
+                return f
+                  ? <img src={f} alt={mvpTeam.name} width={40} height={27} className="object-contain block" />
+                  : <div className="w-10 h-[27px] rounded bg-primary flex items-center justify-center text-white text-[9px] font-black">{mvpTeam.name.slice(0, 2).toUpperCase()}</div>;
+              })()}
+              <img src="/icons/star.svg" alt="" width={8} height={8} className="absolute" style={{ top: -4, right: -4 }} />
+            </div>
+            {/* Name + team */}
+            <div className="flex flex-col items-center gap-1">
+              <p className="text-sm font-medium text-black text-center">{mvpPlayer.name}</p>
+              {mvpTeam && <p className="text-xs text-center" style={{ color: "rgba(0,0,0,0.75)" }}>{mvpTeam.name}</p>}
             </div>
           </div>
         </div>
