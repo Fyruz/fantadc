@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { resolveTeamFlag } from "@/lib/flags";
 
 type TeamInfo = {
@@ -57,6 +57,7 @@ function groupByDate(votes: PendingVote[]): { label: string; items: PendingVote[
 }
 
 export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [animIn, setAnimIn] = useState(false);
   const count = votes.length;
@@ -79,6 +80,11 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
   function closeSheet() {
     setAnimIn(false);
     setTimeout(() => setMounted(false), 300);
+  }
+
+  function navigateTo(href: string) {
+    setAnimIn(false);
+    setTimeout(() => { setMounted(false); router.push(href); }, 300);
   }
 
   return (
@@ -163,11 +169,11 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                       const scored = vote.homeScore !== null && vote.awayScore !== null;
 
                       return (
-                        <Link
+                        <button
                           key={vote.matchId}
-                          href={`/vota/${vote.matchId}`}
-                          onClick={closeSheet}
-                          className="relative flex items-center py-4 hover:bg-(--surface-1) transition-colors -mx-4 px-4"
+                          type="button"
+                          onClick={() => navigateTo(`/vota/${vote.matchId}`)}
+                          className="relative flex items-center py-4 hover:bg-(--surface-1) transition-colors -mx-4 px-4 text-left w-full"
                           style={idx < group.items.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
                         >
                           <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
@@ -192,7 +198,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                           </div>
 
                           <i className="pi pi-chevron-right absolute right-4 text-xs" style={{ color: "var(--text-muted)" }} />
-                        </Link>
+                        </button>
                       );
                     })}
                   </div>
