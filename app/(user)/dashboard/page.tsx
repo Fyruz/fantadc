@@ -3,13 +3,21 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
-import { computeTeamHistory, getTeamPhaseBreakdown } from "@/lib/scoring";
-import { isMvpWindowOpen, MVP_WINDOW_MS } from "@/lib/domain/vote";
+import { getTeamPhaseBreakdown, computeCumulativeRankings } from "@/lib/scoring";
 import { getActiveEditWindow } from "@/lib/roster-edit-window";
-import { resolveTeamFlag } from "@/lib/flags";
-import ScoreTable from "../squadra/_score-table";
-import { Button } from "primereact/button";
-import ShareStoryButton from "../squadra/_share-story-button";
+import { getPublicMvpData } from "@/lib/data/public/mvp";
+
+const CARD: React.CSSProperties = {
+  background: "#fff",
+  border: "1px solid rgba(9,20,76,0.05)",
+  boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)",
+};
+
+const DARK_CARD: React.CSSProperties = {
+  background: "#0F195A",
+  border: "1px solid rgba(255,255,255,0.07)",
+  boxShadow: "0 4px 10px 0 rgba(0,0,0,0.4)",
+};
 
 export default async function DashboardPage() {
   const user = await requireAuth();
@@ -17,36 +25,11 @@ export default async function DashboardPage() {
 
   const fantasyTeam = await db.fantasyTeam.findUnique({
     where: { userId },
-    include: {
-      players: {
-        include: {
-          player: {
-            select: {
-              id: true,
-              name: true,
-              role: true,
-              footballTeam: {
-                select: {
-                  name: true,
-                  shortName: true,
-                  countryCode: true,
-                  logoUrl: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    select: { id: true, name: true },
   });
 
-  if (!fantasyTeam) {
-    redirect(AUTH_ONBOARDING_PATH);
-  }
+  if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
-  const history = await computeTeamHistory(fantasyTeam.id);
-
-  // Finestra di modifica rosa ("mercato")
   const editWindow = await getActiveEditWindow();
   let changesLeft = 0;
   if (editWindow) {
@@ -66,313 +49,167 @@ export default async function DashboardPage() {
       })
     : null;
 
-  // Punti per fase
-  const phaseBreakdown = await getTeamPhaseBreakdown(fantasyTeam.id);
-  const hasClosedPhases = phaseBreakdown.some((p) => !p.current);
-
-  const voteCutoff = new Date(Date.now() - MVP_WINDOW_MS);
-  const [recentConcludedMatches, expressedVotes] = await Promise.all([
-    db.match.findMany({
-      where: {
-        status: "CONCLUDED",
-        concludedAt: { not: null, gte: voteCutoff },
-      },
-      orderBy: { concludedAt: "desc" },
-      include: {
-        homeTeam: { select: { name: true } },
-        awayTeam: { select: { name: true } },
-      },
-    }),
-    db.vote.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
-      include: {
-        player: { select: { name: true } },
-        match: {
-          select: {
-            id: true,
-            startsAt: true,
-            homeSeed: true,
-            awaySeed: true,
-            homeTeam: { select: { name: true } },
-            awayTeam: { select: { name: true } },
-          },
-        },
-      },
-    }),
+  const [phaseBreakdown, rankings, mvpData] = await Promise.all([
+    getTeamPhaseBreakdown(fantasyTeam.id),
+    computeCumulativeRankings(),
+    getPublicMvpData(),
   ]);
 
-  const openMatches = recentConcludedMatches.filter((match) =>
-    isMvpWindowOpen(match.concludedAt)
-  );
-  const votedMatchIds = new Set(expressedVotes.map((vote) => vote.matchId));
-  const pendingOpenMatches = openMatches.filter((match) => !votedMatchIds.has(match.id));
+  const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
+  const userRank = rankings.find((r) => r.fantasyTeamId === fantasyTeam.id)?.rank ?? null;
+  const mvpMatches = mvpData.byMatch;
 
   return (
     <div className="flex flex-col gap-10">
+
       {/* Header */}
-      <div>
-        <div className="over-label mb-0.5">Bentornato</div>
-        <h1 className="font-display font-black text-3xl uppercase" style={{ color: "var(--text-primary)" }}>
-          {user.name ? user.name.toUpperCase() : user.email.split("@")[0].toUpperCase()}
+      <div className="flex items-center justify-between">
+        <h1
+          className="text-xl font-medium uppercase whitespace-nowrap"
+          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
+        >
+          La mia rosa
         </h1>
+        <Link
+          href="/account"
+          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+          style={{ background: "rgba(9,20,76,0.06)" }}
+        >
+          <i className="pi pi-user" style={{ fontSize: 18, color: "var(--text-primary)" }} />
+        </Link>
       </div>
 
-      {/* Banner finestra di modifica rosa aperta */}
+      {/* Banner mercato aperto */}
       {editWindow && (
-        <div
-          className="flex flex-col gap-3 bg-white rounded-3xl p-6"
-          style={{ border: "1px solid rgba(9,20,76,0.05)", boxShadow: "0 4px 10px 0 rgba(9,20,76,0.10)" }}
-        >
-          <p
-            className="uppercase text-(--text-primary) text-base leading-[34px] font-medium"
-            style={{ fontFamily: "var(--font-tallica)" }}
+        <div className="rounded-3xl p-6 flex flex-col gap-4" style={CARD}>
+          <h2
+            className="text-base font-medium uppercase"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", lineHeight: "34px" }}
           >
             Mercato aperto
-          </p>
-          <p className="text-sm text-black font-normal">
-            Hai <strong>{changesLeft}/{editWindow.maxChanges} cambi</strong> disponibili.<br/>
+          </h2>
+          <p className="text-sm text-black">
+            Hai <strong>{changesLeft}/{editWindow.maxChanges} cambi</strong> disponibili.
             La finestra chiude il <strong>{editWindowClosesAt}</strong>.
           </p>
           <Link
             href="/squadra/modifica"
-            className="flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold text-white"
+            className="flex items-center justify-center rounded-lg py-2 w-full"
             style={{ background: "var(--text-primary)" }}
           >
-            Modifica rosa
+            <span className="text-xs text-white">Modifica rosa</span>
           </Link>
         </div>
       )}
 
-      {/* Squadra */}
-      <div
-        className="rounded-[18px] p-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(145deg, #0107A3 0%, #000669 100%)", boxShadow: "0 6px 24px rgba(1,7,163,0.30)" }}
-      >
-        <div className="absolute right-[-20px] bottom-[-20px] w-28 h-28 rounded-full border border-white/5 pointer-events-none" />
-        <div className="relative">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="text-[9px] font-bold uppercase tracking-widest text-white/50 mb-1">La mia squadra</div>
-              <div className="font-display font-black text-xl uppercase text-white">{fantasyTeam.name}</div>
-            </div>
-            <Link href="/squadra" className="text-[10px] font-bold uppercase tracking-wide text-white/60 hover:text-white transition-colors mt-1">
-              VEDI →
-            </Link>
+      {/* Promo card (solo se mercato chiuso) */}
+      {!editWindow && (
+        <div className="rounded-3xl p-6 flex flex-col gap-4" style={CARD}>
+          <h2
+            className="text-base font-medium uppercase"
+            style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)", lineHeight: "34px" }}
+          >
+            Scopri l&apos;andamento della tua squadra
+          </h2>
+          <p className="text-sm text-black">
+            La competizione è entrata nel vivo. Come sta andando la tua squadra?
+          </p>
+          <Link
+            href={`/squadre-fanta/${fantasyTeam.id}`}
+            className="flex items-center justify-center rounded-lg py-2 w-full"
+            style={{ background: "var(--text-primary)" }}
+          >
+            <span className="text-xs text-white">Vedi squadra</span>
+          </Link>
+        </div>
+      )}
+
+      {/* Stats card */}
+      <div className="rounded-3xl overflow-hidden" style={CARD}>
+        <div
+          className="px-6 py-4"
+          style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}
+        >
+          <p className="text-base font-medium text-black">{fantasyTeam.name}</p>
+        </div>
+        <div className="flex items-center gap-6 px-6 py-4">
+          <div className="flex flex-col gap-2 flex-1 items-start">
+            <p className="text-[10px] text-black">Pti totali</p>
+            <p className="text-base font-semibold text-black leading-6 tabular-nums">
+              {totalPoints.toFixed(1)}
+            </p>
           </div>
-          <div className="grid grid-cols-1 gap-2">
-            {fantasyTeam.players.map(({ player }) => {
-              const isCaptain = player.id === fantasyTeam.captainPlayerId;
-              const flagSrc = resolveTeamFlag(player.footballTeam);
+          <div className="w-px self-stretch" style={{ background: "rgba(9,20,76,0.05)" }} />
+          <div className="flex flex-col gap-2 flex-1 items-start">
+            <p className="text-[10px] text-black">Classifica globale</p>
+            <p className="text-base font-semibold text-black leading-6 tabular-nums">
+              {userRank ?? "—"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Player of the Match */}
+      {mvpMatches.length > 0 && (
+        <div className="rounded-3xl p-6 flex flex-col gap-5" style={CARD}>
+          <p className="text-base font-medium text-black">Player of the Match</p>
+
+          <div
+            className="flex gap-3 overflow-x-auto -mx-6 px-6 pb-1"
+            style={{ scrollbarWidth: "none" } as React.CSSProperties}
+          >
+            {mvpMatches.map((m) => {
+              const parts = m.label.split(" vs ");
               return (
                 <div
-                  key={player.id}
-                  className="flex items-center gap-2 rounded-2xl px-3 py-2"
-                  style={isCaptain
-                    ? { background: "rgba(232,160,0,0.15)", border: "1px solid #E8A000", color: "#E8A000" }
-                    : { background: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.18)", color: "rgba(255,255,255,0.9)" }
-                  }
+                  key={m.matchId}
+                  className="flex flex-col items-center justify-center gap-4 p-4 rounded-2xl shrink-0 w-32"
+                  style={DARK_CARD}
                 >
-                  <div
-                    className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10"
-                    style={{ border: "1px solid rgba(255,255,255,0.16)" }}
-                  >
-                    {flagSrc ? (
-                      <img
-                        src={flagSrc}
-                        alt={player.footballTeam.name}
-                        className="h-5 w-5 rounded-sm object-contain"
-                      />
-                    ) : (
-                      <span className="text-[9px] font-black text-white/70">
-                        {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      {isCaptain && <span className="text-[10px]">★</span>}
-                      <span className="truncate text-xs font-black uppercase leading-tight">
-                        {player.name}
+                  {m.mvpPlayer.flagSrc ? (
+                    <img src={m.mvpPlayer.flagSrc} alt={m.mvpPlayer.footballTeamName} width={40} height={27} />
+                  ) : (
+                    <div
+                      className="w-10 h-[27px] rounded flex items-center justify-center"
+                      style={{ background: "rgba(255,255,255,0.10)" }}
+                    >
+                      <span className="text-[9px] font-bold text-white">
+                        {m.mvpPlayer.footballTeamName.slice(0, 3).toUpperCase()}
                       </span>
                     </div>
-                    <div className="truncate text-[10px] font-medium" style={{ color: isCaptain ? "rgba(232,160,0,0.75)" : "rgba(255,255,255,0.55)" }}>
-                      {player.footballTeam.shortName ?? player.footballTeam.name}
-                    </div>
+                  )}
+                  <div className="flex flex-col items-center gap-1 text-center w-full">
+                    <p className="text-xs text-white font-normal truncate max-w-full">{m.mvpPlayer.name}</p>
+                    <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.75)" }}>
+                      <span className="font-semibold text-white">{parts[0]}</span>
+                      {parts[1] ? ` · ${parts[1]}` : ""}
+                    </p>
                   </div>
-                  <span className="shrink-0 rounded-full px-2 py-1 text-[9px] font-black uppercase" style={{ background: "rgba(255,255,255,0.10)" }}>
-                    {player.role === "P" ? "POR" : "ATT"}
-                  </span>
                 </div>
               );
             })}
-          </div>
-          <div className="mt-3 border-t border-white/10 pt-3">
-            <ShareStoryButton teamId={fantasyTeam.id} variant="subtle" />
-          </div>
-        </div>
-      </div>
 
-      {/* Punti per fase */}
-      {hasClosedPhases && (
-        <div className="card overflow-hidden">
-          <div className="px-4 pt-3 pb-2" style={{ borderBottom: "1px solid var(--border-soft)" }}>
-            <div className="over-label">Punti per fase</div>
-          </div>
-          {phaseBreakdown.map((p, index) => (
-            <div
-              key={p.phaseId ?? "current"}
-              className="flex items-center justify-between gap-3 px-4 py-2.5"
-              style={index < phaseBreakdown.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
+            <Link
+              href="/mvp"
+              className="flex items-center justify-center p-4 rounded-2xl shrink-0 w-32 self-stretch text-center"
+              style={DARK_CARD}
             >
-              <div className="flex items-center gap-2 min-w-0">
-                <span className="text-[13px] font-display font-black uppercase truncate" style={{ color: "var(--text-primary)" }}>
-                  {p.name}
-                </span>
-                {p.current && (
-                  <span className="text-[9px] font-bold uppercase tracking-wide shrink-0" style={{ color: "#1A7F37" }}>
-                    in corso
-                  </span>
-                )}
-              </div>
-              <span className="font-display font-black text-sm tabular-nums shrink-0" style={{ color: "var(--primary)" }}>
-                {p.points.toFixed(1)} pt
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Vota MVP */}
-      {pendingOpenMatches.length > 0 && (
-        <div className="card overflow-hidden">
-          <div className="px-4 pt-3 pb-2 flex items-center justify-between" style={{ borderBottom: "1px solid var(--border-soft)" }}>
-            <div className="over-label">Vota MVP</div>
-            <span className="text-[9px] font-bold uppercase tracking-wide" style={{ color: "#E8A000" }}>
-              {pendingOpenMatches.length} aperti
-            </span>
-          </div>
-          {pendingOpenMatches.map((m, index) => {
-            return (
-              <div
-                key={m.id}
-                className="flex items-center justify-between gap-3 px-4 py-3"
-                style={index < pendingOpenMatches.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : {}}
-              >
-                <div className="font-display font-black text-[12px] uppercase min-w-0 flex-1" style={{ color: "var(--text-primary)" }}>
-                  {m.homeTeam?.name ?? m.homeSeed ?? "TBD"}{" "}
-                  <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span>{" "}
-                  {m.awayTeam?.name ?? m.awaySeed ?? "TBD"}
-                </div>
-                <Link href={`/vota/${m.id}`} className="flex-shrink-0">
-                  <Button
-                    type="button"
-                    label="VOTA"
-                    className="rounded-full font-black text-[10px] uppercase tracking-wide px-3 py-1.5 whitespace-nowrap"
-                    style={{ background: "#E8A000", color: "#06073D", boxShadow: "0 2px 6px rgba(232,160,0,0.35)" }}
-                  />
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {pendingOpenMatches.length === 0 && (
-        <div className="card px-4 py-3">
-          <div className="over-label">Vota MVP</div>
-          <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-            Nessuna partita con votazione aperta in questo momento.
-          </p>
-        </div>
-      )}
-
-      {/* Storico punteggi */}
-      {history.length > 0 && (
-        <div>
-          <div className="over-label mb-3">Storico punteggi</div>
-          <div className="flex flex-col gap-2">
-            {history.map((ms) => (
-              <details key={ms.matchId} className="group overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-white">
-                <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]">
-                  <div className="flex items-center gap-2">
-                    <i className="pi pi-chevron-right text-[10px] text-[var(--text-muted)] transition-transform group-open:rotate-90" />
-                    <span className="font-display text-[13px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
-                      {ms.label}
-                    </span>
-                  </div>
-                  <span className="font-display text-base font-black" style={{ color: "var(--primary)" }}>
-                    {ms.total.toFixed(1)} pt
-                  </span>
-                </summary>
-                <div className="px-4 pb-3.5 pt-1">
-                  {ms.playerScores.some((ps) => ps.played) ? (
-                    <ScoreTable rows={ms.playerScores.filter((ps) => ps.played)} />
-                  ) : (
-                    <p className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                      Nessun giocatore della tua rosa risulta presente in questa partita.
-                    </p>
-                  )}
-                </div>
-              </details>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Storico voti MVP */}
-      <div>
-        <div className="over-label mb-3">Voti espressi</div>
-        <details className="group overflow-hidden rounded-2xl border border-[var(--border-soft)] bg-white">
-          <summary className="flex cursor-pointer list-none items-center justify-between px-4 py-3.5 transition-colors hover:bg-[var(--surface-1)]">
-            <div className="flex items-center gap-2">
-              <i className="pi pi-chevron-right text-[10px] text-[var(--text-muted)] transition-transform group-open:rotate-90" />
-              <span className="font-display text-[13px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
-                Storico voti MVP
-              </span>
-            </div>
-            <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
-              {expressedVotes.length} voti
-            </span>
-          </summary>
-          <div className="border-t border-[var(--border-soft)] px-4 py-1">
-            {expressedVotes.length === 0 ? (
-              <p className="py-2 text-xs" style={{ color: "var(--text-muted)" }}>
-                Non hai ancora espresso voti MVP.
+              <p className="text-xs text-white font-normal leading-normal">
+                Vedi giornata precedente
               </p>
-            ) : (
-              expressedVotes.map((vote, index) => (
-                <Link
-                  key={vote.id}
-                  href={`/vota/${vote.matchId}`}
-                  className="flex items-center justify-between gap-3 py-2.5 transition-colors hover:bg-[var(--surface-1)]"
-                  style={index < expressedVotes.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
-                >
-                  <div className="min-w-0">
-                    <div className="font-display text-[12px] font-black uppercase" style={{ color: "var(--text-primary)" }}>
-                      {vote.match.homeTeam?.name ?? vote.match.homeSeed ?? "TBD"}{" "}
-                      <span style={{ color: "var(--text-disabled)", fontFamily: "inherit", fontWeight: 400, fontSize: "10px" }}>vs</span>{" "}
-                      {vote.match.awayTeam?.name ?? vote.match.awaySeed ?? "TBD"}
-                    </div>
-                    <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                      MVP votato: <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{vote.player.name}</span>
-                    </div>
-                    <div className="text-[10px]" style={{ color: "var(--text-disabled)" }}>
-                      {vote.createdAt.toLocaleDateString("it-IT", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                  <i className="pi pi-chevron-right text-[10px]" style={{ color: "var(--text-disabled)" }} />
-                </Link>
-              ))
-            )}
+            </Link>
           </div>
-        </details>
-      </div>
+
+          <Link
+            href="/mvp"
+            className="text-xs font-semibold text-center whitespace-nowrap"
+            style={{ color: "var(--text-primary)" }}
+          >
+            Scopri i precedenti vincitori
+          </Link>
+        </div>
+      )}
+
     </div>
   );
 }
