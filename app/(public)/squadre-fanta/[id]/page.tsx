@@ -41,7 +41,7 @@ export default async function SquadraFantasyPublicPage({
 
       {/* Header mobile */}
       <div className="md:hidden flex items-center justify-between h-12">
-        <div className="flex-1 flex items-center">
+        <div className="w-10 flex items-center">
           <BackButton />
         </div>
         <div className="flex flex-col items-center flex-1 px-2 min-w-0" style={{ gap: 4 }}>
@@ -52,7 +52,7 @@ export default async function SquadraFantasyPublicPage({
             {team.ownerLabel}
           </span>
         </div>
-        <div className="flex-1" />
+        <div className="w-10" />
       </div>
 
       {/* Rosa */}

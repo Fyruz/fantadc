@@ -134,9 +134,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
           {/* Scorers */}
           {match.goals.length > 0 && (
             <div className="flex gap-3 items-start">
-              <div className="flex-1 flex flex-col items-end gap-2">
+              <div className="flex-1 flex flex-col items-end gap-2 min-w-0">
                 {homeGoals.map((g, i) => (
-                  <span key={i} className="text-xs text-black">
+                  <span key={i} className="text-xs text-black truncate max-w-full">
                     {g.scorer.name}{g.isOwnGoal ? " (A)" : ""}
                     {g.minute ? ` ${g.minute}'` : ""}
                   </span>
@@ -145,9 +145,9 @@ export default async function PartitaPublicPage({ params }: { params: Promise<{ 
               <div className="shrink-0 flex items-start justify-center w-10">
                 <img src="/icons/ball.svg" alt="goal" className="w-3 h-3" />
               </div>
-              <div className="flex-1 flex flex-col items-start gap-2">
+              <div className="flex-1 flex flex-col items-start gap-2 min-w-0">
                 {awayGoals.map((g, i) => (
-                  <span key={i} className="text-xs text-black">
+                  <span key={i} className="text-xs text-black truncate max-w-full">
                     {g.scorer.name}{g.isOwnGoal ? " (A)" : ""}
                     {g.minute ? ` ${g.minute}'` : ""}
                   </span>

@@ -149,7 +149,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
               <button
                 type="button"
                 onClick={closeSheet}
-                className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-(--surface-1) transition-colors"
+                className="flex items-center justify-end w-6 h-6 rounded-full hover:bg-(--surface-1) transition-colors"
               >
                 <i className="pi pi-times text-sm" style={{ color: "var(--text-muted)" }} />
               </button>
@@ -173,7 +173,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                           key={vote.matchId}
                           type="button"
                           onClick={() => navigateTo(`/vota/${vote.matchId}`)}
-                          className="relative flex items-center py-5 px-4 w-full"
+                          className="relative flex items-center py-5 w-full"
                           style={idx < group.items.length - 1 ? { borderBottom: "1px solid var(--border-soft)" } : undefined}
                         >
                           <div className="flex items-center justify-end gap-2 flex-1 min-w-0">
@@ -197,7 +197,7 @@ export default function MvpVoteBanner({ votes }: { votes: PendingVote[] }) {
                             </span>
                           </div>
 
-                          <i className="pi pi-chevron-right absolute right-4 text-xs" style={{ color: "var(--text-muted)" }} />
+                          <i className="pi pi-chevron-right absolute right-0 text-xs" style={{ color: "var(--text-muted)" }} />
                         </button>
                       );
                     })}
