@@ -89,7 +89,7 @@ export default function VolleyMatchCard({
         <div className="flex flex-col items-center justify-center gap-3 shrink-0">
           {rightText && (
             <span
-              className="text-sm capitalize text-center"
+              className={`${concluded ? "text-xs" : "text-sm"} capitalize text-center`}
               style={{ color: concluded ? "rgba(0,0,0,0.55)" : "var(--text-primary)" }}
             >
               {rightText}
