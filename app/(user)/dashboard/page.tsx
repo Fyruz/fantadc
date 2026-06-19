@@ -109,14 +109,14 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats card */}
-      <div className="rounded-3xl" style={CARD}>
+      <div className="rounded-3xl p-6 flex flex-col gap-4" style={CARD}>
         <div
-          className="px-6 py-4"
+          className="pb-4"
           style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}
         >
           <p className="text-base font-medium text-black">{fantasyTeam.name}</p>
         </div>
-        <div className="flex items-center gap-6 px-6 py-4">
+        <div className="flex items-center gap-6">
           <div className="flex flex-col gap-2 flex-1 items-start">
             <p className="text-[10px] text-black">Pti totali</p>
             <p className="text-base font-semibold text-black leading-6 tabular-nums">
