@@ -57,27 +57,11 @@ export default async function DashboardPage() {
 
   const totalPoints = phaseBreakdown.reduce((s, p) => s + p.points, 0);
   const userRank = rankings.find((r) => r.fantasyTeamId === fantasyTeam.id)?.rank ?? null;
+  const currentPhase = phaseBreakdown.find((p) => p.current);
   const mvpMatches = mvpData.byMatch;
 
   return (
     <div className="flex flex-col gap-10">
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1
-          className="text-xl font-medium uppercase whitespace-nowrap"
-          style={{ fontFamily: "var(--font-tallica)", color: "var(--text-primary)" }}
-        >
-          La mia rosa
-        </h1>
-        <Link
-          href="/account"
-          className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-          style={{ background: "rgba(9,20,76,0.06)" }}
-        >
-          <i className="pi pi-user" style={{ fontSize: 18, color: "var(--text-primary)" }} />
-        </Link>
-      </div>
 
       {/* Banner mercato aperto */}
       {editWindow && (
@@ -125,7 +109,7 @@ export default async function DashboardPage() {
       )}
 
       {/* Stats card */}
-      <div className="rounded-3xl overflow-hidden" style={CARD}>
+      <div className="rounded-3xl" style={CARD}>
         <div
           className="px-6 py-4"
           style={{ borderBottom: "1px solid rgba(9,20,76,0.05)" }}
@@ -151,14 +135,19 @@ export default async function DashboardPage() {
 
       {/* Player of the Match */}
       {mvpMatches.length > 0 && (
-        <div className="rounded-3xl p-6 flex flex-col gap-5" style={CARD}>
-          <p className="text-base font-medium text-black">Player of the Match</p>
+        <div className="rounded-3xl p-6 flex flex-col" style={CARD}>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-base font-medium text-black">Player of the Match</p>
+            {currentPhase && (
+              <p className="text-xs" style={{ color: "rgba(0,0,0,0.45)" }}>{currentPhase.name}</p>
+            )}
+          </div>
 
           <div
-            className="flex gap-3 overflow-x-auto -mx-6 px-6 pb-1"
+            className="flex gap-3 overflow-x-auto -mx-6 px-6 py-5"
             style={{ scrollbarWidth: "none" } as React.CSSProperties}
           >
-            {mvpMatches.map((m) => {
+            {mvpMatches.slice(0, 2).map((m) => {
               const parts = m.label.split(" vs ");
               return (
                 <div
@@ -202,7 +191,7 @@ export default async function DashboardPage() {
 
           <Link
             href="/mvp"
-            className="text-xs font-semibold text-center whitespace-nowrap"
+            className="text-xs font-semibold whitespace-nowrap"
             style={{ color: "var(--text-primary)" }}
           >
             Scopri i precedenti vincitori
