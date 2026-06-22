@@ -141,6 +141,7 @@ export default async function SquadraPage({
         <img
           src="/images/football-field.webp"
           alt=""
+          fetchPriority="high"
           className="pointer-events-none absolute inset-0 w-full h-full object-cover"
         />
 
