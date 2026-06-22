@@ -34,7 +34,7 @@ export default async function MvpPage({
           <BackButton />
         </div>
         <span
-          className="flex-1 text-center uppercase"
+          className="flex-1 text-center uppercase whitespace-nowrap"
           style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
         >
           Player of the Match
