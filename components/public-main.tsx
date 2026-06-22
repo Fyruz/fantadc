@@ -10,8 +10,8 @@ export default function PublicMain({ children }: { children: React.ReactNode }) 
 
   return (
     <main
-      className={`flex-1 max-w-6xl mx-auto w-full${
-        isFullBleed ? " flex flex-col pt-6 max-w-3xl" : " px-4 py-6 pb-34 md:pb-8"
+      className={`flex-1 max-w-6xl mx-auto w-full min-h-0${
+        isFullBleed ? " flex flex-col pt-6 max-w-3xl overflow-hidden" : " px-4 py-6 pb-34 md:pb-8"
       }`}
     >
       {children}
