@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicFantasyTeamDetail } from "@/lib/data/public/fantasy-rankings";
 import { getTeamPhaseBreakdown } from "@/lib/scoring";
+import { db } from "@/lib/db";
 import BackButton from "@/components/back-button";
 import { resolveTeamFlag } from "@/lib/flags";
 
@@ -8,10 +10,12 @@ export const revalidate = 60;
 
 export default async function SquadraFantasyPublicPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ fase?: string }>;
 }) {
-  const { id } = await params;
+  const [{ id }, { fase }] = await Promise.all([params, searchParams]);
   const teamId = Number(id);
 
   const detail = await getPublicFantasyTeamDetail(teamId);
@@ -19,13 +23,31 @@ export default async function SquadraFantasyPublicPage({
 
   const { team, history, lastClosedAt, totalPoints } = detail;
 
-  const [phaseBreakdown] = await Promise.all([getTeamPhaseBreakdown(teamId)]);
+  const [phaseBreakdown, dbPhases] = await Promise.all([
+    getTeamPhaseBreakdown(teamId),
+    db.scoringPhase.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, startsAt: true, closedAt: true },
+    }),
+  ]);
 
-  const currentPhasePlayerTotals = new Map<number, number>();
+  const selectedPhaseId: number | null =
+    fase && fase !== "current" ? Number(fase) : null;
+
+  const phasePlayerTotals = new Map<number, number>();
   for (const ms of history) {
-    if (lastClosedAt && ms.concludedAt && ms.concludedAt < lastClosedAt) continue;
+    const at = ms.concludedAt;
+    if (!at) continue;
+    if (selectedPhaseId === null) {
+      if (lastClosedAt && at < lastClosedAt) continue;
+    } else {
+      const p = dbPhases.find((ph) => ph.id === selectedPhaseId);
+      if (!p) continue;
+      if (p.startsAt && at < p.startsAt) continue;
+      if (at >= p.closedAt) continue;
+    }
     for (const ps of ms.playerScores) {
-      currentPhasePlayerTotals.set(ps.playerId, (currentPhasePlayerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
+      phasePlayerTotals.set(ps.playerId, (phasePlayerTotals.get(ps.playerId) ?? 0) + ps.finalPoints);
     }
   }
 
@@ -62,20 +84,28 @@ export default async function SquadraFantasyPublicPage({
           className="flex gap-10 overflow-x-auto px-4 mt-10"
           style={{ scrollbarWidth: "none", borderBottom: "1px solid rgba(9,20,76,0.08)" } as React.CSSProperties}
         >
-          {phaseBreakdown.map((p) => (
-            <div key={p.phaseId ?? "current"} className="flex flex-col gap-2 items-center shrink-0">
-              <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{p.name}</span>
-              <span
-                className="text-sm font-semibold tabular-nums pb-0.5"
-                style={{
-                  color: "var(--primary)",
-                  borderBottom: p.current ? "1.5px solid var(--primary)" : undefined,
-                }}
+          {phaseBreakdown.map((p) => {
+            const phaseKey = p.phaseId === null ? "current" : String(p.phaseId);
+            const isActive = p.phaseId === selectedPhaseId;
+            return (
+              <Link
+                key={phaseKey}
+                href={`/squadre-fanta/${teamId}?fase=${phaseKey}`}
+                className="flex flex-col gap-2 items-center shrink-0"
               >
-                {p.points.toFixed(0)} pti
-              </span>
-            </div>
-          ))}
+                <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{p.name}</span>
+                <span
+                  className="text-sm font-semibold tabular-nums pb-0.5"
+                  style={{
+                    color: "var(--primary)",
+                    borderBottom: isActive ? "1.5px solid var(--primary)" : undefined,
+                  }}
+                >
+                  {p.points.toFixed(0)} pti
+                </span>
+              </Link>
+            );
+          })}
         </div>
       )}
 
@@ -95,7 +125,7 @@ export default async function SquadraFantasyPublicPage({
                 key={player.id}
                 player={player}
                 isCaptain={player.id === team.captainPlayerId}
-                points={showPoints ? (currentPhasePlayerTotals.get(player.id) ?? 0) : null}
+                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
               />
             ))}
           </div>
@@ -109,7 +139,7 @@ export default async function SquadraFantasyPublicPage({
                 key={player.id}
                 player={player}
                 isCaptain={player.id === team.captainPlayerId}
-                points={showPoints ? (currentPhasePlayerTotals.get(player.id) ?? 0) : null}
+                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
               />
             ))}
           </div>
@@ -121,7 +151,7 @@ export default async function SquadraFantasyPublicPage({
             <PlayerCard
               player={gk.player}
               isCaptain={gk.player.id === team.captainPlayerId}
-              points={showPoints ? (currentPhasePlayerTotals.get(gk.player.id) ?? 0) : null}
+              points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
             />
           </div>
         )}
