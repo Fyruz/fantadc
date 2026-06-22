@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import BackButton from "@/components/back-button";
 import { getMvpMatchDetail } from "@/lib/data/public/mvp";
 
@@ -148,14 +149,14 @@ export default async function MvpDetailPage({
         </div>
         <div className="flex items-center justify-center w-full">
           <div className="flex flex-col gap-3 items-start">
-            <div className="flex gap-3 items-center">
+            <Link href="/bonus-pubblici" className="flex gap-3 items-center">
               <img src="/icons/basic-lock.svg" alt="" width={14} height={14} />
               <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus pubblici</span>
-            </div>
-            <div className="flex gap-3 items-center">
+            </Link>
+            <Link href="/bonus-segreti" className="flex gap-3 items-center">
               <img src="/icons/lock.svg" alt="" width={14} height={14} />
               <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus segreti</span>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
