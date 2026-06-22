@@ -133,7 +133,8 @@ export type MvpMatchDetail = {
     flagSrc: string | null;
   };
   mvpBonusPoints: number;
-  goals: { scorerName: string; isOwnGoal: boolean; minute: number | null }[];
+  homeGoals: string[];
+  awayGoals: string[];
 };
 
 export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail | null> {
@@ -146,6 +147,8 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
         awayScore: true,
         homeSeed: true,
         awaySeed: true,
+        homeTeamId: true,
+        awayTeamId: true,
         mvpOverridePlayerId: true,
         homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
         awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
@@ -167,7 +170,12 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
           select: {
             isOwnGoal: true,
             minute: true,
-            scorer: { select: { name: true } },
+            scorer: {
+              select: {
+                name: true,
+                footballTeamId: true,
+              },
+            },
           },
         },
       },
@@ -189,6 +197,20 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
   const mp = match.players.find((p) => p.playerId === resolution.playerId);
   if (!mp) return null;
 
+  const homeGoals: string[] = [];
+  const awayGoals: string[] = [];
+
+  for (const g of match.goals) {
+    const scorerIsHome = g.scorer.footballTeamId === match.homeTeamId;
+    const countsForHome = g.isOwnGoal ? !scorerIsHome : scorerIsHome;
+    const lastName = g.scorer.name.trim().split(/\s+/).slice(-1)[0];
+    if (countsForHome) {
+      homeGoals.push(lastName);
+    } else {
+      awayGoals.push(lastName);
+    }
+  }
+
   return {
     match: {
       homeTeamName: match.homeTeam?.name ?? match.homeSeed ?? "TBD",
@@ -203,10 +225,7 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
       flagSrc: resolveTeamFlag(mp.player.footballTeam),
     },
     mvpBonusPoints: mvpBonusType ? Number(mvpBonusType.points) : 3,
-    goals: match.goals.map((g) => ({
-      scorerName: g.scorer.name,
-      isOwnGoal: g.isOwnGoal,
-      minute: g.minute,
-    })),
+    homeGoals,
+    awayGoals,
   };
 }
