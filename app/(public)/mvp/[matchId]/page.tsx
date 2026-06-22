@@ -59,7 +59,7 @@ export default async function MvpDetailPage({
           {/* Score */}
           <div className="flex flex-col items-center justify-center leading-normal shrink-0">
             <span className="font-bold uppercase" style={{ fontSize: 24, color: "#000" }}>
-              {match.homeScore ?? "–"} - {match.awayScore ?? "–"}
+              {match.homeScore ?? "-"} - {match.awayScore ?? "-"}
             </span>
             <span className="font-light" style={{ fontSize: 12, color: "rgba(0,0,0,0.65)" }}>
               Fischio finale
