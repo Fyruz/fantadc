@@ -203,11 +203,10 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
   for (const g of match.goals) {
     const scorerIsHome = g.scorer.footballTeamId === match.homeTeamId;
     const countsForHome = g.isOwnGoal ? !scorerIsHome : scorerIsHome;
-    const lastName = g.scorer.name.trim().split(/\s+/).slice(-1)[0];
     if (countsForHome) {
-      homeGoals.push(lastName);
+      homeGoals.push(g.scorer.name);
     } else {
-      awayGoals.push(lastName);
+      awayGoals.push(g.scorer.name);
     }
   }
 
