@@ -4,6 +4,10 @@ import { getMvpMatchDetail } from "@/lib/data/public/mvp";
 
 export const revalidate = 60;
 
+const DIVIDER = (
+  <div className="w-full" style={{ height: 1, background: "rgba(9,20,76,0.08)" }} />
+);
+
 export default async function MvpDetailPage({
   params,
 }: {
@@ -38,18 +42,9 @@ export default async function MvpDetailPage({
           {/* Home team */}
           <div className="flex flex-1 flex-col gap-4 items-center justify-center min-w-0">
             {match.homeTeamFlagSrc ? (
-              <img
-                src={match.homeTeamFlagSrc}
-                alt={match.homeTeamName}
-                width={56}
-                height={38}
-                className="object-contain"
-              />
+              <img src={match.homeTeamFlagSrc} alt={match.homeTeamName} width={56} height={38} className="object-contain" />
             ) : (
-              <div
-                className="w-14 h-10 rounded flex items-center justify-center"
-                style={{ background: "rgba(9,20,76,0.06)" }}
-              >
+              <div className="w-14 h-10 rounded flex items-center justify-center" style={{ background: "rgba(9,20,76,0.06)" }}>
                 <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
                   {match.homeTeamName.slice(0, 3).toUpperCase()}
                 </span>
@@ -74,22 +69,13 @@ export default async function MvpDetailPage({
           <div className="flex flex-1 flex-col gap-3 items-center justify-center min-w-0">
             {match.awayTeamFlagSrc ? (
               <div
-                className="flex items-center justify-center rounded-full p-1 bg-white"
+                className="flex items-center justify-center rounded-full p-1 bg-white shrink-0"
                 style={{ width: 64, height: 64, border: "1px solid rgba(9,20,76,0.06)" }}
               >
-                <img
-                  src={match.awayTeamFlagSrc}
-                  alt={match.awayTeamName}
-                  width={48}
-                  height={48}
-                  className="object-contain"
-                />
+                <img src={match.awayTeamFlagSrc} alt={match.awayTeamName} width={48} height={48} className="object-contain" />
               </div>
             ) : (
-              <div
-                className="rounded-full flex items-center justify-center"
-                style={{ background: "rgba(9,20,76,0.06)", width: 64, height: 64 }}
-              >
+              <div className="rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(9,20,76,0.06)", width: 64, height: 64 }}>
                 <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
                   {match.awayTeamName.slice(0, 3).toUpperCase()}
                 </span>
@@ -106,27 +92,11 @@ export default async function MvpDetailPage({
       {/* MVP player */}
       <div className="flex flex-col gap-4 items-center">
         <div className="relative">
-          <img
-            src="/icons/star.svg"
-            alt="MVP"
-            width={14}
-            height={14}
-            className="absolute z-10"
-            style={{ top: -7, right: -7 }}
-          />
+          <img src="/icons/star.svg" alt="MVP" width={14} height={14} className="absolute z-10" style={{ top: -7, right: -7 }} />
           {mvpPlayer.flagSrc ? (
-            <img
-              src={mvpPlayer.flagSrc}
-              alt={mvpPlayer.name}
-              width={40}
-              height={27}
-              className="object-contain"
-            />
+            <img src={mvpPlayer.flagSrc} alt={mvpPlayer.name} width={40} height={27} className="object-contain" />
           ) : (
-            <div
-              className="w-10 h-7 rounded flex items-center justify-center"
-              style={{ background: "rgba(9,20,76,0.08)" }}
-            >
+            <div className="w-10 h-7 rounded flex items-center justify-center" style={{ background: "rgba(9,20,76,0.08)" }}>
               <span className="text-[9px] font-bold" style={{ color: "var(--text-primary)" }}>
                 {mvpPlayer.name.slice(0, 2).toUpperCase()}
               </span>
@@ -143,73 +113,53 @@ export default async function MvpDetailPage({
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="w-full h-px" style={{ background: "rgba(9,20,76,0.08)" }} />
+      {DIVIDER}
 
       {/* Gol section */}
       {hasGoals && (
-        <div className="flex flex-col gap-6 w-full">
-          {/* Title */}
-          <div className="flex items-center justify-center w-full">
-            <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>
-              Gol
-            </span>
-          </div>
-
-          {/* 3-column layout: home scorers | ⚽ | away scorers */}
-          <div className="flex gap-6 items-start justify-center w-full">
-            {/* Home scorers — right-aligned */}
-            <div className="flex flex-1 flex-col gap-2 items-end min-w-0">
-              {homeGoals.map((name, i) => (
-                <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>
-                  {name}
-                </span>
-              ))}
+        <>
+          <div className="flex flex-col gap-6 w-full">
+            {/* Title */}
+            <div className="flex items-center justify-center w-full">
+              <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>Gol</span>
             </div>
 
-            {/* Ball icon */}
-            <div className="flex flex-col items-center justify-start shrink-0">
-              <span style={{ fontSize: 16 }}>⚽</span>
-            </div>
-
-            {/* Away scorers — left-aligned */}
-            <div className="flex flex-1 flex-col gap-2 items-start min-w-0">
-              {awayGoals.map((name, i) => (
-                <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>
-                  {name}
-                </span>
-              ))}
+            {/* 3-column: home (right-aligned) | ⚽ | away (left-aligned) */}
+            <div className="flex gap-6 items-start justify-center w-full">
+              <div className="flex flex-1 flex-col gap-2 items-end min-w-0">
+                {homeGoals.map((name, i) => (
+                  <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>{name}</span>
+                ))}
+              </div>
+              <div className="shrink-0 flex items-start justify-center" style={{ paddingTop: 1 }}>
+                <img src="/icons/ball.svg" alt="gol" width={16} height={16} />
+              </div>
+              <div className="flex flex-1 flex-col gap-2 items-start min-w-0">
+                {awayGoals.map((name, i) => (
+                  <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>{name}</span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+
+          {DIVIDER}
+        </>
       )}
-
-      {/* Divider */}
-      <div className="w-full h-px" style={{ background: "rgba(9,20,76,0.08)" }} />
 
       {/* Come fare punti */}
       <div className="flex flex-col gap-6 pb-6 w-full">
-        {/* Title */}
         <div className="flex items-center justify-center w-full">
-          <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>
-            Come fare punti
-          </span>
+          <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>Come fare punti</span>
         </div>
-
-        {/* Items — centered */}
         <div className="flex items-center justify-center w-full">
           <div className="flex flex-col gap-3 items-start">
             <div className="flex gap-3 items-center">
-              <i className="pi pi-lock shrink-0" style={{ fontSize: 14, color: "rgba(0,0,0,0.45)" }} />
-              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>
-                Bonus pubblici
-              </span>
+              <img src="/icons/basic-lock.svg" alt="" width={14} height={14} />
+              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus pubblici</span>
             </div>
             <div className="flex gap-3 items-center">
-              <i className="pi pi-lock shrink-0" style={{ fontSize: 14, color: "rgba(0,0,0,0.45)" }} />
-              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>
-                Bonus segreti
-              </span>
+              <img src="/icons/lock.svg" alt="" width={14} height={14} />
+              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus segreti</span>
             </div>
           </div>
         </div>
