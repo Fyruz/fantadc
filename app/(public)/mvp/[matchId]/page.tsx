@@ -66,16 +66,11 @@ export default async function MvpDetailPage({
           </div>
 
           {/* Away team */}
-          <div className="flex flex-1 flex-col gap-3 items-center justify-center min-w-0">
+          <div className="flex flex-1 flex-col gap-4 items-center justify-center min-w-0">
             {match.awayTeamFlagSrc ? (
-              <div
-                className="flex items-center justify-center rounded-full p-1 bg-white shrink-0"
-                style={{ width: 64, height: 64, border: "1px solid rgba(9,20,76,0.06)" }}
-              >
-                <img src={match.awayTeamFlagSrc} alt={match.awayTeamName} width={48} height={48} className="object-contain" />
-              </div>
+              <img src={match.awayTeamFlagSrc} alt={match.awayTeamName} width={56} height={38} className="object-contain" />
             ) : (
-              <div className="rounded-full flex items-center justify-center shrink-0" style={{ background: "rgba(9,20,76,0.06)", width: 64, height: 64 }}>
+              <div className="w-14 h-10 rounded flex items-center justify-center" style={{ background: "rgba(9,20,76,0.06)" }}>
                 <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
                   {match.awayTeamName.slice(0, 3).toUpperCase()}
                 </span>
