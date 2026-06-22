@@ -34,10 +34,10 @@ export default async function MvpPage({
           <BackButton />
         </div>
         <span
-          className="flex-1 text-center uppercase whitespace-nowrap"
+          className="flex-1 text-center uppercase whitespace-pre"
           style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
         >
-          Player of the Match
+          {`Player of the  Match`}
         </span>
         <div className="flex-1" />
       </div>
@@ -129,8 +129,8 @@ export default async function MvpPage({
 
               {/* Score row */}
               <div
-                className="flex items-center justify-center w-full pt-4"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.05)", gap: 10 }}
+                className="flex gap-2 items-center justify-center w-full pt-4"
+                style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
               >
                 <span className="font-semibold text-white" style={{ fontSize: 10 }}>
                   {m.homeShortName}
@@ -140,7 +140,7 @@ export default async function MvpPage({
                   {" - "}
                   {m.awayScore ?? "–"}
                 </span>
-                <span className="font-normal" style={{ fontSize: 10, color: "rgba(255,255,255,0.75)" }}>
+                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.75)" }}>
                   {m.awayShortName}
                 </span>
               </div>
