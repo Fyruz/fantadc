@@ -2,6 +2,7 @@ import MobileOnlyGate from "@/components/mobile-only-gate";
 import PublicBottomNav from "@/components/public-bottom-nav";
 import PublicNav from "@/components/public-nav";
 import MvpVoteToast from "@/components/mvp-vote-toast";
+import UserMain from "@/components/user-main";
 import { getPendingOpenMvpVotes } from "@/lib/pending-mvp-votes";
 import { getCurrentUser } from "@/lib/session";
 
@@ -14,7 +15,7 @@ export default async function UserLayout({ children }: { children: React.ReactNo
       <div className="min-h-screen flex flex-col" style={{ background: '#F5F6FF' }}>
         <MvpVoteToast pendingVotes={pendingVotes} />
         <PublicNav />
-        <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6 pb-34 md:pb-8">{children}</main>
+        <UserMain>{children}</UserMain>
         <PublicBottomNav />
       </div>
     </MobileOnlyGate>

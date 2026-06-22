@@ -73,7 +73,7 @@ export default function PublicBottomNav() {
 
   const isGV = pathname.startsWith("/greenvolley");
 
-  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname) || (pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta")) || /^\/squadre-fanta\/.+/.test(pathname) || pathname.startsWith("/gironi") || pathname.startsWith("/classifica-marcatori") || pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account") || pathname.startsWith("/giocatori")) return null;
+  if (pathname.startsWith("/vota") || /^\/partite\/\d+/.test(pathname) || (pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta")) || /^\/squadre-fanta\/.+/.test(pathname) || pathname.startsWith("/gironi") || pathname.startsWith("/classifica-marcatori") || pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account") || pathname.startsWith("/giocatori") || pathname.startsWith("/squadra")) return null;
 
   const isActive = (href: string, matchers?: readonly string[]) => {
     if (matchers) return matchers.some((m) => pathname === m || pathname.startsWith(m + "/"));

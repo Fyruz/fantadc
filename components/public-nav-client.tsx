@@ -117,7 +117,8 @@ export default function PublicNavClient() {
   const isGVGironi = pathname.startsWith("/greenvolley/gironi");
   const isGVEliminazione = pathname.startsWith("/greenvolley/eliminazione");
   const isGVSquadreDetail = /^\/greenvolley\/squadre\/\d+/.test(pathname);
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail;
+  const isSquadraPage = pathname.startsWith("/squadra");
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail || isSquadraPage;
 
   const getMobileTitle = (): string | null => {
     if (pathname.startsWith("/greenvolley/altro")) return null;
@@ -131,7 +132,8 @@ export default function PublicNavClient() {
     }
     if (pathname.startsWith("/partite")) return "Partite";
     if (pathname.startsWith("/squadre-fanta")) return "Lega";
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/squadra")) return "La mia rosa";
+    if (pathname.startsWith("/dashboard")) return "La mia rosa";
+    if (pathname.startsWith("/squadra")) return null;
     if (pathname.startsWith("/altro")) return null;
     return null;
   };

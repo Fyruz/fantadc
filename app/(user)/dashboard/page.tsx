@@ -99,11 +99,11 @@ export default async function DashboardPage() {
             La competizione è entrata nel vivo. Come sta andando la tua squadra?
           </p>
           <Link
-            href={`/squadre-fanta/${fantasyTeam.id}`}
+            href="/squadra"
             className="flex items-center justify-center rounded-lg py-2 w-full"
             style={{ background: "var(--text-primary)" }}
           >
-            <span className="text-xs text-white">Vedi squadra</span>
+            <span className="text-xs text-white font-semibold">Vedi squadra</span>
           </Link>
         </div>
       )}
