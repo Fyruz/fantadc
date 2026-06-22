@@ -118,3 +118,95 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
 
   return { byMatch, byPlayer };
 }
+
+export type MvpMatchDetail = {
+  match: {
+    homeTeamName: string;
+    awayTeamName: string;
+    homeTeamFlagSrc: string | null;
+    awayTeamFlagSrc: string | null;
+    homeScore: number | null;
+    awayScore: number | null;
+  };
+  mvpPlayer: {
+    name: string;
+    flagSrc: string | null;
+  };
+  mvpBonusPoints: number;
+  goals: { scorerName: string; isOwnGoal: boolean; minute: number | null }[];
+};
+
+export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail | null> {
+  const [match, mvpBonusType] = await Promise.all([
+    db.match.findUnique({
+      where: { id: matchId, status: MatchStatus.CONCLUDED },
+      select: {
+        concludedAt: true,
+        homeScore: true,
+        awayScore: true,
+        homeSeed: true,
+        awaySeed: true,
+        mvpOverridePlayerId: true,
+        homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+        awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+        votes: { select: { playerId: true } },
+        players: {
+          select: {
+            playerId: true,
+            player: {
+              select: {
+                id: true,
+                name: true,
+                footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+              },
+            },
+          },
+        },
+        goals: {
+          orderBy: { minute: "asc" },
+          select: {
+            isOwnGoal: true,
+            minute: true,
+            scorer: { select: { name: true } },
+          },
+        },
+      },
+    }),
+    db.bonusType.findFirst({ where: { code: "MVP" }, select: { points: true } }),
+  ]);
+
+  if (!match) return null;
+
+  const resolution = resolveMvp({
+    concludedAt: match.concludedAt,
+    votes: match.votes,
+    mvpOverridePlayerId: match.mvpOverridePlayerId,
+    eligiblePlayerIds: match.players.map((p) => p.playerId),
+  });
+
+  if (resolution.status !== "resolved") return null;
+
+  const mp = match.players.find((p) => p.playerId === resolution.playerId);
+  if (!mp) return null;
+
+  return {
+    match: {
+      homeTeamName: match.homeTeam?.name ?? match.homeSeed ?? "TBD",
+      awayTeamName: match.awayTeam?.name ?? match.awaySeed ?? "TBD",
+      homeTeamFlagSrc: match.homeTeam ? resolveTeamFlag(match.homeTeam) : null,
+      awayTeamFlagSrc: match.awayTeam ? resolveTeamFlag(match.awayTeam) : null,
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
+    },
+    mvpPlayer: {
+      name: mp.player.name,
+      flagSrc: resolveTeamFlag(mp.player.footballTeam),
+    },
+    mvpBonusPoints: mvpBonusType ? Number(mvpBonusType.points) : 3,
+    goals: match.goals.map((g) => ({
+      scorerName: g.scorer.name,
+      isOwnGoal: g.isOwnGoal,
+      minute: g.minute,
+    })),
+  };
+}

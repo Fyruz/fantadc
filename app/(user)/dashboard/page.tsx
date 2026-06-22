@@ -150,8 +150,9 @@ export default async function DashboardPage() {
             {mvpMatches.slice(0, 2).map((m) => {
               const parts = m.label.split(" vs ");
               return (
-                <div
+                <Link
                   key={m.matchId}
+                  href={`/mvp/${m.matchId}`}
                   className="flex flex-col items-center justify-center gap-4 p-4 rounded-2xl shrink-0 w-32"
                   style={DARK_CARD}
                 >
@@ -174,7 +175,7 @@ export default async function DashboardPage() {
                       {parts[1] ? ` · ${parts[1]}` : ""}
                     </p>
                   </div>
-                </div>
+                </Link>
               );
             })}
 
