@@ -26,7 +26,7 @@ export default async function MvpPage({
   });
 
   return (
-    <div className="flex flex-col gap-6 min-h-full">
+    <div className="flex flex-col gap-10 min-h-full">
 
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -75,16 +75,16 @@ export default async function MvpPage({
           Nessun MVP per questa fase.
         </p>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3">
           {filtered.map((m) => (
             <Link
               key={m.matchId}
               href={`/mvp/${m.matchId}`}
               className="flex flex-col gap-4 items-center justify-center p-6 rounded-3xl"
               style={{
-                background: "#0F195A",
-                border: "1px solid rgba(255,255,255,0.07)",
-                boxShadow: "0 4px 10px 0 rgba(0,0,0,0.4)",
+                background: "#fff",
+                border: "1px solid rgba(9,20,76,0.05)",
+                boxShadow: "0 4px 5px 0 rgba(9,20,76,0.10)",
               }}
             >
               {/* Flag with star */}
@@ -108,9 +108,9 @@ export default async function MvpPage({
                 ) : (
                   <div
                     className="w-12 h-8 rounded flex items-center justify-center"
-                    style={{ background: "rgba(255,255,255,0.10)" }}
+                    style={{ background: "rgba(9,20,76,0.08)" }}
                   >
-                    <span className="text-[9px] font-bold text-white">
+                    <span className="text-[9px] font-bold" style={{ color: "var(--text-primary)" }}>
                       {m.mvpPlayer.footballTeamName.slice(0, 3).toUpperCase()}
                     </span>
                   </div>
@@ -119,28 +119,28 @@ export default async function MvpPage({
 
               {/* Name + team */}
               <div className="flex flex-col items-center gap-1 w-full">
-                <span className="text-xs text-white text-center truncate w-full" style={{ fontWeight: 400 }}>
+                <span className="text-sm text-black text-center truncate w-full font-medium">
                   {m.mvpPlayer.name}
                 </span>
-                <span className="text-center" style={{ fontSize: 10, color: "rgba(255,255,255,0.75)" }}>
+                <span className="text-center text-xs" style={{ color: "rgba(0,0,0,0.75)" }}>
                   {m.mvpPlayer.footballTeamName}
                 </span>
               </div>
 
               {/* Score row */}
               <div
-                className="flex gap-2 items-center justify-center w-full pt-4"
-                style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}
+                className="flex gap-3 items-center justify-center w-full pt-4"
+                style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
               >
-                <span className="font-semibold text-white" style={{ fontSize: 10 }}>
+                <span className="font-semibold text-black text-xs">
                   {m.homeShortName}
                 </span>
-                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.75)" }}>
-                  <span className="font-semibold text-white">{m.homeScore ?? "–"}</span>
+                <span className="text-xs" style={{ color: "rgba(0,0,0,0.75)" }}>
+                  <span className="font-semibold text-black">{m.homeScore ?? "–"}</span>
                   {" - "}
                   {m.awayScore ?? "–"}
                 </span>
-                <span style={{ fontSize: 10, color: "rgba(255,255,255,0.75)" }}>
+                <span className="text-xs" style={{ color: "rgba(0,0,0,0.75)" }}>
                   {m.awayShortName}
                 </span>
               </div>
