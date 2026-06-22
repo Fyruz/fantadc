@@ -91,6 +91,7 @@ export default async function SquadraFantasyPublicPage({
               <Link
                 key={phaseKey}
                 href={`/squadre-fanta/${teamId}?fase=${phaseKey}`}
+                replace
                 className="flex flex-col gap-2 items-center shrink-0"
               >
                 <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{p.name}</span>

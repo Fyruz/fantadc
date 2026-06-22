@@ -117,6 +117,7 @@ export default async function SquadraPage({
               <Link
                 key={phaseKey}
                 href={`/squadra?fase=${phaseKey}`}
+                replace
                 className="flex flex-col gap-2 items-center shrink-0"
               >
                 <span className="text-xs" style={{ color: "rgba(0,0,0,0.65)" }}>{p.name}</span>
