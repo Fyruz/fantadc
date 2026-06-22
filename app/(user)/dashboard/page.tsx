@@ -156,18 +156,21 @@ export default async function DashboardPage() {
                   className="flex flex-col items-center justify-center gap-4 p-4 rounded-2xl shrink-0 w-32"
                   style={DARK_CARD}
                 >
-                  {m.mvpPlayer.flagSrc ? (
-                    <img src={m.mvpPlayer.flagSrc} alt={m.mvpPlayer.footballTeamName} width={40} height={27} />
-                  ) : (
-                    <div
-                      className="w-10 h-[27px] rounded flex items-center justify-center"
-                      style={{ background: "rgba(255,255,255,0.10)" }}
-                    >
-                      <span className="text-[9px] font-bold text-white">
-                        {m.mvpPlayer.footballTeamName.slice(0, 3).toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  <div className="relative">
+                    <img src="/icons/star.svg" alt="MVP" width={12} height={12} className="absolute z-10" style={{ top: -6, right: -6 }} />
+                    {m.mvpPlayer.flagSrc ? (
+                      <img src={m.mvpPlayer.flagSrc} alt={m.mvpPlayer.footballTeamName} width={40} height={27} />
+                    ) : (
+                      <div
+                        className="w-10 h-[27px] rounded flex items-center justify-center"
+                        style={{ background: "rgba(255,255,255,0.10)" }}
+                      >
+                        <span className="text-[9px] font-bold text-white">
+                          {m.mvpPlayer.footballTeamName.slice(0, 3).toUpperCase()}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                   <div className="flex flex-col items-center gap-1 text-center w-full">
                     <p className="text-xs text-white font-normal truncate max-w-full">{m.mvpPlayer.name}</p>
                     <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.75)" }}>
@@ -184,7 +187,7 @@ export default async function DashboardPage() {
               className="flex items-center justify-center p-4 rounded-2xl shrink-0 w-32 self-stretch text-center"
               style={DARK_CARD}
             >
-              <p className="text-xs text-white font-normal leading-normal">
+              <p className="text-xs text-white font-semibold leading-normal">
                 Vedi giornata precedente
               </p>
             </Link>

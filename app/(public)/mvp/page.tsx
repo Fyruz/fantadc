@@ -34,16 +34,16 @@ export default async function MvpPage({
           <BackButton />
         </div>
         <span
-          className="flex-1 text-center uppercase whitespace-pre"
-          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+          className="flex-1 text-center uppercase whitespace-nowrap"
+          style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)", wordSpacing: "0.3em" }}
         >
-          {`Player of the  Match`}
+          Player of the Match
         </span>
         <div className="flex-1" />
       </div>
 
       {/* Phase filter tabs */}
-      {data.phases.length > 1 && (
+      {data.phases.length > 0 && (
         <div
           className="flex gap-3 overflow-x-auto -mx-4 px-4"
           style={{ scrollbarWidth: "none" } as React.CSSProperties}
@@ -55,11 +55,11 @@ export default async function MvpPage({
               <Link
                 key={phaseKey}
                 href={`/mvp?fase=${phaseKey}`}
-                className="shrink-0 px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition-colors"
+                className="shrink-0 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors"
                 style={
                   isActive
-                    ? { background: "var(--text-primary)", color: "#fff" }
-                    : { background: "transparent", color: "rgba(0,0,0,0.45)", border: "1px solid rgba(9,20,76,0.15)" }
+                    ? { background: "#09144C", color: "#fff", fontWeight: 500 }
+                    : { background: "rgba(9,20,76,0.25)", color: "#fff", fontWeight: 400 }
                 }
               >
                 {phase.name}
@@ -92,10 +92,10 @@ export default async function MvpPage({
                 <img
                   src="/icons/star.svg"
                   alt="MVP"
-                  width={14}
-                  height={14}
+                  width={12}
+                  height={12}
                   className="absolute z-10"
-                  style={{ top: -7, right: -7 }}
+                  style={{ top: -6, right: -6 }}
                 />
                 {m.mvpPlayer.flagSrc ? (
                   <img

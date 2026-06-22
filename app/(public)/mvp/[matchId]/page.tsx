@@ -88,7 +88,7 @@ export default async function MvpDetailPage({
       {/* MVP player */}
       <div className="flex flex-col gap-4 items-center">
         <div className="relative">
-          <img src="/icons/star.svg" alt="MVP" width={14} height={14} className="absolute z-10" style={{ top: -7, right: -7 }} />
+          <img src="/icons/star.svg" alt="MVP" width={12} height={12} className="absolute z-10" style={{ top: -6, right: -6 }} />
           {mvpPlayer.flagSrc ? (
             <img src={mvpPlayer.flagSrc} alt={mvpPlayer.name} width={40} height={27} className="object-contain" />
           ) : (
@@ -100,10 +100,10 @@ export default async function MvpDetailPage({
           )}
         </div>
         <div className="flex flex-col items-center gap-2">
-          <span className="font-medium" style={{ fontSize: 14, color: "#000" }}>
+          <span className="font-medium text-sm text-black">
             {mvpPlayer.name}
           </span>
-          <span className="font-normal" style={{ fontSize: 12, color: "rgba(0,0,0,0.75)" }}>
+          <span className="font-normal text-xs text-black/75">
             Player of the Match (+{mvpBonusPoints.toFixed(0)}pti)
           </span>
         </div>
@@ -117,14 +117,14 @@ export default async function MvpDetailPage({
           <div className="flex flex-col gap-6 w-full">
             {/* Title */}
             <div className="flex items-center justify-center w-full">
-              <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>Gol</span>
+              <span className="font-normal text-sm text-black">Gol</span>
             </div>
 
             {/* 3-column: home (right-aligned) | ⚽ | away (left-aligned) */}
             <div className="flex gap-6 items-start justify-center w-full">
               <div className="flex flex-1 flex-col gap-2 items-end min-w-0">
                 {homeGoals.map((name, i) => (
-                  <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>{name}</span>
+                  <span key={i} className="font-normal text-xs text-black">{name}</span>
                 ))}
               </div>
               <div className="shrink-0 flex items-start justify-center" style={{ paddingTop: 1 }}>
@@ -132,7 +132,7 @@ export default async function MvpDetailPage({
               </div>
               <div className="flex flex-1 flex-col gap-2 items-start min-w-0">
                 {awayGoals.map((name, i) => (
-                  <span key={i} className="font-normal" style={{ fontSize: 12, color: "#000" }}>{name}</span>
+                  <span key={i} className="font-normal text-xs text-black">{name}</span>
                 ))}
               </div>
             </div>
@@ -145,17 +145,17 @@ export default async function MvpDetailPage({
       {/* Come fare punti */}
       <div className="flex flex-col gap-6 pb-6 w-full">
         <div className="flex items-center justify-center w-full">
-          <span className="font-normal" style={{ fontSize: 14, color: "#000" }}>Come fare punti</span>
+          <span className="font-normal text-sm text-black">Come fare punti</span>
         </div>
         <div className="flex items-center justify-center w-full">
           <div className="flex flex-col gap-3 items-start">
             <Link href="/bonus-pubblici" className="flex gap-3 items-center">
               <img src="/icons/basic-lock.svg" alt="" width={14} height={14} />
-              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus pubblici</span>
+              <span className="font-normal text-xs text-black">Bonus pubblici</span>
             </Link>
             <Link href="/bonus-segreti" className="flex gap-3 items-center">
               <img src="/icons/lock.svg" alt="" width={14} height={14} />
-              <span className="font-normal" style={{ fontSize: 12, color: "#000" }}>Bonus segreti</span>
+              <span className="font-normal text-xs text-black">Bonus segreti</span>
             </Link>
           </div>
         </div>
