@@ -118,8 +118,8 @@ export default function PublicNavClient() {
   const isGVEliminazione = pathname.startsWith("/greenvolley/eliminazione");
   const isGVSquadreDetail = /^\/greenvolley\/squadre\/\d+/.test(pathname);
   const isSquadraPage = pathname.startsWith("/squadra");
-  const isMvpDetail = /^\/mvp\/\d+/.test(pathname);
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail || isSquadraPage || isMvpDetail;
+  const isMvpPage = pathname === "/mvp" || /^\/mvp\/\d+/.test(pathname);
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail || isSquadraPage || isMvpPage;
 
   const getMobileTitle = (): string | null => {
     if (pathname.startsWith("/greenvolley/altro")) return null;

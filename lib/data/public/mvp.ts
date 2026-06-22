@@ -5,10 +5,20 @@ import { db } from "@/lib/db";
 import { resolveMvp } from "@/lib/domain/mvp";
 import { resolveTeamFlag } from "@/lib/flags";
 
+export type MvpPhase = {
+  id: number | null; // null = fase in corso
+  name: string;
+};
+
 export type MvpMatchRow = {
   matchId: number;
   label: string;
   concludedAt: Date;
+  phaseId: number | null;
+  homeShortName: string;
+  awayShortName: string;
+  homeScore: number | null;
+  awayScore: number | null;
   mvpPlayer: {
     id: number;
     name: string;
@@ -27,39 +37,62 @@ export type MvpPlayerRow = {
 };
 
 export type PublicMvpData = {
+  phases: MvpPhase[];
   byMatch: MvpMatchRow[];
   byPlayer: MvpPlayerRow[];
 };
 
 export async function getPublicMvpData(): Promise<PublicMvpData> {
-  const matches = await db.match.findMany({
-    where: { status: MatchStatus.CONCLUDED, concludedAt: { not: null } },
-    orderBy: { concludedAt: "desc" },
-    select: {
-      id: true,
-      concludedAt: true,
-      homeSeed: true,
-      awaySeed: true,
-      mvpOverridePlayerId: true,
-      homeTeam: { select: { name: true, shortName: true } },
-      awayTeam: { select: { name: true, shortName: true } },
-      votes: { select: { playerId: true } },
-      players: {
-        select: {
-          playerId: true,
-          player: {
-            select: {
-              id: true,
-              name: true,
-              footballTeam: {
-                select: { name: true, shortName: true, countryCode: true, logoUrl: true },
+  const [matches, closedPhases] = await Promise.all([
+    db.match.findMany({
+      where: { status: MatchStatus.CONCLUDED, concludedAt: { not: null } },
+      orderBy: { concludedAt: "desc" },
+      select: {
+        id: true,
+        concludedAt: true,
+        homeSeed: true,
+        awaySeed: true,
+        homeScore: true,
+        awayScore: true,
+        mvpOverridePlayerId: true,
+        homeTeam: { select: { name: true, shortName: true } },
+        awayTeam: { select: { name: true, shortName: true } },
+        votes: { select: { playerId: true } },
+        players: {
+          select: {
+            playerId: true,
+            player: {
+              select: {
+                id: true,
+                name: true,
+                footballTeam: {
+                  select: { name: true, shortName: true, countryCode: true, logoUrl: true },
+                },
               },
             },
           },
         },
       },
-    },
-  });
+    }),
+    db.scoringPhase.findMany({
+      orderBy: { order: "asc" },
+      select: { id: true, name: true, closedAt: true, startsAt: true },
+    }),
+  ]);
+
+  // Build phases list (closed + "fase in corso")
+  const phases: MvpPhase[] = [
+    ...closedPhases.map((p) => ({ id: p.id, name: p.name })),
+    { id: null, name: "Fase in corso" },
+  ];
+
+  function resolvePhaseId(concludedAt: Date): number | null {
+    for (const p of closedPhases) {
+      if (p.startsAt && concludedAt < p.startsAt) continue;
+      if (concludedAt < p.closedAt) return p.id;
+    }
+    return null;
+  }
 
   const byMatch: MvpMatchRow[] = [];
   const byPlayerMap = new Map<number, MvpPlayerRow>();
@@ -77,15 +110,21 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
     const mp = match.players.find((p) => p.playerId === resolution.playerId);
     if (!mp) continue;
 
-    const homeName = match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD";
-    const awayName = match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD";
-    const label = `${homeName} vs ${awayName}`;
+    const homeShortName = match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD";
+    const awayShortName = match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD";
+    const label = `${homeShortName} vs ${awayShortName}`;
     const flagSrc = resolveTeamFlag(mp.player.footballTeam);
+    const phaseId = resolvePhaseId(match.concludedAt!);
 
-    const matchRow = {
+    const matchRow: MvpMatchRow = {
       matchId: match.id,
       label,
       concludedAt: match.concludedAt!,
+      phaseId,
+      homeShortName,
+      awayShortName,
+      homeScore: match.homeScore,
+      awayScore: match.awayScore,
       mvpPlayer: {
         id: mp.player.id,
         name: mp.player.name,
@@ -116,7 +155,7 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
     (a, b) => b.count - a.count || a.playerName.localeCompare(b.playerName, "it")
   );
 
-  return { byMatch, byPlayer };
+  return { phases, byMatch, byPlayer };
 }
 
 export type MvpMatchDetail = {
