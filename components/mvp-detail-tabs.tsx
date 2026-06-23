@@ -122,28 +122,29 @@ export default function MvpDetailTabs({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-8 pb-6">
+        <div className="pb-6">
           {playerVotes.length === 0 ? (
             <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.45)" }}>
               Nessun voto registrato.
             </p>
           ) : (
-            <>
-              {homePlayers.length > 0 && (
+            <div className="flex gap-4 items-start">
+              <div className="flex-1 min-w-0">
                 <TeamSection
                   teamName={match.homeTeamName}
                   flagSrc={match.homeTeamFlagSrc}
                   players={homePlayers}
                 />
-              )}
-              {awayPlayers.length > 0 && (
+              </div>
+              <div style={{ width: 1, alignSelf: "stretch", background: "rgba(9,20,76,0.08)", flexShrink: 0 }} />
+              <div className="flex-1 min-w-0">
                 <TeamSection
                   teamName={match.awayTeamName}
                   flagSrc={match.awayTeamFlagSrc}
                   players={awayPlayers}
                 />
-              )}
-            </>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -186,42 +187,25 @@ function TeamSection({
 }
 
 function PlayerVoteRow({ player, isLast }: { player: MvpPlayerVote; isLast: boolean }) {
+  const hasExtras = player.bonuses.length > 0 || player.goals > 0 || player.ownGoals > 0;
   return (
     <div
-      className="flex flex-col gap-3 py-4"
+      className="flex flex-col gap-2 py-3"
       style={!isLast ? { borderBottom: "1px solid rgba(9,20,76,0.06)" } : undefined}
     >
-      {/* Player identity + vote count */}
-      <div className="flex items-center gap-3">
-        {player.flagSrc ? (
-          <img src={player.flagSrc} alt={player.footballTeamName} width={28} height={19} className="object-contain shrink-0" />
-        ) : (
-          <div
-            className="shrink-0 rounded flex items-center justify-center"
-            style={{ width: 28, height: 19, background: "rgba(9,20,76,0.08)" }}
-          >
-            <span className="text-[9px] font-bold" style={{ color: "var(--text-primary)" }}>
-              {player.footballTeamName.slice(0, 2).toUpperCase()}
-            </span>
-          </div>
-        )}
-        <div className="flex flex-col min-w-0 flex-1">
-          <span className="text-sm font-medium text-black truncate">{player.playerName}</span>
-          <span className="text-xs truncate" style={{ color: "rgba(0,0,0,0.55)" }}>{player.footballTeamName}</span>
-        </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-medium text-black truncate flex-1 min-w-0">{player.playerName}</span>
         {player.voteCount > 0 && (
-          <div className="flex items-center gap-1 shrink-0">
-            <img src="/icons/star.svg" alt="" width={12} height={12} />
-            <span className="text-xs font-medium tabular-nums" style={{ color: "var(--primary)" }}>
+          <div className="flex items-center gap-0.5 shrink-0">
+            <img src="/icons/star.svg" alt="" width={10} height={10} />
+            <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--primary)" }}>
               {player.voteCount}
             </span>
           </div>
         )}
       </div>
-
-      {/* Bonuses + goals */}
-      {(player.bonuses.length > 0 || player.goals > 0 || player.ownGoals > 0) && (
-        <div className="flex flex-wrap gap-2 pl-10">
+      {hasExtras && (
+        <div className="flex flex-wrap gap-1">
           {player.goals > 0 && (
             <BonusChip label={player.goals === 1 ? "Gol" : `Gol ×${player.goals}`} />
           )}
