@@ -195,14 +195,21 @@ function PlayerVoteRow({ player, isLast }: { player: MvpPlayerVote; isLast: bool
     >
       <div className="flex items-center gap-1.5">
         <span className="text-xs font-medium text-black truncate flex-1 min-w-0">{player.playerName}</span>
-        {player.voteCount > 0 && (
-          <div className="flex items-center gap-0.5 shrink-0">
-            <img src="/icons/star.svg" alt="" width={10} height={10} />
-            <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--primary)" }}>
-              {player.voteCount}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {player.totalPoints !== 0 && (
+            <span className="text-[11px] tabular-nums" style={{ color: "rgba(0,0,0,0.55)" }}>
+              {player.totalPoints % 1 === 0 ? player.totalPoints.toFixed(0) : player.totalPoints.toFixed(1)}
             </span>
-          </div>
-        )}
+          )}
+          {player.voteCount > 0 && (
+            <div className="flex items-center gap-0.5">
+              <img src="/icons/star.svg" alt="" width={10} height={10} />
+              <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--primary)" }}>
+                {player.voteCount}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
       {hasExtras && (
         <div className="flex flex-wrap gap-1">

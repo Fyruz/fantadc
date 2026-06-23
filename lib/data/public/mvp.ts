@@ -167,6 +167,7 @@ export type MvpPlayerVote = {
   voteCount: number;
   goals: number;
   ownGoals: number;
+  totalPoints: number;
   bonuses: Array<{ name: string; points: number; quantity: number }>;
 };
 
@@ -296,12 +297,16 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
     }
   }
 
+  const mvpBonusValue = mvpBonusType ? Number(mvpBonusType.points) : 3;
+
   const playerVotes: MvpPlayerVote[] = match.players
     .map(({ playerId, player }) => {
       const gs = goalsByPlayer.get(playerId) ?? { goals: 0, ownGoals: 0 };
       const bonusMap = bonusByPlayer.get(playerId) ?? new Map();
       const teamSide: "home" | "away" =
         player.footballTeam.id === match.homeTeamId ? "home" : "away";
+      const nonMvpPoints = [...bonusMap.values()].reduce((s, b) => s + b.points, 0);
+      const isMvp = playerId === resolution.playerId;
       return {
         playerId,
         playerName: player.name,
@@ -311,6 +316,7 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
         voteCount: voteCounts.get(playerId) ?? 0,
         goals: gs.goals,
         ownGoals: gs.ownGoals,
+        totalPoints: nonMvpPoints + (isMvp ? mvpBonusValue : 0),
         bonuses: [...bonusMap.values()],
       };
     })
@@ -329,7 +335,7 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
       name: mp.player.name,
       flagSrc: resolveTeamFlag(mp.player.footballTeam),
     },
-    mvpBonusPoints: mvpBonusType ? Number(mvpBonusType.points) : 3,
+    mvpBonusPoints: mvpBonusValue,
     homeGoals,
     awayGoals,
     playerVotes,
