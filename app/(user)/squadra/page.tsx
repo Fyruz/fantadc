@@ -5,7 +5,7 @@ import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory, getLastClosedAt, getTeamPhaseBreakdown } from "@/lib/scoring";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
-import { resolveTeamFlag } from "@/lib/flags";
+import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
 
 export default async function SquadraPage({
   searchParams,
@@ -203,6 +203,7 @@ function PlayerCard({
   points: number | null;
 }) {
   const flagSrc = resolveTeamFlag(player.footballTeam);
+  const kitSrc = resolveTeamKit(player.footballTeam);
   const parts = player.name.trim().split(/\s+/);
   const shortName = parts.length > 1 ? `${parts[0][0]}. ${parts.slice(1).join(" ")}` : player.name;
 
@@ -218,18 +219,22 @@ function PlayerCard({
             className="absolute -top-1 -right-1 z-10"
           />
         )}
-        <div
-          className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
-          style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)" }}
-        >
-          {flagSrc ? (
-            <img src={flagSrc} alt={player.footballTeam.name} className="w-full h-full object-cover" />
-          ) : (
-            <span className="text-white font-bold text-sm">
-              {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2).toUpperCase()}
-            </span>
-          )}
-        </div>
+        {kitSrc ? (
+          <img src={kitSrc} alt={player.footballTeam.name} width={56} height={56} className="object-contain" />
+        ) : (
+          <div
+            className="w-14 h-14 rounded-full overflow-hidden flex items-center justify-center"
+            style={{ background: "rgba(255,255,255,0.15)", border: "2px solid rgba(255,255,255,0.35)" }}
+          >
+            {flagSrc ? (
+              <img src={flagSrc} alt={player.footballTeam.name} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white font-bold text-sm">
+                {(player.footballTeam.shortName ?? player.footballTeam.name).slice(0, 2).toUpperCase()}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div

@@ -87,6 +87,34 @@ export function isExternalFlagUrl(url: string): boolean {
   return EXTERNAL_FLAG_HOSTS.some((host) => url.includes(host));
 }
 
+// Mappa country code → kit (maglia) locale in /images/kit/.
+const KIT_BY_CODE: Record<string, string> = {
+  AR:  "/images/kit/argentina.webp",
+  BR:  "/images/kit/brasile.webp",
+  BI:  "/images/kit/burundi.webp",
+  ER:  "/images/kit/eritrea.webp",
+  DE:  "/images/kit/germania.webp",
+  IE:  "/images/kit/irlanda.webp",
+  KW:  "/images/kit/kuwait.webp",
+  LA:  "/images/kit/laos.webp",
+  NZ:  "/images/kit/nuova-zelanda.webp",
+  NG:  "/images/kit/nigeria.webp",
+  PT:  "/images/kit/portogallo.webp",
+  RU:  "/images/kit/russia.webp",
+  ES:  "/images/kit/spagna.webp",
+  VE:  "/images/kit/venezuela.webp",
+  EUS: "/images/kit/basque-country.webp",
+  IDP: "/images/kit/idp.webp",
+};
+
+export function resolveTeamKit(team: {
+  countryCode?: string | null;
+}): string | null {
+  const code = normalizeCountryCode(team.countryCode);
+  if (!code) return null;
+  return KIT_BY_CODE[code] ?? null;
+}
+
 // Sorgente unica per la bandiera/logo di una squadra:
 // - usa logoUrl solo se è un logo "vero" (non un vecchio URL di servizio esterno),
 // - altrimenti ricava la bandiera locale dal countryCode.
