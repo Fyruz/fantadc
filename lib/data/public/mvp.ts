@@ -158,6 +158,17 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
   return { phases, byMatch, byPlayer };
 }
 
+export type MvpPlayerVote = {
+  playerId: number;
+  playerName: string;
+  footballTeamName: string;
+  flagSrc: string | null;
+  voteCount: number;
+  goals: number;
+  ownGoals: number;
+  bonuses: Array<{ name: string; points: number; quantity: number }>;
+};
+
 export type MvpMatchDetail = {
   match: {
     homeTeamName: string;
@@ -174,6 +185,7 @@ export type MvpMatchDetail = {
   mvpBonusPoints: number;
   homeGoals: string[];
   awayGoals: string[];
+  playerVotes: MvpPlayerVote[];
 };
 
 export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail | null> {
@@ -207,14 +219,18 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
         goals: {
           orderBy: { minute: "asc" },
           select: {
+            scorerId: true,
             isOwnGoal: true,
-            minute: true,
-            scorer: {
-              select: {
-                name: true,
-                footballTeamId: true,
-              },
-            },
+            scorer: { select: { name: true, footballTeamId: true } },
+          },
+        },
+        bonuses: {
+          where: { bonusType: { code: { not: "MVP" } } },
+          select: {
+            playerId: true,
+            quantity: true,
+            points: true,
+            bonusType: { select: { name: true } },
           },
         },
       },
@@ -249,6 +265,53 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
     }
   }
 
+  // Vote counts per player
+  const voteCounts = new Map<number, number>();
+  for (const v of match.votes) {
+    voteCounts.set(v.playerId, (voteCounts.get(v.playerId) ?? 0) + 1);
+  }
+
+  // Goals per player
+  const goalsByPlayer = new Map<number, { goals: number; ownGoals: number }>();
+  for (const g of match.goals) {
+    if (!g.scorerId) continue;
+    const cur = goalsByPlayer.get(g.scorerId) ?? { goals: 0, ownGoals: 0 };
+    if (g.isOwnGoal) cur.ownGoals += 1;
+    else cur.goals += 1;
+    goalsByPlayer.set(g.scorerId, cur);
+  }
+
+  // Bonuses per player, aggregated by bonus type name
+  const bonusByPlayer = new Map<number, Map<string, { name: string; points: number; quantity: number }>>();
+  for (const b of match.bonuses) {
+    if (!bonusByPlayer.has(b.playerId)) bonusByPlayer.set(b.playerId, new Map());
+    const byName = bonusByPlayer.get(b.playerId)!;
+    const existing = byName.get(b.bonusType.name);
+    if (existing) {
+      existing.quantity += b.quantity;
+      existing.points += Number(b.points);
+    } else {
+      byName.set(b.bonusType.name, { name: b.bonusType.name, points: Number(b.points), quantity: b.quantity });
+    }
+  }
+
+  const playerVotes: MvpPlayerVote[] = match.players
+    .map(({ playerId, player }) => {
+      const gs = goalsByPlayer.get(playerId) ?? { goals: 0, ownGoals: 0 };
+      const bonusMap = bonusByPlayer.get(playerId) ?? new Map();
+      return {
+        playerId,
+        playerName: player.name,
+        footballTeamName: player.footballTeam.name,
+        flagSrc: resolveTeamFlag(player.footballTeam),
+        voteCount: voteCounts.get(playerId) ?? 0,
+        goals: gs.goals,
+        ownGoals: gs.ownGoals,
+        bonuses: [...bonusMap.values()],
+      };
+    })
+    .sort((a, b) => b.voteCount - a.voteCount || a.playerName.localeCompare(b.playerName, "it"));
+
   return {
     match: {
       homeTeamName: match.homeTeam?.name ?? match.homeSeed ?? "TBD",
@@ -265,5 +328,6 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
     mvpBonusPoints: mvpBonusType ? Number(mvpBonusType.points) : 3,
     homeGoals,
     awayGoals,
+    playerVotes,
   };
 }
