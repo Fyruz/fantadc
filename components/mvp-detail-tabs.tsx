@@ -11,11 +11,14 @@ const DIVIDER = (
 export default function MvpDetailTabs({
   detail,
 }: {
-  detail: Pick<MvpMatchDetail, "mvpPlayer" | "mvpBonusPoints" | "homeGoals" | "awayGoals" | "playerVotes">;
+  detail: Pick<MvpMatchDetail, "match" | "mvpPlayer" | "mvpBonusPoints" | "homeGoals" | "awayGoals" | "playerVotes">;
 }) {
   const [tab, setTab] = useState<"info" | "voti">("info");
-  const { mvpPlayer, mvpBonusPoints, homeGoals, awayGoals, playerVotes } = detail;
+  const { match, mvpPlayer, mvpBonusPoints, homeGoals, awayGoals, playerVotes } = detail;
   const hasGoals = homeGoals.length > 0 || awayGoals.length > 0;
+
+  const homePlayers = playerVotes.filter((p) => p.teamSide === "home");
+  const awayPlayers = playerVotes.filter((p) => p.teamSide === "away");
 
   return (
     <>
@@ -119,23 +122,66 @@ export default function MvpDetailTabs({
           </div>
         </div>
       ) : (
-        <div className="flex flex-col pb-6">
+        <div className="flex flex-col gap-8 pb-6">
           {playerVotes.length === 0 ? (
             <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.45)" }}>
               Nessun voto registrato.
             </p>
           ) : (
-            playerVotes.map((player, idx) => (
-              <PlayerVoteRow
-                key={player.playerId}
-                player={player}
-                isLast={idx === playerVotes.length - 1}
-              />
-            ))
+            <>
+              {homePlayers.length > 0 && (
+                <TeamSection
+                  teamName={match.homeTeamName}
+                  flagSrc={match.homeTeamFlagSrc}
+                  players={homePlayers}
+                />
+              )}
+              {awayPlayers.length > 0 && (
+                <TeamSection
+                  teamName={match.awayTeamName}
+                  flagSrc={match.awayTeamFlagSrc}
+                  players={awayPlayers}
+                />
+              )}
+            </>
           )}
         </div>
       )}
     </>
+  );
+}
+
+function TeamSection({
+  teamName,
+  flagSrc,
+  players,
+}: {
+  teamName: string;
+  flagSrc: string | null;
+  players: MvpPlayerVote[];
+}) {
+  return (
+    <div className="flex flex-col">
+      {/* Team header */}
+      <div className="flex items-center gap-2 mb-1">
+        {flagSrc ? (
+          <img src={flagSrc} alt={teamName} width={20} height={14} className="object-contain shrink-0" />
+        ) : null}
+        <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{teamName}</span>
+      </div>
+      <div
+        className="flex flex-col"
+        style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}
+      >
+        {players.map((player, idx) => (
+          <PlayerVoteRow
+            key={player.playerId}
+            player={player}
+            isLast={idx === players.length - 1}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 

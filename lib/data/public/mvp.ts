@@ -163,6 +163,7 @@ export type MvpPlayerVote = {
   playerName: string;
   footballTeamName: string;
   flagSrc: string | null;
+  teamSide: "home" | "away";
   voteCount: number;
   goals: number;
   ownGoals: number;
@@ -211,7 +212,7 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
               select: {
                 id: true,
                 name: true,
-                footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+                footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
               },
             },
           },
@@ -299,11 +300,14 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
     .map(({ playerId, player }) => {
       const gs = goalsByPlayer.get(playerId) ?? { goals: 0, ownGoals: 0 };
       const bonusMap = bonusByPlayer.get(playerId) ?? new Map();
+      const teamSide: "home" | "away" =
+        player.footballTeam.id === match.homeTeamId ? "home" : "away";
       return {
         playerId,
         playerName: player.name,
         footballTeamName: player.footballTeam.name,
         flagSrc: resolveTeamFlag(player.footballTeam),
+        teamSide,
         voteCount: voteCounts.get(playerId) ?? 0,
         goals: gs.goals,
         ownGoals: gs.ownGoals,
