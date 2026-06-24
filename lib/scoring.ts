@@ -311,18 +311,12 @@ export type PhaseBreakdownEntry = {
 
 /** Punti per fase di una singola squadra (fasi congelate + fase in corso). */
 export async function getTeamPhaseBreakdown(fantasyTeamId: number): Promise<PhaseBreakdownEntry[]> {
-  const now = new Date();
-  const [phases, lastClosedAt, activePhase] = await Promise.all([
+  const [phases, lastClosedAt] = await Promise.all([
     db.scoringPhase.findMany({
       orderBy: { order: "asc" },
       select: { id: true, name: true, scores: { where: { fantasyTeamId }, select: { points: true } } },
     }),
     getLastClosedAt(),
-    db.scoringPhase.findFirst({
-      where: { closedAt: { gt: now } },
-      orderBy: { order: "asc" },
-      select: { name: true },
-    }),
   ]);
 
   const result: PhaseBreakdownEntry[] = phases.map((p) => ({
@@ -335,7 +329,7 @@ export async function getTeamPhaseBreakdown(fantasyTeamId: number): Promise<Phas
   const current = await computeFantasyTeamPoints({ from: lastClosedAt });
   result.push({
     phaseId: null,
-    name: activePhase?.name ?? "Fase in corso",
+    name: "Fase in corso",
     points: current.get(fantasyTeamId) ?? 0,
     current: true,
   });
