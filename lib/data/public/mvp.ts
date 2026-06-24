@@ -19,6 +19,7 @@ export type MvpMatchRow = {
   awayShortName: string;
   homeScore: number | null;
   awayScore: number | null;
+  mvpTeamSide: "home" | "away";
   mvpPlayer: {
     id: number;
     name: string;
@@ -55,6 +56,8 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
         homeScore: true,
         awayScore: true,
         mvpOverridePlayerId: true,
+        homeTeamId: true,
+        awayTeamId: true,
         homeTeam: { select: { name: true, shortName: true } },
         awayTeam: { select: { name: true, shortName: true } },
         votes: { select: { playerId: true } },
@@ -66,7 +69,7 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
                 id: true,
                 name: true,
                 footballTeam: {
-                  select: { name: true, shortName: true, countryCode: true, logoUrl: true },
+                  select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true },
                 },
               },
             },
@@ -116,6 +119,9 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
     const flagSrc = resolveTeamFlag(mp.player.footballTeam);
     const phaseId = resolvePhaseId(match.concludedAt!);
 
+    const mvpTeamSide: "home" | "away" =
+      mp.player.footballTeam.id === match.homeTeamId ? "home" : "away";
+
     const matchRow: MvpMatchRow = {
       matchId: match.id,
       label,
@@ -125,6 +131,7 @@ export async function getPublicMvpData(): Promise<PublicMvpData> {
       awayShortName,
       homeScore: match.homeScore,
       awayScore: match.awayScore,
+      mvpTeamSide,
       mvpPlayer: {
         id: mp.player.id,
         name: mp.player.name,

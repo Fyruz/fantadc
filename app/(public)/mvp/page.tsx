@@ -132,15 +132,15 @@ export default async function MvpPage({
                 className="flex gap-3 items-center justify-center w-full pt-4"
                 style={{ borderTop: "1px solid rgba(9,20,76,0.05)" }}
               >
-                <span className="font-semibold text-black text-xs">
+                <span className={`text-xs${m.mvpTeamSide === "home" ? " font-semibold text-black" : ""}`} style={m.mvpTeamSide !== "home" ? { color: "rgba(0,0,0,0.75)" } : undefined}>
                   {m.homeShortName}
                 </span>
                 <span className="text-xs" style={{ color: "rgba(0,0,0,0.75)" }}>
-                  <span className="font-semibold text-black">{m.homeScore ?? "–"}</span>
+                  <span className={m.mvpTeamSide === "home" ? "font-semibold text-black" : ""}>{m.homeScore ?? "–"}</span>
                   {" - "}
-                  {m.awayScore ?? "–"}
+                  <span className={m.mvpTeamSide === "away" ? "font-semibold text-black" : ""}>{m.awayScore ?? "–"}</span>
                 </span>
-                <span className="text-xs" style={{ color: "rgba(0,0,0,0.75)" }}>
+                <span className={`text-xs${m.mvpTeamSide === "away" ? " font-semibold text-black" : ""}`} style={m.mvpTeamSide !== "away" ? { color: "rgba(0,0,0,0.75)" } : undefined}>
                   {m.awayShortName}
                 </span>
               </div>

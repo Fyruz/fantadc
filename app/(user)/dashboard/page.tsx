@@ -149,6 +149,8 @@ export default async function DashboardPage() {
           >
             {mvpMatches.slice(0, 2).map((m) => {
               const parts = m.label.split(" vs ");
+              const mvpPart = m.mvpTeamSide === "home" ? parts[0] : parts[1];
+              const otherPart = m.mvpTeamSide === "home" ? parts[1] : parts[0];
               return (
                 <Link
                   key={m.matchId}
@@ -174,8 +176,8 @@ export default async function DashboardPage() {
                   <div className="flex flex-col items-center gap-1 text-center w-full">
                     <p className="text-xs text-white font-normal truncate max-w-full">{m.mvpPlayer.name}</p>
                     <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.75)" }}>
-                      <span className="font-semibold text-white">{parts[0]}</span>
-                      {parts[1] ? ` · ${parts[1]}` : ""}
+                      <span className="font-semibold text-white">{mvpPart}</span>
+                      {otherPart ? ` · ${otherPart}` : ""}
                     </p>
                   </div>
                 </Link>
