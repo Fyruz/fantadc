@@ -164,6 +164,7 @@ export type MvpPlayerVote = {
   footballTeamName: string;
   flagSrc: string | null;
   teamSide: "home" | "away";
+  isMvp: boolean;
   voteCount: number;
   goals: number;
   ownGoals: number;
@@ -313,6 +314,7 @@ export async function getMvpMatchDetail(matchId: number): Promise<MvpMatchDetail
         footballTeamName: player.footballTeam.name,
         flagSrc: resolveTeamFlag(player.footballTeam),
         teamSide,
+        isMvp,
         voteCount: voteCounts.get(playerId) ?? 0,
         goals: gs.goals,
         ownGoals: gs.ownGoals,

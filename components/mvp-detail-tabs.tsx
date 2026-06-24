@@ -13,7 +13,7 @@ export default function MvpDetailTabs({
 }: {
   detail: Pick<MvpMatchDetail, "match" | "mvpPlayer" | "mvpBonusPoints" | "homeGoals" | "awayGoals" | "playerVotes">;
 }) {
-  const [tab, setTab] = useState<"info" | "voti">("info");
+  const [tab, setTab] = useState<"info" | "punteggi">("info");
   const { match, mvpPlayer, mvpBonusPoints, homeGoals, awayGoals, playerVotes } = detail;
   const hasGoals = homeGoals.length > 0 || awayGoals.length > 0;
 
@@ -23,12 +23,9 @@ export default function MvpDetailTabs({
   return (
     <>
       {/* Tab bar */}
-      <div
-        className="flex"
-        style={{ borderBottom: "1px solid rgba(9,20,76,0.08)" }}
-      >
-        {(["info", "voti"] as const).map((t) => {
-          const label = t === "info" ? "Info partita" : "Voti";
+      <div className="flex" style={{ borderBottom: "1px solid rgba(9,20,76,0.08)" }}>
+        {(["info", "punteggi"] as const).map((t) => {
+          const label = t === "info" ? "Info Partita" : "Punteggi";
           const isActive = tab === t;
           return (
             <button
@@ -122,29 +119,28 @@ export default function MvpDetailTabs({
           </div>
         </div>
       ) : (
-        <div className="pb-6">
+        <div className="flex flex-col gap-8 pb-6">
           {playerVotes.length === 0 ? (
             <p className="text-sm text-center py-8" style={{ color: "rgba(0,0,0,0.45)" }}>
-              Nessun voto registrato.
+              Nessun dato disponibile.
             </p>
           ) : (
-            <div className="flex gap-4 items-start">
-              <div className="flex-1 min-w-0">
+            <>
+              {homePlayers.length > 0 && (
                 <TeamSection
                   teamName={match.homeTeamName}
                   flagSrc={match.homeTeamFlagSrc}
                   players={homePlayers}
                 />
-              </div>
-              <div style={{ width: 1, alignSelf: "stretch", background: "rgba(9,20,76,0.08)", flexShrink: 0 }} />
-              <div className="flex-1 min-w-0">
+              )}
+              {awayPlayers.length > 0 && (
                 <TeamSection
                   teamName={match.awayTeamName}
                   flagSrc={match.awayTeamFlagSrc}
                   players={awayPlayers}
                 />
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -162,85 +158,78 @@ function TeamSection({
   players: MvpPlayerVote[];
 }) {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-4">
       {/* Team header */}
-      <div className="flex items-center gap-2 mb-1">
+      <div className="flex items-center gap-3">
         {flagSrc ? (
-          <img src={flagSrc} alt={teamName} width={20} height={14} className="object-contain shrink-0" />
+          <img src={flagSrc} alt={teamName} width={24} height={16} className="object-contain shrink-0" />
         ) : null}
-        <span className="text-xs font-semibold" style={{ color: "var(--text-primary)" }}>{teamName}</span>
+        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{teamName}</span>
       </div>
-      <div
-        className="flex flex-col"
-        style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}
-      >
-        {players.map((player, idx) => (
-          <PlayerVoteRow
-            key={player.playerId}
-            player={player}
-            isLast={idx === players.length - 1}
-          />
+
+      {/* Players */}
+      <div className="flex flex-col">
+        {players.map((player) => (
+          <PlayerRow key={player.playerId} player={player} />
         ))}
       </div>
     </div>
   );
 }
 
-function PlayerVoteRow({ player, isLast }: { player: MvpPlayerVote; isLast: boolean }) {
-  const hasExtras = player.bonuses.length > 0 || player.goals > 0 || player.ownGoals > 0;
+function PlayerRow({ player }: { player: MvpPlayerVote }) {
+  const hasBonuses = player.bonuses.length > 0 || player.isMvp;
+  const pts = player.totalPoints;
+  const ptsStr = Number.isInteger(pts) ? String(pts) : pts.toFixed(1);
+
   return (
-    <div
-      className="flex flex-col gap-2 py-3"
-      style={!isLast ? { borderBottom: "1px solid rgba(9,20,76,0.06)" } : undefined}
-    >
-      <div className="flex items-center gap-1.5">
-        <span className="text-xs font-medium text-black truncate flex-1 min-w-0">{player.playerName}</span>
-        <div className="flex items-center gap-1.5 shrink-0">
-          {player.totalPoints !== 0 && (
-            <span className="text-[11px] tabular-nums" style={{ color: "rgba(0,0,0,0.55)" }}>
-              {player.totalPoints % 1 === 0 ? player.totalPoints.toFixed(0) : player.totalPoints.toFixed(1)}
-            </span>
-          )}
-          {player.voteCount > 0 && (
-            <div className="flex items-center gap-0.5">
-              <img src="/icons/star.svg" alt="" width={10} height={10} />
-              <span className="text-[11px] font-medium tabular-nums" style={{ color: "var(--primary)" }}>
-                {player.voteCount}
-              </span>
+    <div className="flex flex-col">
+      {/* Top divider */}
+      <div style={{ height: 1, background: "rgba(9,20,76,0.08)" }} />
+
+      <div className="flex items-start gap-3 py-3">
+        {/* Left: name + bonus chips */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          {/* Name row */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-black">{player.playerName}</span>
+            {player.isMvp && (
+              <img src="/icons/star.svg" alt="MVP" width={12} height={12} className="shrink-0" />
+            )}
+          </div>
+
+          {/* Bonus chips */}
+          {hasBonuses && (
+            <div className="flex flex-wrap gap-1">
+              {player.isMvp && (
+                <span
+                  className="text-[8px] font-medium uppercase px-1 py-0.5 rounded-full"
+                  style={{ background: "#fefce8", border: "1px solid #fefce8", color: "#a65f00" }}
+                >
+                  MVP
+                </span>
+              )}
+              {player.bonuses.map((b) => {
+                const sign = b.points >= 0 ? "+" : "";
+                const label = b.quantity > 1 ? `${b.name} x${b.quantity}` : b.name;
+                return (
+                  <span
+                    key={b.name}
+                    className="flex items-center gap-1 text-[8px] uppercase px-1 py-0.5 rounded-full"
+                    style={{ border: "1px solid rgba(9,20,76,0.06)" }}
+                  >
+                    <span style={{ color: "rgba(0,0,0,0.75)" }}>{label}</span>
+                    <span className="font-semibold text-black">{sign}{b.points % 1 === 0 ? b.points.toFixed(1) : b.points.toFixed(1)}</span>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>
-      </div>
-      {hasExtras && (
-        <div className="flex flex-wrap gap-1">
-          {player.goals > 0 && (
-            <BonusChip label={player.goals === 1 ? "Gol" : `Gol ×${player.goals}`} />
-          )}
-          {player.ownGoals > 0 && (
-            <BonusChip label={player.ownGoals === 1 ? "Autogol" : `Autogol ×${player.ownGoals}`} muted />
-          )}
-          {player.bonuses.map((b) => (
-            <BonusChip
-              key={b.name}
-              label={b.quantity > 1 ? `${b.name} ×${b.quantity}` : b.name}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
-function BonusChip({ label, muted }: { label: string; muted?: boolean }) {
-  return (
-    <span
-      className="text-[11px] px-2 py-0.5 rounded-full"
-      style={{
-        background: muted ? "rgba(0,0,0,0.06)" : "rgba(9,20,76,0.08)",
-        color: muted ? "rgba(0,0,0,0.45)" : "var(--primary)",
-      }}
-    >
-      {label}
-    </span>
+        {/* Right: total points */}
+        <span className="text-xs font-semibold text-black shrink-0 tabular-nums">{ptsStr}</span>
+      </div>
+    </div>
   );
 }
