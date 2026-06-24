@@ -63,12 +63,12 @@ export default async function MvpDetailPage({
               <img src={match.homeTeamFlagSrc} alt={match.homeTeamName} width={56} height={38} className="object-contain" />
             ) : (
               <div className="w-14 h-10 rounded flex items-center justify-center" style={{ background: "rgba(9,20,76,0.06)" }}>
-                <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
+                <span className="text-xs font-bold" style={{ color: "#000" }}>
                   {match.homeTeamName.slice(0, 3).toUpperCase()}
                 </span>
               </div>
             )}
-            <span className="text-xs text-center" style={{ color: "var(--text-primary)" }}>
+            <span className="text-xs text-center" style={{ color: "#000" }}>
               {match.homeTeamName}
             </span>
           </div>
@@ -89,12 +89,12 @@ export default async function MvpDetailPage({
               <img src={match.awayTeamFlagSrc} alt={match.awayTeamName} width={56} height={38} className="object-contain" />
             ) : (
               <div className="w-14 h-10 rounded flex items-center justify-center" style={{ background: "rgba(9,20,76,0.06)" }}>
-                <span className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
+                <span className="text-xs font-bold" style={{ color: "#000" }}>
                   {match.awayTeamName.slice(0, 3).toUpperCase()}
                 </span>
               </div>
             )}
-            <span className="text-xs text-center" style={{ color: "var(--text-primary)" }}>
+            <span className="text-xs text-center" style={{ color: "#000" }}>
               {match.awayTeamName}
             </span>
           </div>
