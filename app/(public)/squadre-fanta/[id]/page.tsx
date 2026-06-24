@@ -2,8 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPublicFantasyTeamDetail } from "@/lib/data/public/fantasy-rankings";
 import { getTeamPhaseBreakdown } from "@/lib/scoring";
+import { getPublicMatchesPageData } from "@/lib/data/public/matches";
 import { db } from "@/lib/db";
 import BackButton from "@/components/back-button";
+import SquadraMenu from "@/components/squadra-menu";
 import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
 
 export const revalidate = 60;
@@ -23,12 +25,13 @@ export default async function SquadraFantasyPublicPage({
 
   const { team, history, lastClosedAt, totalPoints } = detail;
 
-  const [phaseBreakdown, dbPhases] = await Promise.all([
+  const [phaseBreakdown, dbPhases, { matches }] = await Promise.all([
     getTeamPhaseBreakdown(teamId),
     db.scoringPhase.findMany({
       orderBy: { order: "asc" },
       select: { id: true, startsAt: true, closedAt: true },
     }),
+    getPublicMatchesPageData(),
   ]);
 
   const selectedPhaseId: number | null =
@@ -74,7 +77,7 @@ export default async function SquadraFantasyPublicPage({
           </span>
         </div>
         <div className="w-10 shrink-0 flex items-center justify-end">
-          <i className="pi pi-ellipsis-v text-sm" style={{ color: "var(--text-primary)" }} />
+          <SquadraMenu matches={matches} />
         </div>
       </div>
 
@@ -98,8 +101,8 @@ export default async function SquadraFantasyPublicPage({
                 <span
                   className="text-sm font-semibold tabular-nums pb-0.5"
                   style={{
-                    color: "var(--primary)",
-                    borderBottom: isActive ? "1.5px solid var(--primary)" : undefined,
+                    color: "#09144C",
+                    borderBottom: isActive ? "1.5px solid #09144C" : undefined,
                   }}
                 >
                   {p.points.toFixed(0)} pti

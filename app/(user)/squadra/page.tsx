@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import BackButton from "@/components/back-button";
+import SquadraMenu from "@/components/squadra-menu";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory, getLastClosedAt, getTeamPhaseBreakdown } from "@/lib/scoring";
+import { getPublicMatchesPageData } from "@/lib/data/public/matches";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
 
@@ -35,7 +37,7 @@ export default async function SquadraPage({
 
   if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
-  const [history, lastClosedAt, phaseBreakdown, dbPhases] = await Promise.all([
+  const [history, lastClosedAt, phaseBreakdown, dbPhases, { matches }] = await Promise.all([
     computeTeamHistory(fantasyTeam.id),
     getLastClosedAt(),
     getTeamPhaseBreakdown(fantasyTeam.id),
@@ -43,6 +45,7 @@ export default async function SquadraPage({
       orderBy: { order: "asc" },
       select: { id: true, startsAt: true, closedAt: true },
     }),
+    getPublicMatchesPageData(),
   ]);
 
   // Determine selected phase: null = fase in corso
@@ -100,7 +103,7 @@ export default async function SquadraPage({
               </span>
             </div>
           )}
-          <i className="pi pi-ellipsis-v text-sm" style={{ color: "var(--text-primary)" }} />
+          <SquadraMenu teamId={fantasyTeam.id} matches={matches} />
         </div>
       </div>
 
@@ -124,8 +127,8 @@ export default async function SquadraPage({
                 <span
                   className="text-sm font-semibold tabular-nums pb-0.5"
                   style={{
-                    color: "var(--primary)",
-                    borderBottom: isActive ? "1.5px solid var(--primary)" : undefined,
+                    color: "#09144C",
+                    borderBottom: isActive ? "1.5px solid #09144C" : undefined,
                   }}
                 >
                   {p.points.toFixed(0)} pti
