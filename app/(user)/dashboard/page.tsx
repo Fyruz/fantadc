@@ -153,7 +153,7 @@ export default async function DashboardPage() {
                 <Link
                   key={m.matchId}
                   href={`/mvp/${m.matchId}`}
-                  className="flex flex-col items-center justify-center gap-4 p-4 rounded-2xl shrink-0 w-32"
+                  className="flex flex-col items-center justify-center gap-4 p-6 rounded-2xl shrink-0 w-32"
                   style={DARK_CARD}
                 >
                   <div className="relative">
@@ -172,10 +172,10 @@ export default async function DashboardPage() {
                     )}
                   </div>
                   <div className="flex flex-col items-center gap-1 text-center w-full">
-                    <p className="text-xs text-white font-normal truncate max-w-full">{m.mvpPlayer.name}</p>
+                    <p className="text-xs text-white font-semibold truncate max-w-full">{m.mvpPlayer.name.split(" ").at(-1)}</p>
                     <p className="text-[10px] whitespace-nowrap" style={{ color: "rgba(255,255,255,0.75)" }}>
                       <span className={m.mvpTeamSide === "home" ? "font-semibold text-white" : ""}>{parts[0]}</span>
-                      {parts[1] ? <> · <span className={m.mvpTeamSide === "away" ? "font-semibold text-white" : ""}>{parts[1]}</span></> : null}
+                      {parts[1] ? <> - <span className={m.mvpTeamSide === "away" ? "font-semibold text-white" : ""}>{parts[1]}</span></> : null}
                     </p>
                   </div>
                 </Link>
