@@ -176,7 +176,7 @@ function TeamSection({
         {flagSrc ? (
           <img src={flagSrc} alt={teamName} width={24} height={16} className="object-contain shrink-0" />
         ) : null}
-        <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{teamName}</span>
+        <span className="text-sm font-medium text-black">{teamName}</span>
       </div>
       <div className="flex flex-col">
         {players.map((player) => (
