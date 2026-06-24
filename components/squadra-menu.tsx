@@ -101,7 +101,7 @@ export default function SquadraMenu({
     }
   }
 
-  const groups = groupMatchesByDate(matches.filter((m) => m.status !== "CONCLUDED"));
+  const groups = groupMatchesByDate(matches.filter((m) => m.status === "CONCLUDED"));
 
   return (
     <div className="relative">
