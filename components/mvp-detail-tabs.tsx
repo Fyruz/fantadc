@@ -208,21 +208,19 @@ function PlayerRow({
   return (
     <div className="flex flex-col">
       <div style={{ height: 1, background: "rgba(9,20,76,0.08)" }} />
-      <div className="flex items-center gap-3 py-3">
+      <div className="flex items-center gap-3 py-2">
         {/* Left: name + bonus chips */}
         <div className="flex flex-col gap-2 flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
+            {inRoster && (
+              <div
+                className="shrink-0 rounded-full"
+                style={{ width: 6, height: 6, background: "var(--primary)" }}
+              />
+            )}
             <span className="text-xs text-black">{player.playerName}</span>
             {isCaptain && (
               <img src="/icons/star.svg" alt="Capitano" width={12} height={12} className="shrink-0" />
-            )}
-            {inRoster && (
-              <span
-                className="text-[8px] font-medium px-1 py-0.5 rounded-full shrink-0"
-                style={{ background: "rgba(9,20,76,0.08)", color: "var(--primary)" }}
-              >
-                In rosa
-              </span>
             )}
           </div>
           {hasBonuses && (
