@@ -245,7 +245,7 @@ function PlayerRow({
           )}
         </div>
         {/* Right: total points — centrato verticalmente grazie a items-center sul parent */}
-        <span className="text-xs font-semibold text-black shrink-0 tabular-nums">{ptsStr}</span>
+        <span className={`text-xs text-black shrink-0 tabular-nums${inRoster ? " font-semibold" : ""}`}>{ptsStr}</span>
       </div>
     </div>
   );
