@@ -39,9 +39,9 @@ export default function MvpDetailTabs({
               onClick={() => setTab(t)}
               className="flex-1 py-3 text-sm transition-colors"
               style={{
-                color: isActive ? "var(--primary)" : "rgba(0,0,0,0.45)",
+                color: isActive ? "#09144C" : "rgba(0,0,0,0.45)",
                 fontWeight: isActive ? 600 : 400,
-                borderBottom: isActive ? "2px solid var(--primary)" : "2px solid transparent",
+                borderBottom: isActive ? "2px solid #09144C" : "2px solid transparent",
                 marginBottom: -1,
               }}
             >
