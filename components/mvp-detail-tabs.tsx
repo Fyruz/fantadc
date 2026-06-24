@@ -10,11 +10,16 @@ const DIVIDER = (
 
 export default function MvpDetailTabs({
   detail,
+  captainPlayerId,
+  rosterPlayerIds,
 }: {
   detail: Pick<MvpMatchDetail, "match" | "mvpPlayer" | "mvpBonusPoints" | "homeGoals" | "awayGoals" | "playerVotes">;
+  captainPlayerId: number | null;
+  rosterPlayerIds: number[];
 }) {
   const [tab, setTab] = useState<"info" | "punteggi">("info");
   const { match, mvpPlayer, mvpBonusPoints, homeGoals, awayGoals, playerVotes } = detail;
+  const rosterSet = new Set(rosterPlayerIds);
   const hasGoals = homeGoals.length > 0 || awayGoals.length > 0;
 
   const homePlayers = playerVotes.filter((p) => p.teamSide === "home");
@@ -131,6 +136,8 @@ export default function MvpDetailTabs({
                   teamName={match.homeTeamName}
                   flagSrc={match.homeTeamFlagSrc}
                   players={homePlayers}
+                  captainPlayerId={captainPlayerId}
+                  rosterSet={rosterSet}
                 />
               )}
               {awayPlayers.length > 0 && (
@@ -138,6 +145,8 @@ export default function MvpDetailTabs({
                   teamName={match.awayTeamName}
                   flagSrc={match.awayTeamFlagSrc}
                   players={awayPlayers}
+                  captainPlayerId={captainPlayerId}
+                  rosterSet={rosterSet}
                 />
               )}
             </>
@@ -152,53 +161,70 @@ function TeamSection({
   teamName,
   flagSrc,
   players,
+  captainPlayerId,
+  rosterSet,
 }: {
   teamName: string;
   flagSrc: string | null;
   players: MvpPlayerVote[];
+  captainPlayerId: number | null;
+  rosterSet: Set<number>;
 }) {
   return (
     <div className="flex flex-col gap-4">
-      {/* Team header */}
       <div className="flex items-center gap-3">
         {flagSrc ? (
           <img src={flagSrc} alt={teamName} width={24} height={16} className="object-contain shrink-0" />
         ) : null}
         <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{teamName}</span>
       </div>
-
-      {/* Players */}
       <div className="flex flex-col">
         {players.map((player) => (
-          <PlayerRow key={player.playerId} player={player} />
+          <PlayerRow
+            key={player.playerId}
+            player={player}
+            isCaptain={player.playerId === captainPlayerId}
+            inRoster={rosterSet.has(player.playerId)}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function PlayerRow({ player }: { player: MvpPlayerVote }) {
+function PlayerRow({
+  player,
+  isCaptain,
+  inRoster,
+}: {
+  player: MvpPlayerVote;
+  isCaptain: boolean;
+  inRoster: boolean;
+}) {
   const hasBonuses = player.bonuses.length > 0 || player.isMvp;
   const pts = player.totalPoints;
   const ptsStr = Number.isInteger(pts) ? String(pts) : pts.toFixed(1);
 
   return (
     <div className="flex flex-col">
-      {/* Top divider */}
       <div style={{ height: 1, background: "rgba(9,20,76,0.08)" }} />
-
-      <div className="flex items-start gap-3 py-3">
+      <div className="flex items-center gap-3 py-3">
         {/* Left: name + bonus chips */}
         <div className="flex flex-col gap-2 flex-1 min-w-0">
-          {/* Name row */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-black">{player.playerName}</span>
-            {player.isMvp && (
-              <img src="/icons/star.svg" alt="MVP" width={12} height={12} className="shrink-0" />
+            {isCaptain && (
+              <img src="/icons/star.svg" alt="Capitano" width={12} height={12} className="shrink-0" />
+            )}
+            {inRoster && (
+              <span
+                className="text-[8px] font-medium px-1 py-0.5 rounded-full shrink-0"
+                style={{ background: "rgba(9,20,76,0.08)", color: "var(--primary)" }}
+              >
+                In rosa
+              </span>
             )}
           </div>
-
-          {/* Bonus chips */}
           {hasBonuses && (
             <div className="flex flex-wrap gap-1">
               {player.isMvp && (
@@ -219,15 +245,14 @@ function PlayerRow({ player }: { player: MvpPlayerVote }) {
                     style={{ border: "1px solid rgba(9,20,76,0.06)" }}
                   >
                     <span style={{ color: "rgba(0,0,0,0.75)" }}>{label}</span>
-                    <span className="font-semibold text-black">{sign}{b.points % 1 === 0 ? b.points.toFixed(1) : b.points.toFixed(1)}</span>
+                    <span className="font-semibold text-black">{sign}{b.points.toFixed(1)}</span>
                   </span>
                 );
               })}
             </div>
           )}
         </div>
-
-        {/* Right: total points */}
+        {/* Right: total points — centrato verticalmente grazie a items-center sul parent */}
         <span className="text-xs font-semibold text-black shrink-0 tabular-nums">{ptsStr}</span>
       </div>
     </div>

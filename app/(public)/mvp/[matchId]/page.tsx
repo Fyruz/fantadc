@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import BackButton from "@/components/back-button";
 import MvpDetailTabs from "@/components/mvp-detail-tabs";
 import { getMvpMatchDetail } from "@/lib/data/public/mvp";
+import { getCurrentUser } from "@/lib/session";
+import { db } from "@/lib/db";
 
 export const revalidate = 60;
 
@@ -11,8 +13,28 @@ export default async function MvpDetailPage({
   params: Promise<{ matchId: string }>;
 }) {
   const { matchId } = await params;
-  const detail = await getMvpMatchDetail(Number(matchId));
+  const [detail, user] = await Promise.all([
+    getMvpMatchDetail(Number(matchId)),
+    getCurrentUser(),
+  ]);
   if (!detail) notFound();
+
+  // Se l'utente è loggato, carica il suo team per evidenziare capitano e rosa
+  let captainPlayerId: number | null = null;
+  let rosterPlayerIds: number[] = [];
+  if (user) {
+    const fantasyTeam = await db.fantasyTeam.findUnique({
+      where: { userId: Number(user.id) },
+      select: {
+        captainPlayerId: true,
+        players: { select: { playerId: true } },
+      },
+    });
+    if (fantasyTeam) {
+      captainPlayerId = fantasyTeam.captainPlayerId;
+      rosterPlayerIds = fantasyTeam.players.map((p) => p.playerId);
+    }
+  }
 
   const { match } = detail;
 
@@ -80,8 +102,12 @@ export default async function MvpDetailPage({
         </div>
       </div>
 
-      {/* Tabs: Info partita / Voti */}
-      <MvpDetailTabs detail={detail} />
+      {/* Tabs: Info partita / Punteggi */}
+      <MvpDetailTabs
+        detail={detail}
+        captainPlayerId={captainPlayerId}
+        rosterPlayerIds={rosterPlayerIds}
+      />
 
     </div>
   );
