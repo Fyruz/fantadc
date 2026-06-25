@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { resolveTeamFlag } from "@/lib/flags";
+import LiveMatchClock from "@/components/live-match-clock";
+import { getMatchClockNow } from "@/lib/domain/match";
 
 type Team = {
   id: number;
@@ -52,6 +54,7 @@ export default function LiveMatchCard({ match: m }: Props) {
   });
   const homeScore = m.homeScore ?? 0;
   const awayScore = m.awayScore ?? 0;
+  const elapsedMsAtLoad = getMatchClockNow().getTime() - m.startsAt.getTime();
 
   return (
       <Link
@@ -87,7 +90,7 @@ export default function LiveMatchCard({ match: m }: Props) {
 
           {/* Clock */}
           <div className="flex flex-1 justify-end shrink-0">
-            <i className="pi pi-clock" style={{ fontSize: 16, color: "rgba(255,255,255,0.4)" }} />
+            <LiveMatchClock elapsedMsAtLoad={elapsedMsAtLoad} />
           </div>
         </div>
 
