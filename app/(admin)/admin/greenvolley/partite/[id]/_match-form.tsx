@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
+import { InputNumber } from "primereact/inputnumber";
 import { updateVolleyMatch } from "@/app/actions/admin/volley";
 
 type SelectItem = { id: number; name: string };
@@ -15,6 +16,8 @@ type MatchFormValue = {
   date: string | null;
   groupId: number | null;
   knockoutRoundId: number | null;
+  homeDisciplinaryPoints: number;
+  awayDisciplinaryPoints: number;
 };
 
 export default function EditVolleyMatchForm({
@@ -34,6 +37,12 @@ export default function EditVolleyMatchForm({
   const [awayTeamId, setAwayTeamId] = useState<number | null>(match.awayTeamId);
   const [groupId, setGroupId] = useState<number | null>(match.groupId);
   const [knockoutRoundId, setKnockoutRoundId] = useState<number | null>(match.knockoutRoundId);
+  const [homeDisciplinaryPoints, setHomeDisciplinaryPoints] = useState<number | null>(
+    match.homeDisciplinaryPoints
+  );
+  const [awayDisciplinaryPoints, setAwayDisciplinaryPoints] = useState<number | null>(
+    match.awayDisciplinaryPoints
+  );
   const [date, setDate] = useState<Date | null>(() => match.date ? new Date(match.date) : null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -125,6 +134,39 @@ export default function EditVolleyMatchForm({
             className="w-full"
           />
           <input type="hidden" name="knockoutRoundId" value={knockoutRoundId ?? ""} />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div>
+          <label className="text-sm font-semibold">Punteggio disciplinare</label>
+          <p className="mt-0.5 text-xs" style={{ color: "var(--text-muted)" }}>
+            Rosso da somma ammonizioni = 1, rosso diretto = 2.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold">Casa</label>
+            <InputNumber
+              value={homeDisciplinaryPoints}
+              onValueChange={(event) => setHomeDisciplinaryPoints(event.value ?? null)}
+              min={0}
+              max={99}
+              className="w-full"
+            />
+            <input type="hidden" name="homeDisciplinaryPoints" value={homeDisciplinaryPoints ?? ""} />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs font-semibold">Ospite</label>
+            <InputNumber
+              value={awayDisciplinaryPoints}
+              onValueChange={(event) => setAwayDisciplinaryPoints(event.value ?? null)}
+              min={0}
+              max={99}
+              className="w-full"
+            />
+            <input type="hidden" name="awayDisciplinaryPoints" value={awayDisciplinaryPoints ?? ""} />
+          </div>
         </div>
       </div>
 

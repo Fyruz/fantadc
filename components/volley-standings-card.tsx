@@ -16,8 +16,10 @@ type Props = {
 
 const FULL_COLS: { key: keyof VolleyStandingRow; label: string }[] = [
   { key: "played",   label: "G"  },
+  { key: "wins",     label: "V"  },
   { key: "setsWon",  label: "SV" },
   { key: "setsLost", label: "SP" },
+  { key: "disciplinaryPoints", label: "PD" },
 ];
 
 const COMPACT_COLS: { key: keyof VolleyStandingRow; label: string }[] = [

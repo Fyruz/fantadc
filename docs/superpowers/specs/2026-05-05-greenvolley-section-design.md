@@ -17,7 +17,7 @@ The fantadc site currently manages the DCup football tournament. The same admin 
 - Teams and players (anagrafica only — no per-match player stats)
 - Matches with up to 5 sets, each set storing home/away points
 - Group stage + knockout rounds (same structure as DCup football)
-- Standings calculated on-the-fly: each set won = 1 point; tiebreaker: set ratio then points ratio
+- Standings calculated on-the-fly: each set won = 1 point; tiebreakers follow match wins, head-to-head standings points, points ratio, lower disciplinary score, then draw/lottery
 - Public-facing pages: matches, standings, groups, knockout, teams, players
 - Admin CRUD for all entities
 - Admin switcher between DCup and GreenVolley contexts
@@ -117,8 +117,11 @@ Computed on-the-fly from `VolleySet` records — no denormalized counters.
 
 For each team in a group:
 - **Points** = total sets won across all group matches
-- **Tiebreaker 1** = set ratio (sets won / sets lost)
-- **Tiebreaker 2** = points ratio (total points scored / total points conceded)
+- **Tiebreaker 1** = match wins
+- **Tiebreaker 2** = standings points earned in head-to-head matches among teams still tied
+- **Tiebreaker 3** = points ratio (total points scored / total points conceded)
+- **Tiebreaker 4** = lower disciplinary score
+- **Final unresolved tie** = draw/lottery
 
 Example: match result 3-1 → home team gets 3 pts, away team gets 1 pt.
 

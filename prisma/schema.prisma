@@ -409,6 +409,8 @@ model VolleyMatch {
   awayTeamId      Int
   status          VolleyMatchStatus    @default(DRAFT)
   date            DateTime?
+  homeDisciplinaryPoints Int            @default(0)
+  awayDisciplinaryPoints Int            @default(0)
   sets            VolleySet[]
   group           VolleyGroup?         @relation(fields: [groupId], references: [id])
   groupId         Int?

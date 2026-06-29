@@ -17,6 +17,12 @@ function parseVolleyMatchDate(value: string | null) {
   return date;
 }
 
+function parseNonNegativeInteger(value: FormDataEntryValue | null) {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) return null;
+  return parsed;
+}
+
 // ─── SQUADRE ──────────────────────────────────────────────────────────────────
 
 export async function createVolleyTeam(
@@ -126,9 +132,14 @@ export async function updateVolleyMatch(
   const dateRaw = formData.get("date") as string | null;
   const groupId = Number(formData.get("groupId")) || null;
   const knockoutRoundId = Number(formData.get("knockoutRoundId")) || null;
+  const homeDisciplinaryPoints = parseNonNegativeInteger(formData.get("homeDisciplinaryPoints"));
+  const awayDisciplinaryPoints = parseNonNegativeInteger(formData.get("awayDisciplinaryPoints"));
 
   if (!homeTeamId || !awayTeamId) return { error: "Seleziona entrambe le squadre" };
   if (homeTeamId === awayTeamId) return { error: "Le squadre devono essere diverse" };
+  if (homeDisciplinaryPoints === null || awayDisciplinaryPoints === null) {
+    return { error: "Punteggio disciplinare non valido" };
+  }
 
   await db.volleyMatch.update({
     where: { id },
@@ -138,6 +149,8 @@ export async function updateVolleyMatch(
       date: parseVolleyMatchDate(dateRaw),
       groupId,
       knockoutRoundId,
+      homeDisciplinaryPoints,
+      awayDisciplinaryPoints,
     },
   });
   revalidatePath("/admin/greenvolley/partite");

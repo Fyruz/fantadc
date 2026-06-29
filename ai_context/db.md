@@ -265,7 +265,7 @@ Sistema di gestione torneo pallavolo completamente separato dal fantacalcio.
 
 * `VolleyTeam`: squadre reali del campionato volley
 * `VolleyPlayer`: giocatori, solo anagrafica (teamId)
-* `VolleyMatch`: partita con status DRAFT/SCHEDULED/CONCLUDED, collegabile a VolleyGroup o VolleyKnockoutRound
+* `VolleyMatch`: partita con status DRAFT/SCHEDULED/CONCLUDED, collegabile a VolleyGroup o VolleyKnockoutRound; conserva anche il punteggio disciplinare delle due squadre (`homeDisciplinaryPoints`, `awayDisciplinaryPoints`)
 * `VolleySet`: set della partita, setNumber (1-5), homePoints, awayPoints
 * `VolleyGroup`: girone con nome
 * `VolleyGroupTeam`: join VolleyGroup↔VolleyTeam, qualified flag
@@ -273,9 +273,14 @@ Sistema di gestione torneo pallavolo completamente separato dal fantacalcio.
 
 ### Classifica
 
-* Ogni set vinto = 1 punto
-* Tiebreaker primario: quoziente set (setsWon / setsLost)
-* Tiebreaker secondario: quoziente punti (pointsScored / pointsConceded)
+* Ogni set vinto = 1 punto in classifica
+* In caso di parita di punti nella fase a gironi, i criteri di classifica sono, in ordine:
+  * maggior numero di vittorie partita
+  * punti in classifica ottenuti negli scontri diretti tra le squadre ancora pari
+  * miglior quoziente tra punti vinti e punti persi (`pointsScored / pointsConceded`)
+  * minor punteggio disciplinare
+  * sorteggio, se i criteri automatici non risolvono la parita
+* Il punteggio disciplinare e calcolato come: rosso dovuto a somma di ammonizioni = 1 punto; rosso diretto = 2 punti
 * Calcolato on-the-fly da `lib/volley/standings.ts`
 
 ### Routes
@@ -287,7 +292,7 @@ Sistema di gestione torneo pallavolo completamente separato dal fantacalcio.
 
 ## Estensioni future
 
-* configurazione esplicita delle regole di spareggio
+* eventuale gestione esplicita del sorteggio GreenVolley quando i criteri automatici non risolvono la parita
 * configurazione esplicita del bonus MVP
 * rate limit e antifrode piu evoluti
 * multi stagione

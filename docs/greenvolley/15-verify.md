@@ -92,13 +92,13 @@ Modelli separati dal calcio. Prefisso `Volley` su tutti.
 
 - `VolleyTeam`: squadre reali del campionato volley
 - `VolleyPlayer`: giocatori, solo anagrafica (teamId)
-- `VolleyMatch`: partita con status DRAFT/SCHEDULED/CONCLUDED, collegabile a VolleyGroup o VolleyKnockoutRound
+- `VolleyMatch`: partita con status DRAFT/SCHEDULED/CONCLUDED, collegabile a VolleyGroup o VolleyKnockoutRound, con punteggio disciplinare casa/ospite
 - `VolleySet`: set della partita, setNumber (1-5), homePoints, awayPoints
 - `VolleyGroup`: girone con nome
 - `VolleyGroupTeam`: join VolleyGroup↔VolleyTeam, qualified flag
 - `VolleyKnockoutRound`: turno eliminazione con ordine numerico
 
-Classifica: ogni set vinto = 1 punto. Tiebreaker: quoziente set poi quoziente punti. Calcolato on-the-fly da `lib/volley/standings.ts`.
+Classifica: ogni set vinto = 1 punto. Spareggi: vittorie partita, punti negli scontri diretti, quoziente punti vinti/persi, minor punteggio disciplinare, sorteggio. Calcolato on-the-fly da `lib/volley/standings.ts`.
 ```
 
 ```bash

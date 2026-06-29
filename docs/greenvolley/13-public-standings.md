@@ -68,7 +68,7 @@ export default async function VolleyClassificaPage() {
             >
               {/* Header */}
               <div
-                className="grid grid-cols-[1fr_40px_40px_40px_40px_50px] px-4 py-2 text-xs font-black uppercase tracking-wide gap-2"
+                className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_50px] px-4 py-2 text-xs font-black uppercase tracking-wide gap-2"
                 style={{
                   background: "var(--surface-1)",
                   color: "var(--text-muted)",
@@ -77,16 +77,17 @@ export default async function VolleyClassificaPage() {
               >
                 <span>Squadra</span>
                 <span className="text-center">G</span>
+                <span className="text-center">V</span>
                 <span className="text-center">SV</span>
                 <span className="text-center">SP</span>
-                <span className="text-center">QS</span>
+                <span className="text-center">PD</span>
                 <span className="text-center" style={{ color: "#3DD907" }}>Pt</span>
               </div>
 
               {standings.map((row, i) => (
                 <div
                   key={row.teamId}
-                  className="grid grid-cols-[1fr_40px_40px_40px_40px_50px] px-4 py-3 text-sm gap-2 items-center"
+                  className="grid grid-cols-[1fr_40px_40px_40px_40px_40px_50px] px-4 py-3 text-sm gap-2 items-center"
                   style={{
                     borderBottom:
                       i < standings.length - 1
@@ -98,10 +99,11 @@ export default async function VolleyClassificaPage() {
                   <span className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
                     {row.played}
                   </span>
+                  <span className="text-center text-xs">{row.wins}</span>
                   <span className="text-center text-xs">{row.setsWon}</span>
                   <span className="text-center text-xs">{row.setsLost}</span>
                   <span className="text-center text-xs" style={{ color: "var(--text-muted)" }}>
-                    {row.setRatio === 0 ? "0" : row.setRatio.toFixed(2)}
+                    {row.disciplinaryPoints}
                   </span>
                   <span
                     className="text-center font-black"
@@ -113,7 +115,7 @@ export default async function VolleyClassificaPage() {
               ))}
             </div>
             <div className="text-[10px] mt-1 px-1" style={{ color: "var(--text-muted)" }}>
-              G=Giocate · SV=Set Vinti · SP=Set Persi · QS=Quoziente Set · Pt=Punti (set vinti)
+              G=Giocate · V=Vittorie · SV=Set Vinti · SP=Set Persi · PD=Punteggio Disciplinare · Pt=Punti (set vinti)
             </div>
           </div>
         );

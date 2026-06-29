@@ -57,6 +57,8 @@ export default async function GreenVolleyDashboard() {
           homeTeamId: m.homeTeamId,
           awayTeamId: m.awayTeamId,
           status: m.status,
+          homeDisciplinaryPoints: m.homeDisciplinaryPoints,
+          awayDisciplinaryPoints: m.awayDisciplinaryPoints,
           sets: m.sets,
         }))
       ).slice(0, 4)

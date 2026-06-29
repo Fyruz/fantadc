@@ -1,0 +1,3 @@
+ALTER TABLE "VolleyMatch"
+ADD COLUMN "homeDisciplinaryPoints" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "awayDisciplinaryPoints" INTEGER NOT NULL DEFAULT 0;

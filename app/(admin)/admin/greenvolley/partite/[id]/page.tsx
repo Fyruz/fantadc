@@ -123,6 +123,8 @@ export default async function VolleyMatchDetailPage({
             date: match.date ? match.date.toISOString() : null,
             groupId: match.groupId,
             knockoutRoundId: match.knockoutRoundId,
+            homeDisciplinaryPoints: match.homeDisciplinaryPoints,
+            awayDisciplinaryPoints: match.awayDisciplinaryPoints,
           }}
           teams={teams}
           groups={groups}
