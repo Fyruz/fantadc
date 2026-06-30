@@ -19,7 +19,7 @@ export default async function ModificaSquadraPage() {
               id: true,
               name: true,
               role: true,
-              footballTeam: { select: { id: true, name: true, shortName: true } },
+              footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
             },
           },
         },
@@ -47,7 +47,7 @@ export default async function ModificaSquadraPage() {
       id: true,
       name: true,
       role: true,
-      footballTeam: { select: { id: true, name: true, shortName: true } },
+      footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
     },
   });
 

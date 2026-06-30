@@ -33,35 +33,12 @@ function getMobileHint(v: Validation, teamName: string): string | null {
   return null;
 }
 
-const SLOT_META: Record<
-  SlotKey,
-  { label: string; role: Player["role"]; wrapperClassName: string }
-> = {
-  goalkeeper: {
-    label: "Portiere",
-    role: "P",
-    wrapperClassName: "left-1/2 top-[72%] -translate-x-1/2 -translate-y-1/2",
-  },
-  topLeft: {
-    label: "Giocatore 1",
-    role: "A",
-    wrapperClassName: "left-[24%] top-[23%] -translate-x-1/2 -translate-y-1/2",
-  },
-  topRight: {
-    label: "Giocatore 2",
-    role: "A",
-    wrapperClassName: "left-[76%] top-[23%] -translate-x-1/2 -translate-y-1/2",
-  },
-  bottomLeft: {
-    label: "Giocatore 3",
-    role: "A",
-    wrapperClassName: "left-[24%] top-[49%] -translate-x-1/2 -translate-y-1/2",
-  },
-  bottomRight: {
-    label: "Giocatore 4",
-    role: "A",
-    wrapperClassName: "left-[76%] top-[49%] -translate-x-1/2 -translate-y-1/2",
-  },
+const SLOT_ROLE: Record<SlotKey, Player["role"]> = {
+  goalkeeper: "P",
+  topLeft: "A",
+  topRight: "A",
+  bottomLeft: "A",
+  bottomRight: "A",
 };
 
 function createEmptySlots(): SlotsState {
@@ -151,7 +128,7 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
     );
     return players.filter(
       (p) =>
-        p.role === SLOT_META[activeSlot].role &&
+        p.role === SLOT_ROLE[activeSlot] &&
         !usedPlayerIds.has(p.id) &&
         !usedTeamIds.has(p.footballTeam.id)
     );
@@ -260,90 +237,66 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
       {/* Campo + sidebar desktop */}
       <div className="flex flex-1 flex-col lg:grid lg:flex-none lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
         {/* Campo di gioco */}
-        <div
-          className="relative flex-1 overflow-hidden rounded-[32px] lg:aspect-[5/6] lg:w-full lg:flex-none lg:max-w-[26rem] lg:mx-auto"
-          style={{
-            background: "linear-gradient(175deg, #21c05a 0%, #17964a 35%, #116e35 70%, #0c5529 100%)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15)",
-          }}
-        >
-          {/* Strisce erba alternate */}
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 46px, rgba(0,0,0,0.05) 46px, rgba(0,0,0,0.05) 92px)",
-            }}
+        <div className="relative flex flex-col items-center justify-around py-12 flex-1">
+          <img
+            src="/images/football-field.webp"
+            alt=""
+            fetchPriority="high"
+            className="pointer-events-none absolute inset-0 w-full h-full object-cover"
           />
 
-          {/* Segni del campo SVG */}
-          <svg
-            className="pointer-events-none absolute inset-0 w-full h-full"
-            viewBox="0 0 100 120"
-            preserveAspectRatio="none"
-            fill="none"
-          >
-            {/* Bordo campo */}
-            <rect x="4" y="3" width="92" height="114" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
-            {/* Linea di metà campo (in alto = lato avversario) */}
-            <line x1="4" y1="3" x2="96" y2="3" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
-            {/* Semicerchio centrocampo (arco visibile nella nostra metà) */}
-            <path d="M 36 3 A 14 14 0 0 0 64 3" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
-            {/* Pallino centrocampo */}
-            <circle cx="50" cy="3" r="1.1" fill="rgba(255,255,255,0.5)" />
-
-            {/* Area di rigore (grande) */}
-            <rect x="20" y="67" width="60" height="34" stroke="rgba(255,255,255,0.5)" strokeWidth="0.65" />
-            {/* Arco dell'area */}
-            <path d="M 26 67 A 13.5 13.5 0 0 1 74 67" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
-            {/* Dischetto del rigore */}
-            <circle cx="50" cy="78" r="1.1" fill="rgba(255,255,255,0.6)" />
-
-            {/* Piccola area */}
-            <rect x="34" y="88" width="32" height="13" stroke="rgba(255,255,255,0.38)" strokeWidth="0.55" />
-
-            {/* Porta */}
-            <rect x="37" y="101" width="26" height="16" fill="rgba(0,0,0,0.12)" stroke="rgba(255,255,255,0.6)" strokeWidth="0.75" />
-            {/* Rete porta - linee orizzontali */}
-            <line x1="37" y1="105" x2="63" y2="105" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
-            <line x1="37" y1="109" x2="63" y2="109" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
-            <line x1="37" y1="113" x2="63" y2="113" stroke="rgba(255,255,255,0.18)" strokeWidth="0.4" />
-            {/* Rete porta - linee verticali */}
-            <line x1="42.5" y1="101" x2="42.5" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
-            <line x1="48" y1="101" x2="48" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
-            <line x1="53.5" y1="101" x2="53.5" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
-            <line x1="59" y1="101" x2="59" y2="117" stroke="rgba(255,255,255,0.13)" strokeWidth="0.35" />
-          </svg>
-
-          {/* Vignette per profondità */}
-          <div
-            className="pointer-events-none absolute inset-0 rounded-[32px]"
-            style={{
-              background: "radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.18) 100%)",
-            }}
-          />
-
-          {/* Slot */}
-          {SLOT_ORDER.map((slotKey) => {
-            const player = slots[slotKey];
-            return (
-              <div
-                key={slotKey}
-                className={`absolute ${SLOT_META[slotKey].wrapperClassName}`}
-              >
+          {/* Top row — Giocatori 1 e 2 */}
+          <div className="flex gap-8 items-end justify-center relative z-10">
+            {(["topLeft", "topRight"] as const).map((slotKey) => {
+              const player = slots[slotKey];
+              return (
                 <SlotCard
+                  key={slotKey}
                   slotKey={slotKey}
                   player={player}
                   isCaptain={player !== null && captainId === player.id}
                   pending={pending}
                   onEmptyClick={() => openSlot(slotKey)}
-                  onFilledClick={() => {
-                    if (!pending) setMenuSlot(slotKey);
-                  }}
+                  onFilledClick={() => { if (!pending) setMenuSlot(slotKey); }}
                 />
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* Middle row — Giocatori 3 e 4 */}
+          <div className="flex gap-16 items-end justify-center relative z-10">
+            {(["bottomLeft", "bottomRight"] as const).map((slotKey) => {
+              const player = slots[slotKey];
+              return (
+                <SlotCard
+                  key={slotKey}
+                  slotKey={slotKey}
+                  player={player}
+                  isCaptain={player !== null && captainId === player.id}
+                  pending={pending}
+                  onEmptyClick={() => openSlot(slotKey)}
+                  onFilledClick={() => { if (!pending) setMenuSlot(slotKey); }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Portiere */}
+          <div className="relative z-10">
+            {(() => {
+              const player = slots.goalkeeper;
+              return (
+                <SlotCard
+                  slotKey="goalkeeper"
+                  player={player}
+                  isCaptain={player !== null && captainId === player.id}
+                  pending={pending}
+                  onEmptyClick={() => openSlot("goalkeeper")}
+                  onFilledClick={() => { if (!pending) setMenuSlot("goalkeeper"); }}
+                />
+              );
+            })()}
+          </div>
         </div>
 
         {/* Sidebar desktop */}
@@ -373,7 +326,7 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
               {SLOT_ORDER.map((slotKey) => (
                 <SlotSummaryRow
                   key={slotKey}
-                  label={SLOT_META[slotKey].label}
+                  label={slotKey === "goalkeeper" ? "Portiere" : `Giocatore ${["topLeft","topRight","bottomLeft","bottomRight"].indexOf(slotKey) + 1}`}
                   player={slots[slotKey]}
                   onSelect={() => openSlot(slotKey)}
                   onClear={() => clearSlot(slotKey)}
@@ -864,7 +817,7 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
         visible={activeSlot !== null}
         slotLabel={
           activeSlot
-            ? `Seleziona ${SLOT_META[activeSlot].label.toLowerCase()}`
+            ? activeSlot === "goalkeeper" ? "Seleziona portiere" : "Seleziona giocatore"
             : ""
         }
         availableGroups={availableGroups}

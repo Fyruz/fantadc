@@ -8,8 +8,8 @@ const groups: PlayerGroup[] = [
     teamName: "Juventus",
     teamCode: "JUV",
     players: [
-      { id: 1, name: "Vlahovic", role: "A", footballTeam: { id: 1, name: "Juventus", shortName: "JUV" } },
-      { id: 2, name: "Yildiz", role: "A", footballTeam: { id: 1, name: "Juventus", shortName: "JUV" } },
+      { id: 1, name: "Vlahovic", role: "A", footballTeam: { id: 1, name: "Juventus", shortName: "JUV", countryCode: null, logoUrl: null } },
+      { id: 2, name: "Yildiz", role: "A", footballTeam: { id: 1, name: "Juventus", shortName: "JUV", countryCode: null, logoUrl: null } },
     ],
   },
   {
@@ -17,7 +17,7 @@ const groups: PlayerGroup[] = [
     teamName: "Inter",
     teamCode: "INT",
     players: [
-      { id: 3, name: "Lautaro", role: "A", footballTeam: { id: 2, name: "Inter", shortName: "INT" } },
+      { id: 3, name: "Lautaro", role: "A", footballTeam: { id: 2, name: "Inter", shortName: "INT", countryCode: null, logoUrl: null } },
     ],
   },
 ];

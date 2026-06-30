@@ -22,7 +22,7 @@ export default async function CreaSquadraPage() {
         id: true,
         name: true,
         role: true,
-        footballTeam: { select: { id: true, name: true, shortName: true } },
+        footballTeam: { select: { id: true, name: true, shortName: true, countryCode: true, logoUrl: true } },
       },
     }),
     hasConcludedMatches(),

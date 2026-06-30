@@ -2,7 +2,7 @@ export type Player = {
   id: number;
   name: string;
   role: "P" | "A";
-  footballTeam: { id: number; name: string; shortName: string | null };
+  footballTeam: { id: number; name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null };
 };
 
 export type SlotKey = "goalkeeper" | "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
