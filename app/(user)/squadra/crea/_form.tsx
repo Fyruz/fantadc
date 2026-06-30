@@ -214,37 +214,36 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
         </div>
       )}
 
+      {/* Mobile: nome squadra + link regole (sopra il campo) */}
+      <div className="flex flex-col items-center gap-1.5 px-4 pb-2 lg:hidden">
+        <InputText
+          value={teamName}
+          onChange={(e) => setTeamName(e.target.value)}
+          className="w-full max-w-xs text-center"
+          placeholder="Nome della tua squadra"
+          maxLength={40}
+        />
+        <button
+          type="button"
+          onClick={() => setRulesVisible(true)}
+          className="flex items-center gap-1 text-[10px] font-semibold transition-colors hover:text-[var(--primary)]"
+          style={{ color: "var(--text-muted)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
+        >
+          <i className="pi pi-info-circle text-[10px]" />
+          Come funziona il Fanta
+        </button>
+      </div>
+
       {/* Campo + sidebar desktop */}
       <div className="flex-1 flex flex-col overflow-hidden lg:flex-none lg:overflow-visible lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
         {/* Campo di gioco */}
-        <div className="relative flex flex-col items-center justify-around py-12 mt-6 flex-1">
+        <div className="relative flex flex-col items-center justify-around py-12 flex-1">
           <img
             src="/images/football-field.webp"
             alt=""
             fetchPriority="high"
             className="pointer-events-none absolute inset-0 w-full h-full object-cover"
           />
-
-          {/* Mobile overlay top: nome squadra + regole */}
-          <div className="lg:hidden absolute top-3 inset-x-4 z-20 flex flex-col items-center gap-1">
-            <InputText
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              className="w-full text-center text-sm"
-              style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(4px)", height: 36 }}
-              placeholder="Nome della tua squadra"
-              maxLength={40}
-            />
-            <button
-              type="button"
-              onClick={() => setRulesVisible(true)}
-              className="flex items-center gap-1 text-[10px] font-semibold"
-              style={{ color: "rgba(255,255,255,0.8)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
-            >
-              <i className="pi pi-info-circle text-[10px]" />
-              Come funziona il Fanta
-            </button>
-          </div>
 
           {/* Top row — Giocatori 1 e 2 */}
           <div className="flex gap-8 items-end justify-center relative z-10">
