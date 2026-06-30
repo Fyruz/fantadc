@@ -355,7 +355,7 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
   ]);
 
   const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
-  const mvpBonusName = mvpBonusType?.name ?? "MVP";
+  const mvpBonusName = "MVP";
 
   const totalGoals = goals.filter((g) => !g.isOwnGoal).length;
   const totalOwnGoals = goals.filter((g) => g.isOwnGoal).length;

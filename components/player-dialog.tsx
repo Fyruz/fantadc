@@ -88,7 +88,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
         <div className="mx-4 mb-6">
           <div className="grid grid-cols-3 rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(9,20,76,0.1)" }}>
             {[
-              { label: "Seleziona da", value: Math.round(player.pickRate) + "%" },
+              { label: "Selezionato da", value: Math.round(player.pickRate) + "%" },
               { label: "Goal", value: player.totalGoals },
               { label: "Punti fanta", value: fmtPts(player.totalBonusPoints) },
             ].map(({ label, value }, i) => (
