@@ -1,21 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog } from "primereact/dialog";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import RoleBadge from "@/components/role-badge";
 import { resolveTeamFlag } from "@/lib/flags";
+
+type BonusDetail = { name: string; points: number; quantity: number };
 
 type MatchStat = {
   matchId: number;
   startsAt: string;
   isHome: boolean;
   opponent: string;
+  opponentCountryCode: string | null;
+  phase: string | null;
   hs: number | null;
   as_: number | null;
   won: boolean;
   lost: boolean;
   matchGoals: number;
   matchBonusPoints: number;
+  bonuses: BonusDetail[];
 };
 
 type Player = {
@@ -27,188 +32,302 @@ type Player = {
   totalOwnGoals: number;
   totalBonusPoints: number;
   presenze: number;
+  pickRate: number;
   matchStats: MatchStat[];
 };
 
 type Group = { teamName: string; players: Player[] };
 
-function PlayerDialog({ player, onHide }: { player: Player; onHide: () => void }) {
-  const pts = player.totalBonusPoints;
-  const ptsStr = pts % 1 === 0 ? String(pts) : pts.toFixed(1);
+function Flag({ countryCode, logoUrl, name }: { countryCode: string | null; logoUrl?: string | null; name: string }) {
+  const src = resolveTeamFlag({ countryCode, logoUrl: logoUrl ?? null });
+  if (!src) return null;
+  return <img src={src} alt={name} className="shrink-0 object-cover" style={{ width: 24, height: 16 }} />;
+}
 
-  return (
-    <Dialog
-      visible
-      onHide={onHide}
-      header={null}
-      closable={false}
-      style={{ width: "min(28rem, 94vw)", padding: 0 }}
-      contentStyle={{ padding: 0 }}
-      pt={{ root: { style: { borderRadius: "20px", overflow: "hidden" } } }}
-      modal
-      draggable={false}
-      resizable={false}
-    >
-      {/* ── Header ── */}
-      <div
-        className="flex items-center gap-3 px-5 py-4"
-        style={{ borderBottom: "1px solid var(--border-soft)" }}
-      >
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
-          style={{
-            background: player.role === "GK" ? "rgba(232,160,0,0.12)" : "rgba(1,7,163,0.08)",
-            color: player.role === "GK" ? "#C87800" : "var(--primary)",
-          }}
-        >
-          {player.role === "GK" ? "P" : "A"}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div
-            className="font-display font-black text-base uppercase leading-tight truncate"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {player.name}
-          </div>
-          <div className="text-xs truncate" style={{ color: "var(--text-muted)" }}>
-            {player.footballTeam.name}
-          </div>
-        </div>
+function fmtPts(n: number) {
+  return n % 1 === 0 ? String(n) : n.toFixed(1);
+}
+
+function PlayerDialog({ player, onHide }: { player: Player; onHide: () => void }) {
+  const [selectedMatchIdx, setSelectedMatchIdx] = useState(0);
+  const [animIn, setAnimIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    requestAnimationFrame(() => requestAnimationFrame(() => setAnimIn(true)));
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
+  const handleClose = () => {
+    setAnimIn(false);
+    setTimeout(onHide, 300);
+  };
+
+  const handleNavigate = (href: string) => {
+    setAnimIn(false);
+    setTimeout(() => { onHide(); router.push(href); }, 300);
+  };
+
+  const selectedMatch = player.matchStats[selectedMatchIdx] ?? player.matchStats[0] ?? null;
+
+  const matchGroups = player.matchStats.reduce<
+    Array<{ phase: string; matches: Array<MatchStat & { idx: number }> }>
+  >((acc, match, idx) => {
+    const phase = match.phase ?? "—";
+    const existing = acc.find((g) => g.phase === phase);
+    if (existing) {
+      existing.matches.push({ ...match, idx });
+    } else {
+      acc.push({ phase, matches: [{ ...match, idx }] });
+    }
+    return acc;
+  }, []);
+
+  const teamFlagSrc = resolveTeamFlag(player.footballTeam);
+
+  const content = (
+    <>
+      {/* ── X button ── */}
+      <div className="flex justify-end px-5 pt-4 shrink-0">
         <button
           type="button"
-          onClick={onHide}
-          className="w-8 h-8 flex items-center justify-center rounded-full flex-shrink-0 transition-colors"
-          style={{ background: "var(--surface-1)", color: "var(--text-muted)" }}
+          onClick={handleClose}
+          className="w-6 h-6 flex items-center justify-center"
+          style={{ color: "rgba(9,20,76,0.4)" }}
         >
-          <i className="pi pi-times text-xs" />
+          <i className="pi pi-times text-sm" />
         </button>
       </div>
 
-      {/* ── Stats strip ── */}
-      <div
-        className="grid grid-cols-3"
-        style={{ borderBottom: "1px solid var(--border-soft)" }}
-      >
-        {[
-          { label: "Presenze", value: player.presenze },
-          { label: "Goal", value: player.totalGoals + (player.totalOwnGoals > 0 ? ` (+${player.totalOwnGoals} AG)` : "") },
-          { label: "Punti fanta", value: ptsStr },
-        ].map(({ label, value }, i) => (
-          <div
-            key={label}
-            className="flex flex-col items-center justify-center py-3 gap-0.5"
-            style={i < 2 ? { borderRight: "1px solid var(--border-soft)" } : undefined}
-          >
-            <span
-              className="font-display font-black text-xl leading-none"
-              style={{ color: "var(--text-primary)" }}
-            >
-              {value}
-            </span>
-            <span
-              className="text-[10px] font-black uppercase tracking-widest"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {label}
-            </span>
+      {/* ── Header ── */}
+      <div className="flex items-center gap-6 px-5 pt-2 pb-0 shrink-0">
+        <img src="/icons/user-player.svg" alt="player" className="w-14 h-14 object-contain shrink-0" />
+        <div className="flex-1 min-w-0 flex flex-col gap-3">
+          <div className="font-semibold text-black" style={{ fontSize: 20, lineHeight: "24px" }}>{player.name}</div>
+          <div className="flex items-center gap-2">
+            {teamFlagSrc && (
+              <img src={teamFlagSrc} alt={player.footballTeam.name} className="object-cover shrink-0" style={{ width: 24, height: 16 }} />
+            )}
+            <span className="text-sm text-black">{player.footballTeam.name}</span>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* ── Match history ── */}
-      <div className="flex flex-col">
+      {/* ── Scrollable body ── */}
+      <div className="overflow-y-auto flex-1 pb-10 pt-6">
+        {/* Stats strip */}
+        <div className="mx-4 mb-6">
+          <div className="grid grid-cols-3 rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(9,20,76,0.1)" }}>
+            {[
+              { label: "Seleziona da", value: Math.round(player.pickRate) + "%" },
+              { label: "Goal", value: player.totalGoals },
+              { label: "Punti fanta", value: fmtPts(player.totalBonusPoints) },
+            ].map(({ label, value }, i) => (
+              <div
+                key={label}
+                className="flex flex-col items-center py-4 gap-2"
+                style={i < 2 ? { borderRight: "1px solid rgba(9,20,76,0.1)" } : undefined}
+              >
+                <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>{label}</span>
+                <span className="font-semibold text-base text-black">{value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Match carousel ── */}
         {player.matchStats.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-center" style={{ color: "var(--text-muted)" }}>
+          <p className="px-5 text-sm text-center" style={{ color: "var(--text-muted)" }}>
             Nessuna partita giocata.
           </p>
         ) : (
           <>
-            <div
-              className="px-5 pt-3 pb-1 text-[10px] font-black uppercase tracking-widest"
-              style={{ color: "var(--text-muted)" }}
-            >
-              Ultime partite
+            <div className="overflow-x-auto" style={{ scrollbarWidth: "none" }}>
+              <div className="flex px-4 gap-3 min-w-max pb-2">
+                {matchGroups.map(({ phase, matches }) => (
+                  <div key={phase} className="flex flex-col gap-2">
+                    <span className="text-xs" style={{ color: "rgba(0,0,0,0.4)" }}>{phase}</span>
+                    <div className="flex gap-2">
+                      {matches.map(({ idx, opponent, opponentCountryCode, matchBonusPoints }) => {
+                        const isSelected = selectedMatchIdx === idx;
+                        const flagSrc = opponentCountryCode
+                          ? resolveTeamFlag({ countryCode: opponentCountryCode, logoUrl: null })
+                          : null;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setSelectedMatchIdx(idx)}
+                            className="flex flex-col items-center justify-center gap-2 cursor-pointer transition-colors"
+                            style={{
+                              width: 96,
+                              paddingTop: 8,
+                              paddingBottom: 8,
+                              paddingLeft: 24,
+                              paddingRight: 24,
+                              background: isSelected ? "rgba(1,7,163,0.07)" : "transparent",
+                              border: isSelected ? "none" : "1px solid rgba(9,20,76,0.05)",
+                            }}
+                          >
+                            <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.35)" }}>vs</span>
+                            {flagSrc ? (
+                              <img
+                                src={flagSrc}
+                                alt={opponent}
+                                className="object-cover shrink-0"
+                                style={{ width: 40, height: 26.667 }}
+                              />
+                            ) : (
+                              <div
+                                className="flex items-center justify-center text-[10px] font-bold"
+                                style={{ width: 40, height: 26.667, background: "var(--surface-1)", color: "var(--text-muted)" }}
+                              >
+                                {opponent.slice(0, 3).toUpperCase()}
+                              </div>
+                            )}
+                            <span
+                              className="text-[10px] font-medium text-white"
+                              style={{ background: "#09144c", borderRadius: 4, paddingLeft: 4, paddingRight: 4, paddingTop: 2, paddingBottom: 2 }}
+                            >
+                              {fmtPts(matchBonusPoints)} pti
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            {player.matchStats.map((m, idx) => (
-              <div
-                key={m.matchId}
-                className="flex items-center gap-3 px-5 py-3"
-                style={{
-                  borderTop: idx > 0 ? "1px solid var(--border-soft)" : undefined,
-                }}
-              >
-                {/* W/D/L dot */}
-                <span
-                  className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5"
-                  style={{
-                    background:
-                      m.hs === null
-                        ? "var(--text-disabled)"
-                        : m.won
-                        ? "#10B981"
-                        : m.lost
-                        ? "#EF4444"
-                        : "#94A3B8",
-                  }}
-                />
-                {/* Opponent */}
-                <span
-                  className="text-sm font-semibold flex-1 truncate"
-                  style={{ color: "var(--text-primary)" }}
-                >
-                  {m.isHome ? "vs" : "@"} {m.opponent}
-                </span>
-                {/* Badges */}
-                <div className="flex items-center gap-1.5 flex-shrink-0">
-                  {m.matchGoals > 0 && (
-                    <span
-                      className="text-[11px] font-black px-2 py-0.5 rounded-full"
-                      style={{ background: "rgba(1,7,163,0.08)", color: "var(--primary)" }}
-                    >
-                      ⚽ {m.matchGoals}
+
+            {/* ── Selected match detail ── */}
+            {selectedMatch && (
+              <div className="mt-6" style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}>
+                {/* Score row: [nome][flag] … score … [flag][nome] + chevron */}
+                <button type="button" onClick={() => handleNavigate(`/mvp/${selectedMatch.matchId}`)} className="relative flex items-center gap-5 px-4 py-6 w-full text-left">
+                  <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
+                    <span className="text-sm text-black truncate">
+                      {selectedMatch.isHome
+                        ? (player.footballTeam.shortName ?? player.footballTeam.name)
+                        : selectedMatch.opponent}
                     </span>
-                  )}
-                  {m.matchBonusPoints !== 0 && (
-                    <span
-                      className="text-[11px] font-black px-2 py-0.5 rounded-full"
-                      style={{
-                        background: m.matchBonusPoints > 0 ? "#ECFDF5" : "#FEF2F2",
-                        color: m.matchBonusPoints > 0 ? "#065F46" : "#991B1B",
-                      }}
-                    >
-                      {m.matchBonusPoints > 0 ? "+" : ""}
-                      {m.matchBonusPoints % 1 === 0
-                        ? m.matchBonusPoints
-                        : m.matchBonusPoints.toFixed(1)}
-                      pt
+                    <Flag
+                      countryCode={selectedMatch.isHome ? player.footballTeam.countryCode : selectedMatch.opponentCountryCode}
+                      logoUrl={selectedMatch.isHome ? player.footballTeam.logoUrl : null}
+                      name={selectedMatch.isHome ? player.footballTeam.name : selectedMatch.opponent}
+                    />
+                  </div>
+                  <span className="text-sm font-normal text-black tabular-nums shrink-0">
+                    {selectedMatch.hs !== null && selectedMatch.as_ !== null
+                      ? `${selectedMatch.hs}-${selectedMatch.as_}`
+                      : "–"}
+                  </span>
+                  <div className="flex-1 flex items-center gap-3 min-w-0">
+                    <Flag
+                      countryCode={selectedMatch.isHome ? selectedMatch.opponentCountryCode : player.footballTeam.countryCode}
+                      logoUrl={selectedMatch.isHome ? null : player.footballTeam.logoUrl}
+                      name={selectedMatch.isHome ? selectedMatch.opponent : player.footballTeam.name}
+                    />
+                    <span className="text-sm text-black truncate">
+                      {selectedMatch.isHome
+                        ? selectedMatch.opponent
+                        : (player.footballTeam.shortName ?? player.footballTeam.name)}
                     </span>
-                  )}
-                  {/* Score */}
-                  {m.hs !== null && m.as_ !== null && (
-                    <span
-                      className="text-xs font-display font-black tabular-nums"
-                      style={{ color: "var(--text-secondary)" }}
-                    >
-                      {m.hs}–{m.as_}
-                    </span>
+                  </div>
+                  <i className="pi pi-chevron-right absolute right-4 text-xs" style={{ color: "rgba(9,20,76,0.3)" }} />
+                </button>
+
+                {/* Bonus rows */}
+                <div className="flex flex-col px-4">
+                  {selectedMatch.bonuses.length === 0 ? (
+                    <p className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>
+                      Nessun bonus in questa partita.
+                    </p>
+                  ) : (
+                    <>
+                      {selectedMatch.bonuses.map((bonus, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 py-4"
+                          style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}
+                        >
+                          <span className="text-sm text-black flex-1 min-w-0">
+                            {bonus.name}
+                            {bonus.quantity > 1 && (
+                              <span style={{ color: "rgba(0,0,0,0.4)" }}> ×{bonus.quantity}</span>
+                            )}
+                          </span>
+                          <span className="text-sm font-semibold text-black tabular-nums shrink-0">
+                            {fmtPts(bonus.points)}
+                          </span>
+                        </div>
+                      ))}
+                      <div
+                        className="flex items-center gap-3 py-4"
+                        style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}
+                      >
+                        <span className="text-sm font-semibold uppercase text-black flex-1">Totale</span>
+                        <span className="text-sm font-semibold text-black tabular-nums shrink-0">
+                          {fmtPts(selectedMatch.matchBonusPoints)}
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
-                {/* Date */}
-                <span
-                  className="text-[10px] flex-shrink-0 hidden sm:block"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {new Date(m.startsAt).toLocaleDateString("it-IT", {
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </span>
               </div>
-            ))}
+            )}
           </>
         )}
       </div>
-    </Dialog>
+    </>
+  );
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40"
+        style={{ background: "rgba(6,7,61,0.3)", opacity: animIn ? 1 : 0, transition: "opacity 0.3s ease" }}
+        onClick={handleClose}
+      />
+
+      {/* Mobile: bottom sheet */}
+      <div
+        className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white flex flex-col"
+        style={{
+          borderRadius: "24px 24px 0 0",
+          height: "80svh",
+          transform: animIn ? "translateY(0)" : "translateY(100%)",
+          transition: "transform 0.3s cubic-bezier(0.32,0.72,0,1)",
+        }}
+      >
+        <div className="flex justify-center py-3 shrink-0">
+          <div className="w-10 h-1 rounded-full" style={{ background: "rgba(0,0,0,0.15)" }} />
+        </div>
+        {content}
+      </div>
+
+      {/* Desktop: centered modal */}
+      <div
+        className="hidden md:flex fixed inset-0 z-50 items-center justify-center p-4"
+        onClick={(e) => { if (e.target === e.currentTarget) handleClose(); }}
+      >
+        <div
+          className="bg-white flex flex-col"
+          style={{
+            borderRadius: 24,
+            width: "min(500px, 96vw)",
+            maxHeight: "90vh",
+            opacity: animIn ? 1 : 0,
+            transform: animIn ? "scale(1)" : "scale(0.95)",
+            transition: "opacity 0.25s ease, transform 0.25s ease",
+          }}
+        >
+          {content}
+        </div>
+      </div>
+    </>
   );
 }
 

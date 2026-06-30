@@ -31,17 +31,21 @@ export type PublicPlayerGridRow = {
   totalOwnGoals: number;
   totalBonusPoints: number;
   presenze: number;
+  pickRate: number;
   matchStats: Array<{
     matchId: number;
     startsAt: string;
     isHome: boolean;
     opponent: string;
+    opponentCountryCode: string | null;
+    phase: string | null;
     hs: number | null;
     as_: number | null;
     won: boolean;
     lost: boolean;
     matchGoals: number;
     matchBonusPoints: number;
+    bonuses: Array<{ name: string; points: number; quantity: number }>;
   }>;
 };
 
@@ -115,7 +119,7 @@ export const getPublicScorerRanking = cachePublicData(
 export const getPublicPlayersGroups = cachePublicData(
   "data.public.players.index.fetch",
   async (): Promise<PublicPlayersGroup[]> => {
-    const [players, appearances, goals, bonuses] = await Promise.all([
+    const [players, appearances, goals, bonuses, totalFantasyTeams] = await Promise.all([
       db.player.findMany({
         orderBy: [{ footballTeam: { name: "asc" } }, { role: "asc" }, { name: "asc" }],
         select: {
@@ -126,6 +130,7 @@ export const getPublicPlayersGroups = cachePublicData(
           footballTeam: {
             select: { name: true, shortName: true, countryCode: true, logoUrl: true },
           },
+          _count: { select: { fantasyTeams: true } },
         },
       }),
       db.matchPlayer.findMany({
@@ -141,12 +146,14 @@ export const getPublicPlayersGroups = cachePublicData(
               awayTeamId: true,
               homeSeed: true,
               awaySeed: true,
-              homeTeam: { select: { shortName: true, name: true } },
-              awayTeam: { select: { shortName: true, name: true } },
+              homeTeam: { select: { shortName: true, name: true, countryCode: true } },
+              awayTeam: { select: { shortName: true, name: true, countryCode: true } },
+              group: { select: { name: true } },
+              knockoutRound: { select: { name: true } },
             },
           },
         },
-        orderBy: { match: { startsAt: "desc" } },
+        orderBy: { match: { startsAt: "asc" } },
       }),
       db.matchGoal.findMany({
         select: { matchId: true, scorerId: true, isOwnGoal: true },
@@ -156,8 +163,11 @@ export const getPublicPlayersGroups = cachePublicData(
           playerId: true,
           matchId: true,
           points: true,
+          quantity: true,
+          bonusType: { select: { name: true } },
         },
       }),
+      db.fantasyTeam.count(),
     ]);
 
     const appearancesByPlayer = new Map<number, typeof appearances>();
@@ -193,7 +203,11 @@ export const getPublicPlayersGroups = cachePublicData(
         0
       );
 
-      const matchStats = playerAppearances.slice(0, 5).map((appearance) => {
+      const pickRate = totalFantasyTeams > 0
+        ? (player._count.fantasyTeams / totalFantasyTeams) * 100
+        : 0;
+
+      const matchStats = playerAppearances.map((appearance) => {
         const match = appearance.match;
         const isHome = match.homeTeamId === player.footballTeamId;
         const hs = isHome ? match.homeScore : match.awayScore;
@@ -201,12 +215,18 @@ export const getPublicPlayersGroups = cachePublicData(
         const opponent = isHome
           ? (match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD")
           : (match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD");
+        const opponentCountryCode = isHome
+          ? (match.awayTeam?.countryCode ?? null)
+          : (match.homeTeam?.countryCode ?? null);
+        const phase = match.group?.name ?? match.knockoutRound?.name ?? null;
         const matchGoals = playerGoals.filter(
           (goal) => goal.matchId === match.id && !goal.isOwnGoal
         ).length;
-        const matchBonusPoints = playerBonuses
-          .filter((bonus) => bonus.matchId === match.id)
-          .reduce((sum, bonus) => sum + Number(bonus.points), 0);
+        const matchBonusEntries = playerBonuses.filter((b) => b.matchId === match.id);
+        const matchBonusPoints = matchBonusEntries.reduce(
+          (sum, bonus) => sum + Number(bonus.points),
+          0
+        );
         const won = hs !== null && as_ !== null && hs > as_;
         const lost = hs !== null && as_ !== null && hs < as_;
 
@@ -215,12 +235,19 @@ export const getPublicPlayersGroups = cachePublicData(
           startsAt: match.startsAt.toISOString(),
           isHome,
           opponent,
+          opponentCountryCode,
+          phase,
           hs,
           as_,
           won,
           lost,
           matchGoals,
           matchBonusPoints,
+          bonuses: matchBonusEntries.map((b) => ({
+            name: b.bonusType.name,
+            points: Number(b.points),
+            quantity: b.quantity,
+          })),
         };
       });
 
@@ -233,6 +260,7 @@ export const getPublicPlayersGroups = cachePublicData(
         totalOwnGoals,
         totalBonusPoints,
         presenze: playerAppearances.length,
+        pickRate,
         matchStats,
       };
     });
