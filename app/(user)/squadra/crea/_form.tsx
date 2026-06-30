@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { createFantasyTeam } from "@/app/actions/user/fantasy-teams";
+import BackButton from "@/components/back-button";
 import { getTeamCode, SLOT_ORDER } from "./_types";
 import type { Player, PlayerGroup, SlotKey, SlotsState } from "./_types";
 import SlotCard from "./_slot-card";
@@ -198,6 +199,29 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
       action={action}
       className="flex-1 flex flex-col overflow-hidden lg:flex-none lg:overflow-visible lg:gap-3"
     >
+      {/* Header */}
+      <div className="flex items-center px-4">
+        <div className="w-10 shrink-0 flex items-center">
+          <BackButton />
+        </div>
+        <div className="flex items-center justify-center flex-1 px-2 min-w-0">
+          <span className="text-base font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+            Crea squadra
+          </span>
+        </div>
+        <div className="w-10 shrink-0 flex items-center justify-end">
+          <Button
+            type="button"
+            icon="pi pi-question-circle"
+            text
+            rounded
+            aria-label="Come funziona il Fanta"
+            onClick={() => setRulesVisible(true)}
+            style={{ color: "var(--text-muted)" }}
+          />
+        </div>
+      </div>
+
       {/* Avviso torneo già iniziato — solo desktop (anche nel dialog di conferma) */}
       {tournamentAlreadyStarted && (
         <div
@@ -214,8 +238,8 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
         </div>
       )}
 
-      {/* Mobile: nome squadra + link regole (sopra il campo) */}
-      <div className="flex flex-col items-center gap-1.5 px-4 pb-2 lg:hidden">
+      {/* Mobile: nome squadra (sopra il campo) */}
+      <div className="flex items-center justify-center px-4 pb-2 lg:hidden">
         <InputText
           value={teamName}
           onChange={(e) => setTeamName(e.target.value)}
@@ -223,15 +247,6 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
           placeholder="Nome della tua squadra"
           maxLength={40}
         />
-        <button
-          type="button"
-          onClick={() => setRulesVisible(true)}
-          className="flex items-center gap-1 text-[10px] font-semibold transition-colors hover:text-[var(--primary)]"
-          style={{ color: "var(--text-muted)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
-        >
-          <i className="pi pi-info-circle text-[10px]" />
-          Come funziona il Fanta
-        </button>
       </div>
 
       {/* Campo + sidebar desktop */}
