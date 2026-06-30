@@ -2,6 +2,7 @@ import "server-only";
 
 import { db } from "@/lib/db";
 import { resolveTeamFlag } from "@/lib/flags";
+import { getOfficialMvpPlayerId } from "@/lib/domain/mvp";
 import { cachePublicData, PUBLIC_CACHE_TAGS, PUBLIC_CACHE_TTL_SECONDS } from "./cache";
 
 export type PublicScorerRankingRow = {
@@ -310,7 +311,7 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
 
   if (!player) return null;
 
-  const [appearances, goals, bonuses] = await Promise.all([
+  const [appearances, goals, bonuses, mvpBonusType] = await Promise.all([
     db.matchPlayer.findMany({
       where: { playerId: id },
       select: {
@@ -324,10 +325,14 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
             awayTeamId: true,
             homeSeed: true,
             awaySeed: true,
+            concludedAt: true,
+            mvpOverridePlayerId: true,
             homeTeam: { select: { shortName: true, name: true, countryCode: true } },
             awayTeam: { select: { shortName: true, name: true, countryCode: true } },
             group: { select: { name: true } },
             knockoutRound: { select: { name: true } },
+            votes: { select: { playerId: true } },
+            players: { select: { playerId: true } },
           },
         },
       },
@@ -338,7 +343,7 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
       select: { matchId: true, isOwnGoal: true },
     }),
     db.playerMatchBonus.findMany({
-      where: { playerId: id },
+      where: { playerId: id, bonusType: { code: { not: "MVP" } } },
       select: {
         matchId: true,
         points: true,
@@ -346,11 +351,14 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
         bonusType: { select: { name: true } },
       },
     }),
+    db.bonusType.findFirst({ where: { code: "MVP" }, select: { name: true, points: true } }),
   ]);
+
+  const mvpBonus = mvpBonusType ? Number(mvpBonusType.points) : 0;
+  const mvpBonusName = mvpBonusType?.name ?? "MVP";
 
   const totalGoals = goals.filter((g) => !g.isOwnGoal).length;
   const totalOwnGoals = goals.filter((g) => g.isOwnGoal).length;
-  const totalBonusPoints = bonuses.reduce((sum, b) => sum + Number(b.points), 0);
   const pickRate = totalFantasyTeams > 0 ? (player._count.fantasyTeams / totalFantasyTeams) * 100 : 0;
 
   const matchStats = appearances.map((appearance) => {
@@ -365,7 +373,18 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
     const phase = match.group?.name ?? match.knockoutRound?.name ?? null;
     const matchGoals = goals.filter((g) => g.matchId === match.id && !g.isOwnGoal).length;
     const matchBonusEntries = bonuses.filter((b) => b.matchId === match.id);
-    const matchBonusPoints = matchBonusEntries.reduce((sum, b) => sum + Number(b.points), 0);
+
+    const mvpId = getOfficialMvpPlayerId({
+      concludedAt: match.concludedAt,
+      votes: match.votes,
+      mvpOverridePlayerId: match.mvpOverridePlayerId,
+      eligiblePlayerIds: match.players.map((p) => p.playerId),
+    });
+    const isMvp = mvpId === id;
+
+    const matchBonusPoints =
+      matchBonusEntries.reduce((sum, b) => sum + Number(b.points), 0) +
+      (isMvp ? mvpBonus : 0);
 
     return {
       matchId: match.id,
@@ -380,13 +399,18 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
       lost: hs !== null && as_ !== null && hs < as_,
       matchGoals,
       matchBonusPoints,
-      bonuses: matchBonusEntries.map((b) => ({
-        name: b.bonusType.name,
-        points: Number(b.points),
-        quantity: b.quantity,
-      })),
+      bonuses: [
+        ...matchBonusEntries.map((b) => ({
+          name: b.bonusType.name,
+          points: Number(b.points),
+          quantity: b.quantity,
+        })),
+        ...(isMvp ? [{ name: mvpBonusName, points: mvpBonus, quantity: 1 }] : []),
+      ],
     };
   });
+
+  const totalBonusPoints = matchStats.reduce((sum, ms) => sum + ms.matchBonusPoints, 0);
 
   return {
     id: player.id,
