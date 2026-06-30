@@ -187,7 +187,9 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                   </div>
                   <span className="text-sm font-normal text-black tabular-nums shrink-0">
                     {selectedMatch.hs !== null && selectedMatch.as_ !== null
-                      ? `${selectedMatch.hs}-${selectedMatch.as_}`
+                      ? selectedMatch.isHome
+                        ? `${selectedMatch.hs}-${selectedMatch.as_}`
+                        : `${selectedMatch.as_}-${selectedMatch.hs}`
                       : "–"}
                   </span>
                   <div className="flex-1 flex items-center gap-3 min-w-0">
