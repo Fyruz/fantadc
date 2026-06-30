@@ -196,12 +196,12 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
     <form
       ref={formRef}
       action={action}
-      className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0"
+      className="flex-1 flex flex-col overflow-hidden lg:flex-none lg:overflow-visible lg:gap-3"
     >
-      {/* Avviso torneo già iniziato */}
+      {/* Avviso torneo già iniziato — solo desktop (anche nel dialog di conferma) */}
       {tournamentAlreadyStarted && (
         <div
-          className="flex items-start gap-3 rounded-2xl px-4 py-3"
+          className="hidden lg:flex items-start gap-3 rounded-2xl px-4 py-3"
           style={{
             background: "rgba(1,7,163,0.05)",
             border: "1px solid rgba(1,7,163,0.12)",
@@ -214,36 +214,37 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
         </div>
       )}
 
-      {/* Mobile: nome squadra + link regole */}
-      <div className="flex flex-col items-center gap-1.5 lg:hidden">
-        <InputText
-          value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
-          className="w-full max-w-xs text-center"
-          placeholder="Inserisci il nome della tua squadra"
-          maxLength={40}
-        />
-        <button
-          type="button"
-          onClick={() => setRulesVisible(true)}
-          className="flex items-center gap-1 text-center text-[10px] font-semibold transition-colors hover:text-[var(--primary)]"
-          style={{ color: "var(--text-muted)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
-        >
-          <i className="pi pi-info-circle text-[10px]" />
-          Come funziona il Fanta
-        </button>
-      </div>
-
       {/* Campo + sidebar desktop */}
-      <div className="flex flex-1 flex-col lg:grid lg:flex-none lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
+      <div className="flex-1 flex flex-col overflow-hidden lg:flex-none lg:overflow-visible lg:grid lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
         {/* Campo di gioco */}
-        <div className="relative flex flex-col items-center justify-around py-12 flex-1">
+        <div className="relative flex flex-col items-center justify-around py-12 mt-6 flex-1">
           <img
             src="/images/football-field.webp"
             alt=""
             fetchPriority="high"
             className="pointer-events-none absolute inset-0 w-full h-full object-cover"
           />
+
+          {/* Mobile overlay top: nome squadra + regole */}
+          <div className="lg:hidden absolute top-3 inset-x-4 z-20 flex flex-col items-center gap-1">
+            <InputText
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              className="w-full text-center text-sm"
+              style={{ background: "rgba(255,255,255,0.88)", backdropFilter: "blur(4px)", height: 36 }}
+              placeholder="Nome della tua squadra"
+              maxLength={40}
+            />
+            <button
+              type="button"
+              onClick={() => setRulesVisible(true)}
+              className="flex items-center gap-1 text-[10px] font-semibold"
+              style={{ color: "rgba(255,255,255,0.8)", textDecoration: "underline dotted", textUnderlineOffset: "3px" }}
+            >
+              <i className="pi pi-info-circle text-[10px]" />
+              Come funziona il Fanta
+            </button>
+          </div>
 
           {/* Top row — Giocatori 1 e 2 */}
           <div className="flex gap-8 items-end justify-center relative z-10">
@@ -296,6 +297,30 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
                 />
               );
             })()}
+          </div>
+
+          {/* Mobile overlay bottom: hint + conferma */}
+          <div className="lg:hidden absolute bottom-3 inset-x-4 z-20 flex flex-col gap-2">
+            {getMobileHint(validation, teamName) && (
+              <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "rgba(251,191,36,0.92)", backdropFilter: "blur(4px)" }}>
+                <i className="pi pi-info-circle shrink-0 text-sm text-amber-900" />
+                <p className="text-[12px] font-medium text-amber-900">{getMobileHint(validation, teamName)}</p>
+              </div>
+            )}
+            {state?.success === false && (
+              <div aria-live="polite" className="flex flex-col items-center gap-0.5">
+                {state.message && <p className="text-[11px] font-medium text-red-500 drop-shadow">{state.message}</p>}
+                {state.errors?.name && <p className="text-[11px] font-medium text-red-500 drop-shadow">{state.errors.name[0]}</p>}
+                {state.errors?.captainPlayerId && <p className="text-[11px] font-medium text-red-500 drop-shadow">{state.errors.captainPlayerId[0]}</p>}
+              </div>
+            )}
+            <Button
+              type="button"
+              label={pending ? "Salvo..." : "Conferma squadra"}
+              disabled={!validation.isValid || pending}
+              className="w-full"
+              onClick={handleConfermaClick}
+            />
           </div>
         </div>
 
@@ -383,42 +408,6 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
             />
           </div>
         </div>
-      </div>
-
-      {/* Hint validazione mobile — progressivo */}
-      {getMobileHint(validation, teamName) && (
-        <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 lg:hidden">
-          <i className="pi pi-info-circle shrink-0 text-sm text-amber-600" />
-          <p className="text-[12px] font-medium text-amber-800">
-            {getMobileHint(validation, teamName)}
-          </p>
-        </div>
-      )}
-
-      {/* Errori server mobile */}
-      {state?.success === false && (
-        <div aria-live="polite" className="flex flex-col items-center gap-0.5 lg:hidden">
-          {state.message && (
-            <p className="text-[11px] font-medium text-red-500">{state.message}</p>
-          )}
-          {state.errors?.name && (
-            <p className="text-[11px] font-medium text-red-500">{state.errors.name[0]}</p>
-          )}
-          {state.errors?.captainPlayerId && (
-            <p className="text-[11px] font-medium text-red-500">{state.errors.captainPlayerId[0]}</p>
-          )}
-        </div>
-      )}
-
-      {/* Conferma mobile */}
-      <div className="flex justify-center lg:hidden">
-        <Button
-          type="button"
-          label={pending ? "Salvo..." : "Conferma squadra"}
-          disabled={!validation.isValid || pending}
-          className="w-56"
-          onClick={handleConfermaClick}
-        />
       </div>
 
       {/* Hidden inputs per il form */}
