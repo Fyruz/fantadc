@@ -107,10 +107,10 @@ export default function SquadraMenu({
     <div className="relative">
       <button
         onClick={() => setMenuOpen((v) => !v)}
-        className="w-10 h-10 flex items-center justify-center"
+        className="inline-flex items-center justify-center w-6 h-6"
         aria-label="Menu"
       >
-        <i className="pi pi-ellipsis-v text-sm" style={{ color: "var(--text-primary)" }} />
+        <i className="pi pi-ellipsis-v" style={{ fontSize: 12, color: "var(--text-primary)" }} />
       </button>
 
       {menuOpen && (

@@ -381,7 +381,7 @@ export default async function HomePage({
         )} */}
 
           {/* ══ GIOCA ═════════════════════════════════════════════════ */}
-          <section className="max-w-lg mx-auto w-full px-4">
+          <section className="max-w-lg mx-auto w-full px-4 mt-10">
             <h2
               className="uppercase text-(--text-primary) text-xl leading-[34px] font-medium mb-6"
               style={{ fontFamily: "var(--font-tallica)" }}
