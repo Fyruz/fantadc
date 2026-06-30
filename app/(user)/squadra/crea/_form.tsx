@@ -201,25 +201,7 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
     >
       {/* Header */}
       <div className="flex items-center px-4">
-        <div className="w-10 shrink-0 flex items-center">
-          <BackButton />
-        </div>
-        <div className="flex items-center justify-center flex-1 px-2 min-w-0">
-          <span className="text-base font-semibold truncate" style={{ color: "var(--text-primary)" }}>
-            Crea squadra
-          </span>
-        </div>
-        <div className="w-10 shrink-0 flex items-center justify-end">
-          <Button
-            type="button"
-            icon="pi pi-question-circle"
-            text
-            rounded
-            aria-label="Come funziona il Fanta"
-            onClick={() => setRulesVisible(true)}
-            style={{ color: "var(--text-muted)" }}
-          />
-        </div>
+        <BackButton />
       </div>
 
       {/* Avviso torneo già iniziato — solo desktop (anche nel dialog di conferma) */}
@@ -314,7 +296,7 @@ export default function CreaSquadraForm({ players, tournamentAlreadyStarted }: {
           </div>
 
           {/* Mobile overlay bottom: hint + conferma */}
-          <div className="lg:hidden absolute bottom-3 inset-x-4 z-20 flex flex-col gap-2">
+          <div className="lg:hidden absolute bottom-[4.5rem] inset-x-4 z-20 flex flex-col gap-2">
             {getMobileHint(validation, teamName) && (
               <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "rgba(251,191,36,0.92)", backdropFilter: "blur(4px)" }}>
                 <i className="pi pi-info-circle shrink-0 text-sm text-amber-900" />
