@@ -264,7 +264,7 @@ export default async function HomePage({
               <section className="max-w-lg mx-auto w-full px-4 my-10 flex flex-col gap-6">
                 <h2
                   className="uppercase font-medium"
-                  style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)" }}
+                  style={{ fontFamily: "var(--font-tallica)", fontSize: 20, color: "var(--text-primary)", wordSpacing: "0.3em" }}
                 >
                   {liveMatchesWithTeams.length > 1 ? "Partite in diretta" : "Partita in diretta"}
                 </h2>
