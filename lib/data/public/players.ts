@@ -290,6 +290,118 @@ export const getPublicPlayersGroups = cachePublicData(
   }
 );
 
+export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridRow | null> {
+  const [player, totalFantasyTeams] = await Promise.all([
+    db.player.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        footballTeamId: true,
+        footballTeam: {
+          select: { name: true, shortName: true, countryCode: true, logoUrl: true },
+        },
+        _count: { select: { fantasyTeams: true } },
+      },
+    }),
+    db.fantasyTeam.count(),
+  ]);
+
+  if (!player) return null;
+
+  const [appearances, goals, bonuses] = await Promise.all([
+    db.matchPlayer.findMany({
+      where: { playerId: id },
+      select: {
+        match: {
+          select: {
+            id: true,
+            startsAt: true,
+            homeScore: true,
+            awayScore: true,
+            homeTeamId: true,
+            awayTeamId: true,
+            homeSeed: true,
+            awaySeed: true,
+            homeTeam: { select: { shortName: true, name: true, countryCode: true } },
+            awayTeam: { select: { shortName: true, name: true, countryCode: true } },
+            group: { select: { name: true } },
+            knockoutRound: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { match: { startsAt: "asc" } },
+    }),
+    db.matchGoal.findMany({
+      where: { scorerId: id },
+      select: { matchId: true, isOwnGoal: true },
+    }),
+    db.playerMatchBonus.findMany({
+      where: { playerId: id },
+      select: {
+        matchId: true,
+        points: true,
+        quantity: true,
+        bonusType: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  const totalGoals = goals.filter((g) => !g.isOwnGoal).length;
+  const totalOwnGoals = goals.filter((g) => g.isOwnGoal).length;
+  const totalBonusPoints = bonuses.reduce((sum, b) => sum + Number(b.points), 0);
+  const pickRate = totalFantasyTeams > 0 ? (player._count.fantasyTeams / totalFantasyTeams) * 100 : 0;
+
+  const matchStats = appearances.map((appearance) => {
+    const match = appearance.match;
+    const isHome = match.homeTeamId === player.footballTeamId;
+    const hs = isHome ? match.homeScore : match.awayScore;
+    const as_ = isHome ? match.awayScore : match.homeScore;
+    const opponent = isHome
+      ? (match.awayTeam?.shortName ?? match.awayTeam?.name ?? match.awaySeed ?? "TBD")
+      : (match.homeTeam?.shortName ?? match.homeTeam?.name ?? match.homeSeed ?? "TBD");
+    const opponentCountryCode = isHome ? (match.awayTeam?.countryCode ?? null) : (match.homeTeam?.countryCode ?? null);
+    const phase = match.group?.name ?? match.knockoutRound?.name ?? null;
+    const matchGoals = goals.filter((g) => g.matchId === match.id && !g.isOwnGoal).length;
+    const matchBonusEntries = bonuses.filter((b) => b.matchId === match.id);
+    const matchBonusPoints = matchBonusEntries.reduce((sum, b) => sum + Number(b.points), 0);
+
+    return {
+      matchId: match.id,
+      startsAt: match.startsAt.toISOString(),
+      isHome,
+      opponent,
+      opponentCountryCode,
+      phase,
+      hs,
+      as_,
+      won: hs !== null && as_ !== null && hs > as_,
+      lost: hs !== null && as_ !== null && hs < as_,
+      matchGoals,
+      matchBonusPoints,
+      bonuses: matchBonusEntries.map((b) => ({
+        name: b.bonusType.name,
+        points: Number(b.points),
+        quantity: b.quantity,
+      })),
+    };
+  });
+
+  return {
+    id: player.id,
+    name: player.name,
+    role: player.role,
+    footballTeam: player.footballTeam,
+    totalGoals,
+    totalOwnGoals,
+    totalBonusPoints,
+    presenze: appearances.length,
+    pickRate,
+    matchStats,
+  };
+}
+
 export const getPublicFantasyPlayerPickRows = cachePublicData(
   "data.public.players.fantasy-picks.fetch",
   async (): Promise<PublicFantasyPlayerPickRow[]> => {

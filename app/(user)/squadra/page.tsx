@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import BackButton from "@/components/back-button";
 import SquadraMenu from "@/components/squadra-menu";
+import PlayerStatsTrigger from "@/components/player-stats-trigger";
 import { requireAuth } from "@/lib/session";
 import { db } from "@/lib/db";
 import { computeTeamHistory, getLastClosedAt, getTeamPhaseBreakdown } from "@/lib/scoring";
@@ -84,18 +85,18 @@ export default async function SquadraPage({
 
       {/* Header */}
       <div className="flex items-center px-4">
-        <div className="w-10 shrink-0 flex items-center">
+        <div className="w-16 shrink-0 flex items-center">
           <BackButton />
         </div>
-        <div className="flex items-center justify-center flex-1 px-2 min-w-0">
+        <div className="flex-1 flex items-center justify-center min-w-0 px-2">
           <span className="text-base font-semibold truncate" style={{ color: "var(--text-primary)" }}>
             {fantasyTeam.name}
           </span>
         </div>
-        <div className="w-10 shrink-0 flex items-center justify-end gap-3">
+        <div className="w-16 shrink-0 flex items-center justify-end gap-2">
           {showPoints && (
-            <div>
-              <span className="text-xs text-black font-semibold tabular-nums pr-1">
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xs text-black font-semibold tabular-nums">
                 {totalPoints.toFixed(0)}
               </span>
               <span className="text-[10px] font-normal text-black/75">
@@ -152,12 +153,13 @@ export default async function SquadraPage({
         {topRow.length > 0 && (
           <div className="flex gap-8 items-end justify-center relative z-10">
             {topRow.map(({ player }) => (
-              <PlayerCard
-                key={player.id}
-                player={player}
-                isCaptain={player.id === fantasyTeam.captainPlayerId}
-                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
-              />
+              <PlayerStatsTrigger key={player.id} playerId={player.id}>
+                <PlayerCard
+                  player={player}
+                  isCaptain={player.id === fantasyTeam.captainPlayerId}
+                  points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
+                />
+              </PlayerStatsTrigger>
             ))}
           </div>
         )}
@@ -166,12 +168,13 @@ export default async function SquadraPage({
         {bottomRow.length > 0 && (
           <div className="flex gap-16 items-end justify-center relative z-10">
             {bottomRow.map(({ player }) => (
-              <PlayerCard
-                key={player.id}
-                player={player}
-                isCaptain={player.id === fantasyTeam.captainPlayerId}
-                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
-              />
+              <PlayerStatsTrigger key={player.id} playerId={player.id}>
+                <PlayerCard
+                  player={player}
+                  isCaptain={player.id === fantasyTeam.captainPlayerId}
+                  points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
+                />
+              </PlayerStatsTrigger>
             ))}
           </div>
         )}
@@ -179,11 +182,13 @@ export default async function SquadraPage({
         {/* Goalkeeper */}
         {gk && (
           <div className="relative z-10">
-            <PlayerCard
-              player={gk.player}
-              isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
-              points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
-            />
+            <PlayerStatsTrigger playerId={gk.player.id}>
+              <PlayerCard
+                player={gk.player}
+                isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
+                points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
+              />
+            </PlayerStatsTrigger>
           </div>
         )}
       </div>

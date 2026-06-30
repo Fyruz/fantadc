@@ -6,6 +6,7 @@ import { getPublicMatchesPageData } from "@/lib/data/public/matches";
 import { db } from "@/lib/db";
 import BackButton from "@/components/back-button";
 import SquadraMenu from "@/components/squadra-menu";
+import PlayerStatsTrigger from "@/components/player-stats-trigger";
 import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
 
 export const revalidate = 60;
@@ -126,12 +127,13 @@ export default async function SquadraFantasyPublicPage({
         {topRow.length > 0 && (
           <div className="flex gap-8 items-end justify-center relative z-10">
             {topRow.map(({ player }) => (
-              <PlayerCard
-                key={player.id}
-                player={player}
-                isCaptain={player.id === team.captainPlayerId}
-                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
-              />
+              <PlayerStatsTrigger key={player.id} playerId={player.id}>
+                <PlayerCard
+                  player={player}
+                  isCaptain={player.id === team.captainPlayerId}
+                  points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
+                />
+              </PlayerStatsTrigger>
             ))}
           </div>
         )}
@@ -140,12 +142,13 @@ export default async function SquadraFantasyPublicPage({
         {bottomRow.length > 0 && (
           <div className="flex gap-16 items-end justify-center relative z-10">
             {bottomRow.map(({ player }) => (
-              <PlayerCard
-                key={player.id}
-                player={player}
-                isCaptain={player.id === team.captainPlayerId}
-                points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
-              />
+              <PlayerStatsTrigger key={player.id} playerId={player.id}>
+                <PlayerCard
+                  player={player}
+                  isCaptain={player.id === team.captainPlayerId}
+                  points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
+                />
+              </PlayerStatsTrigger>
             ))}
           </div>
         )}
@@ -153,11 +156,13 @@ export default async function SquadraFantasyPublicPage({
         {/* Goalkeeper */}
         {gk && (
           <div className="relative z-10">
-            <PlayerCard
-              player={gk.player}
-              isCaptain={gk.player.id === team.captainPlayerId}
-              points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
-            />
+            <PlayerStatsTrigger playerId={gk.player.id}>
+              <PlayerCard
+                player={gk.player}
+                isCaptain={gk.player.id === team.captainPlayerId}
+                points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
+              />
+            </PlayerStatsTrigger>
           </div>
         )}
       </div>
