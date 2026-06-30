@@ -17,7 +17,7 @@ function fmtPts(n: number) {
 }
 
 export default function PlayerDialog({ player, onHide }: { player: PublicPlayerGridRow; onHide: () => void }) {
-  const [selectedMatchIdx, setSelectedMatchIdx] = useState(0);
+  const [selectedMatchIdx, setSelectedMatchIdx] = useState(() => Math.max(0, player.matchStats.length - 1));
   const [animIn, setAnimIn] = useState(false);
   const router = useRouter();
 
