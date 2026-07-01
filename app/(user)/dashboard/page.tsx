@@ -81,7 +81,7 @@ export default async function DashboardPage() {
             className="flex items-center justify-center rounded-lg py-2 w-full"
             style={{ background: "var(--text-primary)" }}
           >
-            <span className="text-xs text-white">Modifica rosa</span>
+            <span className="text-sm font-semibold text-white">Modifica rosa</span>
           </Link>
         </div>
       )}

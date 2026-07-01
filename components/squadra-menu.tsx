@@ -37,9 +37,11 @@ function groupMatchesByDate(matches: PublicMatchRow[]) {
 export default function SquadraMenu({
   teamId,
   matches = [],
+  editWindowOpen = false,
 }: {
   teamId?: number;
   matches?: PublicMatchRow[];
+  editWindowOpen?: boolean;
 }) {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -125,6 +127,19 @@ export default function SquadraMenu({
               minWidth: 164,
             }}
           >
+            {editWindowOpen && (
+              <>
+                <button
+                  onClick={() => { setMenuOpen(false); router.push("/squadra/modifica"); }}
+                  className="w-full flex items-center gap-2 px-4 py-4 text-xs font-semibold active:bg-black/5"
+                  style={{ color: "#1A7F37" }}
+                >
+                  <i className="pi pi-unlock text-xs" />
+                  Modifica rosa
+                </button>
+                <div style={{ height: 1, background: "rgba(9,20,76,0.05)" }} />
+              </>
+            )}
             <button
               onClick={openSheet}
               className="w-full flex items-center px-4 py-4 text-xs text-black active:bg-black/5"

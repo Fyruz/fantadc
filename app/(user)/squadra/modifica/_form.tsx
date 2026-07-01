@@ -4,6 +4,7 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { updateMyFantasyRoster } from "@/app/actions/user/fantasy-teams";
+import BackButton from "@/components/back-button";
 import { getTeamCode, SLOT_ORDER } from "../crea/_types";
 import type { Player, PlayerGroup, SlotKey, SlotsState } from "../crea/_types";
 import SlotCard from "../crea/_slot-card";
@@ -59,7 +60,7 @@ export default function ModificaSquadraForm({
   }, []);
 
   useEffect(() => {
-    if (state?.success === true) router.push("/squadra");
+    if (state?.success === true) router.push("/dashboard");
   }, [state, router]);
 
   const selectedPlayers = useMemo(
@@ -142,75 +143,122 @@ export default function ModificaSquadraForm({
   }
 
   return (
-    <form action={action} className="flex min-h-[calc(100svh-11rem)] flex-col gap-3 lg:min-h-0">
-      {/* Contatore cambi */}
-      <div
-        className="flex items-center justify-between gap-3 rounded-2xl px-4 py-2.5"
-        style={
-          overLimit
-            ? { background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.30)" }
-            : { background: "rgba(50,215,75,0.10)", border: "1px solid rgba(50,215,75,0.30)" }
-        }
-      >
-        <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-          Cambi giocatore
+    <form action={action} className="flex-1 flex flex-col overflow-hidden lg:overflow-visible">
+      {/* Header */}
+      <div className="flex items-center px-4">
+        <div className="w-16 shrink-0 flex items-center">
+          <BackButton />
+        </div>
+        <span className="flex-1 text-center text-base font-semibold truncate" style={{ color: "var(--text-primary)" }}>
+          Modifica rosa
         </span>
-        <span
-          className="text-sm font-bold tabular-nums"
-          style={{ color: overLimit ? "#DC2626" : "#1A7F37" }}
+        <div className="w-16 shrink-0" />
+      </div>
+
+      {/* Banner cambi */}
+      <div className="flex items-center justify-center mx-4" style={{ marginTop: 40, marginBottom: 24 }}>
+        <div
+          className="inline-flex items-center gap-2 rounded-full px-4"
+          style={{
+            height: 47,
+            ...(overLimit
+              ? { background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.25)" }
+              : { background: "rgba(50,215,75,0.10)", border: "1px solid rgba(50,215,75,0.25)" }),
+          }}
         >
-          {Math.max(0, changesLeft)}/{maxChanges} rimasti
-        </span>
+          <i
+            className={`pi ${overLimit ? "pi-exclamation-circle" : "pi-check-circle"} text-xs`}
+            style={{ color: overLimit ? "#DC2626" : "#1A7F37" }}
+          />
+          <span className="text-xs font-semibold tabular-nums" style={{ color: overLimit ? "#DC2626" : "#1A7F37" }}>
+            {Math.max(0, changesLeft)}/{maxChanges} cambi rimasti
+          </span>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col lg:grid lg:flex-none lg:grid-cols-[1fr_20rem] lg:items-start lg:gap-4">
         {/* Campo di gioco */}
-        <div
-          className="relative flex-1 overflow-hidden rounded-[32px] lg:aspect-[5/6] lg:w-full lg:flex-none lg:max-w-[26rem] lg:mx-auto"
-          style={{
-            background: "linear-gradient(175deg, #21c05a 0%, #17964a 35%, #116e35 70%, #0c5529 100%)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.15)",
-          }}
-        >
-          <div
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(180deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 46px, rgba(0,0,0,0.05) 46px, rgba(0,0,0,0.05) 92px)",
-            }}
+        <div className="relative flex flex-col items-center justify-around py-12 flex-1">
+          <img
+            src="/images/football-field.webp"
+            alt=""
+            fetchPriority="high"
+            className="pointer-events-none absolute inset-0 w-full h-full object-cover"
           />
-          <svg className="pointer-events-none absolute inset-0 w-full h-full" viewBox="0 0 100 120" preserveAspectRatio="none" fill="none">
-            <rect x="4" y="3" width="92" height="114" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
-            <line x1="4" y1="3" x2="96" y2="3" stroke="rgba(255,255,255,0.45)" strokeWidth="0.65" />
-            <path d="M 36 3 A 14 14 0 0 0 64 3" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
-            <circle cx="50" cy="3" r="1.1" fill="rgba(255,255,255,0.5)" />
-            <rect x="20" y="67" width="60" height="34" stroke="rgba(255,255,255,0.5)" strokeWidth="0.65" />
-            <path d="M 26 67 A 13.5 13.5 0 0 1 74 67" stroke="rgba(255,255,255,0.3)" strokeWidth="0.6" fill="none" />
-            <circle cx="50" cy="78" r="1.1" fill="rgba(255,255,255,0.6)" />
-            <rect x="34" y="88" width="32" height="13" stroke="rgba(255,255,255,0.38)" strokeWidth="0.55" />
-            <rect x="37" y="101" width="26" height="16" fill="rgba(0,0,0,0.12)" stroke="rgba(255,255,255,0.6)" strokeWidth="0.75" />
-          </svg>
-          <div
-            className="pointer-events-none absolute inset-0 rounded-[32px]"
-            style={{ background: "radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.18) 100%)" }}
-          />
-          {SLOT_ORDER.map((slotKey) => {
-            const player = slots[slotKey];
-            return (
-              <div key={slotKey} className={`absolute ${SLOT_META[slotKey].wrapperClassName}`}>
+
+          {/* Top row */}
+          <div className="flex gap-8 items-end justify-center relative z-10">
+            {(["topLeft", "topRight"] as const).map((slotKey) => {
+              const player = slots[slotKey];
+              return (
                 <SlotCard
+                  key={slotKey}
                   slotKey={slotKey}
                   player={player}
                   isCaptain={player !== null && captainId === player.id}
                   pending={pending}
                   onEmptyClick={() => openSlot(slotKey)}
-                  onFilledClick={() => {
-                    if (!pending) setMenuSlot(slotKey);
-                  }}
+                  onFilledClick={() => { if (!pending) setMenuSlot(slotKey); }}
                 />
+              );
+            })}
+          </div>
+
+          {/* Middle row */}
+          <div className="flex gap-16 items-end justify-center relative z-10">
+            {(["bottomLeft", "bottomRight"] as const).map((slotKey) => {
+              const player = slots[slotKey];
+              return (
+                <SlotCard
+                  key={slotKey}
+                  slotKey={slotKey}
+                  player={player}
+                  isCaptain={player !== null && captainId === player.id}
+                  pending={pending}
+                  onEmptyClick={() => openSlot(slotKey)}
+                  onFilledClick={() => { if (!pending) setMenuSlot(slotKey); }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Portiere */}
+          <div className="relative z-10">
+            {(() => {
+              const player = slots.goalkeeper;
+              return (
+                <SlotCard
+                  slotKey="goalkeeper"
+                  player={player}
+                  isCaptain={player !== null && captainId === player.id}
+                  pending={pending}
+                  onEmptyClick={() => openSlot("goalkeeper")}
+                  onFilledClick={() => { if (!pending) setMenuSlot("goalkeeper"); }}
+                />
+              );
+            })()}
+          </div>
+
+          {/* Overlay mobile: errori + bottone salva */}
+          <div className="lg:hidden absolute bottom-8 inset-x-4 z-20 flex flex-col gap-2">
+            {overLimit && (
+              <div className="flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: "rgba(220,38,38,0.88)", backdropFilter: "blur(4px)" }}>
+                <i className="pi pi-exclamation-triangle shrink-0 text-sm text-white" />
+                <p className="text-xs font-medium text-white">Troppi cambi: max {maxChanges} {maxChanges === 1 ? "giocatore" : "giocatori"}</p>
               </div>
-            );
-          })}
+            )}
+            {state?.success === false && state.message && (
+              <p aria-live="polite" className="text-[11px] font-medium text-red-500 drop-shadow text-center">{state.message}</p>
+            )}
+            <button
+              type="submit"
+              disabled={!validation.isValid || pending}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-50"
+              style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", color: "var(--text-primary)" }}
+            >
+              {pending ? "Salvo..." : "Salva modifiche"}
+            </button>
+          </div>
         </div>
 
         {/* Sidebar desktop */}
@@ -265,27 +313,6 @@ export default function ModificaSquadraForm({
             <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={!validation.isValid || pending} className="w-full" />
           </div>
         </div>
-      </div>
-
-      {overLimit && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-          <i className="pi pi-exclamation-triangle shrink-0 text-sm text-red-600" />
-          <p className="text-[12px] font-medium text-red-700">
-            Hai selezionato troppi cambi: puoi sostituire al massimo {maxChanges}{" "}
-            {maxChanges === 1 ? "giocatore" : "giocatori"} rispetto alla rosa di partenza.
-          </p>
-        </div>
-      )}
-
-      {state?.success === false && state.message && (
-        <p aria-live="polite" className="text-center text-[12px] font-medium text-red-500">
-          {state.message}
-        </p>
-      )}
-
-      {/* Salva mobile */}
-      <div className="flex justify-center lg:hidden">
-        <Button type="submit" label={pending ? "Salvo..." : "Salva modifiche"} disabled={!validation.isValid || pending} className="w-56" />
       </div>
 
       {/* Hidden inputs */}

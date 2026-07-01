@@ -9,6 +9,9 @@ import { computeTeamHistory, getLastClosedAt, getTeamPhaseBreakdown } from "@/li
 import { getPublicMatchesPageData } from "@/lib/data/public/matches";
 import { AUTH_ONBOARDING_PATH } from "@/lib/post-auth";
 import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
+import { getActiveEditWindow } from "@/lib/roster-edit-window";
+
+export const dynamic = "force-dynamic";
 
 export default async function SquadraPage({
   searchParams,
@@ -38,30 +41,37 @@ export default async function SquadraPage({
 
   if (!fantasyTeam) redirect(AUTH_ONBOARDING_PATH);
 
-  const [history, lastClosedAt, phaseBreakdown, dbPhases, { matches }] = await Promise.all([
+  // Determine selected phase: null = fase in corso
+  const selectedPhaseId: number | null =
+    fase && fase !== "current" ? Number(fase) : null;
+
+  const [history, lastClosedAt, phaseBreakdown, dbPhases, { matches }, editWindow] = await Promise.all([
     computeTeamHistory(fantasyTeam.id),
     getLastClosedAt(),
     getTeamPhaseBreakdown(fantasyTeam.id),
     db.scoringPhase.findMany({
       orderBy: { order: "asc" },
-      select: { id: true, startsAt: true, closedAt: true },
+      select: {
+        id: true,
+        startsAt: true,
+        closedAt: true,
+        scores: {
+          where: { fantasyTeamId: fantasyTeam.id },
+          select: { rosterPlayerIds: true, captainPlayerId: true },
+        },
+      },
     }),
     getPublicMatchesPageData(),
+    getActiveEditWindow(),
   ]);
-
-  // Determine selected phase: null = fase in corso
-  const selectedPhaseId: number | null =
-    fase && fase !== "current" ? Number(fase) : null;
 
   const phasePlayerTotals = new Map<number, number>();
   for (const ms of history) {
     const at = ms.concludedAt;
     if (!at) continue;
     if (selectedPhaseId === null) {
-      // Fase in corso: partite dopo l'ultimo freeze
       if (lastClosedAt && at < lastClosedAt) continue;
     } else {
-      // Fase congelata: filtra per finestra temporale
       const p = dbPhases.find((ph) => ph.id === selectedPhaseId);
       if (!p) continue;
       if (p.startsAt && at < p.startsAt) continue;
@@ -72,9 +82,30 @@ export default async function SquadraPage({
     }
   }
 
+  // Per le fasi congelate usa la rosa storica dello snapshot
+  const frozenScore = selectedPhaseId !== null
+    ? (dbPhases.find((p) => p.id === selectedPhaseId)?.scores[0] ?? null)
+    : null;
 
-  const gk = fantasyTeam.players.find((p) => p.player.role === "P");
-  const outfield = fantasyTeam.players.filter((p) => p.player.role === "A");
+  let pitchPlayers: { player: { id: number; name: string; role: string; footballTeam: { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } } }[];
+  let pitchCaptainId: number;
+
+  if (frozenScore) {
+    const frozenIds = frozenScore.rosterPlayerIds as number[];
+    const frozenRecords = await db.player.findMany({
+      where: { id: { in: frozenIds } },
+      select: { id: true, name: true, role: true, footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } } },
+    });
+    const byId = new Map(frozenRecords.map((p) => [p.id, p]));
+    pitchPlayers = frozenIds.flatMap((id) => { const p = byId.get(id); return p ? [{ player: p }] : []; });
+    pitchCaptainId = frozenScore.captainPlayerId;
+  } else {
+    pitchPlayers = fantasyTeam.players;
+    pitchCaptainId = fantasyTeam.captainPlayerId;
+  }
+
+  const gk = pitchPlayers.find((p) => p.player.role === "P");
+  const outfield = pitchPlayers.filter((p) => p.player.role === "A");
   const topRow = outfield.slice(0, 2);
   const bottomRow = outfield.slice(2);
   const showPoints = history.length > 0;
@@ -104,7 +135,7 @@ export default async function SquadraPage({
               </span>
             </div>
           )}
-          <SquadraMenu teamId={fantasyTeam.id} matches={matches} />
+          <SquadraMenu teamId={fantasyTeam.id} matches={matches} editWindowOpen={!!editWindow} />
         </div>
       </div>
 
@@ -156,7 +187,7 @@ export default async function SquadraPage({
               <PlayerStatsTrigger key={player.id} playerId={player.id}>
                 <PlayerCard
                   player={player}
-                  isCaptain={player.id === fantasyTeam.captainPlayerId}
+                  isCaptain={player.id === pitchCaptainId}
                   points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
                 />
               </PlayerStatsTrigger>
@@ -171,7 +202,7 @@ export default async function SquadraPage({
               <PlayerStatsTrigger key={player.id} playerId={player.id}>
                 <PlayerCard
                   player={player}
-                  isCaptain={player.id === fantasyTeam.captainPlayerId}
+                  isCaptain={player.id === pitchCaptainId}
                   points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
                 />
               </PlayerStatsTrigger>
@@ -185,11 +216,23 @@ export default async function SquadraPage({
             <PlayerStatsTrigger playerId={gk.player.id}>
               <PlayerCard
                 player={gk.player}
-                isCaptain={gk.player.id === fantasyTeam.captainPlayerId}
+                isCaptain={gk.player.id === pitchCaptainId}
                 points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
               />
             </PlayerStatsTrigger>
           </div>
+        )}
+
+        {/* Mercato aperto overlay */}
+        {editWindow && (
+          <Link
+            href="/squadra/modifica"
+            className="absolute bottom-8 inset-x-4 z-20 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold"
+            style={{ background: "rgba(255,255,255,0.92)", backdropFilter: "blur(8px)", color: "var(--text-primary)" }}
+          >
+            <i className="pi pi-unlock text-xs" />
+            Modifica rosa
+          </Link>
         )}
       </div>
 
