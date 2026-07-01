@@ -76,13 +76,22 @@ export default async function DashboardPage() {
             Hai <strong>{changesLeft}/{editWindow.maxChanges} cambi</strong> disponibili.
             La finestra chiude il <strong>{editWindowClosesAt}</strong>.
           </p>
-          <Link
-            href="/squadra/modifica"
-            className="flex items-center justify-center rounded-lg py-2 w-full"
-            style={{ background: "var(--text-primary)" }}
-          >
-            <span className="text-sm font-semibold text-white">Modifica rosa</span>
-          </Link>
+          <div className="flex gap-3">
+            <Link
+              href="/squadra/modifica"
+              className="flex flex-1 items-center justify-center rounded-lg py-2"
+              style={{ background: "var(--text-primary)" }}
+            >
+              <span className="text-sm font-semibold text-white">Modifica rosa</span>
+            </Link>
+            <Link
+              href="/squadra"
+              className="flex flex-1 items-center justify-center rounded-lg py-2"
+              style={{ border: "1px solid rgba(9,20,76,0.15)", color: "var(--text-primary)" }}
+            >
+              <span className="text-sm font-semibold">Vedi squadra</span>
+            </Link>
+          </div>
         </div>
       )}
 

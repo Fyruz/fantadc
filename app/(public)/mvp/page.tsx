@@ -1,7 +1,6 @@
 import Link from "next/link";
 import BackButton from "@/components/back-button";
 import { getPublicMvpData } from "@/lib/data/public/mvp";
-import { resolveTeamFlag } from "@/lib/flags";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 60;
@@ -55,6 +54,7 @@ export default async function MvpPage({
               <Link
                 key={phaseKey}
                 href={`/mvp?fase=${phaseKey}`}
+                replace
                 className="shrink-0 px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors"
                 style={
                   isActive
