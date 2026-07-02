@@ -88,17 +88,20 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
         <div className="mx-4 mb-6">
           <div className="grid grid-cols-3 rounded-3xl overflow-hidden" style={{ border: "1px solid rgba(9,20,76,0.1)" }}>
             {[
-              { label: "Selezionato da", value: Math.round(player.pickRate) + "%" },
-              { label: "Goal", value: player.totalGoals },
-              { label: "Punti fanta", value: fmtPts(player.totalBonusPoints) },
-            ].map(({ label, value }, i) => (
+              { label: "Selezionato da", value: Math.round(player.pickRate) + "%", suffix: null },
+              { label: "Goal", value: player.totalGoals, suffix: null },
+              { label: "Punti fanta", value: fmtPts(player.totalBonusPoints), suffix: "pti" },
+            ].map(({ label, value, suffix }, i) => (
               <div
                 key={label}
                 className="flex flex-col items-center py-4 gap-2"
                 style={i < 2 ? { borderRight: "1px solid rgba(9,20,76,0.1)" } : undefined}
               >
                 <span className="text-[10px]" style={{ color: "rgba(0,0,0,0.45)" }}>{label}</span>
-                <span className="font-semibold text-base text-black">{value}</span>
+                <span className="font-semibold text-base text-black">
+                  {value}
+                  {suffix && <span className="font-normal text-xs"> {suffix}</span>}
+                </span>
               </div>
             ))}
           </div>
@@ -184,7 +187,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
               <div className="mt-6" style={{ borderTop: "1px solid rgba(9,20,76,0.08)" }}>
                 <button type="button" onClick={() => handleNavigate(`/mvp/${selectedMatch.matchId}`)} className="relative flex items-center gap-5 px-4 py-6 w-full text-left">
                   <div className="flex-1 flex items-center justify-end gap-3 min-w-0">
-                    <span className="text-sm text-black truncate">
+                    <span className={`text-sm text-black truncate ${selectedMatch.isHome ? "font-semibold" : ""}`}>
                       {selectedMatch.isHome
                         ? (player.footballTeam.shortName ?? player.footballTeam.name)
                         : selectedMatch.opponent}
@@ -195,12 +198,20 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                       name={selectedMatch.isHome ? player.footballTeam.name : selectedMatch.opponent}
                     />
                   </div>
-                  <span className="text-sm font-normal text-black tabular-nums shrink-0">
-                    {selectedMatch.hs !== null && selectedMatch.as_ !== null
-                      ? selectedMatch.isHome
-                        ? `${selectedMatch.hs}-${selectedMatch.as_}`
-                        : `${selectedMatch.as_}-${selectedMatch.hs}`
-                      : "–"}
+                  <span className="text-sm text-black tabular-nums shrink-0">
+                    {selectedMatch.hs !== null && selectedMatch.as_ !== null ? (
+                      selectedMatch.isHome ? (
+                        <>
+                          <span className="font-semibold">{selectedMatch.hs}</span>-<span className="font-normal">{selectedMatch.as_}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-normal">{selectedMatch.as_}</span>-<span className="font-semibold">{selectedMatch.hs}</span>
+                        </>
+                      )
+                    ) : (
+                      "–"
+                    )}
                   </span>
                   <div className="flex-1 flex items-center gap-3 min-w-0">
                     <Flag
@@ -208,7 +219,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                       logoUrl={selectedMatch.isHome ? null : player.footballTeam.logoUrl}
                       name={selectedMatch.isHome ? selectedMatch.opponent : player.footballTeam.name}
                     />
-                    <span className="text-sm text-black truncate">
+                    <span className={`text-sm text-black truncate ${selectedMatch.isHome ? "" : "font-semibold"}`}>
                       {selectedMatch.isHome
                         ? selectedMatch.opponent
                         : (player.footballTeam.shortName ?? player.footballTeam.name)}
@@ -237,7 +248,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                             )}
                           </span>
                           <span className="text-sm font-semibold text-black tabular-nums shrink-0">
-                            {fmtPts(bonus.points)}
+                            {fmtPts(bonus.points)}<span className="font-normal text-xs"> pti</span>
                           </span>
                         </div>
                       ))}
@@ -247,7 +258,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                       >
                         <span className="text-sm font-semibold uppercase text-black flex-1">Totale</span>
                         <span className="text-sm font-semibold text-black tabular-nums shrink-0">
-                          {fmtPts(selectedMatch.matchBonusPoints)}
+                          {fmtPts(selectedMatch.matchBonusPoints)}<span className="font-normal text-xs"> pti</span>
                         </span>
                       </div>
                     </>
