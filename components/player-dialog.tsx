@@ -125,6 +125,15 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                         return (
                           <button
                             key={idx}
+                            ref={
+                              isSelected
+                                ? (el) => {
+                                    if (el && el.offsetParent !== null) {
+                                      el.scrollIntoView({ block: "nearest", inline: "end" });
+                                    }
+                                  }
+                                : undefined
+                            }
                             type="button"
                             onClick={() => setSelectedMatchIdx(idx)}
                             className="flex flex-col items-center justify-center gap-3 cursor-pointer transition-colors"
@@ -134,6 +143,7 @@ export default function PlayerDialog({ player, onHide }: { player: PublicPlayerG
                               paddingBottom: 8,
                               paddingLeft: 24,
                               paddingRight: 24,
+                              scrollMarginInlineEnd: 16,
                               background: isSelected ? "rgba(1,7,163,0.07)" : "transparent",
                               border: isSelected ? "1px solid transparent" : "1px solid rgba(9,20,76,0.05)",
                             }}

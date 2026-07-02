@@ -34,7 +34,15 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
     })
   ).values()];
 
-  const [activeDay, setActiveDay] = useState<string | null>(null);
+  const [activeDay, setActiveDay] = useState<string | null>(() => {
+    if (matches.length === 0) return null;
+    const now = new Date();
+    const upcoming = matches.filter((m) => m.startsAt >= now);
+    if (upcoming.length > 0) {
+      return upcoming.reduce((min, m) => (m.startsAt < min.startsAt ? m : min)).startsAt.toDateString();
+    }
+    return matches.reduce((max, m) => (m.startsAt > max.startsAt ? m : max)).startsAt.toDateString();
+  });
 
   const filteredMatches = activeDay
     ? matches.filter((m) => m.startsAt.toDateString() === activeDay)
@@ -80,6 +88,11 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                 return (
                   <button
                     key={d.key}
+                    ref={
+                      isActive
+                        ? (el) => el?.scrollIntoView({ block: "nearest", inline: "center" })
+                        : undefined
+                    }
                     type="button"
                     onClick={() => setActiveDay(isActive ? null : d.date)}
                     className="shrink-0 rounded-full text-white transition-colors"
@@ -88,6 +101,8 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
                       fontWeight: isActive ? 500 : 400,
                       background: isActive ? "var(--text-primary)" : "rgba(9,20,76,0.25)",
                       padding: isActive ? "5px 12px" : "4px 12px",
+                      scrollMarginInlineStart: 16,
+                      scrollMarginInlineEnd: 16,
                     }}
                   >
                     {d.key.charAt(0).toUpperCase() + d.key.slice(1)}
