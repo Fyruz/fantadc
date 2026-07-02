@@ -313,7 +313,7 @@ export async function getPublicPlayerById(id: number): Promise<PublicPlayerGridR
 
   const [appearances, goals, bonuses, mvpBonusType] = await Promise.all([
     db.matchPlayer.findMany({
-      where: { playerId: id },
+      where: { playerId: id, match: { concludedAt: { not: null } } },
       select: {
         match: {
           select: {
