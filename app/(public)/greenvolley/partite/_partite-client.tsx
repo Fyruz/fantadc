@@ -42,7 +42,16 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
       })
   ).values()];
 
-  const [activeDay, setActiveDay] = useState<string | null>(null);
+  const [activeDay, setActiveDay] = useState<string | null>(() => {
+    const dated = matches.filter((m): m is Match & { date: Date } => m.date !== null);
+    if (dated.length === 0) return null;
+    const now = new Date();
+    const upcoming = dated.filter((m) => m.date >= now);
+    if (upcoming.length > 0) {
+      return upcoming.reduce((min, m) => (m.date < min.date ? m : min)).date.toDateString();
+    }
+    return dated.reduce((max, m) => (m.date > max.date ? m : max)).date.toDateString();
+  });
 
   const filteredMatches = activeDay
     ? matches.filter((m) => m.date && m.date.toDateString() === activeDay)
@@ -88,6 +97,11 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
                 return (
                   <button
                     key={d.key}
+                    ref={
+                      isActive
+                        ? (el) => el?.scrollIntoView({ block: "nearest", inline: "center" })
+                        : undefined
+                    }
                     type="button"
                     onClick={() => setActiveDay(isActive ? null : d.date)}
                     className="shrink-0 rounded-full text-white transition-colors"
@@ -96,6 +110,8 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
                       fontWeight: isActive ? 500 : 400,
                       background: isActive ? "var(--primary)" : "rgba(9,20,76,0.25)",
                       padding: isActive ? "5px 12px" : "4px 12px",
+                      scrollMarginInlineStart: 16,
+                      scrollMarginInlineEnd: 16,
                     }}
                   >
                     {d.key.charAt(0).toUpperCase() + d.key.slice(1)}
