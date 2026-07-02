@@ -30,7 +30,7 @@ export default function VolleyAltroPage() {
       <Section label="Competizione">
         <Item icon={<img src="/icons/shield-star.svg" width={18} height={18} alt="" />} label="Squadre" href="/greenvolley/squadre" />
         <Item icon={<img src="/icons/table.svg" width={18} height={18} alt="" />} label="Gironi" href="/greenvolley/gironi" />
-        <Item icon={<img src="/icons/bracket.svg" width={18} height={18} alt="" />} label="Eliminazione" href="/greenvolley/eliminazione" />
+        <Item icon={<img src="/icons/bracket.svg" width={18} height={18} alt="" />} label="Tabellone" href="/greenvolley/eliminazione" />
       </Section>
 
       {/* Esplora */}

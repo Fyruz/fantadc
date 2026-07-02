@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { type GroupStandingRow } from "@/lib/standings";
+import type { PublicKnockoutRound } from "@/lib/data/public/matches";
 import GroupStandingCard from "@/components/group-standing-card";
 import MatchCard from "@/components/match-card";
+import KnockoutBracket from "@/components/knockout-bracket";
 
 type Team = { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
 type Match = {
@@ -18,12 +20,20 @@ type Match = {
 };
 type Group = { id: number; name: string; rows: GroupStandingRow[] };
 
+const TABS = ["calendario", "classifica", "tabellone"] as const;
+type Tab = (typeof TABS)[number];
+const TAB_LABELS: Record<Tab, string> = {
+  calendario: "Calendario e risultati",
+  classifica: "Classifica",
+  tabellone: "Tabellone",
+};
 
-export default function PartiteClient({ matches, groups }: { matches: Match[]; groups: Group[] }) {
+export default function PartiteClient({ matches, groups, knockoutRounds }: { matches: Match[]; groups: Group[]; knockoutRounds: PublicKnockoutRound[] }) {
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<"calendario" | "classifica">(
-    searchParams.get("tab") === "classifica" ? "classifica" : "calendario"
-  );
+  const [tab, setTab] = useState<Tab>(() => {
+    const fromUrl = searchParams.get("tab");
+    return TABS.includes(fromUrl as Tab) ? (fromUrl as Tab) : "calendario";
+  });
 
   // Unique days for pills
   const days = [...new Map(
@@ -59,21 +69,21 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
     <div className="flex flex-col gap-0">
       {/* ── Tabs ─────────────────────────────────────────────────── */}
       <div className="flex" style={{ borderBottom: "1px solid rgba(9,20,76,0.08)" }}>
-        {(["calendario", "classifica"] as const).map((t) => (
+        {TABS.map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             className="px-0 pb-2 text-sm transition-colors"
             style={{
-              marginRight: t === "calendario" ? 24 : 0,
+              marginRight: t === "tabellone" ? 0 : 24,
               color: tab === t ? "var(--text-primary)" : "rgba(0,0,0,0.45)",
               fontWeight: tab === t ? 600 : 400,
               borderBottom: tab === t ? "2px solid var(--text-primary)" : "2px solid transparent",
               marginBottom: -1,
             }}
           >
-            {t === "calendario" ? "Calendario e risultati" : "Classifica"}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
@@ -128,11 +138,15 @@ export default function PartiteClient({ matches, groups }: { matches: Match[]; g
             <p className="text-sm text-center" style={{ color: "rgba(0,0,0,0.4)" }}>Nessuna partita per questo giorno.</p>
           )}
         </div>
-      ) : (
+      ) : tab === "classifica" ? (
         <div className="flex flex-col gap-6 pt-10">
           {groups.map((g) => (
             <GroupStandingCard key={g.id} group={g} />
           ))}
+        </div>
+      ) : (
+        <div className="pt-6">
+          <KnockoutBracket rounds={knockoutRounds} />
         </div>
       )}
     </div>

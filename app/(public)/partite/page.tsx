@@ -1,11 +1,14 @@
-import { getPublicMatchesPageData } from "@/lib/data/public/matches";
+import { getPublicMatchesPageData, getPublicKnockoutRounds } from "@/lib/data/public/matches";
 import PartiteClient from "./_partite-client";
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 60;
 
 export default async function PartitePublicPage() {
-  const { matches, groupStandings } = await getPublicMatchesPageData();
+  const [{ matches, groupStandings }, knockoutRounds] = await Promise.all([
+    getPublicMatchesPageData(),
+    getPublicKnockoutRounds(),
+  ]);
 
   if (matches.length === 0 && groupStandings.length === 0) {
     return (
@@ -17,7 +20,7 @@ export default async function PartitePublicPage() {
 
   return (
     <div className="max-w-lg mx-auto">
-      <PartiteClient matches={matches} groups={groupStandings} />
+      <PartiteClient matches={matches} groups={groupStandings} knockoutRounds={knockoutRounds} />
     </div>
   );
 }

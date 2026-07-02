@@ -110,6 +110,7 @@ export default function PublicNavClient() {
   const isSquadre = pathname.startsWith("/squadre") && !pathname.startsWith("/squadre-fanta");
   const isSquadreFantaDetail = pathname.startsWith("/squadre-fanta/");
   const isGironi = pathname.startsWith("/gironi");
+  const isEliminazione = pathname.startsWith("/eliminazione");
   const isMarcatori = pathname.startsWith("/classifica-marcatori");
   const isGiocatori = pathname.startsWith("/giocatori");
   const isAltroPage = pathname.startsWith("/regolamento") || pathname.startsWith("/supporto") || pathname.startsWith("/contatti") || pathname.startsWith("/privacy") || pathname.startsWith("/account");
@@ -119,7 +120,7 @@ export default function PublicNavClient() {
   const isGVSquadreDetail = /^\/greenvolley\/squadre\/\d+/.test(pathname);
   const isSquadraPage = pathname.startsWith("/squadra");
   const isMvpPage = pathname === "/mvp" || /^\/mvp\/\d+/.test(pathname);
-  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail || isSquadraPage || isMvpPage;
+  const hideOnMobile = isVota || isPartiteDetail || isSquadre || isSquadreFantaDetail || isGironi || isEliminazione || isMarcatori || isGiocatori || isAltroPage || isGVGironi || isGVEliminazione || isGVSquadreDetail || isSquadraPage || isMvpPage;
 
   const getMobileTitle = (): string | null => {
     if (pathname.startsWith("/greenvolley/altro")) return null;

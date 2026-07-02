@@ -4,7 +4,9 @@ import { useState } from "react";
 import { formatVolleyDayPill, formatVolleyDayHeading } from "@/lib/volley/format";
 import VolleyMatchCard from "@/components/volley-match-card";
 import VolleyStandingsCard from "@/components/volley-standings-card";
+import VolleyKnockoutBracket from "@/components/volley-knockout-bracket";
 import type { VolleyStandingRow } from "@/lib/volley/standings";
+import type { getPublicVolleyEliminationRounds } from "@/lib/data/public/volley";
 
 type Match = {
   id: number;
@@ -18,9 +20,18 @@ type Match = {
 };
 
 type Group = { id: number; name: string; rows: VolleyStandingRow[] };
+type KnockoutRound = Awaited<ReturnType<typeof getPublicVolleyEliminationRounds>>[number];
 
-export default function VolleyPartiteClient({ matches, groups }: { matches: Match[]; groups: Group[] }) {
-  const [tab, setTab] = useState<"calendario" | "classifica">("calendario");
+const TABS = ["calendario", "classifica", "tabellone"] as const;
+type Tab = (typeof TABS)[number];
+const TAB_LABELS: Record<Tab, string> = {
+  calendario: "Calendario e risultati",
+  classifica: "Classifica",
+  tabellone: "Tabellone",
+};
+
+export default function VolleyPartiteClient({ matches, groups, knockoutRounds }: { matches: Match[]; groups: Group[]; knockoutRounds: KnockoutRound[] }) {
+  const [tab, setTab] = useState<Tab>("calendario");
 
   const days = [...new Map(
     matches
@@ -48,21 +59,21 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
     <div className="flex flex-col gap-0">
       {/* ── Tabs ─────────────────────────────────────────────────── */}
       <div className="flex" style={{ borderBottom: "1px solid rgba(9,20,76,0.08)" }}>
-        {(["calendario", "classifica"] as const).map((t) => (
+        {TABS.map((t) => (
           <button
             key={t}
             type="button"
             onClick={() => setTab(t)}
             className="px-0 pb-2 text-sm transition-colors"
             style={{
-              marginRight: t === "calendario" ? 24 : 0,
+              marginRight: t === "tabellone" ? 0 : 24,
               color: tab === t ? "var(--primary)" : "rgba(0,0,0,0.45)",
               fontWeight: tab === t ? 500 : 400,
               borderBottom: tab === t ? "2px solid var(--primary)" : "2px solid transparent",
               marginBottom: -1,
             }}
           >
-            {t === "calendario" ? "Calendario e risultati" : "Classifica"}
+            {TAB_LABELS[t]}
           </button>
         ))}
       </div>
@@ -124,7 +135,7 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
             </p>
           )}
         </div>
-      ) : (
+      ) : tab === "classifica" ? (
         <div className="flex flex-col gap-6 pt-10">
           {groups.length === 0 && (
             <p className="text-sm text-center" style={{ color: "rgba(0,0,0,0.4)" }}>
@@ -134,6 +145,10 @@ export default function VolleyPartiteClient({ matches, groups }: { matches: Matc
           {groups.map((g) => (
             <VolleyStandingsCard key={g.id} name={g.name} rows={g.rows} />
           ))}
+        </div>
+      ) : (
+        <div className="pt-6">
+          <VolleyKnockoutBracket rounds={knockoutRounds} />
         </div>
       )}
     </div>

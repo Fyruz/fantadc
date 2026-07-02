@@ -41,14 +41,15 @@ export type PublicKnockoutRound = {
   order: number;
   matches: Array<{
     id: number;
+    status: string;
     homeTeamId: number | null;
     awayTeamId: number | null;
     homeScore: number | null;
     awayScore: number | null;
     homeSeed: string | null;
     awaySeed: string | null;
-    homeTeam: { name: string; shortName: string | null } | null;
-    awayTeam: { name: string; shortName: string | null } | null;
+    homeTeam: { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
+    awayTeam: { name: string; shortName: string | null; countryCode: string | null; logoUrl: string | null } | null;
   }>;
 };
 
@@ -168,18 +169,18 @@ export const getPublicKnockoutRounds = cachePublicData(
         name: true,
         order: true,
         matches: {
-          where: { status: { not: "DRAFT" } },
           orderBy: { bracketPosition: "asc" },
           select: {
             id: true,
+            status: true,
             homeTeamId: true,
             awayTeamId: true,
             homeScore: true,
             awayScore: true,
             homeSeed: true,
             awaySeed: true,
-            homeTeam: { select: { name: true, shortName: true } },
-            awayTeam: { select: { name: true, shortName: true } },
+            homeTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
+            awayTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
           },
         },
       },
