@@ -30,7 +30,15 @@ export default async function SquadraFantasyPublicPage({
     getTeamPhaseBreakdown(teamId),
     db.scoringPhase.findMany({
       orderBy: { order: "asc" },
-      select: { id: true, startsAt: true, closedAt: true },
+      select: {
+        id: true,
+        startsAt: true,
+        closedAt: true,
+        scores: {
+          where: { fantasyTeamId: teamId },
+          select: { rosterPlayerIds: true, captainPlayerId: true },
+        },
+      },
     }),
     getPublicMatchesPageData(),
   ]);
@@ -55,8 +63,30 @@ export default async function SquadraFantasyPublicPage({
     }
   }
 
-  const gk = team.players.find((p) => p.player.role === "P");
-  const outfield = team.players.filter((p) => p.player.role === "A");
+  // Per le fasi congelate usa la rosa storica dello snapshot
+  const frozenScore = selectedPhaseId !== null
+    ? (dbPhases.find((p) => p.id === selectedPhaseId)?.scores[0] ?? null)
+    : null;
+
+  let pitchPlayers: typeof team.players;
+  let pitchCaptainId: number;
+
+  if (frozenScore) {
+    const frozenIds = frozenScore.rosterPlayerIds as number[];
+    const frozenRecords = await db.player.findMany({
+      where: { id: { in: frozenIds } },
+      select: { id: true, name: true, role: true, footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } } },
+    });
+    const byId = new Map(frozenRecords.map((p) => [p.id, p]));
+    pitchPlayers = frozenIds.flatMap((id) => { const p = byId.get(id); return p ? [{ player: p }] : []; });
+    pitchCaptainId = frozenScore.captainPlayerId;
+  } else {
+    pitchPlayers = team.players;
+    pitchCaptainId = team.captainPlayerId;
+  }
+
+  const gk = pitchPlayers.find((p) => p.player.role === "P");
+  const outfield = pitchPlayers.filter((p) => p.player.role === "A");
   const topRow = outfield.slice(0, 2);
   const bottomRow = outfield.slice(2);
   const showPoints = history.length > 0;
@@ -130,7 +160,7 @@ export default async function SquadraFantasyPublicPage({
               <PlayerStatsTrigger key={player.id} playerId={player.id}>
                 <PlayerCard
                   player={player}
-                  isCaptain={player.id === team.captainPlayerId}
+                  isCaptain={player.id === pitchCaptainId}
                   points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
                 />
               </PlayerStatsTrigger>
@@ -145,7 +175,7 @@ export default async function SquadraFantasyPublicPage({
               <PlayerStatsTrigger key={player.id} playerId={player.id}>
                 <PlayerCard
                   player={player}
-                  isCaptain={player.id === team.captainPlayerId}
+                  isCaptain={player.id === pitchCaptainId}
                   points={showPoints ? (phasePlayerTotals.get(player.id) ?? 0) : null}
                 />
               </PlayerStatsTrigger>
@@ -159,7 +189,7 @@ export default async function SquadraFantasyPublicPage({
             <PlayerStatsTrigger playerId={gk.player.id}>
               <PlayerCard
                 player={gk.player}
-                isCaptain={gk.player.id === team.captainPlayerId}
+                isCaptain={gk.player.id === pitchCaptainId}
                 points={showPoints ? (phasePlayerTotals.get(gk.player.id) ?? 0) : null}
               />
             </PlayerStatsTrigger>
