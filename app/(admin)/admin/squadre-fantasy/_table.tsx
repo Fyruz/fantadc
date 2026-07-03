@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
 
 type Row = {
   id: number;
@@ -15,15 +16,40 @@ const PAGE_SIZE = 15;
 
 export default function SquadreFantasyTable({ rows }: { rows: Row[] }) {
   const [page, setPage] = useState(0);
-  const total = rows.length;
+  const [search, setSearch] = useState("");
+
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter(
+      (r) => r.name.toLowerCase().includes(q) || r.user.email.toLowerCase().includes(q)
+    );
+  }, [rows, search]);
+
+  const total = filteredRows.length;
   const start = page * PAGE_SIZE;
-  const slice = rows.slice(start, start + PAGE_SIZE);
+  const slice = filteredRows.slice(start, start + PAGE_SIZE);
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
   return (
-    <div className="card overflow-hidden">
+    <div>
+      <div className="relative mb-3">
+        <i className="pi pi-search pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style={{ color: "var(--text-muted)" }} />
+        <InputText
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(0);
+          }}
+          placeholder="Cerca per nome o email…"
+          className="w-full !pl-9"
+        />
+      </div>
+      <div className="card overflow-hidden">
       {total === 0 ? (
-        <p className="px-4 py-10 text-center over-label">Nessuna squadra fanta.</p>
+        <p className="px-4 py-10 text-center over-label">
+          {search ? "Nessuna squadra corrisponde alla ricerca." : "Nessuna squadra fanta."}
+        </p>
       ) : (
         <>
           {slice.map((row, idx) => {
@@ -80,6 +106,7 @@ export default function SquadreFantasyTable({ rows }: { rows: Row[] }) {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }
