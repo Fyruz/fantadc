@@ -28,6 +28,12 @@ const TAB_LABELS: Record<Tab, string> = {
   tabellone: "Tabellone",
 };
 
+// Le etichette dei giorni sono formattate in UTC: la chiave di raggruppamento deve usare lo stesso fuso,
+// altrimenti un orario vicino alla mezzanotte fa "scivolare" la partita sul giorno locale sbagliato.
+function utcDayKey(date: Date): string {
+  return `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`;
+}
+
 export default function PartiteClient({ matches, groups, knockoutRounds }: { matches: Match[]; groups: Group[]; knockoutRounds: PublicKnockoutRound[] }) {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>(() => {
@@ -40,7 +46,7 @@ export default function PartiteClient({ matches, groups, knockoutRounds }: { mat
     matches.map((m) => {
       const key = m.startsAt.toLocaleDateString("it-IT", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
       const full = m.startsAt.toLocaleDateString("it-IT", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
-      return [key, { key, full, date: m.startsAt.toDateString() }];
+      return [key, { key, full, date: utcDayKey(m.startsAt) }];
     })
   ).values()];
 
@@ -49,13 +55,13 @@ export default function PartiteClient({ matches, groups, knockoutRounds }: { mat
     const now = new Date();
     const upcoming = matches.filter((m) => m.startsAt >= now);
     if (upcoming.length > 0) {
-      return upcoming.reduce((min, m) => (m.startsAt < min.startsAt ? m : min)).startsAt.toDateString();
+      return utcDayKey(upcoming.reduce((min, m) => (m.startsAt < min.startsAt ? m : min)).startsAt);
     }
-    return matches.reduce((max, m) => (m.startsAt > max.startsAt ? m : max)).startsAt.toDateString();
+    return utcDayKey(matches.reduce((max, m) => (m.startsAt > max.startsAt ? m : max)).startsAt);
   });
 
   const filteredMatches = activeDay
-    ? matches.filter((m) => m.startsAt.toDateString() === activeDay)
+    ? matches.filter((m) => utcDayKey(m.startsAt) === activeDay)
     : matches;
 
   const byDay = new Map<string, Match[]>();

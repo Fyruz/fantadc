@@ -22,6 +22,12 @@ type Match = {
 type Group = { id: number; name: string; rows: VolleyStandingRow[] };
 type KnockoutRound = Awaited<ReturnType<typeof getPublicVolleyEliminationRounds>>[number];
 
+// Le etichette dei giorni sono formattate in UTC: la chiave di raggruppamento deve usare lo stesso fuso,
+// altrimenti un orario vicino alla mezzanotte fa "scivolare" la partita sul giorno locale sbagliato.
+function utcDayKey(date: Date): string {
+  return `${date.getUTCFullYear()}-${date.getUTCMonth()}-${date.getUTCDate()}`;
+}
+
 const TABS = ["calendario", "classifica", "tabellone"] as const;
 type Tab = (typeof TABS)[number];
 const TAB_LABELS: Record<Tab, string> = {
@@ -38,7 +44,7 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
       .filter((m) => m.date)
       .map((m) => {
         const key = formatVolleyDayPill(m.date!);
-        return [key, { key, date: m.date!.toDateString() }];
+        return [key, { key, date: utcDayKey(m.date!) }];
       })
   ).values()];
 
@@ -48,13 +54,13 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
     const now = new Date();
     const upcoming = dated.filter((m) => m.date >= now);
     if (upcoming.length > 0) {
-      return upcoming.reduce((min, m) => (m.date < min.date ? m : min)).date.toDateString();
+      return utcDayKey(upcoming.reduce((min, m) => (m.date < min.date ? m : min)).date);
     }
-    return dated.reduce((max, m) => (m.date > max.date ? m : max)).date.toDateString();
+    return utcDayKey(dated.reduce((max, m) => (m.date > max.date ? m : max)).date);
   });
 
   const filteredMatches = activeDay
-    ? matches.filter((m) => m.date && m.date.toDateString() === activeDay)
+    ? matches.filter((m) => m.date && utcDayKey(m.date) === activeDay)
     : matches;
 
   const byDay = new Map<string, Match[]>();
