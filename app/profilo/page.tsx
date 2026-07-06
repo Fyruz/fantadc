@@ -73,7 +73,7 @@ export default async function ProfiloPage({
             {isGV ? "GreenVolley — il campionato" : "Dove il calcio incontra la fantasia"}
           </p>
           <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
-            Copyright © {new Date().getFullYear()} — Versione app {pkg.version}
+            {`Copyright © ${new Date().getFullYear()} — Versione app ${pkg.version}`}
           </p>
         </div>
       </div>

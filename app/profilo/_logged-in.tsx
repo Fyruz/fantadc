@@ -77,7 +77,7 @@ export default function ProfiloLoggedIn({ name, isAdmin, isGV }: { name: string;
           {isGV ? "GreenVolley — il campionato" : "Dove il calcio incontra la fantasia"}
         </p>
         <p className="text-[10px] text-center" style={{ color: "rgba(0,0,0,0.65)" }}>
-          Copyright © {new Date().getFullYear()} — Danimarca&apos;s Cup
+          {`Copyright © ${new Date().getFullYear()} — Danimarca's Cup`}
         </p>
       </div>
     </div>
