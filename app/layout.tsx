@@ -8,7 +8,10 @@ import Providers from "@/components/providers";
 import PwaController from "@/components/pwa/pwa-controller";
 import VisitTracker from "@/components/visit-tracker";
 import SplashScreen from "@/components/splash-screen";
+import ReviewPromptModal from "@/components/review-prompt-modal";
 import { getSiteUrl, siteConfig } from "@/lib/site";
+import { getCurrentUser } from "@/lib/session";
+import { getReviewPromptPlayers } from "@/lib/review-prompt";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,15 +75,19 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getCurrentUser();
+  const reviewPromptPlayers = user ? await getReviewPromptPlayers(Number(user.id)) : [];
+
   return (
     <html lang="it" className={`h-full antialiased ${inter.variable}`}>
       <body className="min-h-full flex flex-col font-[var(--font-inter)]">
         <Providers>
           <SplashScreen />
           {children}
+          <ReviewPromptModal players={reviewPromptPlayers} />
           <VisitTracker />
           <PwaController />
         </Providers>

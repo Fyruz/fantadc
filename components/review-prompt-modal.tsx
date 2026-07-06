@@ -7,7 +7,7 @@ import StoreBadge from "./store-badge";
 import type { ReviewPromptPlayer } from "@/lib/review-prompt";
 
 const STORAGE_PREFIX = "fantadc:review-prompt:";
-const SHOW_AT_SESSION = 2;
+const SHOW_AT_SESSION = 1;
 const SNOOZE_SESSIONS = 4;
 
 const MESSAGES = [
