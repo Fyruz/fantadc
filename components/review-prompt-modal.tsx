@@ -77,11 +77,6 @@ const dismiss = () => {
 
   const firstName = player.name.trim().split(/\s+/)[0];
 
-  const openStore = () => {
-    handleReview();
-    if (storeUrl) window.open(storeUrl, "_blank", "noreferrer");
-  };
-
   return createPortal(
     <>
       <div
@@ -136,14 +131,16 @@ const dismiss = () => {
 
           <div className="flex flex-col items-center gap-3 w-full mt-1">
             {storeUrl ? (
-              <button
-                type="button"
-                onClick={openStore}
+              <a
+                href={storeUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={handleReview}
                 className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white"
                 style={{ background: "var(--text-primary)" }}
               >
                 Lascia una recensione
-              </button>
+              </a>
             ) : (
               <div className="flex items-center gap-4" onClick={handleReview}>
                 <StoreBadge src="/images/app_store.png" alt="Scarica su App Store" url={appStoreConfig.appleAppStoreUrl} />
