@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTransition } from "react";
 import { logout } from "@/app/actions/auth";
+import { openReviewPrompt } from "@/lib/review-prompt-trigger";
 
 export default function ProfiloLoggedIn({ name, isAdmin, isGV }: { name: string; isAdmin: boolean; isGV?: boolean }) {
   const [pending, startTransition] = useTransition();
@@ -54,6 +55,9 @@ export default function ProfiloLoggedIn({ name, isAdmin, isGV }: { name: string;
         <div className="flex flex-col gap-4">
           <Link href="/privacy" className="text-base text-black">Norme sulla privacy</Link>
           <Link href="/supporto" className="text-base text-black">Supporto app</Link>
+          <button type="button" onClick={openReviewPrompt} className="text-left text-base text-black">
+            Lascia una recensione
+          </button>
           <button
             type="button"
             disabled={pending}

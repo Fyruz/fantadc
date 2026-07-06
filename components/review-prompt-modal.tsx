@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { appStoreConfig } from "@/lib/site";
+import { REVIEW_PROMPT_OPEN_EVENT } from "@/lib/review-prompt-trigger";
 import StoreBadge from "./store-badge";
 import type { ReviewPromptPlayer } from "@/lib/review-prompt";
 
@@ -25,11 +26,19 @@ function detectStoreUrl(): string | null {
   return null;
 }
 
+function pickRandomPlayer(players: ReviewPromptPlayer[]) {
+  return players[Math.floor(Math.random() * players.length)];
+}
+
+function pickRandomMessage() {
+  return MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
+}
+
 export default function ReviewPromptModal({ players }: { players: ReviewPromptPlayer[] }) {
   const [player, setPlayer] = useState<ReviewPromptPlayer | null>(null);
+  const [message, setMessage] = useState(pickRandomMessage);
   const [animIn, setAnimIn] = useState(false);
-  const message = useMemo(() => MESSAGES[Math.floor(Math.random() * MESSAGES.length)], []);
-  const storeUrl = useMemo(() => detectStoreUrl(), []);
+  const [storeUrl] = useState(detectStoreUrl);
 
   useEffect(() => {
     if (players.length === 0) return;
@@ -45,7 +54,19 @@ export default function ReviewPromptModal({ players }: { players: ReviewPromptPl
     const nextShowAt = Number(localStorage.getItem(`${STORAGE_PREFIX}nextShowAt`) ?? String(SHOW_AT_SESSION));
     if (count < nextShowAt) return;
 
-    setPlayer(players[Math.floor(Math.random() * players.length)]);
+    setMessage(pickRandomMessage());
+    setPlayer(pickRandomPlayer(players));
+  }, [players]);
+
+  // Trigger manuale (es. da "Lascia una recensione" in Altro/Profilo): ignora contatori e stato "done".
+  useEffect(() => {
+    function handleManualOpen() {
+      if (players.length === 0) return;
+      setMessage(pickRandomMessage());
+      setPlayer(pickRandomPlayer(players));
+    }
+    window.addEventListener(REVIEW_PROMPT_OPEN_EVENT, handleManualOpen);
+    return () => window.removeEventListener(REVIEW_PROMPT_OPEN_EVENT, handleManualOpen);
   }, [players]);
 
   useEffect(() => {
