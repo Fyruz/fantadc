@@ -39,8 +39,8 @@ export const appStoreConfig: {
   googlePlayStoreUrl: string | null;
 } = {
   appName: "Danimarca's Cup",
-  appleAppStoreUrl: null,
-  googlePlayStoreUrl: null,
+  appleAppStoreUrl: "https://apps.apple.com/it/app/id6768604629",
+  googlePlayStoreUrl: "https://play.google.com/store/apps/details?id=it.nuovapolisportivachianti.dcup",
 };
 
 function resolveAppUrl(value: string | undefined) {
