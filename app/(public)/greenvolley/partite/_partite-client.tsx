@@ -110,7 +110,7 @@ export default function VolleyPartiteClient({ matches, groups, knockoutRounds }:
                     }
                     type="button"
                     onClick={() => setActiveDay(isActive ? null : d.date)}
-                    className="shrink-0 rounded-full text-white transition-colors"
+                    className="shrink-0 rounded-full text-white transition-all duration-300 ease-out"
                     style={{
                       fontSize: 12,
                       fontWeight: isActive ? 500 : 400,
