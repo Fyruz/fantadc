@@ -3,13 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { appStoreConfig } from "@/lib/site";
-import { resolveTeamFlag, resolveTeamKit } from "@/lib/flags";
 import StoreBadge from "./store-badge";
 import type { ReviewPromptPlayer } from "@/lib/review-prompt";
 
 const STORAGE_PREFIX = "fantadc:review-prompt:";
-const SHOW_AT_SESSION = 3;
-const SNOOZE_SESSIONS = 10;
+const SHOW_AT_SESSION = 2;
+const SNOOZE_SESSIONS = 4;
 
 const MESSAGES = [
   "se ti sto facendo fare punti, una recensione mi farebbe più felice di un gol all'ultimo minuto",
@@ -76,9 +75,12 @@ const dismiss = () => {
     dismiss();
   };
 
-  const kitSrc = resolveTeamKit(player.footballTeam);
-  const flagSrc = resolveTeamFlag(player.footballTeam);
   const firstName = player.name.trim().split(/\s+/)[0];
+
+  const openStore = () => {
+    handleReview();
+    if (storeUrl) window.open(storeUrl, "_blank", "noreferrer");
+  };
 
   return createPortal(
     <>
@@ -111,18 +113,7 @@ const dismiss = () => {
             <i className="pi pi-times text-sm" />
           </button>
 
-          <div className="relative">
-            {kitSrc ? (
-              <img src={kitSrc} alt={player.footballTeam.name} width={88} height={88} className="object-contain" />
-            ) : (
-              <div
-                className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center"
-                style={{ background: "var(--surface-1)", border: "2px solid rgba(9,20,76,0.1)" }}
-              >
-                {flagSrc && <img src={flagSrc} alt={player.footballTeam.name} className="w-full h-full object-cover" />}
-              </div>
-            )}
-          </div>
+          <img src="/icons/user-player.svg" alt="" className="w-14 h-14 object-contain" />
 
           <div className="flex gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -145,16 +136,14 @@ const dismiss = () => {
 
           <div className="flex flex-col items-center gap-3 w-full mt-1">
             {storeUrl ? (
-              <a
-                href={storeUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={handleReview}
-                className="w-full text-center text-sm font-semibold text-white py-3 rounded-full"
-                style={{ background: "var(--primary)" }}
+              <button
+                type="button"
+                onClick={openStore}
+                className="w-full flex items-center justify-center py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ background: "var(--text-primary)" }}
               >
                 Lascia una recensione
-              </a>
+              </button>
             ) : (
               <div className="flex items-center gap-4" onClick={handleReview}>
                 <StoreBadge src="/images/app_store.png" alt="Scarica su App Store" url={appStoreConfig.appleAppStoreUrl} />
