@@ -19,6 +19,7 @@ const DCUP_GROUPS = [
       { href: "/admin/gironi",       label: "Gironi"       },
       { href: "/admin/eliminazione", label: "Eliminazione" },
       { href: "/admin/bonus-types",  label: "Tipi bonus"   },
+      { href: "/admin/classifica-bonus", label: "Classifica bonus" },
     ],
   },
   {

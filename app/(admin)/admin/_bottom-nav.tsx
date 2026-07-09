@@ -26,6 +26,7 @@ const DCUP_MORE = [
   { href: "/admin/eliminazione",    label: "Eliminazione",  icon: "pi-sitemap"  },
   { href: "/admin/utenti",          label: "Utenti",        icon: "pi-id-card"  },
   { href: "/admin/bonus-types",     label: "Tipi bonus",    icon: "pi-star"     },
+  { href: "/admin/classifica-bonus",label: "Classifica bonus",icon: "pi-chart-bar"},
   { href: "/admin/squadre-fantasy", label: "Squadre Fanta", icon: "pi-trophy"   },
   { href: "/admin/modifiche-rosa",  label: "Modifiche rosa",icon: "pi-pencil"   },
   { href: "/admin/fasi-punteggio",  label: "Fasi punteggio",icon: "pi-flag"     },
