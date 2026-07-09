@@ -1,11 +1,14 @@
 import { db } from "@/lib/db";
+import { MatchStatus } from "@prisma/client";
+import { getOfficialMvpPlayerId } from "@/lib/domain/mvp";
 import AdminPageHeader from "@/components/admin-page-header";
 import BonusMalusTables from "./_tables";
 export const dynamic = "force-dynamic";
 
 export default async function ClassificaBonusPage() {
-  const [assignments, bonusTypes] = await Promise.all([
+  const [assignments, bonusTypes, mvpMatches] = await Promise.all([
     db.playerMatchBonus.findMany({
+      where: { bonusType: { code: { not: "MVP" } } },
       include: {
         player: {
           select: { id: true, name: true, role: true, footballTeam: { select: { name: true } } },
@@ -14,6 +17,20 @@ export default async function ClassificaBonusPage() {
       },
     }),
     db.bonusType.findMany({ orderBy: { code: "asc" } }),
+    db.match.findMany({
+      where: { status: MatchStatus.CONCLUDED },
+      select: {
+        concludedAt: true,
+        mvpOverridePlayerId: true,
+        votes: { select: { playerId: true } },
+        players: {
+          select: {
+            playerId: true,
+            player: { select: { id: true, name: true, role: true, footballTeam: { select: { name: true } } } },
+          },
+        },
+      },
+    }),
   ]);
 
   const byPlayerAndType = new Map<
@@ -35,6 +52,37 @@ export default async function ClassificaBonusPage() {
         bonusTypeId: a.bonusType.id,
         quantity: a.quantity,
       });
+    }
+  }
+
+  const mvpBonusType = bonusTypes.find((bt) => bt.code === "MVP");
+  if (mvpBonusType) {
+    for (const match of mvpMatches) {
+      const mvpId = getOfficialMvpPlayerId({
+        concludedAt: match.concludedAt,
+        votes: match.votes,
+        mvpOverridePlayerId: match.mvpOverridePlayerId,
+        eligiblePlayerIds: match.players.map((p) => p.playerId),
+      });
+      if (mvpId === null) continue;
+
+      const mp = match.players.find((p) => p.playerId === mvpId);
+      if (!mp) continue;
+
+      const key = `${mvpId}-${mvpBonusType.id}`;
+      const entry = byPlayerAndType.get(key);
+      if (entry) {
+        entry.quantity += 1;
+      } else {
+        byPlayerAndType.set(key, {
+          playerId: mvpId,
+          name: mp.player.name,
+          role: mp.player.role,
+          teamName: mp.player.footballTeam.name,
+          bonusTypeId: mvpBonusType.id,
+          quantity: 1,
+        });
+      }
     }
   }
 
