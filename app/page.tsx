@@ -13,6 +13,7 @@ import { buildGroupStandings } from "@/lib/standings";
 import { getMatchClockNow, LIVE_MATCH_WINDOW_MS } from "@/lib/domain/match";
 import { getCurrentUser } from "@/lib/session";
 import { getPendingOpenMvpVotes } from "@/lib/pending-mvp-votes";
+import { getPublicScorerRanking } from "@/lib/data/public/players";
 
 function MatchTeamLogo({
   name, shortName, countryCode, logoUrl,
@@ -88,16 +89,8 @@ export default async function HomePage({
         },
       },
     }),
-    // Top marcatori
-    db.player.findMany({
-      where: { goals: { some: { isOwnGoal: false } } },
-      orderBy: { goals: { _count: "desc" } },
-      take: 5,
-      include: {
-        footballTeam: { select: { name: true, shortName: true, countryCode: true, logoUrl: true } },
-        _count: { select: { goals: { where: { isOwnGoal: false } } } },
-      },
-    }),
+    // Top marcatori — stessa fonte di /classifica-marcatori, per restare coerenti
+    getPublicScorerRanking().then((rows) => rows.slice(0, 5)),
     // Voti MVP pendenti (solo per utenti loggati)
     user ? getPendingOpenMvpVotes(Number(user.id)) : Promise.resolve([]),
   ]);
@@ -528,9 +521,9 @@ export default async function HomePage({
                     <span className="text-xs text-black w-4 shrink-0 tabular-nums">{idx + 1}</span>
                     <div className="flex items-center gap-4 flex-1 min-w-0">
                       <div className="shrink-0 flex items-center justify-center">
-                        {resolveTeamFlag(player.footballTeam) ? (
+                        {player.flagSrc ? (
                           <img
-                            src={resolveTeamFlag(player.footballTeam)!}
+                            src={player.flagSrc}
                             alt={player.footballTeam.name}
                             width={24}
                             height={16}
@@ -541,7 +534,7 @@ export default async function HomePage({
                       <span className="text-sm font-normal text-black truncate">{player.name}</span>
                     </div>
                     <span className="text-sm font-bold text-black shrink-0 tabular-nums">
-                      {player._count.goals}
+                      {player.goals}
                     </span>
                   </div>
                 ))}
