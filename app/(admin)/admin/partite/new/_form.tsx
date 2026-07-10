@@ -10,7 +10,6 @@ import { createMatch } from "@/app/actions/admin/matches";
 
 type Team = { id: number; name: string };
 type Group = { id: number; name: string; slug: string };
-type Round = { id: number; name: string };
 
 const STATUS_OPTIONS = [
   { label: "Bozza",       value: "DRAFT"      },
@@ -20,7 +19,6 @@ const STATUS_OPTIONS = [
 const PHASE_OPTIONS = [
   { label: "Nessuna (amichevole)", value: "" },
   { label: "Girone", value: "group" },
-  { label: "Eliminazione diretta", value: "knockout" },
 ];
 
 function startOfToday() {
@@ -38,15 +36,11 @@ function roundedCurrentTime() {
 export default function NuovaPartitaForm({
   teams,
   groups,
-  rounds,
   defaultGroupId,
-  defaultKnockoutRoundId,
 }: {
   teams: Team[];
   groups: Group[];
-  rounds: Round[];
   defaultGroupId: number | null;
-  defaultKnockoutRoundId: number | null;
 }) {
   const [state, action, pending] = useActionState(createMatch, undefined);
   const [homeTeamId, setHomeTeamId] = useState<string>("");
@@ -55,13 +49,8 @@ export default function NuovaPartitaForm({
   const [date, setDate]             = useState<Date | null>(() => startOfToday());
   const [time, setTime]             = useState<Date | null>(() => roundedCurrentTime());
   const [isMobile, setIsMobile] = useState(false);
-  const [phase, setPhase] = useState<string>(
-    defaultGroupId ? "group" : defaultKnockoutRoundId ? "knockout" : ""
-  );
+  const [phase, setPhase] = useState<string>(defaultGroupId ? "group" : "");
   const [groupId, setGroupId] = useState<string>(defaultGroupId ? String(defaultGroupId) : "");
-  const [knockoutRoundId, setKnockoutRoundId] = useState<string>(
-    defaultKnockoutRoundId ? String(defaultKnockoutRoundId) : ""
-  );
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 768px)");
@@ -84,13 +73,10 @@ export default function NuovaPartitaForm({
     : "";
 
   const groupOptions = groups.map((g) => ({ label: `Girone ${g.slug} — ${g.name}`, value: String(g.id) }));
-  const roundOptions = rounds.map((r) => ({ label: r.name, value: String(r.id) }));
-  const hasKnockoutRounds = roundOptions.length > 0;
 
   return (
     <form action={action} className="flex flex-col gap-5">
       <input type="hidden" name="groupId" value={phase === "group" ? groupId : ""} />
-      <input type="hidden" name="knockoutRoundId" value={phase === "knockout" ? knockoutRoundId : ""} />
 
       {/* Fase */}
       <div className="max-w-xs">
@@ -99,10 +85,16 @@ export default function NuovaPartitaForm({
         </label>
         <Dropdown
           value={phase}
-          onChange={(e) => { setPhase(e.value); setGroupId(""); setKnockoutRoundId(""); }}
+          onChange={(e) => { setPhase(e.value); setGroupId(""); }}
           options={PHASE_OPTIONS}
           className="w-full"
         />
+        <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+          Le partite di eliminazione diretta si gestiscono da{" "}
+          <Link href="/admin/eliminazione" className="font-semibold underline underline-offset-2" style={{ color: "var(--primary)" }}>
+            Eliminazione diretta
+          </Link>.
+        </p>
       </div>
 
       {phase === "group" && (
@@ -111,31 +103,6 @@ export default function NuovaPartitaForm({
             Girone *
           </label>
           <Dropdown value={groupId} onChange={(e) => setGroupId(e.value)} options={groupOptions} className="w-full" placeholder="Seleziona girone" />
-        </div>
-      )}
-
-      {phase === "knockout" && (
-        <div className="max-w-xs">
-          <label className="block text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--text-secondary)" }}>
-            Turno eliminazione *
-          </label>
-          <Dropdown
-            value={knockoutRoundId}
-            onChange={(e) => setKnockoutRoundId(e.value)}
-            options={roundOptions}
-            className="w-full"
-            placeholder={hasKnockoutRounds ? "Seleziona turno" : "Nessun turno disponibile"}
-            disabled={!hasKnockoutRounds}
-          />
-          {!hasKnockoutRounds && (
-            <p className="mt-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-              Nessun turno configurato. Vai in{" "}
-              <Link href="/admin/eliminazione" className="font-semibold underline underline-offset-2" style={{ color: "var(--primary)" }}>
-                Eliminazione diretta
-              </Link>{" "}
-              per inizializzare il bracket.
-            </p>
-          )}
         </div>
       )}
 

@@ -108,6 +108,22 @@ export async function createVolleyMatch(
   if (!homeTeamId || !awayTeamId) return { error: "Seleziona entrambe le squadre" };
   if (homeTeamId === awayTeamId) return { error: "Le squadre devono essere diverse" };
 
+  if (knockoutRoundId) {
+    // Evita di duplicare per errore la stessa partita (es. la Finale) nello stesso turno.
+    const existing = await db.volleyMatch.findFirst({
+      where: {
+        knockoutRoundId,
+        OR: [
+          { homeTeamId, awayTeamId },
+          { homeTeamId: awayTeamId, awayTeamId: homeTeamId },
+        ],
+      },
+    });
+    if (existing) {
+      return { error: "Questa partita esiste già in questo turno di eliminazione diretta." };
+    }
+  }
+
   await db.volleyMatch.create({
     data: {
       homeTeamId,

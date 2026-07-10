@@ -68,6 +68,15 @@ export async function createMatch(_prev: ActionResult | undefined, formData: For
     return { errors: { date: ["Inserisci sia data sia ora."] } };
   }
 
+  if (parsed.data.knockoutRoundId) {
+    // Il bracket è creato per intero da initBracket(): non deve mai ricevere
+    // partite aggiuntive da qui, altrimenti si duplica una casella del tabellone.
+    const existing = await db.match.findFirst({ where: { knockoutRoundId: parsed.data.knockoutRoundId } });
+    if (existing) {
+      return { message: "Questo turno di eliminazione diretta ha già le sue partite: usa \"Eliminazione diretta\" per assegnare le squadre, non creare una nuova partita qui." };
+    }
+  }
+
   const startsAt = startsAtFromForm(parsed.data.date, parsed.data.time);
 
   const match = await db.match.create({

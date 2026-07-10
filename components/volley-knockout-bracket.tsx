@@ -60,11 +60,11 @@ export default function VolleyKnockoutBracket({ rounds }: { rounds: VolleyKnocko
   const probeRef = useRef<HTMLDivElement>(null);
   const [measuredHeight, setMeasuredHeight] = useState<number | null>(null);
 
-  const populatedRounds: VolleyKnockoutRound[] = [];
-  for (const r of rounds) {
-    if (r.matches.length === 0) break;
-    populatedRounds.push(r);
-  }
+  // La finale 3°/4° posto (nome tipo "Finale 3/4 posto") non fa parte dell'albero
+  // principale del tabellone. A differenza del calcio, l'ordine dei turni volley è
+  // assegnato liberamente dall'admin, quindi il turno si riconosce dal nome.
+  const isThirdPlaceRound = (name: string) => /3.*4/.test(name);
+  const populatedRounds = rounds.filter((r) => !isThirdPlaceRound(r.name) && r.matches.length > 0);
 
   useLayoutEffect(() => {
     if (probeRef.current) setMeasuredHeight(probeRef.current.offsetHeight);
