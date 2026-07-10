@@ -29,7 +29,7 @@ function isTouchPrimaryDevice() {
   );
 }
 
-function shouldShowDesktopService() {
+export function shouldShowDesktopService() {
   if (typeof window === "undefined") return false;
 
   const navigatorRef = window.navigator as NavigatorWithUserAgentData;

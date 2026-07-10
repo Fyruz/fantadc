@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 
-const STORAGE_KEY = "dcup_splash_seen";
+export const SPLASH_SEEN_STORAGE_KEY = "dcup_splash_seen";
+export const SPLASH_DISMISSED_EVENT = "dcup:splash-dismissed";
+
+const STORAGE_KEY = SPLASH_SEEN_STORAGE_KEY;
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
@@ -27,6 +30,7 @@ export default function SplashScreen() {
   const dismiss = () => {
     localStorage.setItem(STORAGE_KEY, "1");
     setVisible(false);
+    window.dispatchEvent(new Event(SPLASH_DISMISSED_EVENT));
   };
 
   return (

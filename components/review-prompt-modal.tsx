@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { appStoreConfig } from "@/lib/site";
 import { REVIEW_PROMPT_OPEN_EVENT } from "@/lib/review-prompt-trigger";
+import { shouldShowDesktopService } from "./mobile-only-gate";
+import { SPLASH_SEEN_STORAGE_KEY, SPLASH_DISMISSED_EVENT } from "./splash-screen";
 import StoreBadge from "./store-badge";
 import type { ReviewPromptPlayer } from "@/lib/review-prompt";
 
@@ -42,26 +44,37 @@ export default function ReviewPromptModal({ players }: { players: ReviewPromptPl
 
   useEffect(() => {
     if (players.length === 0) return;
+    if (shouldShowDesktopService()) return; // niente popup fuori da mobile
     if (localStorage.getItem(`${STORAGE_PREFIX}done`)) return;
 
-    if (!sessionStorage.getItem(`${STORAGE_PREFIX}counted`)) {
-      sessionStorage.setItem(`${STORAGE_PREFIX}counted`, "1");
-      const count = Number(localStorage.getItem(`${STORAGE_PREFIX}count`) ?? "0") + 1;
-      localStorage.setItem(`${STORAGE_PREFIX}count`, String(count));
+    function tryShow() {
+      // Non sovrapporsi allo splash screen (mostrato solo al primo accesso da mobile).
+      if (!localStorage.getItem(SPLASH_SEEN_STORAGE_KEY)) return;
+
+      if (!sessionStorage.getItem(`${STORAGE_PREFIX}counted`)) {
+        sessionStorage.setItem(`${STORAGE_PREFIX}counted`, "1");
+        const count = Number(localStorage.getItem(`${STORAGE_PREFIX}count`) ?? "0") + 1;
+        localStorage.setItem(`${STORAGE_PREFIX}count`, String(count));
+      }
+
+      const count = Number(localStorage.getItem(`${STORAGE_PREFIX}count`) ?? "0");
+      const nextShowAt = Number(localStorage.getItem(`${STORAGE_PREFIX}nextShowAt`) ?? String(SHOW_AT_SESSION));
+      if (count < nextShowAt) return;
+
+      setMessage(pickRandomMessage());
+      setPlayer(pickRandomPlayer(players));
     }
 
-    const count = Number(localStorage.getItem(`${STORAGE_PREFIX}count`) ?? "0");
-    const nextShowAt = Number(localStorage.getItem(`${STORAGE_PREFIX}nextShowAt`) ?? String(SHOW_AT_SESSION));
-    if (count < nextShowAt) return;
-
-    setMessage(pickRandomMessage());
-    setPlayer(pickRandomPlayer(players));
+    tryShow();
+    window.addEventListener(SPLASH_DISMISSED_EVENT, tryShow);
+    return () => window.removeEventListener(SPLASH_DISMISSED_EVENT, tryShow);
   }, [players]);
 
   // Trigger manuale (es. da "Lascia una recensione" in Altro/Profilo): ignora contatori e stato "done".
   useEffect(() => {
     function handleManualOpen() {
       if (players.length === 0) return;
+      if (shouldShowDesktopService()) return;
       setMessage(pickRandomMessage());
       setPlayer(pickRandomPlayer(players));
     }
